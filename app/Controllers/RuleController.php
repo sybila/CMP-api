@@ -18,12 +18,11 @@ use Ublaboo\ApiRouter\ApiRoute;
  * Each rule has the following attributes
  * <json>
  * {
- *  "id": Numeric ID, unique among the rules
- *  "name": Name of the rule
- *  "description": Description of the rule
+ *  "id": Numeric ID, unique among all rules
+ *  "name": Name of rule
+ *  "description": Description of rule
  *  "equation": Rule's equation in BCSL
  *  "modifier": String - mostly list of modifiers, separated by comma, but can be any string basically
- *  "active": Boolean value
  *  "classifications": List of classifications (objects with id and name properties)
  *  "organisms": List of organisms (objects with id and name properties)
  * }
