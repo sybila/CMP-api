@@ -24,6 +24,8 @@ services:
 
     # Api endpoints
     #
+    - App\Controllers\ClassificationController
     - App\Controllers\EntityController
+    - App\Controllers\OrganismController
     - App\Controllers\RuleController
     - App\Controllers\VersionController
