@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\DataEndpoint;
+use App\Http\ApiResponseFormatter;
 use App\Http\ErrorException;
 use App\TableEndpoint;
+use Nette\Caching\Cache;
 use Nette\Database\IRow;
 use Nette\Database\ResultSet;
 use Nette\Database\SqlLiteral;
@@ -45,14 +47,35 @@ final class RuleController extends AbstractController
 {
 	use DataEndpoint;
 
+	/** @var Cache */
+	private $cache;
+
+	public function startup()
+	{
+		$this->cache = new Cache($this->cacheStorage, 'rules');
+	}
+
 	public function actionRead(int $id = 0)
 	{
-		$where = [];
 		if ($id)
-			$where = ['id' => $id];
+		{
+			$this->payload->data = $this->loadRules(['id' => $id]);
+			return;
+		}
 
-		$this->payload->data = [];
-		foreach ($this->fetchAll($where) as $row)
+		$this->payload->data = $this->cache->load('data', function(&$deps)
+		{
+			$deps[Cache::EXPIRE] = '+5 minutes';
+			$deps[Cache::SLIDING] = true;
+			return $this->loadRules([]);
+		});
+	}
+
+	protected function loadRules(array $where)
+	{
+		$res = [];
+
+		foreach ($this->db->query("SELECT SQL_NO_CACHE ? FROM ep_reaction WHERE ?", self::getSqlKeys(true), $where) as $row)
 		{
 			$row = (array)$row;
 
@@ -68,8 +91,10 @@ final class RuleController extends AbstractController
 										WHERE ro.reactionId = ?", $row['id']);
 			$row['organisms'] = $oq->fetchAll();
 
-			$this->payload->data[] = $row;
+			$res[] = $row;
 		}
+
+		return $res;
 	}
 
 	public function actionCreate()
@@ -96,6 +121,7 @@ final class RuleController extends AbstractController
 		$this->db->query("INSERT INTO ep_reaction_organism (reactionId, organismId) VALUES ?", $orgVals);
 
 		$this->db->commit();
+		$this->cache->remove('data');
 	}
 
 	public function actionUpdate($id)
@@ -123,6 +149,7 @@ final class RuleController extends AbstractController
 		$this->db->query("INSERT INTO ep_reaction_organism (reactionId, organismId) VALUES ?", $orgVals);
 
 		$this->db->commit();
+		$this->cache->remove('data');
 	}
 
 	public function actionDelete($id)
@@ -131,12 +158,11 @@ final class RuleController extends AbstractController
 		$this->db->query("DELETE FROM ep_reaction WHERE id = ?", $id);
 		$this->db->query("DELETE FROM ep_reaction_classification WHERE reactionId = ?", $id);
 		$this->db->query("DELETE FROM ep_reaction_organism WHERE reactionId = ?", $id);
+		$this->db->query("DELETE FROM ep_reaction_equation_entity WHERE reactionId = ?", $id);
+		$this->db->query("DELETE FROM ep_reaction_equation_variable WHERE reactionId = ?", $id);
+		$this->db->query("DELETE FROM ep_reaction_note WHERE reactionId = ?", $id);
 		$this->db->commit();
-	}
-
-	protected function fetchAll(array $where = null): ResultSet
-	{
-		return $this->db->query("SELECT SQL_NO_CACHE ? FROM ep_reaction WHERE ?", self::getSqlKeys(true), $where);
+		$this->cache->remove('data');
 	}
 
 	protected static function getKeys(): array

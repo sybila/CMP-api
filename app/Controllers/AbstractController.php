@@ -35,6 +35,9 @@ abstract class AbstractController extends Presenter
 	/** @var \stdClass */
 	protected $payload;
 
+	/** @var Nette\Caching\IStorage @inject */
+	public $cacheStorage;
+
 	public function run(Request $request)
 	{
 		try {
@@ -52,7 +55,7 @@ abstract class AbstractController extends Presenter
 		} catch (BadRequestException $e) {
 			return new ApiResponse($this->apiResponseFormatter->formatError('Bad request'));
 		} catch (ErrorException $e) {
-			return new ApiResponse($this->apiResponseFormatter->formatError($e->getMessage()));
+			return new ApiResponse($this->apiResponseFormatter->formatError($e->getMessage(), $e->getCode()));
 		} /*catch (\Exception $e) {
 			$this->onShutdown($this->getHttpResponse());
 			return new ApiResponse($this->apiResponseFormatter->formatException($e));
