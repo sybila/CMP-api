@@ -24,6 +24,15 @@ trait DataEndpoint
 	 */
 	protected function getTypedValue($type, $value, $field)
 	{
+		if (is_array($type))
+		{
+			$value = $this->getTypedValue($type['type'], $value, $field);
+			if (!in_array($value, $type['data'], true))
+				throw new InvalidTypeException('Value of "' . $field . '" has to be one of: ' . (implode(', ', $type)) . '.');
+
+			return $value;
+		}
+
 		switch ($type)
 		{
 			case 'int':
