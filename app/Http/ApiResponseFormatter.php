@@ -27,19 +27,24 @@ final class ApiResponseFormatter
 	}
 
 
-	public function formatError(string $message): array
+	public function formatError(string $message, int $code = 0): array
 	{
-		return [
+		$ret = [
 			'status' => 'error',
 			'message' => $message,
 		];
+
+		if ($code)
+			$ret['code'] = $code;
+
+		return $ret;
 	}
 
 
 	public function formatException(\Exception $e): array
 	{
 		return [
-			'status' => 'error',
+			'status' => 'error-internal',
 			'code' => $e->getCode(),
 			'message' => $e->getMessage(),
 		];
