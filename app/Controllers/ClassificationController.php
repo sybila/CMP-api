@@ -6,32 +6,7 @@ namespace App\Controllers;
 
 use App\DataEndpoint;
 use App\Http\ErrorException;
-use App\Model\InvalidTypeException;
-use App\TableEndpoint;
-use Nette\Database\IRow;
-use Nette\Database\ResultSet;
-use Nette\Database\SqlLiteral;
-use Tracy\Debugger;
-use Ublaboo\ApiRouter\ApiRoute;
 
-/**
- * API for managing Classifications
- *
- * <json>
- * {
- *  "id": Numeric ID, unique among all classifications
- *  "name": Name of classification
- *  "type": What can this classification be used for, one of ["entity", "rule"]
- * }
- * </json>
- *
- * @ApiRoute(
- * 	"/classifications[/<type>]",
- *  presenter="Classification",
- *  format="json",
- *  methods={"GET"}
- * )
- */
 final class ClassificationController extends AbstractController
 {
 	use DataEndpoint;

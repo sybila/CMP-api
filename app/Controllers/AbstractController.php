@@ -5,15 +5,17 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Http\ApiResponse;
-use App\Http\ErrorException;
-use App\Model\InvalidTypeException;
+use App\Http\ResponseException;
+use App\Model\ApiException;
+use App\Model\AppBadRequestException;
 use Nette;
 use App\Http\ApiResponseFormatter;
 use Nette\Application\Request;
 use Nette\Database\Connection;
 use Nette\Application;
-use Nette\Application\BadRequestException;
 use Nette\Application\UI\Presenter;
+use Tracy\Debugger;
+use Tracy\ILogger;
 
 /**
  * @property-read Request $request
@@ -38,6 +40,9 @@ abstract class AbstractController extends Presenter
 	/** @var Nette\Caching\IStorage @inject */
 	public $cacheStorage;
 
+	/** @var \DateTime */
+	protected $lastModified;
+
 	public function run(Request $request)
 	{
 		try {
@@ -52,14 +57,24 @@ abstract class AbstractController extends Presenter
 			$this->tryCall($this->formatActionMethod($this->action), $this->params);
 			$this->terminate();
 		} catch (Application\AbortException $e) { // intentionally empty, handle after try-catch block
-		} catch (BadRequestException $e) {
-			return new ApiResponse($this->apiResponseFormatter->formatError('Bad request'));
-		} catch (ErrorException $e) {
-			return new ApiResponse($this->apiResponseFormatter->formatError($e->getMessage(), $e->getCode()));
-		} /*catch (\Exception $e) {
+		} catch (ApiException $e) {
+			return new ApiResponse($this->apiResponseFormatter->formatError($e));
+		} catch (ResponseException $e) {
+			return $e->getResponse();
+		} catch (\Exception $e) {
+			if (!Debugger::$productionMode)
+				throw $e;
+
+			Debugger::log($e, ILogger::EXCEPTION);
 			$this->onShutdown($this->getHttpResponse());
-			return new ApiResponse($this->apiResponseFormatter->formatException($e));
-		}*/
+			return new ApiResponse($this->apiResponseFormatter->formatInternalError($e));
+		}
+
+		if ($this->lastModified)
+		{
+			$this->lastModified->setTimezone(new \DateTimeZone('GMT'));
+			$this->getHttpResponse()->addHeader('Last-Modified', $this->lastModified->format('D, d M Y H:i:s e'));
+		}
 
 		return new ApiResponse($this->apiResponseFormatter->formatPayload((array)$this->payload));
 	}
@@ -84,7 +99,6 @@ abstract class AbstractController extends Presenter
 	 * Initializes $this->action, $this->view. Called by run().
 	 * Code taken from UI\Presenter and deleted unused code
 	 * @return void
-	 * @throws BadRequestException if action name is not valid
 	 */
 	private function init()
 	{
@@ -111,5 +125,10 @@ abstract class AbstractController extends Presenter
 		// init & validate $this->action & $this->view
 		$this->changeAction(isset($selfParams[self::ACTION_KEY]) ? $selfParams[self::ACTION_KEY] : self::DEFAULT_ACTION);
 		$this->loadState($selfParams);
+	}
+
+	public function sendResponse(Application\IResponse $response)
+	{
+		throw new ResponseException($response);
 	}
 }

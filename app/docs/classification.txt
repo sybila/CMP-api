@@ -1,0 +1,11 @@
+API for managing Classifications
+
+These should not change much, so they can safely be cached for some time if desirable.
+
+<json>
+{
+	"id": Numeric ID, unique among all classifications
+	"name": Name of classification
+	"type": What can this classification be used for, one of ["entity", "rule"]
+}
+</json>

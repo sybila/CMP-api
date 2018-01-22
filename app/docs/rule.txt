@@ -1,0 +1,16 @@
+API for managing Rules
+Properties marked as read-only are not available when saving (PUT, POST methods).
+When retrieving all rules, only "id", "name", "equation" and "status" properties are available.
+
+<json>
+{
+	"id": Numeric ID, unique among all rules
+	"name": Name of rule
+	"description": Description of rule
+	"equation": Rule's equation in BCSL
+	"modifiers": String - mostly list of modifiers, separated by comma, but can be any string basically (will be defined better later!)
+	"classifications": List of classification IDs (see Classifications endpoint)
+    "organisms": List of organism IDs (see Organisms endpoint)
+	"status": Status of rule, one of ["pending", "active", "inactive"]
+}
+</json>

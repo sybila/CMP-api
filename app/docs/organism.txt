@@ -1,0 +1,10 @@
+API for managing Organisms
+
+These should not change much, so they can safely be cached for some time if desirable.
+
+<json>
+{
+	"id": Numeric ID, unique among all organisms
+	"name": Name of organism
+}
+</json>

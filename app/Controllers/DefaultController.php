@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
-final class VersionController extends AbstractController
+final class DefaultController extends AbstractController
 {
 	public function actionRead()
 	{
-		$this->payload->version = '0.1';
+		$this->redirect(301, 'Version:read');
 	}
 }

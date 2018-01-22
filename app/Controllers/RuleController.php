@@ -5,47 +5,18 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\DataEndpoint;
-use App\Http\ApiResponseFormatter;
-use App\Http\ErrorException;
-use App\TableEndpoint;
+use App\Model\NonExistingObjectException;
 use Nette\Caching\Cache;
-use Nette\Database\IRow;
-use Nette\Database\ResultSet;
-use Nette\Database\SqlLiteral;
-use Tracy\Debugger;
-use Ublaboo\ApiRouter\ApiRoute;
 
-/**
- * API for managing Rules
- * Each rule has the following attributes
- * <json>
- * {
- *  "id": Numeric ID, unique among all rules
- *  "name": Name of rule
- *  "description": Description of rule
- *  "equation": Rule's equation in BCSL
- *  "modifier": String - mostly list of modifiers, separated by comma, but can be any string basically
- *  "classifications": List of classifications (objects with id and name properties)
- *  "organisms": List of organisms (objects with id and name properties)
- * }
- * </json>
- *
- * When saving (POST, PUT) rules, input for classifications and organisms is expected to be array of IDs.
- *
- * @ApiRoute(
- * 	"/rules[/<id>]",
- *  parameters={
- * 		"id"={
- * 			"requirement": "\d+"
- * 		}
- * 	},
- *  presenter="Rule",
- *  format="json"
- * )
- */
 final class RuleController extends AbstractController
 {
 	use DataEndpoint;
+
+	private static $statuses = [
+		0 => 'pending',
+		1 => 'active',
+		2 => 'inactive',
+	];
 
 	/** @var Cache */
 	private $cache;
@@ -58,43 +29,45 @@ final class RuleController extends AbstractController
 	public function actionRead(int $id = 0)
 	{
 		if ($id)
-		{
-			$this->payload->data = $this->loadRules(['id' => $id]);
-			return;
-		}
-
-		$this->payload->data = $this->cache->load('data', function(&$deps)
-		{
-			$deps[Cache::EXPIRE] = '+5 minutes';
-			$deps[Cache::SLIDING] = true;
-			return $this->loadRules([]);
-		});
+			$this->payload->data = $this->loadRule($id);
+		else
+			$this->payload->data = $this->loadRules();
 	}
 
-	protected function loadRules(array $where)
+	protected function loadRules()
 	{
 		$res = [];
 
-		foreach ($this->db->query("SELECT SQL_NO_CACHE ? FROM ep_reaction WHERE ?", self::getSqlKeys(true), $where) as $row)
+		foreach ($this->db->query("SELECT SQL_NO_CACHE id, name, equation, active AS status FROM ep_reaction") as $row)
 		{
 			$row = (array)$row;
-
-			$cq = $this->db->query("SELECT SQL_NO_CACHE c.id, c.name
-										FROM ep_classification AS c
-										INNER JOIN ep_reaction_classification AS rc ON rc.classificationId = c.id
-										WHERE rc.reactionId = ? AND c.type = 'reaction'", $row['id']);
-			$row['classifications'] = $cq->fetchAll();
-
-			$oq = $this->db->query("SELECT SQL_NO_CACHE o.id, o.name
-										FROM ep_organism AS o
-										INNER JOIN ep_reaction_organism AS ro ON ro.organismId = o.id
-										WHERE ro.reactionId = ?", $row['id']);
-			$row['organisms'] = $oq->fetchAll();
-
+			$row['status'] = self::$statuses[$row['status']];
 			$res[] = $row;
 		}
 
 		return $res;
+	}
+
+	protected function loadRule(int $id) : array
+	{
+		$row = $this->db->fetch("SELECT SQL_NO_CACHE id, name, equation, modifier, description, active AS status FROM ep_reaction WHERE id = ?", $id);
+		if (!$row)
+			throw new NonExistingObjectException($id);
+
+		$row = (array)$row;
+
+		$row['status'] = self::$statuses[$row['status']];
+		$row['classifications'] = $this->db->fetchPairs("SELECT SQL_NO_CACHE c.id
+									FROM ep_classification AS c
+									INNER JOIN ep_reaction_classification AS rc ON rc.classificationId = c.id
+									WHERE rc.reactionId = ? AND c.type = 'reaction'", $row['id']);
+
+		$row['organisms'] = $this->db->fetchPairs("SELECT SQL_NO_CACHE o.id
+									FROM ep_organism AS o
+									INNER JOIN ep_reaction_organism AS ro ON ro.organismId = o.id
+									WHERE ro.reactionId = ?", $row['id']);
+
+		return $row;
 	}
 
 	public function actionCreate()
@@ -172,7 +145,6 @@ final class RuleController extends AbstractController
 			'description' => 'string',
 			'equation' => 'string',
 			'modifier' => 'string',
-			'active' => 'bool',
 		];
 	}
 }

@@ -4,49 +4,47 @@ declare(strict_types=1);
 
 namespace App\Http;
 
+use App\Model\ApiException;
+use Tracy\Debugger;
 
 final class ApiResponseFormatter
 {
-	public function formatMessage(string $message): array
-	{
-		return [
-			'status' => 'ok',
-			'payload' => [
-				'message' => $message,
-			],
-		];
-	}
-
-
 	public function formatPayload(array $payload): array
 	{
 		return [
 			'status' => 'ok',
-			'payload' => $payload,
+			'data' => $payload,
 		];
 	}
 
+	public function formatError(ApiException $e): array
+	{
+		return [
+			'status' => 'error',
+			'message' => $e->getMessage(),
+			'code' => $e->getCode(),
+		];
+	}
 
-	public function formatError(string $message, int $code = 0): array
+	public function formatHttpError(string $message, int $code): array
+	{
+		return [
+			'status' => 'error',
+			'message' => $message,
+			'code' => $code,
+		];
+	}
+
+	public function formatInternalError(\Exception $e): array
 	{
 		$ret = [
 			'status' => 'error',
-			'message' => $message,
-		];
-
-		if ($code)
-			$ret['code'] = $code;
-
-		return $ret;
-	}
-
-
-	public function formatException(\Exception $e): array
-	{
-		return [
-			'status' => 'error-internal',
 			'code' => $e->getCode(),
 			'message' => $e->getMessage(),
 		];
+		if (Debugger::$productionMode)
+			$ret['message'] = null;
+
+		return $ret;
 	}
 }

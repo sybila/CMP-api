@@ -5,84 +5,22 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\DataEndpoint;
-use App\Http\ErrorException;
-use App\Model\InvalidTypeException;
-use App\TableEndpoint;
-use Nette\Database\IRow;
+use App\Model\
+{
+	InvalidTypeException, NonExistingObjectException
+};
+use Nette\Caching\Cache;
 use Nette\Database\ResultSet;
-use Nette\Database\SqlLiteral;
-use Tracy\Debugger;
-use Ublaboo\ApiRouter\ApiRoute;
 
-/**
- * API for managing Entities
- * Properties marked as virtual are not available when saving (PUT, POST methods).
- *
- * <json>
- * {
- *  "id": Numeric ID, unique among all entities
- *  "code": Code of entity, unique among all entities
- *  "type": Type of entity, one of ["compartment", "complex", "structure", "atomic"]
- *  "name": Name of entity
- *  "description": Description of entity
- *  "classifications": List of classification IDs (see Classifications endpoint)
- *  "organisms": List of organism IDs (see Organisms endpoint)
- *  "status": Status of entity, one of ["pending", "active", "inactive"]
- * }
- * </json>
- *
- * For type compartment:
- * <json>
- * {
- *  "parent": ID of parent compartment (can be null)
- *  "children": List of children IDs (these are of type compartment) {virtual}
- * }
- * </json>
- *
- * For type complex:
- * <json>
- * {
- * 	"compartments": List of compartment (entity) IDs
- * 	"children": List of children IDs (these are of type structure or atomic)
- * }
- * </json>
- *
- * For type structure:
- * <json>
- * {
- * 	"parents": IDs of parents (of type complex) {virtual}
- * 	"children": List of children IDs (these are of type atomic)
- * }
- * </json>
- *
- * For type atomic:
- * <json>
- * {
- * 	"parents": ID of parents (of type structure or complex) {virtual}
- * 	"states": List of atomic's possible states (objects with code and description properties)
- * }
- * </json>
- *
- * @ApiRoute(
- * 	"/entities[/<id>]",
- *  parameters={
- * 		"id"={
- * 			"requirement": "\d+"
- * 		}
- * 	},
- *  presenter="Entity",
- *  format="json"
- * )
- */
 final class EntityController extends AbstractController
 {
 	use DataEndpoint;
 
 	private static $types = [
-		'compartment',
-		'complex',
-		'structure',
-		'atomic',
+		1 => 'compartment',
+		2 => 'complex',
+		3 => 'structure',
+		4 => 'atomic',
 	];
 
 	private static $statuses = [
@@ -91,9 +29,79 @@ final class EntityController extends AbstractController
 		2 => 'inactive',
 	];
 
+	/** @var Cache */
+	private $cache;
+
+	public function startup()
+	{
+		$this->cache = new Cache($this->cacheStorage, 'entities');
+	}
+
 	public function actionRead(int $id = 0)
 	{
-		;
+		if ($id)
+			$this->payload->data = $this->loadEntity($id);
+		else
+			$this->payload->data = $this->loadEntities();
+	}
+
+	protected function loadEntities() : array
+	{
+		$res = [];
+
+		foreach ($this->db->query("SELECT SQL_NO_CACHE id, name, code, hierarchy_type AS type, active AS status FROM ep_entity WHERE parentId IS NULL") as $row)
+		{
+			$row = (array)$row;
+			$row['type'] = self::$types[$row['type']];
+			$row['status'] = self::$statuses[$row['status'] ?: 1];
+			$res[] = $row;
+		}
+
+		return $res;
+	}
+
+	protected function loadEntity(int $id) : array
+	{
+		$row = $this->db->fetch("SELECT SQL_NO_CACHE id, name, description, code, hierarchy_type AS type, active AS status FROM ep_entity WHERE id = ? AND parentId IS NULL", $id);
+		if (!$row)
+			throw new NonExistingObjectException($id);
+
+		$row = (array)$row;
+		$row['type'] = self::$types[$row['type']];
+		$row['status'] = self::$statuses[$row['status'] ?: 1];
+
+		$row['classifications'] = $this->db->fetchPairs("SELECT SQL_NO_CACHE c.id
+									FROM ep_classification AS c
+									INNER JOIN ep_entity_classification AS ec ON ec.classificationId = c.id
+									WHERE ec.entityId = ? AND c.type = 'entity'", $row['id']);
+
+		$row['organisms'] = $this->db->fetchPairs("SELECT SQL_NO_CACHE o.id
+									FROM ep_organism AS o
+									INNER JOIN ep_entity_organism AS eo ON eo.organismId = o.id
+									WHERE eo.entityId = ?", $row['id']);
+
+		switch ($row['type'])
+		{
+			case 'compartment':
+				$row['parent'] = $this->db->fetchField("SELECT SQL_NO_CACHE parentEntityId FROM ep_entity_location WHERE childEntityId = ?", $row['id']) ?: null;
+				$row['children'] = $this->db->fetchPairs("SELECT SQL_NO_CACHE childEntityId AS id FROM ep_entity_location WHERE parentEntityId = ?", $row['id']);
+				break;
+			case 'complex':
+				$row['children'] = $this->db->fetchPairs("SELECT SQL_NO_CACHE childEntityId AS id FROM ep_entity_composition WHERE parentEntityId = ?", $row['id']);
+				break;
+			case 'structure':
+				$row['parents'] = $this->db->fetchPairs("SELECT SQL_NO_CACHE parentEntityId AS id FROM ep_entity_composition WHERE childEntityId = ?", $row['id']);
+				$row['children'] = $this->db->fetchPairs("SELECT SQL_NO_CACHE childEntityId AS id FROM ep_entity_composition WHERE parentEntityId = ?", $row['id']);
+				break;
+			case 'atomic':
+				$row['parents'] = $this->db->fetchPairs("SELECT SQL_NO_CACHE parentEntityId AS id FROM ep_entity_composition WHERE childEntityId = ?", $row['id']);
+				$row['states'] = $this->db->fetchAll("SELECT SQL_NO_CACHE code, description FROM ep_entity WHERE parentId = ?", $row['id']);
+				break;
+		}
+
+		$row['compartments'] = $this->db->fetchPairs("SELECT SQL_NO_CACHE parentEntityId AS id FROM ep_entity_location WHERE childEntityId = ?", $row['id']);
+
+		return $row;
 	}
 
 	public function actionCreate()
@@ -178,7 +186,7 @@ final class EntityController extends AbstractController
 			'name' => 'string',
 			'description' => 'string',
 			'code' => 'string',
-			'type' => ['type' => 'string', self::$types],
+//			'type' => ['type' => 'string', self::$types],
 			'status' => ['type' => 'int', 'data' => array_values(self::$statuses)],
 		];
 	}

@@ -14,39 +14,13 @@ use Nette\Database\SqlLiteral;
 use Tracy\Debugger;
 use Ublaboo\ApiRouter\ApiRoute;
 
-/**
- * API for managing Organisms
- *
- * <json>
- * {
- *  "id": Numeric ID, unique among all organisms
- *  "name": Name of organism
- * }
- * </json>
- *
- * @ApiRoute(
- * 	"/organisms[/<id>]",
- *  parameters={
- * 		"id"={
- * 			"requirement": "\d+"
- * 		}
- * 	},
- *  presenter="Organism",
- *  format="json",
- *  methods={"GET"}
- * )
- */
 final class OrganismController extends AbstractController
 {
 	use DataEndpoint;
 
-	public function actionRead(int $id = null)
+	public function actionRead()
 	{
-		$where = [];
-		if ($id)
-			$where = ['id' => $id];
-
-		$this->payload->data = $this->db->fetchAll("SELECT SQL_NO_CACHE ? FROM ep_organism WHERE ?", self::getSqlKeys(true), $where);
+		$this->payload->data = $this->db->fetchAll("SELECT SQL_NO_CACHE ? FROM ep_organism", self::getSqlKeys(true));
 	}
 
 	protected static function getKeys(): array
