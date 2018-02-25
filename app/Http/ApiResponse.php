@@ -17,6 +17,8 @@ final class ApiResponse extends JsonResponse
 			$httpResponse->setContentType('text/html', 'utf-8');
 			echo '<pre>';
 		}
+		else
+			$httpResponse->setContentType('application/json', 'utf-8');
 
 		echo Nette\Utils\Json::encode($this->getPayload(), !Debugger::$productionMode ? Nette\Utils\Json::PRETTY : 0);
 	}
