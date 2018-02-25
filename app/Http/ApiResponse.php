@@ -12,12 +12,12 @@ final class ApiResponse extends JsonResponse
 {
 	public function send(Nette\Http\IRequest $httpRequest, Nette\Http\IResponse $httpResponse)
 	{
-		if (Debugger::isEnabled())
+		if (!Debugger::$productionMode)
 		{
 			$httpResponse->setContentType('text/html', 'utf-8');
 			echo '<pre>';
 		}
 
-		echo Nette\Utils\Json::encode($this->getPayload(), Debugger::isEnabled() ? Nette\Utils\Json::PRETTY : 0);
+		echo Nette\Utils\Json::encode($this->getPayload(), !Debugger::$productionMode ? Nette\Utils\Json::PRETTY : 0);
 	}
 }
