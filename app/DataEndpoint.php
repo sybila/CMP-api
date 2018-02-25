@@ -6,13 +6,41 @@ namespace App;
 
 use App\Http\ErrorException;
 use App\Model\InvalidTypeException;
+use Nette\Database\Connection;
 use Nette\Database\SqlLiteral;
 use Nette\Application\Request;
 
 trait DataEndpoint
 {
-	abstract protected function getRequest() : Request;
+	abstract protected function getRequest(): Request;
+	abstract protected function getDb(): Connection;
 	abstract protected static function getKeys(): array;
+
+	/**
+	 * @param string $table
+	 * @param array $values
+	 * @return bool
+	 */
+	protected function checkForeignKeys(string $table, array $values): bool
+	{
+		try {
+			foreach ($values as $value)
+				$this->getTypedValue('int', $value, 'classification id');
+		}
+		catch (InvalidTypeException $e) {
+			return false;
+		}
+
+		$cnt = $this->getDb()->fetchField(
+			"SELECT SQL_NO_CACHE COUNT(*) FROM ? WHERE id IN ?",
+			new SqlLiteral($table), $values
+		);
+
+		if (count($values) != $cnt)
+			return false;
+
+		return true;
+	}
 
 	/**
 	 * Check value by type, if it can be represented, return value in given type, else throw

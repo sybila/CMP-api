@@ -1,1 +1,1 @@
-Database consistency checks are applied when status is "active".
+Additional consistency checks are applied when status is "active".

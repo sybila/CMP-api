@@ -7,30 +7,32 @@ use Throwable;
 
 abstract class ApiException extends \Exception
 {
-	abstract protected function _code() : int;
+	const CODE = 500;
 	public function __construct(string $message = "", Throwable $previous = null)
 	{
-		parent::__construct($message, static::_code(), $previous);
+		parent::__construct($message, static::CODE, $previous);
+	}
+}
+
+class InvalidArgumentException extends ApiException
+{
+	const CODE = 702;
+	public function __construct(string $name, string $arg, string $message = "", Throwable $previous = null)
+	{
+		parent::__construct('Invalid argument "' . $arg . '" for ' . $name . ($message ? (': ' . $message) : ''), $previous);
 	}
 }
 
 class InvalidTypeException extends ApiException
 {
-	protected function _code(): int
-	{
-		return 701;
-	}
+	const CODE = 701;
 }
 
 class NonExistingObjectException extends ApiException
 {
+	const CODE = 700;
 	public function __construct(int $id, Throwable $previous = null)
 	{
 		parent::__construct("Non-existing object with ID " . $id, $previous);
-	}
-
-	protected function _code(): int
-	{
-		return 700;
 	}
 }

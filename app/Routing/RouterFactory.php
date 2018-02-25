@@ -25,7 +25,9 @@ final class RouterFactory
 
 		// Entities
 		$router[] = new AppRoute('/entities[/<id>]', 'GET', 'Entity', [
-			'parameters' => ['id' => ['requirement' => '\\d+']],
+			'parameters' => [
+				'id' => ['requirement' => '\\d+'],
+			],
 			'desc-file' => 'entity',
 		]);
 		$router[] = new AppRoute('/entities', 'POST', 'Entity', [

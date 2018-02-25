@@ -7,9 +7,10 @@ namespace App\Controllers;
 use App\DataEndpoint;
 use App\Model\
 {
-	InvalidTypeException, NonExistingObjectException
+	EntityData, InvalidArgumentException, InvalidTypeException, NonExistingObjectException
 };
 use Nette\Caching\Cache;
+use Nette\Database\Connection;
 use Nette\Database\ResultSet;
 
 final class EntityController extends AbstractController
@@ -37,19 +38,51 @@ final class EntityController extends AbstractController
 		$this->cache = new Cache($this->cacheStorage, 'entities');
 	}
 
-	public function actionRead(int $id = 0)
+	public function actionRead(int $id = 0, string $name = '', string $code = '', string $annotation = '')
 	{
+		$where = [];
+		if (!empty($annotation))
+		{
+			$data = explode(':', $annotation);
+			$type = strtolower($data[0]);
+			if (count($data) !== 2)
+				throw new InvalidArgumentException('annotation', $annotation, 'must be in format TYPE:ID');
+
+			$types = ['doi', 'kegg', 'url', 'chebi', 'pubchem', 'uniprot', 'ec-code', 'go', 'eg-code', 'bnid'];
+			if (!in_array($type, $types))
+				throw new InvalidArgumentException('annotation', $annotation, 'type must be one of ' . implode(', ', $types));
+
+			$where['annotation'] = $annotation;
+		}
+		elseif (!empty($code))
+			$where['code'] = $code;
+		elseif (!empty($name))
+			$where['name LIKE ?'] = '%' . $name . '%';
+
 		if ($id)
 			$this->payload->data = $this->loadEntity($id);
 		else
-			$this->payload->data = $this->loadEntities();
+			$this->payload->data = $this->loadEntities($where);
 	}
 
-	protected function loadEntities() : array
+	protected function loadEntities(array $where = []) : array
 	{
 		$res = [];
 
-		foreach ($this->db->query("SELECT SQL_NO_CACHE id, name, code, hierarchy_type AS type, active AS status FROM ep_entity WHERE parentId IS NULL") as $row)
+		if (isset($where['annotation']))
+		{
+			$data = explode(':', $where['annotation']);
+			$query = $this->db->query("SELECT SQL_NO_CACHE e.id, e.name, e.code, e.hierarchy_type AS type, e.active AS status
+											FROM ep_entity AS e
+											INNER JOIN ep_annotation AS a ON (a.itemId = e.id AND a.itemType = 'entity')
+											WHERE a.termType = ? AND a.termId = ?", $data[0], $data[1]);
+		}
+		else
+		{
+			$where['parentId'] = null;
+			$query = $this->db->query("SELECT SQL_NO_CACHE id, name, code, hierarchy_type AS type, active AS status FROM ep_entity WHERE ?", $where);
+		}
+		foreach ($query as $row)
 		{
 			$row = (array)$row;
 			$row['type'] = self::$types[$row['type']];
@@ -79,6 +112,10 @@ final class EntityController extends AbstractController
 									FROM ep_organism AS o
 									INNER JOIN ep_entity_organism AS eo ON eo.organismId = o.id
 									WHERE eo.entityId = ?", $row['id']);
+
+		$row['annotations'] = $this->db->fetchAll("SELECT SQL_NO_CACHE termId AS id, termType AS type
+									FROM ep_annotation
+									WHERE itemType = 'entity' AND itemId = ?", $row['id']);
 
 		switch ($row['type'])
 		{
@@ -126,7 +163,7 @@ final class EntityController extends AbstractController
 		$this->db->commit();
 	}
 
-	private function validateActive(int $id): bool
+	private function validateActive(int $id)
 	{
 		$classf = [];
 		if ($this->request->getPost('classifications') === null)
@@ -137,18 +174,7 @@ final class EntityController extends AbstractController
 		else
 			$classf = $this->request->getPost('classifications');
 
-		if (!is_array($classf))
-			throw new InvalidTypeException('Value of "classifications" has to be array of classification IDs.');
-
-		array_walk($classf, function($value) {
-			$this->getTypedValue('int', $value, 'classification id');
-		});
-
-		$cnt = $this->db->fetchField(
-			"SELECT SQL_NO_CACHE COUNT(id) FROM ep_classification WHERE id IN ?",
-			$classf
-		);
-		if (count($classf) != $cnt)
+		if (!$this->checkForeignKeys('ep_classification', $classf))
 			throw new InvalidTypeException('Value of "classifications" has to be array of classification IDs.');
 
 		$orgs = [];
@@ -160,24 +186,18 @@ final class EntityController extends AbstractController
 		else
 			$orgs = $this->request->getPost('organisms');
 
-		if (!is_array($orgs))
-			throw new InvalidTypeException('Value of "organisms" has to be array of organism IDs.');
-
-		array_walk($orgs, function($value) {
-			$this->getTypedValue('int', $value, 'organism id');
-		});
-
-		$cnt = $this->db->fetchField(
-			"SELECT SQL_NO_CACHE COUNT(id) FROM ep_organism WHERE id IN ?",
-			$orgs
-		);
-		if (count($orgs) != $cnt)
+		if (!$this->checkForeignKeys('ep_organism', $orgs))
 			throw new InvalidTypeException('Value of "organisms" has to be array of organism IDs.');
 	}
 
 	protected function fetchAll(array $where = null): ResultSet
 	{
 		return null;
+	}
+
+	protected function getDb(): Connection
+	{
+		return $this->db;
 	}
 
 	protected static function getKeys(): array
