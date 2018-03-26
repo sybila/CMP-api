@@ -138,6 +138,11 @@ final class RuleController extends AbstractController
 		$this->cache->remove('data');
 	}
 
+	protected function getDb(): \Nette\Database\Connection
+	{
+		return $this->db;
+	}
+
 	protected static function getKeys(): array
 	{
 		return [

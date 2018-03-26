@@ -23,6 +23,11 @@ final class OrganismController extends AbstractController
 		$this->payload->data = $this->db->fetchAll("SELECT SQL_NO_CACHE ? FROM ep_organism", self::getSqlKeys(true));
 	}
 
+	protected function getDb(): \Nette\Database\Connection
+	{
+		return $this->db;
+	}
+
 	protected static function getKeys(): array
 	{
 		return [

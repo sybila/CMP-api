@@ -23,6 +23,11 @@ final class ClassificationController extends AbstractController
 		$this->payload->data = $this->db->fetchAll("SELECT SQL_NO_CACHE ? FROM ep_classification WHERE ?", self::getSqlKeys(true), $where);
 	}
 
+	protected function getDb(): \Nette\Database\Connection
+	{
+		return $this->db;
+	}
+
 	protected static function getKeys(): array
 	{
 		return [
