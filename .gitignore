@@ -1,4 +1,6 @@
-vendor
-app/config/config.local.neon
-composer.lock
 .idea
+cache/*
+logs/*
+settings.local.php
+vendor
+composer.lock
