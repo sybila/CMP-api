@@ -4,3 +4,5 @@ logs/*
 settings.local.php
 vendor
 composer.lock
+deploy.php
+docs
