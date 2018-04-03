@@ -62,11 +62,14 @@ $c['errorHandler'] = function(Container $c)
 				'message' => $exception->getMessage(),
 			] + $exception->getAdditionalData());
 
+		if (!\Tracy\Debugger::$productionMode)
+			throw $exception;
+
 		$response->withStatus(500);
 		return $response->withJson([
 			'status' => 'error',
 			'code' => 500,
-			'message' => \Tracy\Debugger::$productionMode ? '' : $exception->getMessage(),
+			'message' => '',
 		]);
 	};
 };
