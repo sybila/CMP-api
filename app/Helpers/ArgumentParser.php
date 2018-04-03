@@ -6,7 +6,6 @@ use App\Exceptions\InvalidTypeException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Slim\Interfaces\InvocationStrategyInterface;
-
 class ArgumentParser implements \ArrayAccess
 {
 	/** @var array */
@@ -120,7 +119,6 @@ class RequestResponseParsedArgs implements InvocationStrategyInterface
 		ResponseInterface $response,
 		array $routeArguments
 	) {
-		return call_user_func_array($callable, [$request, $response, new \App\Helpers\ArgumentParser($routeArguments)]);
+		return call_user_func_array($callable, [$request, $response, new ArgumentParser($routeArguments + $request->getQueryParams())]);
 	}
 }
-
