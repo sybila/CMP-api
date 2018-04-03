@@ -4,7 +4,7 @@ namespace App\Controllers;
 
 use App\Entity\
 {
-	Atomic, AtomicState, Compartment, Complex, Entity, EntityAnnotation, EntityClassification, EntityStatus, Organism, Structure
+	AnnotationTerm, Atomic, AtomicState, Compartment, Complex, Entity, EntityAnnotation, EntityClassification, EntityStatus, Organism, Structure
 };
 use App\Exceptions\
 {
@@ -25,9 +25,32 @@ final class EntityController extends WritableController
 
 	public function read(Request $request, Response $response, ArgumentParser $args)
 	{
+		if ($args->hasKey('code'))
+		{
+			$entity = $this->orm->getRepository(Entity::class)->findOneBy(['code' => $args->getString('code')]);
+			return self::formatOk(
+				$response,
+				$entity ? $this->getData($entity) : null
+			);
+		}
+
 		$data = [];
 
-		foreach ($this->orm->getRepository(Entity::class)->findBy([], self::getSort($args)) as $ent)
+		if ($args->hasKey('annotation'))
+		{
+			$parts = explode(':', $args->getString('annotation'));
+			if (count($parts) !== 2)
+				throw new InvalidArgumentException('annotation', $args->getString('annotation'), 'must be in format term:id');
+
+			$term = AnnotationTerm::get(strtolower($parts[0]));
+			$query = $this->orm->getRepository(Entity::class)->findByAnnotation($term, $parts[1], self::getSort($args));
+		}
+		elseif ($args->hasKey('name'))
+			$query = $this->orm->getRepository(Entity::class)->findByName($args->getString('name'), self::getSort($args));
+		else
+			$query = $this->orm->getRepository(Entity::class)->findBy([], self::getSort($args));
+
+		foreach ($query as $ent)
 			$data[] = $this->getData($ent);
 
 		return self::formatOk($response, $data);

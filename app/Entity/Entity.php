@@ -13,6 +13,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\Event\PreUpdateEventArgs;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Query\Expr\OrderBy;
 
 final class EntityStatus extends ConsistenceEnum
 {
@@ -596,13 +597,48 @@ class EntityRepository extends \Doctrine\ORM\EntityRepository
 		return $this->matching(Criteria::create()->where(Criteria::expr()->neq('internalType', 'state')));
 	}
 
+	public function findByAnnotation(AnnotationTerm $type, string $id, array $sort)
+	{
+		$query = $this->getEntityManager()->createQueryBuilder()
+			->select('e')
+			->from(Entity::class, 'e')
+			->innerJoin('e.annotations', 'ea')
+			->where('ea.termType = :type')
+			->andWhere('ea.termId = :id')
+			->setParameters(['type' => $type->getValue(), 'id' => $id]);
+
+		foreach ($sort as $by => $how)
+			$query->orderBy('e.' . $by, $how ?: null);
+
+		return new ArrayCollection($query->getQuery()->getResult());
+	}
+
+	public function findByName(string $name, array $sort)
+	{
+		$query = $this->getEntityManager()->createQueryBuilder()
+			->select('e')
+			->from(Entity::class, 'e');
+
+		$i = 0;
+		foreach (explode(' ', $name) as $namePart)
+		{
+			$query->setParameter($i, '%' . $namePart . '%');
+			$query->andWhere('e.name LIKE ?' . $i++);
+		}
+
+		foreach ($sort as $by => $how)
+			$query->orderBy('e.' . $by, $how ?: null);
+
+		return new ArrayCollection($query->getQuery()->getResult());
+	}
+
 	/**
 	 * @param Compartment $entity
 	 * @return Complex[]|ArrayCollection|\Doctrine\ORM\QueryBuilder
 	 */
 	public function findComplexChildren(Compartment $entity)
 	{
-		return new ArrayCollection($this->_em
+		return new ArrayCollection($this->getEntityManager()
 			->createQuery('SELECT c FROM \\App\\Entity\\Complex c INNER JOIN c.compartments cm WHERE cm.id = :id')
 			->setParameters(['id' => $entity->getId()])
 			->getResult());
@@ -614,7 +650,7 @@ class EntityRepository extends \Doctrine\ORM\EntityRepository
 	 */
 	public function findAtomicStates(Atomic $entity)
 	{
-		return new ArrayCollection($this->_em
+		return new ArrayCollection($this->getEntityManager()
 			->createQuery('SELECT s FROM \\App\\Entity\\AtomicState s WHERE s.parent = :id')
 			->setParameters(['id' => $entity->getId()])
 			->getResult());
