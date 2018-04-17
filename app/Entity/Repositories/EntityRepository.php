@@ -14,8 +14,8 @@ use Doctrine\ORM\QueryBuilder;
 
 interface EntityRepository extends PageableRepository
 {
-	public function get(int $id): Entity;
-	public function getByCode(string $code): Entity;
+	public function get(int $id): ?Entity;
+	public function getByCode(string $code): ?Entity;
 	public function getList(array $filter, ?array $sort, array $limit): array;
 
 	/**
@@ -119,12 +119,12 @@ class EntityRepositoryImpl implements EntityRepository
 			->getResult());
 	}
 
-	public function get(int $id): Entity
+	public function get(int $id): ?Entity
 	{
 		return $this->em->find(Entity::class, $id);
 	}
 
-	public function getByCode(string $code): Entity
+	public function getByCode(string $code): ?Entity
 	{
 		return $this->repository->findOneBy(['code' => $code]);
 	}

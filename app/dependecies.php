@@ -15,6 +15,15 @@ unset($c['logger']);
 
 \Tracy\Debugger::enable($c->settings['tracy']['mode'], $c->settings['tracy']['logDir']);
 \Tracy\Debugger::timer('execution');
+//\Tracy\Debugger::$onFatalError[] = function(\Throwable $exception)
+//{
+//	header('Content-type: application/json');
+//	echo json_encode([
+//		'status' => 'error',
+//		'code' => 500,
+//		'message' => '',
+//	]);
+//};
 
 // Doctrine
 $c['em'] = function (Container $c)
@@ -42,11 +51,23 @@ $c['notFoundHandler'] = function (Container $c)
 {
 	return function(Request $request, Response $response)
 	{
-		$response->withStatus(404);
-		return $response->withJson([
+		return $response->withStatus(404)->withJson([
 			'status' => 'error',
 			'message' => 'Page not found',
 			'code' => 404,
+		]);
+	};
+};
+
+$c['notAllowedHandler'] = function (Container $c)
+{
+	return function (Request $request, Response $response, array $allowedHttpMethods)
+	{
+		return $response->withStatus(405)->withJson([
+			'status' => 'error',
+			'code' => 405,
+			'message' => 'Allowed methods: ' . implode(', ', $allowedHttpMethods),
+			'methods' => $allowedHttpMethods,
 		]);
 	};
 };

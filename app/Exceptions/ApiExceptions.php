@@ -37,6 +37,23 @@ abstract class ApiException extends \Exception
 	}
 }
 
+class UniqueKeyViolationException extends ApiException
+{
+	const CODE = 409;
+	public function __construct(string $key, int $id, Throwable $previous = null)
+	{
+		parent::__construct($previous)
+			->setMessage('Object with given %s already exists with ID %d', $key, $id);
+
+		$this->additional = ['id' => $id, 'key' => $key];
+	}
+
+	public function getHttpCode(): int
+	{
+		return self::CODE;
+	}
+}
+
 class InvalidArgumentException extends ApiException
 {
 	const CODE = 702;

@@ -18,6 +18,7 @@ $app->get('/entities', Controllers\EntityController::class . ':read');
 $app->get('/entities/{id:\\d+}', Controllers\EntityController::class . ':readOne');
 $app->post('/entities', Controllers\EntityController::class . ':add');
 $app->put('/entities/{id:\\d+}', Controllers\EntityController::class . ':edit');
+$app->post('/entities/{id:\\d+}/status', Controllers\EntityController::class . ':editStatus');
 $app->delete('/entities/{id:\\d+}', Controllers\EntityController::class . ':delete');
 $app->get('/entities/{code}', Controllers\EntityController::class . ':readCode');
 $app->get('/rules', Controllers\RuleController::class . ':read');

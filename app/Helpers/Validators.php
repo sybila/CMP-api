@@ -52,6 +52,7 @@ Validators::$compartment = new Assert\Collection([
 	'fields' => [
 		'parent' => $identifier,
 	],
+	'allowExtraFields' => true,
 	'allowMissingFields' => true,
 ]);
 
@@ -60,6 +61,7 @@ Validators::$complex = new Assert\Collection([
 		'compartments' => Validators::$identifierList,
 		'children' => Validators::$identifierList,
 	],
+	'allowExtraFields' => true,
 	'allowMissingFields' => true,
 ]);
 
@@ -68,6 +70,7 @@ Validators::$structure = new Assert\Collection([
 		'parents' => Validators::$identifierList,
 		'children' => Validators::$identifierList,
 	],
+	'allowExtraFields' => true,
 	'allowMissingFields' => true,
 ]);
 
@@ -76,6 +79,7 @@ Validators::$atomic = new Assert\Collection([
 		'parents' => Validators::$identifierList,
 		'states' => Validators::$states,
 	],
+	'allowExtraFields' => true,
 	'allowMissingFields' => true,
 ]);
 

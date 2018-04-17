@@ -221,16 +221,19 @@ traits:
               status: ResponseStatus
               code: ResponseCode
       409:
-        description: On duplicate unique key (usually ID)
-        body: 
+        description: On duplicate unique key
+        body:
           application/json:
             type: object
-            properties: 
+            properties:
               status: ResponseStatus
               code: ResponseCode
               id:
                 type: Identifier
                 description: ID of already existing object
+              key:
+                type: string
+                description: Which key was duplicated
   Update:
     description: Updates <<resourcePathName|!singularize>>
     body:

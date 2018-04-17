@@ -8,10 +8,11 @@ use App\Entity\
 };
 use App\Exceptions\
 {
-	ApiException, InternalErrorException, InvalidArgumentException, NonExistingObjectException
+	ApiException, InternalErrorException, InvalidArgumentException, InvalidEnumFieldValueException, MalformedInputException, NonExistingObjectException, UniqueKeyViolationException
 };
 use App\Helpers\ArgumentParser;
 use App\Helpers\Validators;
+use Consistence\Enum\InvalidEnumValueException;
 use Doctrine\ORM\ORMException;
 use Slim\Container;
 use Slim\Http\{Request, Response};
@@ -65,6 +66,23 @@ final class EntityController extends WritableController
 			$response,
 			$entity ? $this->getData($entity) : null
 		);
+	}
+
+	public function editStatus(Request $request, Response $response, ArgumentParser $args)
+	{
+		$entity = $this->getEntity($args->getInt('id'));
+		$body = new ArgumentParser($request->getParsedBody());
+		try {
+			$status = EntityStatus::get($body->getString('status'));
+			$entity->setStatus($status);
+			$this->orm->persist($entity);
+			$this->orm->flush();
+		}
+		catch (InvalidEnumValueException $e) {
+			throw new InvalidArgumentException('status', $body->getString('status'), implode(', ', EntityStatus::getAvailableValues()));
+		}
+
+		return self::formatOk($response, null);
 	}
 
 	protected function createEntity(ArgumentParser $data): Entity
@@ -214,10 +232,18 @@ final class EntityController extends WritableController
 	protected function setData($entity, ArgumentParser $data): void
 	{
 		Validators::validate($data, 'entity', 'invalid data for entity');
+
 		if ($data->hasKey('name'))
 			$entity->setName($data->getString('name'));
 		if ($data->hasKey('code'))
-			$entity->setCode($data->getString('code'));
+		{
+			$code = $data->getString('code');
+			if ($checkEntity = $this->repository->getByCode($code))
+				if ($checkEntity->getId() != $entity->getId())
+					throw new UniqueKeyViolationException('code', $checkEntity->getId());
+
+			$entity->setCode($code);
+		}
 		if ($data->hasKey('description'))
 			$entity->setDescription($data->getString('description'));
 		if ($data->hasKey('status'))

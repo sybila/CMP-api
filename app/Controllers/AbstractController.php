@@ -20,6 +20,7 @@ abstract class AbstractController
 	{
 		return $response->withStatus(200)->withJson([
 			'status' => 'ok',
+			'code' => 200,
 			'data' => $data,
 		]);
 	}
