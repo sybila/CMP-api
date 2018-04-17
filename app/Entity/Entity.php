@@ -15,7 +15,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\Event\PreUpdateEventArgs;
 use Doctrine\ORM\Mapping as ORM;
-use Doctrine\ORM\Query\Expr\OrderBy;
+use Doctrine\ORM\QueryBuilder;
 
 final class EntityStatus extends ConsistenceEnum
 {
@@ -45,7 +45,7 @@ final class EntityStatus extends ConsistenceEnum
 }
 
 /**
- * @ORM\Entity(repositoryClass="EntityRepository")
+ * @ORM\Entity
  * @ORM\EntityListeners({"EntityListener"})
  * @ORM\Table(name="ep_entity")
  * @ORM\InheritanceType("SINGLE_TABLE")
@@ -684,11 +684,11 @@ class EntityRepository extends \Doctrine\ORM\EntityRepository
 		return $this->matching(Criteria::create()->where(Criteria::expr()->neq('internalType', 'state')));
 	}
 
-	public function listFindBy(array $filter, ?array $sort): array
+	private function buildListQuery(array $filter): QueryBuilder
 	{
 		$query = $this->getEntityManager()->createQueryBuilder()
-			->select('e.id, e.name, e.description, e.code, e.status, TYPE(e) as type')
-			->from(Entity::class, 'e');
+			->from(Entity::class, 'e')
+			->where('e NOT INSTANCE OF \App\Entity\AtomicState');
 
 		if (isset($filter['name']))
 		{
@@ -707,11 +707,33 @@ class EntityRepository extends \Doctrine\ORM\EntityRepository
 				->setParameters($filter['annotation']);
 		}
 
+		return $query;
+	}
+
+	public function getListFindBy(array $filter, ?array $sort, array $limit): array
+	{
+		$query = $this->buildListQuery($filter)
+			->select('e.id, e.name, e.description, e.code, e.status, TYPE(e) as type');
+
 		if ($sort)
 			foreach ($sort as $by => $how)
 				$query->orderBy('e.' . $by, $how ?: null);
 
+		if ($limit['limit'] > 0)
+		{
+			$query->setMaxResults($limit['limit'])
+				->setFirstResult($limit['offset']);
+		}
+
 		return $query->getQuery()->getArrayResult();
+	}
+
+	public function getListNumResults(array $filter): int
+	{
+		return (int)$this->buildListQuery($filter)
+			->select('COUNT(e)')
+			->getQuery()
+			->getScalarResult()[0][1];
 	}
 
 	public function findByAnnotation(AnnotationTerm $type, string $id, array $sort)

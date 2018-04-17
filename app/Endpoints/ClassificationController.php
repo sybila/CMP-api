@@ -4,6 +4,8 @@ namespace App\Controllers;
 
 use App\Entity\Classification;
 use App\Entity\EntityClassification;
+use App\Entity\Repositories\ClassificationRepository;
+use App\Entity\Repositories\ClassificationRepositoryImpl;
 use App\Entity\RuleClassification;
 use App\Exceptions\
 {
@@ -11,11 +13,22 @@ use App\Exceptions\
 };
 use App\Helpers\ArgumentParser;
 use Doctrine\ORM\ORMException;
+use Slim\Container;
 use Slim\Http\{Request, Response};
 
 final class ClassificationController extends ReadableController
 {
+	use PageableController;
 	use SortableController;
+
+	/** @var ClassificationRepository */
+	private $repository;
+
+	public function __construct(Container $c)
+	{
+		parent::__construct($c);
+		$this->repository = new ClassificationRepositoryImpl($c['em']);
+	}
 
 	protected static function getAllowedSort(): array
 	{
@@ -24,23 +37,16 @@ final class ClassificationController extends ReadableController
 
 	public function read(Request $request, Response $response, ArgumentParser $args)
 	{
-		$data = [];
-		$className = Classification::class;
+		$filter = [];
+
 		if ($args->hasKey('type'))
-		{
-			$type = $args->getString('type');
-			if ($type === 'entity')
-				$className = EntityClassification::class;
-			elseif ($type === 'rule')
-				$className = RuleClassification::class;
-			else
-				throw new InvalidArgumentException('type', $type);
-		}
+			$filter['type'] = $args->getString('type');
 
-		foreach ($this->orm->getRepository($className)->findBy([], self::getSort($args)) as $ent)
-			$data[] = $this->getData($ent);
+		$numResults = $this->repository->getNumResults($filter);
+		$limit = self::getPaginationData($args, $numResults);
+		$response = $response->withHeader('X-Pages', $limit['pages']);
 
-		return self::formatOk($response, $data);
+		return self::formatOk($response, $this->repository->getList($filter, self::getSort($args), $limit));
 	}
 
 	/**

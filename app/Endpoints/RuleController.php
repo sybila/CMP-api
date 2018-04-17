@@ -4,7 +4,7 @@ namespace App\Controllers;
 
 use App\Entity\
 {
-	Classification, RuleAnnotation, RuleClassification, Rule, Organism
+	Classification, Repositories\RuleRepository, Repositories\RuleRepositoryImpl, RuleAnnotation, RuleClassification, Rule, Organism, RuleStatus
 };
 use App\Exceptions\
 {
@@ -12,12 +12,23 @@ use App\Exceptions\
 };
 use App\Helpers\ArgumentParser;
 use Doctrine\ORM\ORMException;
+use Slim\Container;
 use Slim\Http\{Request, Response};
 
 //TODO: change to WritableController, fix saving
 final class RuleController extends ReadableController
 {
+	use PageableController;
 	use SortableController;
+
+	/** @var RuleRepository */
+	private $repository;
+
+	public function __construct(Container $c)
+	{
+		parent::__construct($c);
+		$this->repository = new RuleRepositoryImpl($c['em']);
+	}
 
 	protected static function getAllowedSort(): array
 	{
@@ -26,12 +37,10 @@ final class RuleController extends ReadableController
 
 	public function read(Request $request, Response $response, ArgumentParser $args)
 	{
-		$data = [];
-
-		foreach ($this->orm->getRepository(Rule::class)->findBy([], self::getSort($args)) as $ent)
-			$data[] = $this->getData($ent);
-
-		return self::formatOk($response, $data);
+		$numResults = $this->repository->getNumResults([]);
+		$limit = self::getPaginationData($args, $numResults);
+		$response = $response->withHeader('X-Pages', $limit['pages']);
+		return self::formatOk($response, $this->repository->getList([], self::getSort($args), $limit));
 	}
 
 	protected function createEntity(ArgumentParser $data): Rule
@@ -47,7 +56,7 @@ final class RuleController extends ReadableController
 	protected function getEntity(int $id)
 	{
 		try {
-			$ent = $this->orm->find(Rule::class, $id);
+			$ent = $this->repository->get($id);
 			if (!$ent)
 				throw new NonExistingObjectException($id, 'rule');
 		}
@@ -110,6 +119,6 @@ final class RuleController extends ReadableController
 		if ($data->hasKey('description'))
 			$entity->setDescription($data->getString('description'));
 		if ($data->hasKey('status'))
-			$entity->setStatus(EntityStatus::fromInt($data->getInt('status')));
+			$entity->setStatus(RuleStatus::fromInt($data->getInt('status')));
 	}
 }

@@ -3,31 +3,42 @@
 namespace App\Controllers;
 
 use App\Entity\Organism;
+use App\Entity\Repositories\OrganismRepository;
+use App\Entity\Repositories\OrganismRepositoryImpl;
 use App\Exceptions\
 {
 	ApiException, InternalErrorException, NonExistingObjectException
 };
 use App\Helpers\ArgumentParser;
 use Doctrine\ORM\ORMException;
+use Slim\Container;
 use Slim\Http\{Request, Response};
 
 final class OrganismController extends ReadableController
 {
+	use PageableController;
 	use SortableController;
+
+	/** @var OrganismRepository */
+	private $repository;
+
+	public function __construct(Container $c)
+	{
+		parent::__construct($c);
+		$this->repository = new OrganismRepositoryImpl($c['em']);
+	}
 
 	protected static function getAllowedSort(): array
 	{
-		return ['id', 'name'];
+		return ['id', 'name', 'code'];
 	}
 
 	public function read(Request $request, Response $response, ArgumentParser $args)
 	{
-		$data = [];
-
-		foreach ($this->orm->getRepository(Organism::class)->findBy([], self::getSort($args)) as $ent)
-			$data[] = $this->getData($ent);
-
-		return self::formatOk($response, $data);
+		$numResults = $this->repository->getNumResults([]);
+		$limit = self::getPaginationData($args, $numResults);
+		$response = $response->withHeader('X-Pages', $limit['pages']);
+		return self::formatOk($response, $this->repository->getList([], self::getSort($args), $limit));
 	}
 
 	/**
@@ -38,7 +49,7 @@ final class OrganismController extends ReadableController
 	protected function getEntity(int $id)
 	{
 		try {
-			$ent = $this->orm->find(Organism::class, $id);
+			$ent = $this->repository->get($id);
 			if (!$ent)
 				throw new NonExistingObjectException($id, 'organism');
 		}

@@ -6,3 +6,4 @@ vendor
 composer.lock
 deploy.php
 docs
+node-modules

@@ -4,20 +4,30 @@ namespace App\Controllers;
 
 use App\Entity\
 {
-	AnnotationTerm, Atomic, AtomicState, Compartment, Complex, Entity, EntityAnnotation, EntityClassification, EntityStatus, Organism, Structure
+	AnnotationTerm, Atomic, AtomicState, Compartment, Complex, Entity, EntityAnnotation, EntityStatus, Repositories\EntityRepository, Repositories\EntityRepositoryImpl, Structure
 };
 use App\Exceptions\
 {
-	ApiException, EntityHierarchyException, EntityLocationException, InternalErrorException, InvalidArgumentException, InvalidSortFieldException, NonExistingObjectException
+	ApiException, InternalErrorException, InvalidArgumentException, NonExistingObjectException
 };
 use App\Helpers\ArgumentParser;
 use Doctrine\ORM\ORMException;
+use Slim\Container;
 use Slim\Http\{Request, Response};
-use Symfony\Component\Validator\Validation;
 
 final class EntityController extends WritableController
 {
+	use PageableController;
 	use SortableController;
+
+	/** @var EntityRepository */
+	private $repository;
+
+	public function __construct(Container $c)
+	{
+		parent::__construct($c);
+		$this->repository = new EntityRepositoryImpl($c['em']);
+	}
 
 	protected static function getAllowedSort(): array
 	{
@@ -28,7 +38,7 @@ final class EntityController extends WritableController
 	{
 		if ($args->hasKey('code'))
 		{
-			$entity = $this->orm->getRepository(Entity::class)->findOneBy(['code' => $args->getString('code')]);
+			$entity = $this->repository->getByCode($args->getString('code'));
 			return self::formatOk(
 				$response,
 				$entity ? $this->getData($entity) : null
@@ -49,11 +59,11 @@ final class EntityController extends WritableController
 		elseif ($args->hasKey('name'))
 			$filter['name'] = $args->getString('name');
 
-		$data = [];
-		foreach ($this->orm->getRepository(Entity::class)->listFindBy($filter, self::getSort($args)) as $ent)
-			$data[] = $this->getListData($ent);
+		$numResults = $this->repository->getNumResults($filter);
+		$limit = self::getPaginationData($args, $numResults);
+		$response = $response->withHeader('X-Pages', $limit['pages']);
 
-		return self::formatOk($response, $data);
+		return self::formatOk($response, $this->repository->getList($filter, self::getSort($args), $limit));
 	}
 
 	protected function createEntity(ArgumentParser $data): Entity
@@ -76,7 +86,7 @@ final class EntityController extends WritableController
 	protected function getEntity(int $id)
 	{
 		try {
-			$ent = $this->orm->find(Entity::class, $id);
+			$ent = $this->repository->get($id);
 			if (!$ent)
 				throw new NonExistingObjectException($id, 'entity');
 		}
@@ -85,18 +95,6 @@ final class EntityController extends WritableController
 		}
 
 		return $ent;
-	}
-
-	protected function getListData(array $entity): array
-	{
-		return [
-			'id' => $entity['id'],
-			'name' => $entity['name'],
-			'description' => $entity['description'],
-			'code' => $entity['code'],
-			'type' => Entity::$dataToType[$entity['type']],
-			'status' => (string)EntityStatus::fromInt($entity['status'] ?: 1),
-		];
 	}
 
 	/**
@@ -136,7 +134,7 @@ final class EntityController extends WritableController
 		if ($entity instanceof Compartment)
 		{
 			return [
-				'children' => $this->orm->getRepository(Entity::class)
+				'children' => $this->repository
 					->findComplexChildren($entity)
 					->map(self::identifierGetter())
 					->toArray(),
@@ -161,7 +159,7 @@ final class EntityController extends WritableController
 		{
 			return [
 				'parents' => $entity->getParents()->map(self::identifierGetter())->toArray(),
-				'states' => $this->orm->getRepository(Entity::class)->findAtomicStates($entity)->map(function(AtomicState $state)
+				'states' => $this->repository->findAtomicStates($entity)->map(function(AtomicState $state)
 				{
 					return ['code' => $state->getCode(), 'description' => $state->getDescription()];
 				})->toArray(),
@@ -178,7 +176,7 @@ final class EntityController extends WritableController
 			$states[$state['code']] = $state['description'];
 
 		$free = [];
-		foreach ($this->orm->getRepository(Entity::class)->findAtomicStates($entity) as $state)
+		foreach ($this->repository->findAtomicStates($entity) as $state)
 		{
 			$found = null;
 			if (array_key_exists($state->getCode(), $states))
