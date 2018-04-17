@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Exceptions\InvalidArgumentException;
 use App\Helpers\ArgumentParser;
+use App\Helpers\Validators;
 
 trait PageableController
 {
@@ -14,6 +15,8 @@ trait PageableController
 
 	protected static function getPaginationData(ArgumentParser $args, int $resultCount): array
 	{
+		Validators::validate($args, 'pagination', 'invalid pagination data');
+
 		$perPage = static::getDefaultPerPage();
 		if ($args->hasKey('perPage'))
 			$perPage = $args->getInt('perPage');

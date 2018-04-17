@@ -19,6 +19,7 @@ $app->get('/entities/{id:\\d+}', Controllers\EntityController::class . ':readOne
 $app->post('/entities', Controllers\EntityController::class . ':add');
 $app->put('/entities/{id:\\d+}', Controllers\EntityController::class . ':edit');
 $app->delete('/entities/{id:\\d+}', Controllers\EntityController::class . ':delete');
+$app->get('/entities/{code}', Controllers\EntityController::class . ':readCode');
 $app->get('/rules', Controllers\RuleController::class . ':read');
 $app->get('/rules/{id:\\d+}', Controllers\RuleController::class . ':readOne');
 //$app->post('/rules', Controllers\RuleController::class . ':add');

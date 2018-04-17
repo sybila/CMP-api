@@ -11,6 +11,7 @@ use App\Exceptions\
 	ApiException, InternalErrorException, InvalidArgumentException, NonExistingObjectException
 };
 use App\Helpers\ArgumentParser;
+use App\Helpers\Validators;
 use Doctrine\ORM\ORMException;
 use Slim\Container;
 use Slim\Http\{Request, Response};
@@ -36,15 +37,6 @@ final class EntityController extends WritableController
 
 	public function read(Request $request, Response $response, ArgumentParser $args)
 	{
-		if ($args->hasKey('code'))
-		{
-			$entity = $this->repository->getByCode($args->getString('code'));
-			return self::formatOk(
-				$response,
-				$entity ? $this->getData($entity) : null
-			);
-		}
-
 		$filter = [];
 
 		if ($args->hasKey('annotation'))
@@ -64,6 +56,15 @@ final class EntityController extends WritableController
 		$response = $response->withHeader('X-Pages', $limit['pages']);
 
 		return self::formatOk($response, $this->repository->getList($filter, self::getSort($args), $limit));
+	}
+
+	public function readCode(Request $request, Response $response, ArgumentParser $args)
+	{
+		$entity = $this->repository->getByCode($args->getString('code'));
+		return self::formatOk(
+			$response,
+			$entity ? $this->getData($entity) : null
+		);
 	}
 
 	protected function createEntity(ArgumentParser $data): Entity

@@ -1,13 +1,15 @@
 <?php
 
-namespace App\Controllers;
+namespace App\Helpers;
 
-use App\Exceptions\MalformedInputDataException;
+use App\Exceptions\MalformedInputException;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Validation;
 
 class Validators
 {
+	private static $validator;
+
 	public static $code;
 	public static $identifierList;
 	public static $states;
@@ -16,12 +18,15 @@ class Validators
 	public static $structure;
 	public static $atomic;
 	public static $entity;
+	public static $pagination;
 
 	public static function validate($data, $rules, $message)
 	{
-		$validator = Validation::createValidator();
-		if (count($validator->validate($data, self::$$rules)) > 0)
-			throw new MalformedInputDataException($message);
+		if (!self::$validator)
+			self::$validator = Validation::createValidator();
+
+		if (count(self::$validator->validate($data, self::$$rules)) > 0)
+			throw new MalformedInputException($message);
 	}
 }
 
@@ -81,6 +86,16 @@ Validators::$entity = new Assert\Collection([
 		'description' => new Assert\Type(['type' => 'string']),
 		'status' => new Assert\Type(['type' => 'string']),
 	],
+	'allowExtraFields' => true,
+	'allowMissingFields' => true,
+]);
+
+Validators::$pagination = new Assert\Collection([
+	'fields' => [
+		'page' => new Assert\Range(['min' => 1]),
+		'perPage' => new Assert\Range(['min' => 0]),
+	],
+
 	'allowExtraFields' => true,
 	'allowMissingFields' => true,
 ]);
