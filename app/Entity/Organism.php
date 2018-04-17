@@ -8,15 +8,9 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Entity
  * @ORM\Table(name="ep_organism")
  */
-class Organism
+class Organism implements IdentifiedObject
 {
-	/**
-	 * @var int
-	 * @ORM\Id
-	 * @ORM\Column(type="integer")
-	 * @ORM\GeneratedValue
-	 */
-	protected $id;
+	use Identifier;
 
 	/**
 	 * @var string
@@ -25,19 +19,19 @@ class Organism
 	protected $name;
 
 	/**
-	 * @return int
+	 * @var string
+	 * @ORM\Column(type="string")
 	 */
-	public function getId(): int
+	protected $code;
+
+	public function getCode(): string
 	{
-		return $this->id;
+		return $this->code;
 	}
 
-	/**
-	 * @param int $id
-	 */
-	public function setId(int $id): void
+	public function setCode(string $code): void
 	{
-		$this->id = $id;
+		$this->code = $code;
 	}
 
 	/**

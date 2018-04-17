@@ -47,6 +47,16 @@ class InvalidArgumentException extends ApiException
 	}
 }
 
+class MalformedInputDataException extends ApiException
+{
+	const CODE = 704;
+	public function __construct(string $message, Throwable $previous = null)
+	{
+		parent::__construct($previous)
+			->setMessage($message);
+	}
+}
+
 class InvalidSortFieldException extends ApiException
 {
 	const CODE = 703;

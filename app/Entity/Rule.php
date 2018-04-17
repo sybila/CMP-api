@@ -40,15 +40,9 @@ final class RuleStatus extends ConsistenceEnum
  * @ORM\Entity
  * @ORM\Table(name="ep_reaction")
  */
-class Rule
+class Rule implements IdentifiedObject
 {
-	/**
-	 * @var int
-	 * @ORM\Id
-	 * @ORM\Column(type="integer")
-	 * @ORM\GeneratedValue
-	 */
-	protected $id;
+	use Identifier;
 
 	/**
 	 * @var string
@@ -117,11 +111,6 @@ class Rule
 		$this->classifications = new ArrayCollection;
 		$this->annotations = new ArrayCollection;
 		$this->organisms = new ArrayCollection;
-	}
-
-	public function getId(): int
-	{
-		return $this->id;
 	}
 
 	/**

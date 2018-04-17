@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use App\Exceptions\EntityHierarchyException;
+use App\Exceptions\EntityLocationException;
 use App\Helpers\
 {
 	ChangeCollection, ConsistenceEnum
@@ -50,9 +52,10 @@ final class EntityStatus extends ConsistenceEnum
  * @ORM\DiscriminatorColumn(name="hierarchy_type", type="string")
  * @ORM\DiscriminatorMap({0 = "AtomicState", 1 = "Compartment", 2 = "Complex", 3 = "Structure", 4 = "Atomic"})
  */
-abstract class Entity
+abstract class Entity implements IdentifiedObject
 {
 	use ChangeCollection;
+	use Identifier;
 
 	public static $classToType = [
 		Compartment::class => 'compartment',
@@ -61,14 +64,6 @@ abstract class Entity
 		Atomic::class => 'atomic',
 		AtomicState::class => 'state',
 	];
-
-	/**
-	 * @var int
-	 * @ORM\Id
-	 * @ORM\Column(type="integer")
-	 * @ORM\GeneratedValue
-	 */
-	protected $id;
 
 	/**
 	 * @var string
@@ -132,11 +127,6 @@ abstract class Entity
 		$this->classifications = new ArrayCollection;
 		$this->annotations = new ArrayCollection;
 		$this->organisms = new ArrayCollection;
-	}
-
-	public function getId(): int
-	{
-		return $this->id;
 	}
 
 	public function getType(): string
@@ -368,8 +358,11 @@ class Compartment extends Entity
 		self::changeCollection($this->parents, $data, [$this, 'addParent']);
 	}
 
-	public function addParent(Compartment $parent)
+	public function addParent(Entity $parent)
 	{
+		if (!($parent instanceof Compartment))
+			throw new EntityHierarchyException('compartment', $parent->getType());
+
 		$this->parents->add($parent);
 	}
 
@@ -394,10 +387,21 @@ class Complex extends Entity
 	 */
 	protected $compartments;
 
+	/**
+	 * @var ArrayCollection
+	 * @ORM\ManyToMany(targetEntity="Entity")
+	 * @ORM\JoinTable(name="ep_entity_composition",
+	 *     joinColumns={@ORM\JoinColumn(name="parentEntityId")},
+	 *     inverseJoinColumns={@ORM\JoinColumn(name="childEntityId")}
+	 * )
+	 */
+	protected $children;
+
 	public function __construct()
 	{
 		parent::__construct();
 		$this->compartments = new ArrayCollection;
+		$this->children = new ArrayCollection;
 	}
 
 	/**
@@ -413,15 +417,46 @@ class Complex extends Entity
 		self::changeCollection($this->compartments, $data, [$this, 'addCompartment']);
 	}
 
-	public function addCompartment(Compartment $compartment)
+	public function addCompartment(Entity $entity)
 	{
-		$this->compartments->add($compartment);
+		if (!($entity instanceof Compartment))
+			throw new EntityLocationException($entity->getType());
+
+		$this->compartments->add($entity);
 		return $this;
 	}
 
 	public function removeCompartment(Entity $compartment)
 	{
 		$this->compartments->removeElement($compartment);
+		return $this;
+	}
+
+	/**
+	 * @return Entity[]|ArrayCollection
+	 */
+	public function getChildren()
+	{
+		return $this->children;
+	}
+
+	public function setChildren(array $data)
+	{
+		self::changeCollection($this->children, $data, [$this, 'addChild']);
+	}
+
+	public function addChild(Entity $entity)
+	{
+		if (!($entity instanceof Structure) && !($entity instanceof Atomic))
+			throw new EntityHierarchyException('complex', $entity->getType());
+
+		$this->children->add($entity);
+		return $this;
+	}
+
+	public function removeChild(Entity $entity)
+	{
+		$this->children->removeElement($entity);
 		return $this;
 	}
 }
@@ -432,6 +467,7 @@ class Complex extends Entity
 class Structure extends Entity
 {
 	/**
+	 * @var ArrayCollection
 	 * @ORM\ManyToMany(targetEntity="Entity")
 	 * @ORM\JoinTable(name="ep_entity_composition",
 	 *     joinColumns={@ORM\JoinColumn(name="childEntityId")},
@@ -440,10 +476,21 @@ class Structure extends Entity
 	 */
 	protected $parents;
 
+	/**
+	 * @var ArrayCollection
+	 * @ORM\ManyToMany(targetEntity="Entity")
+	 * @ORM\JoinTable(name="ep_entity_composition",
+	 *     joinColumns={@ORM\JoinColumn(name="parentEntityId")},
+	 *     inverseJoinColumns={@ORM\JoinColumn(name="childEntityId")}
+	 * )
+	 */
+	protected $children;
+
 	public function __construct()
 	{
 		parent::__construct();
 		$this->parents = new ArrayCollection;
+		$this->children = new ArrayCollection;
 	}
 
 	/**
@@ -459,8 +506,11 @@ class Structure extends Entity
 		self::changeCollection($this->parents, $data, [$this, 'addParent']);
 	}
 
-	public function addParent(Complex $entity)
+	public function addParent(Entity $entity)
 	{
+		if (!($entity instanceof Complex))
+			throw new EntityHierarchyException($entity->getType(), 'structure');
+
 		$this->parents->add($entity);
 		return $this;
 	}
@@ -468,6 +518,34 @@ class Structure extends Entity
 	public function removeParent(Entity $entity)
 	{
 		$this->parents->removeElement($entity);
+		return $this;
+	}
+
+	/**
+	 * @return Atomic[]|ArrayCollection
+	 */
+	public function getChildren()
+	{
+		return $this->children;
+	}
+
+	public function setChildren(array $data)
+	{
+		self::changeCollection($this->children, $data, [$this, 'addChild']);
+	}
+
+	public function addChild(Entity $entity)
+	{
+		if (!($entity instanceof Atomic))
+			throw new EntityHierarchyException('structure', $entity->getType());
+
+		$this->children->add($entity);
+		return $this;
+	}
+
+	public function removeChild(Entity $entity)
+	{
+		$this->children->removeElement($entity);
 		return $this;
 	}
 }
@@ -508,7 +586,7 @@ class Atomic extends Entity
 	public function addParent(Entity $entity)
 	{
 		if (!($entity instanceof Complex) && !($entity instanceof Structure))
-			throw new \TypeError('Atomic parent must be Complex or Structure');
+			throw new EntityHierarchyException($entity->getType(), 'atomic');
 
 		$this->parents->add($entity);
 		return $this;
@@ -532,9 +610,10 @@ class AtomicState extends Entity
 	 */
 	protected $parent;
 
-	public function __construct()
+	public function __construct(Atomic $parent)
 	{
 		parent::__construct();
+		$this->parent = $parent->getId();
 		$this->internalType = 'state';
 	}
 }

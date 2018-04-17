@@ -6,7 +6,9 @@ use App\Exceptions\InvalidTypeException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Slim\Interfaces\InvocationStrategyInterface;
-class ArgumentParser implements \ArrayAccess
+use Traversable;
+
+class ArgumentParser implements \ArrayAccess, \IteratorAggregate
 {
 	/** @var array */
 	protected $data;
@@ -39,6 +41,15 @@ class ArgumentParser implements \ArrayAccess
 		return $this->data[$key];
 	}
 
+	public function getArray(string $key): array
+	{
+		$value = $this->get($key);
+		if (is_array($value))
+			return $value;
+		else
+			$this->doThrow($key, 'array');
+	}
+
 	public function getInt(string $key): int
 	{
 		$value = $this->get($key);
@@ -50,7 +61,11 @@ class ArgumentParser implements \ArrayAccess
 
 	public function getString(string $key): string
 	{
-		return $this->get($key);
+		$value = $this->get($key);
+		if (is_scalar($value))
+			return $value;
+		else
+			$this->doThrow($key, 'string');
 	}
 
 	public function getFloat(string $key): float
@@ -96,6 +111,18 @@ class ArgumentParser implements \ArrayAccess
 
 	public function offsetUnset($offset)
 	{
+	}
+
+	/**
+	 * Retrieve an external iterator
+	 * @link http://php.net/manual/en/iteratoraggregate.getiterator.php
+	 * @return Traversable An instance of an object implementing <b>Iterator</b> or
+	 * <b>Traversable</b>
+	 * @since 5.0.0
+	 */
+	public function getIterator()
+	{
+		return new \ArrayIterator($this->data);
 	}
 }
 

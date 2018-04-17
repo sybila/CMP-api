@@ -3,9 +3,11 @@
 namespace App\Controllers;
 
 use App\Entity\Classification;
+use App\Entity\EntityClassification;
+use App\Entity\RuleClassification;
 use App\Exceptions\
 {
-	ApiException, InternalErrorException, NonExistingObjectException
+	ApiException, InternalErrorException, InvalidArgumentException, NonExistingObjectException
 };
 use App\Helpers\ArgumentParser;
 use Doctrine\ORM\ORMException;
@@ -17,14 +19,25 @@ final class ClassificationController extends ReadableController
 
 	protected static function getAllowedSort(): array
 	{
-		return ['name' => 'name', 'type' => 'type'];
+		return ['id', 'name'];
 	}
 
 	public function read(Request $request, Response $response, ArgumentParser $args)
 	{
 		$data = [];
+		$className = Classification::class;
+		if ($args->hasKey('type'))
+		{
+			$type = $args->getString('type');
+			if ($type === 'entity')
+				$className = EntityClassification::class;
+			elseif ($type === 'rule')
+				$className = RuleClassification::class;
+			else
+				throw new InvalidArgumentException('type', $type);
+		}
 
-		foreach ($this->orm->getRepository(Classification::class)->findBy([], self::getSort($args)) as $ent)
+		foreach ($this->orm->getRepository($className)->findBy([], self::getSort($args)) as $ent)
 			$data[] = $this->getData($ent);
 
 		return self::formatOk($response, $data);

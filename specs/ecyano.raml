@@ -1,0 +1,478 @@
+#%RAML 1.0
+title: Ecyano API
+version: 0.2
+baseUri: https://api.e-cyanobacterium.org
+mediaType: application/json
+protocols: HTTPS
+types:
+  Identifier:
+    type: integer
+    minimum: 1
+    required: true
+  IdentifierList:
+    type: array
+    items: integer
+    uniqueItems: true
+  ResponseStatus:
+    type: string
+    enum: ['ok', 'error']
+  ResponseCode:
+    type: integer
+    minimum: 1
+    required: false
+    description: Same as HTTP code or custom (700+, listed in /version/errors docs) when HTTP code is 400
+  Classification:
+    properties: 
+      id: Identifier
+      name:
+        type: string
+        required: true
+      type:
+        description: "On which type of object can this classification be used"
+        type: string
+        enum: ["entity", "rule"]
+        required: true
+  Organism:
+    properties: 
+      id: Identifier
+      name:
+        type: string
+        required: true
+  AbstractEntitySignature:
+    properties:
+      id: Identifier
+      name:
+        type: string
+        required: true
+        example: "complex of KaiB6 and KaiC6"
+      code:
+        description: Human-readable entity identifier, unique among all entities
+        type: string
+        required: true
+        pattern: \w+
+        example: "KaiB6C6"
+      type:
+        type: string
+        description: Entity type, can't be changed after entity is in database
+        enum: ["compartment", "complex", "structure", "atomic"]
+        required: true
+  ListEntitySignature:
+    type: AbstractEntitySignature
+    properties:
+      status: ObjectStatus
+  EntitySignature:
+    type: AbstractEntitySignature
+    properties:
+      description:
+        type: string
+        required: false
+      classifications:
+        type: IdentifierList
+        description: List of classification IDs
+      organisms:
+        type: IdentifierList
+        description: List of organism IDs
+  Compartment:
+    type: EntitySignature
+    properties:
+      parent:
+        description: Parent compartment ID
+        type: integer
+      children:
+        description: Children compartment IDs
+        type: IdentifierList
+  Complex:
+    type: EntitySignature
+    properties:
+      compartments:
+        type: IdentifierList
+        description: List of compartments
+      children:
+        type: IdentifierList
+        description: List of child Structure/Atomic agents
+  Structure:
+    type: EntitySignature
+    properties:
+      parents:
+        type: IdentifierList
+        description: List of Complex parents
+      children:
+        type: IdentifierList
+        description: List of child Atomic agents
+  Atomic:
+    type: EntitySignature
+    properties: 
+      parents:
+        type: IdentifierList
+        description: List of Complex or Structure parents
+      states: AtomicState[]
+  AtomicState:
+    properties: 
+      code:
+        type: string
+        description: Code of state, unique among this atomic's states
+      description:
+        type: string
+  AllEntitySignature: Compartment | Complex | Structure | Atomic
+  ListRule:
+    properties: 
+      id: Identifier
+      name:
+        type: string
+        description: Name of rule
+      equation:
+        type: string
+        description: Rule in BCSL
+      modifier:
+        type: string
+        description: Rule modifiers
+      status: ObjectStatus
+  Rule:
+    type: ListRule
+    properties: 
+      description:
+        type: string
+        description: Rule description
+      classifications:
+        type: IdentifierList
+        description: List of classification IDs
+      organisms:
+        type: IdentifierList
+        description: List of organism IDs
+  ObjectStatus:
+    type: string
+    enum: ["new", "active"]
+
+traits:
+  Collection:
+    description: Get all <<resourcePathName|!pluralize>>
+    responses: 
+      200:
+        body: 
+          application/json:
+            type: object
+            properties: 
+              status: ResponseStatus
+              code: ResponseCode
+              data:
+                type: array
+                items: <<type>>
+  IdCollection:
+    description: <<description>>
+    responses: 
+      200:
+        body: 
+          application/json:
+            type: object
+            properties: 
+              status: ResponseStatus
+              code: ResponseCode
+              data: IdentifierList
+  Object:
+    responses: 
+      200:
+        body: 
+          application/json:
+            type: object
+            properties: 
+              status: ResponseStatus
+              code: ResponseCode
+              data:
+                type: <<type>>
+  Insert:
+    description: Inserts a new <<resourcePathName|!singularize>>
+    body:
+      application/json:
+        type: <<type>>
+      application/x-www-form-urlencoded:
+        type: <<type>>
+    responses: 
+      200:
+        body: 
+          application/json:
+            type: object
+            properties: 
+              status: ResponseStatus
+              code: ResponseCode
+              id:
+                type: Identifier
+                description: ID of inserted <<resourcePathName|!singularize>>
+      400:
+        description: Sent on bad input data
+        body: 
+          application/json:
+            type: object
+            properties: 
+              status: ResponseStatus
+              code: ResponseCode
+      403:
+        description: When current access token does not have necessary privileges
+        body: 
+          application/json:
+            type: object
+            properties: 
+              status: ResponseStatus
+              code: ResponseCode
+      404:
+        body:
+          application/json:
+            type: object
+            properties: 
+              status: ResponseStatus
+              code: ResponseCode
+      409:
+        description: On duplicate unique key (usually ID)
+        body: 
+          application/json:
+            type: object
+            properties: 
+              status: ResponseStatus
+              code: ResponseCode
+              id:
+                type: Identifier
+                description: ID of already existing object
+  Update:
+    description: Updates <<resourcePathName|!singularize>>
+    body:
+      application/json:
+          type: <<type>>
+      application/x-www-form-urlencoded:
+        type: <<type>>
+    responses: 
+      200:
+        body: 
+          application/json:
+            type: object
+            properties: 
+              status: ResponseStatus
+              code: ResponseCode
+      400:
+        description: Sent on bad input data
+        body: 
+          application/json:
+            type: object
+            properties: 
+              status: ResponseStatus
+              code: ResponseCode
+      403:
+        description: When current access token does not have necessary privileges
+        body: 
+          application/json:
+            type: object
+            properties: 
+              status: ResponseStatus
+              code: ResponseCode
+      404:
+        description: Object with given ID was not found
+        body:
+          application/json:
+            type: object
+            properties: 
+              status: ResponseStatus
+              code: ResponseCode
+  Delete:
+    description: Removes <<resourcePathName|!singularize>>
+    responses: 
+      200:
+        body: 
+          application/json:
+            type: object
+            properties: 
+              status: ResponseStatus
+              code: ResponseCode
+      403:
+        description: When current access token does not have necessary privileges
+        body:
+          application/json:
+            type: object
+            properties: 
+              status: ResponseStatus
+              code: ResponseCode
+      404:
+        description: Object with given ID was not found
+        body:
+          application/json:
+            type: object
+            properties: 
+              status: ResponseStatus
+              code: ResponseCode
+  Sortable:
+    queryParameters:
+      sort:
+        default: 'id'
+        type: string
+        required: false
+      sortDirection:
+        type: string
+        enum: ["asc", "desc"]
+        default: "asc"
+        required: false
+  Pageable:
+    queryParameters:
+      perPage:
+        type: integer
+        description: "Number of items per page, 0 means unlimited"
+        minimum: 0
+        default: 0
+        required: false
+      page:
+        description: "Current page"
+        type: integer
+        minimum: 1
+        default: 1
+        required: false
+    responses:
+      200:
+        headers:
+          X-Pages:
+            description: "Will contain number of pages for given perPage value"
+            type: number
+
+resourceTypes: 
+  EntityList:
+    get:
+      is: [Collection: {type: <<type>>}, Sortable, Pageable]
+      description: List of EntitySignatures of type <<type>>
+      queryParameters:
+        annotation:
+          type: string
+          description: Filter entities by annotation, format TYPE:ID, where type is one of supported annotation types
+          example: 'KEGG:CP123'
+          pattern: .+:.+
+        name:
+          type: string
+          description: Filter entities by part of name, "clever" search may be used
+        sort:
+          enum: ["id", "name", "code"]
+  EntitySetStatus:
+    post:
+      description: Changes status of <<name>>, users may not have privileges
+      body:
+        application/json:
+          properties: 
+            status: ObjectStatus
+        application/x-www-form-urlencoded:
+          properties: 
+            status: ObjectStatus
+      responses: 
+        200:
+          body: 
+            application/json:
+              type: object
+              properties: 
+                status: ResponseStatus
+                code: ResponseCode
+
+/version:
+  description: Information about API version
+  get:
+    responses: 
+      200:
+        body: 
+          application/json:
+            properties: 
+              status: ResponseStatus
+              code: ResponseCode
+              data:
+                properties: 
+                  version:
+                    type: string
+  /errors:
+    description: |
+      Any error code not listed bellow shall never be encountered by users of this API.
+      With custom error codes (700+), HTTP code will be 400 Bad Request.
+
+      List of error codes (!! INCOMPLETE !! - more will be added later, as API is under construction now):
+      [Code (Http code) - Description]
+      401 (401 Unauthorized) - Unauthorized request, will be implemented with authentication support.
+      403 (403 Forbidden)
+      404 (404 Not Found) - Requested resource was not found
+      500 (500 Internal Server Error) - Server-side or application error. Please, report these!
+      700 - Attempting to access non-existing object
+      701 - When saving an object (POST, PUT methods) and some
+      702 - Invalid argument
+      703 - Invalid field specified for sort
+      
+      BCS - Entity Signature errors:
+      710 - Invalid entity specified as location (must be Compartment), error details: {given: given type}
+      711 - Invalid entity specified as parent, error details: {parent: parent type, child: child type}
+
+/classifications:
+  get:
+    is: [Collection: {type: Classification}, Sortable, Pageable]
+    queryParameters:
+      sort:
+        enum: ["id", "name"]
+      type:
+        type: string
+        enum: ["entity", "rule"]
+        required: false
+
+/organisms:
+  get:
+    is: [Collection: {type: Organism}, Sortable, Pageable]
+    queryParameters: 
+      sort:
+        enum: ["id", "name", "type"]
+
+/entities:
+  description: Entity Signatures
+  type: {EntityList: {type: ListEntitySignature}}
+  get:
+    queryParameters:
+      sort:
+        enum: ["id", "name", "code", "type"]
+  post:
+    is: [Insert: {type: AllEntitySignature}]
+  /{id}:
+    uriParameters:
+      id:
+        type: Identifier
+    get:
+      description: Get specific compartment
+      is: [Object: {type: AllEntitySignature}]
+    put:
+      is: [Update: {type: AllEntitySignature}]
+    delete:
+      is: [Delete]
+  /{code}:
+    uriParameters:
+      code:
+        type: string
+        pattern: \w+
+        description: 'Entity code'
+    get:
+      description: Get specific entity by code
+      is: [Object: {type: AllEntitySignature}]
+  /status:
+    type: [EntitySetStatus: {name: entity}]
+#    /compartment:
+#      type: {EntityList: {type: Compartment}}
+#    /complex:
+#      type: {EntityList: {type: Complex}}
+#    /structure:
+#      type: {EntityList: {type: Structure}}
+#    /atomic:
+#      type: {EntityList: {type: Atomic}}
+
+/rules:
+  get:
+    is: [Collection: {type: ListRule}, Sortable, Pageable]
+  post:
+    is: [Insert: {type: Rule}]
+  put:
+    is: [Update: {type: Rule}]
+  delete:
+    is: [Delete]
+  /{id}:
+    uriParameters:
+      id:
+        type: Identifier
+    get:
+      is: [Object: {type: Rule}]
+    /reactants:
+      get:
+        is: [IdCollection: {description: Get all products of this rule}]
+    /products:
+      get:
+        is: [IdCollection: {description: Get all products of this rule}]

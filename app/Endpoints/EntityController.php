@@ -13,6 +13,7 @@ use App\Exceptions\
 use App\Helpers\ArgumentParser;
 use Doctrine\ORM\ORMException;
 use Slim\Http\{Request, Response};
+use Symfony\Component\Validator\Validation;
 
 final class EntityController extends WritableController
 {
@@ -20,7 +21,7 @@ final class EntityController extends WritableController
 
 	protected static function getAllowedSort(): array
 	{
-		return ['name' => 'name', 'type' => 'type', 'code' => 'code'];
+		return ['id', 'name', 'type', 'code'];
 	}
 
 	public function read(Request $request, Response $response, ArgumentParser $args)
@@ -110,14 +111,8 @@ final class EntityController extends WritableController
 	protected function getSingleData($entity): array
 	{
 		return [
-			'classifications' => $entity->getClassifications()->map(function(EntityClassification $classification)
-			{
-				return $classification->getId();
-			})->toArray(),
-			'organisms' => $entity->getOrganisms()->map(function(Organism $organism)
-			{
-				return $organism->getId();
-			})->toArray(),
+			'classifications' => $entity->getClassifications()->map(self::identifierGetter())->toArray(),
+			'organisms' => $entity->getOrganisms()->map(self::identifierGetter())->toArray(),
 			'annotations' => $entity->getAnnotations()->map(function(EntityAnnotation $annotation)
 			{
 				return ['id' => $annotation->getTermId(), 'type' => $annotation->getTermType()];
@@ -130,38 +125,31 @@ final class EntityController extends WritableController
 		if ($entity instanceof Compartment)
 		{
 			return [
-				'children' => $this->orm->getRepository(Entity::class)->findComplexChildren($entity)->map(function(Organism $organism)
-				{
-					return $organism->getId();
-				})->toArray(),
+				'children' => $this->orm->getRepository(Entity::class)
+					->findComplexChildren($entity)
+					->map(self::identifierGetter())
+					->toArray(),
 				'parent' => (($parent = $entity->getParents()->first()) ? $parent->getId() : null)
 			];
 		}
 		elseif ($entity instanceof Complex)
 		{
 			return [
-				'compartments' => $entity->getCompartments()->map(function(Compartment $compartment)
-				{
-					return $compartment->getId();
-				})->toArray()
+				'compartments' => $entity->getCompartments()->map(self::identifierGetter())->toArray(),
+				'children' => $entity->getChildren()->map(self::identifierGetter())->toArray(),
 			];
 		}
 		elseif ($entity instanceof Structure)
 		{
 			return [
-				'parents' => $entity->getParents()->map(function(Entity $entity)
-				{
-					return $entity->getId();
-				})->toArray()
+				'parents' => $entity->getParents()->map(self::identifierGetter())->toArray(),
+				'children' => $entity->getChildren()->map(self::identifierGetter())->toArray(),
 			];
 		}
 		elseif ($entity instanceof Atomic)
 		{
 			return [
-				'parents' => $entity->getParents()->map(function(Entity $entity)
-				{
-					return $entity->getId();
-				})->toArray(),
+				'parents' => $entity->getParents()->map(self::identifierGetter())->toArray(),
 				'states' => $this->orm->getRepository(Entity::class)->findAtomicStates($entity)->map(function(AtomicState $state)
 				{
 					return ['code' => $state->getCode(), 'description' => $state->getDescription()];
@@ -172,6 +160,42 @@ final class EntityController extends WritableController
 			return [];
 	}
 
+	private function setStates(Atomic $entity, array $input)
+	{
+		$states = [];
+		foreach ($input as $state)
+			$states[$state['code']] = $state['description'];
+
+		$free = [];
+		foreach ($this->orm->getRepository(Entity::class)->findAtomicStates($entity) as $state)
+		{
+			$found = null;
+			if (array_key_exists($state->getCode(), $states))
+			{
+				$state->setDescription($states[$state->getCode()]);
+				$this->orm->persist($state);
+				unset($states[$state->getCode()]);
+			}
+			else
+				$free[] = $state;
+		}
+
+		foreach ($states as $code => $description)
+		{
+			if (!empty($free))
+				$state = array_shift($free);
+			else
+				$state = new AtomicState($entity);
+
+			$state->setCode($code);
+			$state->setDescription($description);
+			$this->orm->persist($state);
+		}
+
+		foreach ($free as $state)
+			$this->orm->remove($state);
+	}
+
 	/**
 	 * @param Entity $entity
 	 * @param ArgumentParser $data
@@ -179,6 +203,7 @@ final class EntityController extends WritableController
 	 */
 	protected function setData($entity, ArgumentParser $data): void
 	{
+		Validators::validate($data, 'entity', 'invalid data for entity');
 		if ($data->hasKey('name'))
 			$entity->setName($data->getString('name'));
 		if ($data->hasKey('code'))
@@ -190,17 +215,13 @@ final class EntityController extends WritableController
 
 		if ($entity instanceof Compartment)
 		{
+			Validators::validate($data, 'compartment', 'invalid data for compartment');
 			if ($data->hasKey('parent'))
 			{
 				if ($data->hasValue('parent'))
 				{
 					$ent = $this->getEntity($data->getInt('parent'));
-					try {
-						$entity->setParents([$ent]);
-					}
-					catch (\TypeError $e) {
-						throw new EntityLocationException($ent->getType(), $e);
-					}
+					$entity->setParents([$ent]);
 				}
 				else
 					$entity->setParents([]);
@@ -208,42 +229,42 @@ final class EntityController extends WritableController
 		}
 		elseif ($entity instanceof Complex)
 		{
-			if ($data->hasKey('compartment'))
+			Validators::validate($data, 'complex', 'invalid data for complex');
+			if ($data->hasKey('compartments'))
 			{
-				$ent = $this->getEntity($data->getInt('compartment'));
-				try {
-					$entity->addCompartment($ent);
-				}
-				catch (\TypeError $e) {
-					throw new EntityLocationException($ent->getType(), $e);
-				}
+				$entities = array_map(function($id) { return $this->getEntity($id); }, $data->getArray('compartments'));
+				$entity->setCompartments($entities);
+			}
+			if ($data->hasKey('children'))
+			{
+				$entities = array_map(function($id) { return $this->getEntity($id); }, $data->getArray('children'));
+				$entity->setChildren($entities);
 			}
 		}
 		elseif ($entity instanceof Structure)
 		{
-			if ($data->hasKey('parent'))
+			Validators::validate($data, 'structure', 'invalid data for structure');
+			if ($data->hasKey('children'))
 			{
-				$ent = $this->getEntity($data->getInt('parent'));
-				try {
-					$entity->addParent($ent);
-				}
-				catch (\TypeError $e) {
-					throw new EntityHierarchyException($ent->getType(), $entity->getType(), $e);
-				}
+				$entities = array_map(function($id) { return $this->getEntity($id); }, $data->getArray('children'));
+				$entity->setChildren($entities);
+			}
+			if ($data->hasKey('parents'))
+			{
+				$entities = array_map(function($id) { return $this->getEntity($id); }, $data->getArray('parents'));
+				$entity->setParents($entities);
 			}
 		}
 		elseif ($entity instanceof Atomic)
 		{
-			if ($data->hasKey('parent'))
+			Validators::validate($data, 'atomic', 'invalid data for atomic');
+			if ($data->hasKey('parents'))
 			{
-				$ent = $this->getEntity($data->getInt('parent'));
-				try {
-					$entity->addParent($ent);
-				}
-				catch (\TypeError $e) {
-					throw new EntityHierarchyException($ent->getType(), $entity->getType(), $e);
-				}
+				$entities = array_map(function($id) { return $this->getEntity($id); }, $data->getArray('parents'));
+				$entity->setParents($entities);
 			}
+			if ($data->hasKey('states'))
+				$this->setStates($entity, $data->getArray('states'));
 		}
 	}
 }

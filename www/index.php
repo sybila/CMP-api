@@ -17,6 +17,7 @@ unset($c['view']);
 unset($c['logger']);
 
 \Tracy\Debugger::enable($c->settings['tracy']['mode'], $c->settings['tracy']['logDir']);
+\Tracy\Debugger::timer('execution');
 
 // Doctrine
 $c['em'] = function (Container $c)
@@ -65,6 +66,7 @@ $c['errorHandler'] = function(Container $c)
 		if (!\Tracy\Debugger::$productionMode)
 			throw $exception;
 
+		\Tracy\Debugger::log($exception);
 		$response->withStatus(500);
 		return $response->withJson([
 			'status' => 'error',
@@ -92,7 +94,8 @@ $app->get('/rules/{id:\\d+}', Controllers\RuleController::class . ':readOne');
 //$app->put('/rules/{id:\\d+}', Controllers\RuleController::class . ':edit');
 //$app->delete('/rules/{id:\\d+}', Controllers\RuleController::class . ':delete');
 $app->get('/organisms', Controllers\OrganismController::class . ':read');
-$app->get('/classifications', Controllers\ClassificationController::class . ':read');
+$app->get('/classifications[/{type}]', Controllers\ClassificationController::class . ':read');
+//$app->get('/classifications', Controllers\ClassificationController::class . ':read');
 
 if (!\Tracy\Debugger::$productionMode)
 {
@@ -115,7 +118,10 @@ $app->add(function(Request $request, Response $response, callable $next) {
 		return $response->withHeader('Content-type', 'text/html')->withBody($body);
 	}
 	else
-		return $response;
+	{
+		$runtime = round(\Tracy\Debugger::timer('execution') * 1000, 3);
+		return $response->withHeader('X-Run-Time', $runtime . 'ms');
+	}
 });
 
 $app->run();

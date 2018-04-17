@@ -17,7 +17,7 @@ final class OrganismController extends ReadableController
 
 	protected static function getAllowedSort(): array
 	{
-		return ['name' => 'name'];
+		return ['id', 'name'];
 	}
 
 	public function read(Request $request, Response $response, ArgumentParser $args)
@@ -58,6 +58,7 @@ final class OrganismController extends ReadableController
 		return [
 			'id' => $entity->getId(),
 			'name' => $entity->getName(),
+			'code' => $entity->getCode(),
 		];
 	}
 

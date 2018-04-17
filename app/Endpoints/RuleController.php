@@ -21,7 +21,7 @@ final class RuleController extends ReadableController
 
 	protected static function getAllowedSort(): array
 	{
-		return ['name' => 'name', 'type' => 'type', 'code' => 'code'];
+		return ['id', 'name', 'type', 'code'];
 	}
 
 	public function read(Request $request, Response $response, ArgumentParser $args)

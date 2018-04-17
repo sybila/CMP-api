@@ -25,15 +25,9 @@ final class AnnotationTerm extends ConsistenceEnum
  * @ORM\DiscriminatorColumn(name="itemType", type="string")
  * @ORM\DiscriminatorMap({"entity" = "EntityAnnotation", "reaction" = "RuleAnnotation"})
  */
-abstract class Annotation
+abstract class Annotation implements IdentifiedObject
 {
-	/**
-	 * @var int
-	 * @ORM\Id
-	 * @ORM\Column(type="integer")
-	 * @ORM\GeneratedValue
-	 */
-	protected $id;
+	use Identifier;
 
 	/**
 	 * @var string
@@ -89,22 +83,6 @@ abstract class Annotation
 	public function setTermId(string $value): void
 	{
 		$this->termId = $value;
-	}
-
-	/**
-	 * @return int
-	 */
-	public function getId(): int
-	{
-		return $this->id;
-	}
-
-	/**
-	 * @param int $id
-	 */
-	public function setId(int $id): void
-	{
-		$this->id = $id;
 	}
 
 	/**

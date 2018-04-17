@@ -11,40 +11,19 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\DiscriminatorColumn(name="type", type="string")
  * @ORM\DiscriminatorMap({"entity" = "EntityClassification", "reaction" = "RuleClassification"})
  */
-abstract class Classification
+abstract class Classification implements IdentifiedObject
 {
+	use Identifier;
+
 	public static $classToType = [
 		EntityClassification::class => 'entity',
 		RuleClassification::class => 'rule',
 	];
 
 	/**
-	 * @ORM\Id
-	 * @ORM\Column(type="integer")
-	 * @ORM\GeneratedValue
-	 */
-	protected $id;
-
-	/**
 	 * @ORM\Column(type="string")
 	 */
 	protected $name;
-
-	/**
-	 * @return int
-	 */
-	public function getId(): int
-	{
-		return $this->id;
-	}
-
-	/**
-	 * @param int $id
-	 */
-	public function setId(int $id): void
-	{
-		$this->id = $id;
-	}
 
 	/**
 	 * @return string
