@@ -35,7 +35,7 @@ final class EntityController extends WritableController
 			);
 		}
 
-		$data = [];
+		$filter = [];
 
 		if ($args->hasKey('annotation'))
 		{
@@ -44,15 +44,14 @@ final class EntityController extends WritableController
 				throw new InvalidArgumentException('annotation', $args->getString('annotation'), 'must be in format term:id');
 
 			$term = AnnotationTerm::get(strtolower($parts[0]));
-			$query = $this->orm->getRepository(Entity::class)->findByAnnotation($term, $parts[1], self::getSort($args));
+			$filter['annotation'] = ['type' => $term, 'id' => $parts[1]];
 		}
 		elseif ($args->hasKey('name'))
-			$query = $this->orm->getRepository(Entity::class)->findByName($args->getString('name'), self::getSort($args));
-		else
-			$query = $this->orm->getRepository(Entity::class)->findBy([], self::getSort($args));
+			$filter['name'] = $args->getString('name');
 
-		foreach ($query as $ent)
-			$data[] = $this->getData($ent);
+		$data = [];
+		foreach ($this->orm->getRepository(Entity::class)->listFindBy($filter, self::getSort($args)) as $ent)
+			$data[] = $this->getListData($ent);
 
 		return self::formatOk($response, $data);
 	}
@@ -86,6 +85,18 @@ final class EntityController extends WritableController
 		}
 
 		return $ent;
+	}
+
+	protected function getListData(array $entity): array
+	{
+		return [
+			'id' => $entity['id'],
+			'name' => $entity['name'],
+			'description' => $entity['description'],
+			'code' => $entity['code'],
+			'type' => Entity::$dataToType[$entity['type']],
+			'status' => (string)EntityStatus::fromInt($entity['status'] ?: 1),
+		];
 	}
 
 	/**

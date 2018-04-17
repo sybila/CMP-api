@@ -31,6 +31,8 @@ $c['em'] = function (Container $c)
 		false
 	);
 
+	$config->addCustomStringFunction('TYPE', \App\Doctrine\ORM\Query\Functions\TypeFunction::class);
+
 	return \Doctrine\ORM\EntityManager::create($settings['doctrine']['connection'], $config);
 };
 

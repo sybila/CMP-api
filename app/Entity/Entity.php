@@ -57,6 +57,14 @@ abstract class Entity implements IdentifiedObject
 	use ChangeCollection;
 	use Identifier;
 
+	public static $dataToType = [
+		0 => 'state',
+		1 => 'compartment',
+		2 => 'complex',
+		3 => 'structure',
+		4 => 'atomic',
+	];
+
 	public static $classToType = [
 		Compartment::class => 'compartment',
 		Complex::class => 'complex',
@@ -674,6 +682,36 @@ class EntityRepository extends \Doctrine\ORM\EntityRepository
 	public function findAll()
 	{
 		return $this->matching(Criteria::create()->where(Criteria::expr()->neq('internalType', 'state')));
+	}
+
+	public function listFindBy(array $filter, ?array $sort): array
+	{
+		$query = $this->getEntityManager()->createQueryBuilder()
+			->select('e.id, e.name, e.description, e.code, e.status, TYPE(e) as type')
+			->from(Entity::class, 'e');
+
+		if (isset($filter['name']))
+		{
+			$i = 0;
+			foreach (explode(' ', $filter['name']) as $namePart)
+			{
+				$query->setParameter($i, '%' . $namePart . '%');
+				$query->andWhere('e.name LIKE ?' . $i++);
+			}
+		}
+		elseif (isset($filter['annotation']))
+		{
+			$query->innerJoin('e.annotations', 'ea')
+				->andWhere('ea.termType = :type')
+				->andWhere('ea.termId = :id')
+				->setParameters($filter['annotation']);
+		}
+
+		if ($sort)
+			foreach ($sort as $by => $how)
+				$query->orderBy('e.' . $by, $how ?: null);
+
+		return $query->getQuery()->getArrayResult();
 	}
 
 	public function findByAnnotation(AnnotationTerm $type, string $id, array $sort)

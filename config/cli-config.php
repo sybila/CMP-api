@@ -13,6 +13,8 @@ $config = \Doctrine\ORM\Tools\Setup::createAnnotationMetadataConfiguration(
     false
 );
 
+$config->addCustomStringFunction('TYPE', \App\Doctrine\ORM\Query\Functions\TypeFunction::class);
+
 $em = \Doctrine\ORM\EntityManager::create($settings['connection'], $config);
 
 return ConsoleRunner::createHelperSet($em);
