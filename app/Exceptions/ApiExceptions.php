@@ -57,7 +57,7 @@ class UniqueKeyViolationException extends ApiException
 class InvalidArgumentException extends ApiException
 {
 	const CODE = 702;
-	public function __construct(string $name, string $argument, string $message = "", Throwable $previous = null)
+	public function __construct(string $name, ?string $argument, string $message = "", Throwable $previous = null)
 	{
 		parent::__construct($previous)
 			->setMessage('Invalid argument "%s" for %s%s', $argument, $name, ($message ? (': ' . $message) : ''));
