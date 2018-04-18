@@ -9,6 +9,13 @@ types:
     type: integer
     minimum: 1
     required: true
+    example: 15
+  UrlIdentifierList:
+    description: Multiple Identifiers separated by comma
+    type: string
+    required: true
+    pattern: '[0-9,]+'
+    example: 1,18,2
   IdentifierList:
     type: array
     items: integer
@@ -22,7 +29,7 @@ types:
     required: false
     description: Same as HTTP code or custom (700+, listed in /version/errors docs) when HTTP code is 400
   Classification:
-    properties: 
+    properties:
       id: Identifier
       name:
         type: string
@@ -33,7 +40,7 @@ types:
         enum: ["entity", "rule"]
         required: true
   Organism:
-    properties: 
+    properties:
       id: Identifier
       name:
         type: string
@@ -101,13 +108,13 @@ types:
         description: List of child Atomic agents
   Atomic:
     type: EntitySignature
-    properties: 
+    properties:
       parents:
         type: IdentifierList
         description: List of Complex or Structure parents
       states: AtomicState[]
   AtomicState:
-    properties: 
+    properties:
       code:
         type: string
         description: Code of state, unique among this atomic's states
@@ -115,7 +122,7 @@ types:
         type: string
   AllEntitySignature: Compartment | Complex | Structure | Atomic
   ListRule:
-    properties: 
+    properties:
       id: Identifier
       name:
         type: string
@@ -129,7 +136,7 @@ types:
       status: ObjectStatus
   Rule:
     type: ListRule
-    properties: 
+    properties:
       description:
         type: string
         description: Rule description
@@ -146,12 +153,12 @@ types:
 traits:
   Collection:
     description: Get all <<resourcePathName|!pluralize>>
-    responses: 
+    responses:
       200:
-        body: 
+        body:
           application/json:
             type: object
-            properties: 
+            properties:
               status: ResponseStatus
               code: ResponseCode
               data:
@@ -159,26 +166,38 @@ traits:
                 items: <<type>>
   IdCollection:
     description: <<description>>
-    responses: 
+    responses:
       200:
-        body: 
+        body:
           application/json:
             type: object
-            properties: 
+            properties:
               status: ResponseStatus
               code: ResponseCode
               data: IdentifierList
   Object:
-    responses: 
+    responses:
       200:
-        body: 
+        body:
           application/json:
             type: object
-            properties: 
+            properties:
               status: ResponseStatus
               code: ResponseCode
               data:
                 type: <<type>>
+  ObjectList:
+    responses:
+      200:
+        body:
+          application/json:
+            type: object
+            properties:
+              status: ResponseStatus
+              code: ResponseCode
+              data:
+                type: array
+                items: <<type>>
   Insert:
     description: Inserts a new <<resourcePathName|!singularize>>
     body:
@@ -186,12 +205,12 @@ traits:
         type: <<type>>
       application/x-www-form-urlencoded:
         type: <<type>>
-    responses: 
+    responses:
       200:
-        body: 
+        body:
           application/json:
             type: object
-            properties: 
+            properties:
               status: ResponseStatus
               code: ResponseCode
               id:
@@ -199,25 +218,25 @@ traits:
                 description: ID of inserted <<resourcePathName|!singularize>>
       400:
         description: Sent on bad input data
-        body: 
+        body:
           application/json:
             type: object
-            properties: 
+            properties:
               status: ResponseStatus
               code: ResponseCode
       403:
         description: When current access token does not have necessary privileges
-        body: 
+        body:
           application/json:
             type: object
-            properties: 
+            properties:
               status: ResponseStatus
               code: ResponseCode
       404:
         body:
           application/json:
             type: object
-            properties: 
+            properties:
               status: ResponseStatus
               code: ResponseCode
       409:
@@ -241,28 +260,28 @@ traits:
           type: <<type>>
       application/x-www-form-urlencoded:
         type: <<type>>
-    responses: 
+    responses:
       200:
-        body: 
+        body:
           application/json:
             type: object
-            properties: 
+            properties:
               status: ResponseStatus
               code: ResponseCode
       400:
         description: Sent on bad input data
-        body: 
+        body:
           application/json:
             type: object
-            properties: 
+            properties:
               status: ResponseStatus
               code: ResponseCode
       403:
         description: When current access token does not have necessary privileges
-        body: 
+        body:
           application/json:
             type: object
-            properties: 
+            properties:
               status: ResponseStatus
               code: ResponseCode
       404:
@@ -270,17 +289,17 @@ traits:
         body:
           application/json:
             type: object
-            properties: 
+            properties:
               status: ResponseStatus
               code: ResponseCode
   Delete:
     description: Removes <<resourcePathName|!singularize>>
-    responses: 
+    responses:
       200:
-        body: 
+        body:
           application/json:
             type: object
-            properties: 
+            properties:
               status: ResponseStatus
               code: ResponseCode
       403:
@@ -288,7 +307,7 @@ traits:
         body:
           application/json:
             type: object
-            properties: 
+            properties:
               status: ResponseStatus
               code: ResponseCode
       404:
@@ -296,7 +315,7 @@ traits:
         body:
           application/json:
             type: object
-            properties: 
+            properties:
               status: ResponseStatus
               code: ResponseCode
   Sortable:
@@ -331,7 +350,7 @@ traits:
             description: "Will contain number of pages for given perPage value"
             type: number
 
-resourceTypes: 
+resourceTypes:
   EntityList:
     get:
       is: [Collection: {type: <<type>>}, Sortable, Pageable]
@@ -352,32 +371,32 @@ resourceTypes:
       description: Changes status of <<name>>, users may not have privileges
       body:
         application/json:
-          properties: 
+          properties:
             status: ObjectStatus
         application/x-www-form-urlencoded:
-          properties: 
+          properties:
             status: ObjectStatus
-      responses: 
+      responses:
         200:
-          body: 
+          body:
             application/json:
               type: object
-              properties: 
+              properties:
                 status: ResponseStatus
                 code: ResponseCode
 
 /version:
   description: Information about API version
   get:
-    responses: 
+    responses:
       200:
-        body: 
+        body:
           application/json:
-            properties: 
+            properties:
               status: ResponseStatus
               code: ResponseCode
               data:
-                properties: 
+                properties:
                   version:
                     type: string
   /errors:
@@ -395,7 +414,7 @@ resourceTypes:
       701 - When saving an object (POST, PUT methods) and some
       702 - Invalid argument
       703 - Invalid field specified for sort
-      
+
       BCS - Entity Signature errors:
       710 - Invalid entity specified as location (must be Compartment), error details: {given: given type}
       711 - Invalid entity specified as parent, error details: {parent: parent type, child: child type}
@@ -410,13 +429,25 @@ resourceTypes:
         type: string
         enum: ["entity", "rule"]
         required: false
+  /{id}:
+    uriParameters:
+      id:
+        UrlIdentifierList
+    get:
+      is: [ObjectList: {type: Organism}]
 
 /organisms:
   get:
     is: [Collection: {type: Organism}, Sortable, Pageable]
-    queryParameters: 
+    queryParameters:
       sort:
         enum: ["id", "name", "type"]
+  /{id}:
+    uriParameters:
+      id:
+        UrlIdentifierList
+    get:
+      is: [ObjectList: {type: Organism}]
 
 /entities:
   description: Entity Signatures
@@ -430,10 +461,10 @@ resourceTypes:
   /{id}:
     uriParameters:
       id:
-        type: Identifier
+        type: UrlIdentifierList
     get:
       description: Get specific compartment
-      is: [Object: {type: AllEntitySignature}]
+      is: [ObjectList: {type: AllEntitySignature}]
     put:
       is: [Update: {type: AllEntitySignature}]
     delete:
@@ -470,9 +501,9 @@ resourceTypes:
   /{id}:
     uriParameters:
       id:
-        type: Identifier
+        type: UrlIdentifierList
     get:
-      is: [Object: {type: Rule}]
+      is: [ObjectList: {type: Rule}]
     /reactants:
       get:
         is: [IdCollection: {description: Get all products of this rule}]

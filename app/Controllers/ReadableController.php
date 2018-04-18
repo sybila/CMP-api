@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Entity\IdentifiedObject;
+use App\Exceptions\MalformedInputException;
 use App\Helpers\ArgumentParser;
 use Slim\Http\Request;
 use Slim\Http\Response;
@@ -13,10 +14,18 @@ abstract class ReadableController extends AbstractController
 	abstract protected function getData($entity): array;
 	abstract protected function getSingleData($entity): array;
 
-	public function readOne(Request $request, Response $response, ArgumentParser $args): Response
+	public function readIdentified(Request $request, Response $response, ArgumentParser $args): Response
 	{
-		$entity = $this->getEntity($args->getInt('id'));
-		return self::formatOk($response, $this->getData($entity) + $this->getSingleData($entity));
+		// format should be checked in route
+		$ids = $args->getString('id');
+		$data = [];
+		foreach (explode(',', $ids) as $id)
+		{
+			$entity = $this->getEntity((int)$id);
+			$data[] = $this->getData($entity) + $this->getSingleData($entity);
+		}
+
+		return self::formatOk($response, $data);
 	}
 
 	public static function identifierGetter(): \Closure
