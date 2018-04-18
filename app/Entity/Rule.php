@@ -92,7 +92,7 @@ class Rule implements IdentifiedObject
 
 	/**
 	 * @var ArrayCollection
-	 * @ORM\OneToMany(targetEntity="RuleAnnotation", mappedBy="entity", cascade={"persist", "remove"})
+	 * @ORM\OneToMany(targetEntity="RuleAnnotation", mappedBy="rule", cascade={"persist", "remove"})
 	 */
 	protected $annotations;
 
