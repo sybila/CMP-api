@@ -26,7 +26,9 @@ $app->get('/rules/{id:\\d+}', Controllers\RuleController::class . ':readOne');
 //$app->post('/rules', Controllers\RuleController::class . ':add');
 //$app->put('/rules/{id:\\d+}', Controllers\RuleController::class . ':edit');
 //$app->delete('/rules/{id:\\d+}', Controllers\RuleController::class . ':delete');
+$app->get('/organisms/{id}', Controllers\OrganismController::class . ':readOne');
 $app->get('/organisms', Controllers\OrganismController::class . ':read');
+$app->get('/classifications/{id:\\d+}', Controllers\ClassificationController::class . ':readOne');
 $app->get('/classifications[/{type}]', Controllers\ClassificationController::class . ':read');
 //$app->get('/classifications', Controllers\ClassificationController::class . ':read');
 

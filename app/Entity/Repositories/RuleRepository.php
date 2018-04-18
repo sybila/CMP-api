@@ -9,7 +9,7 @@ use Doctrine\ORM\QueryBuilder;
 
 interface RuleRepository extends PageableRepository
 {
-	public function get(int $id): Rule;
+	public function get(int $id): ?Rule;
 	public function getList(array $filter, ?array $sort, array $limit): array;
 }
 
@@ -62,7 +62,7 @@ class RuleRepositoryImpl implements RuleRepository
 			->getScalarResult()[0][1];
 	}
 
-	public function get(int $id): Rule
+	public function get(int $id): ?Rule
 	{
 		return $this->em->find(Rule::class, $id);
 	}

@@ -11,7 +11,7 @@ use Doctrine\ORM\QueryBuilder;
 
 interface ClassificationRepository extends PageableRepository
 {
-	public function get(int $id): Classification;
+	public function get(int $id): ?Classification;
 	public function getList(array $filter, ?array $sort, array $limit): array;
 }
 
@@ -73,7 +73,7 @@ class ClassificationRepositoryImpl implements ClassificationRepository
 			->getScalarResult()[0][1];
 	}
 
-	public function get(int $id): Classification
+	public function get(int $id): ?Classification
 	{
 		return $this->em->find(Classification::class, $id);
 	}

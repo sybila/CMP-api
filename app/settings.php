@@ -14,7 +14,7 @@ return (require __DIR__ . '/settings.local.php') + [
 				'ConsoleNoLogin' => 0,
 				'ConsoleAccounts' => [],
 				'ConsoleHashAlgorithm' => 'sha1',
-				'ConsoleHomeDirectory' => DIR,
+				'ConsoleHomeDirectory' => __DIR__,
 				'ConsoleTerminalJs' => '/assets/js/jquery.terminal.min.js',
 				'ConsoleTerminalCss' => '/assets/css/jquery.terminal.min.css',
 				'ProfilerPanel' => [

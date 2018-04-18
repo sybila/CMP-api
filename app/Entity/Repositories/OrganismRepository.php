@@ -8,7 +8,7 @@ use Doctrine\ORM\QueryBuilder;
 
 interface OrganismRepository extends PageableRepository
 {
-	public function get(int $id): Organism;
+	public function get(int $id): ?Organism;
 	public function getList(array $filter, ?array $sort, array $limit): array;
 }
 
@@ -58,7 +58,7 @@ class OrganismRepositoryImpl implements OrganismRepository
 			->getScalarResult()[0][1];
 	}
 
-	public function get(int $id): Organism
+	public function get(int $id): ?Organism
 	{
 		return $this->em->find(Organism::class, $id);
 	}
