@@ -8,26 +8,32 @@ use App\Helpers\Validators;
 
 trait PageableController
 {
-	protected static function getDefaultPerPage()
-	{
-		return 0;
-	}
-
 	protected static function getPaginationData(ArgumentParser $args, int $resultCount): array
 	{
 		Validators::validate($args, 'pagination', 'invalid pagination data');
 
-		$perPage = static::getDefaultPerPage();
-		if ($args->hasKey('perPage'))
-			$perPage = $args->getInt('perPage');
+		if ($args->hasKey('take'))
+		{
+			$offset = 0;
+			if ($args->hasKey('skip'))
+				$offset = $args->getInt('skip');
 
-		$page = 0;
-		if ($args->hasKey('page'))
-			$page = $args->getInt('page') - 1;
+			return ['limit' => $args->getInt('take'), 'offset' => $offset, 'pages' => 0];
+		}
+		else
+		{
+			$perPage = 0;
+			if ($args->hasKey('perPage'))
+				$perPage = $args->getInt('perPage');
 
-		if ($page * $perPage > $resultCount || $page < 0)
-			throw new InvalidArgumentException('page', $page + 1, 'page out of range');
+			$page = 0;
+			if ($args->hasKey('page'))
+				$page = $args->getInt('page') - 1;
 
-		return ['limit' => $perPage, 'offset' => $page * $perPage, 'pages' => $perPage ? ceil($resultCount / $perPage) : 1];
+			if ($page * $perPage > $resultCount || $page < 0)
+				throw new InvalidArgumentException('page', $page + 1, 'page out of range');
+
+			return ['limit' => $perPage, 'offset' => $page * $perPage, 'pages' => $perPage ? ceil($resultCount / $perPage) : 1];
+		}
 	}
 }

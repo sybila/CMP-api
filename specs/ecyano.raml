@@ -346,13 +346,30 @@ traits:
       200:
         headers:
           X-Pages:
-            description: "Will contain number of pages for given perPage value"
-            type: number
+            description: "Will contain number of pages for given perPage value (if pagination is used)"
+            type: integer
+  Limitable:
+    queryParameters:
+      take:
+        description: "How many items to return"
+        type: integer
+        minimum: 1
+      skip:
+        description: "How many items to skip"
+        type: integer
+        minimum: 0
+        default: 0
+    responses:
+      200:
+        headers:
+          X-Count:
+            description: "Will contain number of items total (if limiting is used)"
+            type: integer
 
 resourceTypes:
   EntityList:
     get:
-      is: [Collection: {type: <<type>>}, Sortable: {keys: 'id, name, type, code'}, Pageable]
+      is: [Collection: {type: <<type>>}, Sortable: {keys: 'id, name, type, code'}, Pageable, Limitable]
       description: List of EntitySignatures of type <<type>>
       queryParameters:
         annotation:
@@ -418,7 +435,7 @@ resourceTypes:
 
 /classifications:
   get:
-    is: [Collection: {type: Classification}, Sortable: {keys: 'id, name'}, Pageable]
+    is: [Collection: {type: Classification}, Sortable: {keys: 'id, name'}, Pageable, Limitable]
   /{id}:
     uriParameters:
       id:
@@ -433,7 +450,7 @@ resourceTypes:
 
 /organisms:
   get:
-    is: [Collection: {type: Organism}, Sortable: {keys: 'id, name, type'}, Pageable]
+    is: [Collection: {type: Organism}, Sortable: {keys: 'id, name, type'}, Pageable, Limitable]
   /{id}:
     uriParameters:
       id:
@@ -483,7 +500,7 @@ resourceTypes:
 
 /rules:
   get:
-    is: [Collection: {type: ListRule}, Sortable: {keys: 'id, name, code'}, Pageable]
+    is: [Collection: {type: ListRule}, Sortable: {keys: 'id, name, code'}, Pageable, Limitable]
   post:
     is: [Insert: {type: Rule}]
   put:

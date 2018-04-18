@@ -54,6 +54,7 @@ final class EntityController extends WritableController
 
 		$numResults = $this->repository->getNumResults($filter);
 		$limit = self::getPaginationData($args, $numResults);
+		$response = $response->withHeader('X-Count', $numResults);
 		$response = $response->withHeader('X-Pages', $limit['pages']);
 
 		return self::formatOk($response, $this->repository->getList($filter, self::getSort($args), $limit));

@@ -39,6 +39,7 @@ final class RuleController extends ReadableController
 	{
 		$numResults = $this->repository->getNumResults([]);
 		$limit = self::getPaginationData($args, $numResults);
+		$response = $response->withHeader('X-Count', $numResults);
 		$response = $response->withHeader('X-Pages', $limit['pages']);
 		return self::formatOk($response, $this->repository->getList([], self::getSort($args), $limit));
 	}

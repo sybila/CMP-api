@@ -98,6 +98,8 @@ Validators::$pagination = new Assert\Collection([
 	'fields' => [
 		'page' => new Assert\Range(['min' => 1]),
 		'perPage' => new Assert\Range(['min' => 0]),
+		'skip' => new Assert\Range(['min' => 0]),
+		'take' => new Assert\Range(['min' => 1]),
 	],
 
 	'allowExtraFields' => true,
