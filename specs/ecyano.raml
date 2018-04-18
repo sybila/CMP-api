@@ -321,14 +321,13 @@ traits:
   Sortable:
     queryParameters:
       sort:
-        default: 'id'
+        default: '[id]=asc'
+        description: |
+          query parameter array where keys are sort keys and values are direction (asc/desc),
+          possible keys: <<keys>>
         type: string
         required: false
-      sortDirection:
-        type: string
-        enum: ["asc", "desc"]
-        default: "asc"
-        required: false
+        example: 'endpoint?sort[key1]=asc&sort[key2]=desc'
   Pageable:
     queryParameters:
       perPage:
@@ -353,7 +352,7 @@ traits:
 resourceTypes:
   EntityList:
     get:
-      is: [Collection: {type: <<type>>}, Sortable, Pageable]
+      is: [Collection: {type: <<type>>}, Sortable: {keys: 'id, name, type, code'}, Pageable]
       description: List of EntitySignatures of type <<type>>
       queryParameters:
         annotation:
@@ -364,8 +363,6 @@ resourceTypes:
         name:
           type: string
           description: Filter entities by part of name, "clever" search may be used
-        sort:
-          enum: ["id", "name", "code"]
   EntitySetStatus:
     post:
       description: Changes status of <<name>>, users may not have privileges
@@ -421,27 +418,22 @@ resourceTypes:
 
 /classifications:
   get:
-    is: [Collection: {type: Classification}, Sortable, Pageable]
-    queryParameters:
-      sort:
-        enum: ["id", "name"]
-      type:
-        type: string
-        enum: ["entity", "rule"]
-        required: false
+    is: [Collection: {type: Classification}, Sortable: {keys: 'id, name'}, Pageable]
   /{id}:
     uriParameters:
       id:
         UrlIdentifierList
     get:
       is: [ObjectList: {type: Organism}]
+  /{type}:
+    uriParameters:
+      type:
+        type: string
+        enum: [entity, rule]
 
 /organisms:
   get:
-    is: [Collection: {type: Organism}, Sortable, Pageable]
-    queryParameters:
-      sort:
-        enum: ["id", "name", "type"]
+    is: [Collection: {type: Organism}, Sortable: {keys: 'id, name, type'}, Pageable]
   /{id}:
     uriParameters:
       id:
@@ -491,7 +483,7 @@ resourceTypes:
 
 /rules:
   get:
-    is: [Collection: {type: ListRule}, Sortable, Pageable]
+    is: [Collection: {type: ListRule}, Sortable: {keys: 'id, name, code'}, Pageable]
   post:
     is: [Insert: {type: Rule}]
   put:

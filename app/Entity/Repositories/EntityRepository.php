@@ -16,7 +16,7 @@ interface EntityRepository extends PageableRepository
 {
 	public function get(int $id): ?Entity;
 	public function getByCode(string $code): ?Entity;
-	public function getList(array $filter, ?array $sort, array $limit): array;
+	public function getList(array $filter, array $sort, array $limit): array;
 
 	/**
 	 * @param Compartment $entity
@@ -72,14 +72,18 @@ class EntityRepositoryImpl implements EntityRepository
 		return $query;
 	}
 
-	public function getList(array $filter, ?array $sort, array $limit): array
+	public function getList(array $filter, array $sort, array $limit): array
 	{
 		$query = $this->buildListQuery($filter)
 			->select('e.id, e.name, e.description, e.code, e.status, TYPE(e) as type');
 
-		if ($sort)
-			foreach ($sort as $by => $how)
-				$query->orderBy('e.' . $by, $how ?: null);
+		foreach ($sort as $by => $how)
+		{
+			if ($by != 'type')
+				$by = 'e.' . $by;
+
+			$query->addOrderBy($by, $how ?: null);
+		}
 
 		if ($limit['limit'] > 0)
 		{

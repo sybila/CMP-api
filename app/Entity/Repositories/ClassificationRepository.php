@@ -12,7 +12,7 @@ use Doctrine\ORM\QueryBuilder;
 interface ClassificationRepository extends PageableRepository
 {
 	public function get(int $id): ?Classification;
-	public function getList(array $filter, ?array $sort, array $limit): array;
+	public function getList(array $filter, array $sort, array $limit): array;
 }
 
 class ClassificationRepositoryImpl implements ClassificationRepository
@@ -47,14 +47,13 @@ class ClassificationRepositoryImpl implements ClassificationRepository
 		return $query;
 	}
 
-	public function getList(array $filter, ?array $sort, array $limit): array
+	public function getList(array $filter, array $sort, array $limit): array
 	{
 		$query = $this->buildListQuery($filter['type'] ?? null)
 			->select('c.id, c.name, TYPE(c) as type');
 
-		if ($sort)
-			foreach ($sort as $by => $how)
-				$query->orderBy('c.' . $by, $how ?: null);
+		foreach ($sort as $by => $how)
+			$query->addOrderBy('c.' . $by, $how ?: null);
 
 		if ($limit['limit'] > 0)
 		{

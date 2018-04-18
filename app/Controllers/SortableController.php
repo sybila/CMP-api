@@ -11,40 +11,27 @@ trait SortableController
 
 	protected static function getSort(ArgumentParser $args): ?array
 	{
-		$what = '';
-		$by = '';
+		$order = [];
 
-//		foreach ($args['sort'] as $by => $how)
-//		{
-//			if (!$how)
-//				$how = 'ASC';
-//			else
-//				$how = strtoupper($how);
-//
-//			if ($how !== 'ASC' && $how !== 'DESC')
-//				throw new InvalidSortFieldException('ascdesc');
-//
-//			if (!in_array($by, self::getAllowedSort()))
-//				throw new InvalidSortFieldException($by);
-//
-//			$order[$by] = $how;
-//		}
 		if ($args->hasKey('sort'))
 		{
-			$what = $args->getString('sort');
-			if (!in_array($what, self::getAllowedSort()))
-				throw new InvalidSortFieldException($what);
-
-			if ($args->hasKey('sortDirection'))
+			foreach ($args->getArray('sort') as $by => $how)
 			{
-				$by = strtoupper($args->getString('sortDirection'));
-				if ($by !== 'ASC' && $by !== 'DESC')
+				if (!$how)
+					$how = 'ASC';
+				else
+					$how = strtoupper($how);
+
+				if ($how !== 'ASC' && $how !== 'DESC')
 					throw new InvalidSortFieldException('ascdesc');
+
+				if (!in_array($by, self::getAllowedSort()))
+					throw new InvalidSortFieldException($by);
+
+				$order[$by] = $how;
 			}
-			else
-				$by = 'ASC';
 		}
 
-		return $what ? [$what => $by] : null;
+		return $order;
 	}
 }

@@ -9,7 +9,7 @@ use Doctrine\ORM\QueryBuilder;
 interface OrganismRepository extends PageableRepository
 {
 	public function get(int $id): ?Organism;
-	public function getList(array $filter, ?array $sort, array $limit): array;
+	public function getList(array $filter, array $sort, array $limit): array;
 }
 
 class OrganismRepositoryImpl implements OrganismRepository
@@ -32,14 +32,13 @@ class OrganismRepositoryImpl implements OrganismRepository
 		return $query;
 	}
 
-	public function getList(array $filter, ?array $sort, array $limit): array
+	public function getList(array $filter, array $sort, array $limit): array
 	{
 		$query = $this->buildListQuery($filter)
 			->select('o.id, o.name, o.code');
 
-		if ($sort)
-			foreach ($sort as $by => $how)
-				$query->orderBy('o.' . $by, $how ?: null);
+		foreach ($sort as $by => $how)
+			$query->addOrderBy('o.' . $by, $how ?: null);
 
 		if ($limit['limit'] > 0)
 		{

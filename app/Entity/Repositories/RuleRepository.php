@@ -10,7 +10,7 @@ use Doctrine\ORM\QueryBuilder;
 interface RuleRepository extends PageableRepository
 {
 	public function get(int $id): ?Rule;
-	public function getList(array $filter, ?array $sort, array $limit): array;
+	public function getList(array $filter, array $sort, array $limit): array;
 }
 
 class RuleRepositoryImpl implements RuleRepository
@@ -33,14 +33,13 @@ class RuleRepositoryImpl implements RuleRepository
 		return $query;
 	}
 
-	public function getList(array $filter, ?array $sort, array $limit): array
+	public function getList(array $filter, array $sort, array $limit): array
 	{
 		$query = $this->buildListQuery($filter['type'] ?? null)
 			->select('r.id, r.name, r.equation, r.code, r.modifier, r.status');
 
-		if ($sort)
-			foreach ($sort as $by => $how)
-				$query->orderBy('r.' . $by, $how ?: null);
+		foreach ($sort as $by => $how)
+			$query->addOrderBy('r.' . $by, $how ?: null);
 
 		if ($limit['limit'] > 0)
 		{
