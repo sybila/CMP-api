@@ -13,9 +13,9 @@ class ArgumentParser implements \ArrayAccess, \IteratorAggregate
 	/** @var array */
 	protected $data;
 
-	public function __construct(array $args)
+	public function __construct(?array $args)
 	{
-		$this->data = $args;
+		$this->data = $args ?: [];
 	}
 
 	public function hasKey(string $key): bool
