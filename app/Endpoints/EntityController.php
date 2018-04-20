@@ -253,7 +253,7 @@ final class EntityController extends WritableController
 				$entity->setStatus(EntityStatus::get($data->getString('status')));
 			}
 			catch (InvalidEnumValueException $e) {
-				throw new InvalidEnumFieldValueException('status', $data->getString('status'), implode(',', EntityStatus::getAvailableValues()));
+				throw new InvalidArgumentException('status', $data->getString('status'), 'must be one of: ' . implode(',', EntityStatus::getAvailableValues()));
 			}
 		}
 
