@@ -651,13 +651,14 @@ class EntityListener
 	/**
 	 * @ORM\PrePersist
 	 * @ORM\PreUpdate
-	 * @param Entity             $entity
-	 * @param PreUpdateEventArgs $args
+	 * @param Entity        $entity
+	 * @param mixed 		$args
 	 * @throws EntityException
 	 */
-	public function onUpdate(Entity $entity, PreUpdateEventArgs $args)
+	public function onUpdate(Entity $entity, $args)
 	{
-		if (!$entity->getStatus()->equalsValue(EntityStatus::ACTIVE))
+//		if (!$entity->getStatus()->equalsValue(EntityStatus::ACTIVE))
+		// temporary disabled
 			return;
 
 		switch (get_class($entity))
