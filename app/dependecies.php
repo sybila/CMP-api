@@ -87,8 +87,7 @@ $c['errorHandler'] = function(Container $c)
 			throw $exception;
 
 		\Tracy\Debugger::log($exception);
-		$response->withStatus(500);
-		return $response->withJson([
+		return $response->withStatus(500)->withJson([
 			'status' => 'error',
 			'code' => 500,
 			'message' => '',

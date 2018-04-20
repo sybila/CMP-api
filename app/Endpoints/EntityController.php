@@ -248,7 +248,14 @@ final class EntityController extends WritableController
 		if ($data->hasKey('description'))
 			$entity->setDescription($data->getString('description'));
 		if ($data->hasKey('status'))
-			$entity->setStatus(EntityStatus::fromInt($data->getInt('status')));
+		{
+			try {
+				$entity->setStatus(EntityStatus::get($data->getString('status')));
+			}
+			catch (InvalidEnumValueException $e) {
+				throw new InvalidEnumFieldValueException('status', $data->getString('status'), implode(',', EntityStatus::getAvailableValues()));
+			}
+		}
 
 		if ($entity instanceof Compartment)
 		{
