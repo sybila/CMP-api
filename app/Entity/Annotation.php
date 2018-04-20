@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Helpers\ConsistenceEnum;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 final class AnnotationTerm extends ConsistenceEnum
@@ -16,6 +17,17 @@ final class AnnotationTerm extends ConsistenceEnum
 	const PUBCHEM = 'pubchem';
 	const UNIPROT = 'uniprot';
 	const URL = 'url';
+}
+
+interface IAnnotatedObject
+{
+	public function addAnnotation(Annotation $annotation): void;
+	public function removeAnnotation(Annotation $annotation): void;
+
+	/**
+	 * @return Annotation[]|Collection
+	 */
+	public function getAnnotations(): Collection;
 }
 
 /**

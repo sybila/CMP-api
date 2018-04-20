@@ -40,7 +40,7 @@ final class RuleStatus extends ConsistenceEnum
  * @ORM\Entity
  * @ORM\Table(name="ep_reaction")
  */
-class Rule implements IdentifiedObject
+class Rule implements IdentifiedObject, IAnnotatedObject
 {
 	use Identifier;
 
@@ -244,36 +244,26 @@ class Rule implements IdentifiedObject
 	}
 
 	/**
-	 * Add annotation
-	 *
 	 * @param RuleAnnotation $annotation
-	 *
-	 * @return Rule
 	 */
-	public function addAnnotation(RuleAnnotation $annotation)
+	public function addAnnotation(Annotation $annotation): void
 	{
 		$this->annotations[] = $annotation;
 		$annotation->setRule($this);
-
-		return $this;
 	}
 
 	/**
-	 * Remove annotation
-	 *
 	 * @param RuleAnnotation $annotation
 	 */
-	public function removeAnnotation(RuleAnnotation $annotation)
+	public function removeAnnotation(Annotation $annotation): void
 	{
 		$this->annotations->removeElement($annotation);
 	}
 
 	/**
-	 * Get annotations
-	 *
 	 * @return RuleAnnotation[]|Collection
 	 */
-	public function getAnnotations()
+	public function getAnnotations(): Collection
 	{
 		return $this->annotations;
 	}

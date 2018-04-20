@@ -7,10 +7,8 @@ use App\Entity\RuleStatus;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 
-interface RuleRepository extends PageableRepository
+interface RuleRepository extends IRepository
 {
-	public function get(int $id): ?Rule;
-	public function getList(array $filter, array $sort, array $limit): array;
 }
 
 class RuleRepositoryImpl implements RuleRepository

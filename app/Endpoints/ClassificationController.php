@@ -16,57 +16,23 @@ use Doctrine\ORM\ORMException;
 use Slim\Container;
 use Slim\Http\{Request, Response};
 
-final class ClassificationController extends ReadableController
+/**
+ * @property-read ClassificationRepository $repository
+ * @method Classification getObject(int $id)
+ */
+final class ClassificationController extends RepositoryController
 {
-	use PageableController;
-	use SortableController;
-
-	/** @var ClassificationRepository */
-	private $repository;
-
-	public function __construct(Container $c)
-	{
-		parent::__construct($c);
-		$this->repository = new ClassificationRepositoryImpl($c['em']);
-	}
-
 	protected static function getAllowedSort(): array
 	{
 		return ['id', 'name'];
 	}
 
-	public function read(Request $request, Response $response, ArgumentParser $args)
+	protected function getFilter(ArgumentParser $args): array
 	{
-		$filter = [];
-
 		if ($args->hasKey('type'))
-			$filter['type'] = $args->getString('type');
+			return ['type' => $args->getString('type')];
 
-		$numResults = $this->repository->getNumResults($filter);
-		$limit = self::getPaginationData($args, $numResults);
-		$response = $response->withHeader('X-Count', $numResults);
-		$response = $response->withHeader('X-Pages', $limit['pages']);
-
-		return self::formatOk($response, $this->repository->getList($filter, self::getSort($args), $limit));
-	}
-
-	/**
-	 * @param int $id
-	 * @return Classification
-	 * @throws ApiException
-	 */
-	protected function getEntity(int $id)
-	{
-		try {
-			$ent = $this->orm->find(Classification::class, $id);
-			if (!$ent)
-				throw new NonExistingObjectException($id, 'classification');
-		}
-		catch (ORMException $e) {
-			throw new InternalErrorException('Failed getting classification ID ' . $id, $e);
-		}
-
-		return $ent;
+		return [];
 	}
 
 	/**
@@ -82,12 +48,13 @@ final class ClassificationController extends ReadableController
 		];
 	}
 
-	/**
-	 * @param Classification $entity
-	 * @return array
-	 */
-	protected function getSingleData($entity): array
+	protected static function getRepositoryClassName(): string
 	{
-		return [];
+		return ClassificationRepositoryImpl::class;
+	}
+
+	protected static function getObjectName(): string
+	{
+		return 'classification';
 	}
 }

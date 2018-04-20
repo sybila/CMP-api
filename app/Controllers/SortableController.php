@@ -8,8 +8,7 @@ use App\Helpers\ArgumentParser;
 trait SortableController
 {
 	abstract protected static function getAllowedSort(): array;
-
-	protected static function getSort(ArgumentParser $args): ?array
+	protected static function getSort(ArgumentParser $args): array
 	{
 		$order = [];
 

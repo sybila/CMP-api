@@ -4,7 +4,7 @@ namespace App\Controllers;
 
 use App\Entity\
 {
-	AnnotationTerm, Atomic, AtomicState, Compartment, Complex, Entity, EntityAnnotation, EntityStatus, Repositories\EntityRepository, Repositories\EntityRepositoryImpl, Structure
+	AnnotationTerm, Atomic, AtomicState, Compartment, Complex, Entity, EntityAnnotation, EntityStatus, IdentifiedObject, Repositories\EntityRepository, Repositories\EntityRepositoryImpl, Repositories\IRepository, Structure
 };
 use App\Exceptions\
 {
@@ -17,26 +17,18 @@ use Doctrine\ORM\ORMException;
 use Slim\Container;
 use Slim\Http\{Request, Response};
 
-final class EntityController extends WritableController
+/**
+ * @property-read EntityRepository $repository
+ * @method Entity getObject(int $id)
+ */
+final class EntityController extends WritableRepositoryController
 {
-	use PageableController;
-	use SortableController;
-
-	/** @var EntityRepository */
-	private $repository;
-
-	public function __construct(Container $c)
-	{
-		parent::__construct($c);
-		$this->repository = new EntityRepositoryImpl($c['em']);
-	}
-
 	protected static function getAllowedSort(): array
 	{
 		return ['id', 'name', 'type', 'code'];
 	}
 
-	public function read(Request $request, Response $response, ArgumentParser $args)
+	protected function getFilter(ArgumentParser $args): array
 	{
 		$filter = [];
 
@@ -46,18 +38,19 @@ final class EntityController extends WritableController
 			if (count($parts) !== 2)
 				throw new InvalidArgumentException('annotation', $args->getString('annotation'), 'must be in format term:id');
 
-			$term = AnnotationTerm::get(strtolower($parts[0]));
+			try {
+				$term = AnnotationTerm::get(strtolower($parts[0]));
+			}
+			catch (InvalidEnumValueException $e) {
+				throw new InvalidEnumFieldValueException('termType', $parts[0], implode(', ', AnnotationTerm::getAvailableValues()));
+			}
+
 			$filter['annotation'] = ['type' => $term, 'id' => $parts[1]];
 		}
 		elseif ($args->hasKey('name'))
 			$filter['name'] = $args->getString('name');
 
-		$numResults = $this->repository->getNumResults($filter);
-		$limit = self::getPaginationData($args, $numResults);
-		$response = $response->withHeader('X-Count', $numResults);
-		$response = $response->withHeader('X-Pages', $limit['pages']);
-
-		return self::formatOk($response, $this->repository->getList($filter, self::getSort($args), $limit));
+		return $filter;
 	}
 
 	public function readCode(Request $request, Response $response, ArgumentParser $args)
@@ -71,7 +64,7 @@ final class EntityController extends WritableController
 
 	public function editStatus(Request $request, Response $response, ArgumentParser $args)
 	{
-		$entity = $this->getEntity($args->getInt('id'));
+		$entity = $this->getObject($args->getInt('id'));
 		$body = new ArgumentParser($request->getParsedBody());
 		try {
 			$status = EntityStatus::get($body->getString('status'));
@@ -86,7 +79,12 @@ final class EntityController extends WritableController
 		return self::formatOk($response, null);
 	}
 
-	protected function createEntity(ArgumentParser $data): Entity
+	/**
+	 * @param ArgumentParser $data
+	 * @return Entity
+	 * @throws InvalidArgumentException
+	 */
+	protected function createObject(ArgumentParser $data): IdentifiedObject
 	{
 		if (!$data->hasKey('type'))
 			throw new InvalidArgumentException('type', null);
@@ -96,25 +94,6 @@ final class EntityController extends WritableController
 			throw new InvalidArgumentException('type', $type);
 
 		return new $cls;
-	}
-
-	/**
-	 * @param int $id
-	 * @return Entity
-	 * @throws ApiException
-	 */
-	protected function getEntity(int $id)
-	{
-		try {
-			$ent = $this->repository->get($id);
-			if (!$ent)
-				throw new NonExistingObjectException($id, 'entity');
-		}
-		catch (ORMException $e) {
-			throw new InternalErrorException('Failed getting entity ID ' . $id, $e);
-		}
-
-		return $ent;
 	}
 
 	/**
@@ -130,16 +109,6 @@ final class EntityController extends WritableController
 			'code' => $entity->getCode(),
 			'type' => $entity->getType(),
 			'status' => (string)$entity->getStatus(),
-		];
-	}
-
-	/**
-	 * @param Entity $entity
-	 * @return array
-	 */
-	protected function getSingleData($entity): array
-	{
-		return [
 			'classifications' => $entity->getClassifications()->map(self::identifierGetter())->toArray(),
 			'organisms' => $entity->getOrganisms()->map(self::identifierGetter())->toArray(),
 			'annotations' => $entity->getAnnotations()->map(function(EntityAnnotation $annotation)
@@ -264,7 +233,7 @@ final class EntityController extends WritableController
 			{
 				if ($data->hasValue('parent'))
 				{
-					$ent = $this->getEntity($data->getInt('parent'));
+					$ent = $this->getObject($data->getInt('parent'));
 					$entity->setParents([$ent]);
 				}
 				else
@@ -276,12 +245,12 @@ final class EntityController extends WritableController
 			Validators::validate($data, 'complex', 'invalid data for complex');
 			if ($data->hasKey('compartments'))
 			{
-				$entities = array_map(function($id) { return $this->getEntity($id); }, $data->getArray('compartments'));
+				$entities = array_map(function($id) { return $this->getObject($id); }, $data->getArray('compartments'));
 				$entity->setCompartments($entities);
 			}
 			if ($data->hasKey('children'))
 			{
-				$entities = array_map(function($id) { return $this->getEntity($id); }, $data->getArray('children'));
+				$entities = array_map(function($id) { return $this->getObject($id); }, $data->getArray('children'));
 				$entity->setChildren($entities);
 			}
 		}
@@ -290,12 +259,12 @@ final class EntityController extends WritableController
 			Validators::validate($data, 'structure', 'invalid data for structure');
 			if ($data->hasKey('children'))
 			{
-				$entities = array_map(function($id) { return $this->getEntity($id); }, $data->getArray('children'));
+				$entities = array_map(function($id) { return $this->getObject($id); }, $data->getArray('children'));
 				$entity->setChildren($entities);
 			}
 			if ($data->hasKey('parents'))
 			{
-				$entities = array_map(function($id) { return $this->getEntity($id); }, $data->getArray('parents'));
+				$entities = array_map(function($id) { return $this->getObject($id); }, $data->getArray('parents'));
 				$entity->setParents($entities);
 			}
 		}
@@ -304,11 +273,21 @@ final class EntityController extends WritableController
 			Validators::validate($data, 'atomic', 'invalid data for atomic');
 			if ($data->hasKey('parents'))
 			{
-				$entities = array_map(function($id) { return $this->getEntity($id); }, $data->getArray('parents'));
+				$entities = array_map(function($id) { return $this->getObject($id); }, $data->getArray('parents'));
 				$entity->setParents($entities);
 			}
 			if ($data->hasKey('states'))
 				$this->setStates($entity, $data->getArray('states'));
 		}
+	}
+
+	protected static function getObjectName(): string
+	{
+		return 'entity';
+	}
+
+	protected static function getRepositoryClassName(): string
+	{
+		return EntityRepositoryImpl::class;
 	}
 }

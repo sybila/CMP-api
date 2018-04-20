@@ -12,11 +12,9 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 
-interface EntityRepository extends PageableRepository
+interface EntityRepository extends IRepository
 {
-	public function get(int $id): ?Entity;
 	public function getByCode(string $code): ?Entity;
-	public function getList(array $filter, array $sort, array $limit): array;
 
 	/**
 	 * @param Compartment $entity

@@ -14,51 +14,15 @@ use Doctrine\ORM\ORMException;
 use Slim\Container;
 use Slim\Http\{Request, Response};
 
-final class OrganismController extends ReadableController
+/**
+ * @property-read OrganismRepository $repository
+ * @method Organism getObject(int $id)
+ */
+final class OrganismController extends RepositoryController
 {
-	use PageableController;
-	use SortableController;
-
-	/** @var OrganismRepository */
-	private $repository;
-
-	public function __construct(Container $c)
-	{
-		parent::__construct($c);
-		$this->repository = new OrganismRepositoryImpl($c['em']);
-	}
-
 	protected static function getAllowedSort(): array
 	{
 		return ['id', 'name', 'code'];
-	}
-
-	public function read(Request $request, Response $response, ArgumentParser $args)
-	{
-		$numResults = $this->repository->getNumResults([]);
-		$limit = self::getPaginationData($args, $numResults);
-		$response = $response->withHeader('X-Count', $numResults);
-		$response = $response->withHeader('X-Pages', $limit['pages']);
-		return self::formatOk($response, $this->repository->getList([], self::getSort($args), $limit));
-	}
-
-	/**
-	 * @param int $id
-	 * @return Organism
-	 * @throws ApiException
-	 */
-	protected function getEntity(int $id)
-	{
-		try {
-			$ent = $this->repository->get($id);
-			if (!$ent)
-				throw new NonExistingObjectException($id, 'organism');
-		}
-		catch (ORMException $e) {
-			throw new InternalErrorException('Failed getting organism ID ' . $id, $e);
-		}
-
-		return $ent;
 	}
 
 	/**
@@ -74,12 +38,13 @@ final class OrganismController extends ReadableController
 		];
 	}
 
-	/**
-	 * @param Organism $entity
-	 * @return array
-	 */
-	protected function getSingleData($entity): array
+	protected static function getRepositoryClassName(): string
 	{
-		return [];
+		return OrganismRepositoryImpl::class;
+	}
+
+	protected static function getObjectName(): string
+	{
+		return 'organism';
 	}
 }

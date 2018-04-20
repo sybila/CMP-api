@@ -6,10 +6,8 @@ use App\Entity\Organism;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 
-interface OrganismRepository extends PageableRepository
+interface OrganismRepository extends IRepository
 {
-	public function get(int $id): ?Organism;
-	public function getList(array $filter, array $sort, array $limit): array;
 }
 
 class OrganismRepositoryImpl implements OrganismRepository

@@ -9,10 +9,8 @@ use App\Exceptions\InvalidArgumentException;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 
-interface ClassificationRepository extends PageableRepository
+interface ClassificationRepository extends IRepository
 {
-	public function get(int $id): ?Classification;
-	public function getList(array $filter, array $sort, array $limit): array;
 }
 
 class ClassificationRepositoryImpl implements ClassificationRepository

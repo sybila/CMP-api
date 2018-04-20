@@ -52,7 +52,7 @@ final class EntityStatus extends ConsistenceEnum
  * @ORM\DiscriminatorColumn(name="hierarchy_type", type="string")
  * @ORM\DiscriminatorMap({0 = "AtomicState", 1 = "Compartment", 2 = "Complex", 3 = "Structure", 4 = "Atomic"})
  */
-abstract class Entity implements IdentifiedObject
+abstract class Entity implements IdentifiedObject, IAnnotatedObject
 {
 	use ChangeCollection;
 	use Identifier;
@@ -263,36 +263,26 @@ abstract class Entity implements IdentifiedObject
 	}
 
 	/**
-	 * Add annotation
-	 *
-	 * @param \App\Entity\EntityAnnotation $annotation
-	 *
-	 * @return Entity
+	 * @param EntityAnnotation $annotation
 	 */
-	public function addAnnotation(\App\Entity\EntityAnnotation $annotation)
+	public function addAnnotation(Annotation $annotation): void
 	{
 		$this->annotations[] = $annotation;
 		$annotation->setEntity($this);
-
-		return $this;
 	}
 
 	/**
-	 * Remove annotation
-	 *
-	 * @param \App\Entity\EntityAnnotation $annotation
+	 * @param EntityAnnotation $annotation
 	 */
-	public function removeAnnotation(\App\Entity\EntityAnnotation $annotation)
+	public function removeAnnotation(Annotation $annotation): void
 	{
 		$this->annotations->removeElement($annotation);
 	}
 
 	/**
-	 * Get annotations
-	 *
 	 * @return EntityAnnotation[]|Collection
 	 */
-	public function getAnnotations()
+	public function getAnnotations(): Collection
 	{
 		return $this->annotations;
 	}

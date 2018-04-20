@@ -16,24 +16,27 @@ return function(App $app)
 		return $response->withRedirect('/version');
 	});
 
+	$addRwController = function(string $className, string $path, string $idName = 'id') use ($app, $multiIdRegex)
+	{
+		$app->get($path, $className . ':read');
+		$app->get($path . '/{' . $idName . ':(?:\\d,?)+}', $className . ':readIdentified');
+		$app->post($path, $className . ':add');
+		$app->put($path . '/{' . $idName . ':\\d+}', $className . ':edit');
+		$app->delete($path . '/{' . $idName . ':\\d+}', $className . ':delete');
+	};
+
 	// version
 	$app->get('/version', Ctl\VersionController::class);
 
-	// entities
-	$app->get('/entities', Ctl\EntityController::class . ':read');
-	$app->get('/entities/' . $multiIdRegex, Ctl\EntityController::class . ':readIdentified');
-	$app->post('/entities', Ctl\EntityController::class . ':add');
-	$app->put('/entities/{id:\\d+}', Ctl\EntityController::class . ':edit');
-	$app->post('/entities/{id:\\d+}/status', Ctl\EntityController::class . ':editStatus');
-	$app->delete('/entities/{id:\\d+}', Ctl\EntityController::class . ':delete');
-	$app->get('/entities/{code}', Ctl\EntityController::class . ':readCode');
+	$addRwController(Ctl\EntityController::class, '/entities');
+	$addRwController(Ctl\EntityAnnotationsController::class, '/entities/{entity-id:\\d+}/annotations');
+	$addRwController(Ctl\EntityNoteController::class, '/entities/{entity-id:\\d+}/notes');
+	$addRwController(Ctl\RuleController::class, '/rules');
+	$addRwController(Ctl\RuleAnnotationsController::class, '/rules/{rule-id:\\d+}/annotations');
 
-	// rules
-	$app->get('/rules', Ctl\RuleController::class . ':read');
-	$app->get('/rules/' . $multiIdRegex, Ctl\RuleController::class . ':readIdentified');
-	//$app->post('/rules', C\RuleController::class . ':add');
-	//$app->put('/rules/{id:\\d+}', C\RuleController::class . ':edit');
-	//$app->delete('/rules/{id:\\d+}', C\RuleController::class . ':delete');
+	// entities
+	$app->post('/entities/{id:\\d+}/status', Ctl\EntityController::class . ':editStatus');
+	$app->get('/entities/{code}', Ctl\EntityController::class . ':readCode');
 
 	// organisms
 	$app->get('/organisms/' . $multiIdRegex, Ctl\OrganismController::class . ':readIdentified');
