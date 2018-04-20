@@ -25,6 +25,15 @@ abstract class AbstractController
 		]);
 	}
 
+	protected static function formatInsert(Response $response, int $id): Response
+	{
+		return $response->withStatus(200)->withJson([
+			'status' => 'ok',
+			'code' => 200,
+			'id' => $id,
+		]);
+	}
+
 	protected static function formatError(Response $response, int $code, string $message, ...$args): Response
 	{
 		return $response->withStatus(400)->withJson([

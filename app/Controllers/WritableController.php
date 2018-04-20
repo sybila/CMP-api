@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use App\Entity\IdentifiedObject;
 use App\Helpers\ArgumentParser;
 use Slim\Http\Request;
 use Slim\Http\Response;
@@ -9,7 +10,7 @@ use Slim\Http\Response;
 abstract class WritableController extends ReadableController
 {
 	abstract protected function setData($entity, ArgumentParser $data): void;
-	abstract protected function createEntity(ArgumentParser $data);
+	abstract protected function createEntity(ArgumentParser $data): IdentifiedObject;
 
 	public function add(Request $request, Response $response, ArgumentParser $args): Response
 	{
@@ -18,7 +19,7 @@ abstract class WritableController extends ReadableController
 		$this->setData($entity, $body);
 		$this->orm->persist($entity);
 		$this->orm->flush();
-		return self::formatOk($response);
+		return self::formatInsert($response, $entity->getId());
 	}
 
 	public function edit(Request $request, Response $response, ArgumentParser $args): Response
