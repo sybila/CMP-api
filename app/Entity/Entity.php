@@ -466,6 +466,16 @@ class Structure extends Entity
 {
 	/**
 	 * @var ArrayCollection
+	 * @ORM\ManyToMany(targetEntity="Compartment")
+	 * @ORM\JoinTable(name="ep_entity_location",
+	 *     joinColumns={@ORM\JoinColumn(name="childEntityId")},
+	 *     inverseJoinColumns={@ORM\JoinColumn(name="parentEntityId")}
+	 * )
+	 */
+	protected $compartments;
+
+	/**
+	 * @var ArrayCollection
 	 * @ORM\ManyToMany(targetEntity="Entity")
 	 * @ORM\JoinTable(name="ep_entity_composition",
 	 *     joinColumns={@ORM\JoinColumn(name="childEntityId")},
@@ -487,8 +497,37 @@ class Structure extends Entity
 	public function __construct()
 	{
 		parent::__construct();
+		$this->compartments = new ArrayCollection;
 		$this->parents = new ArrayCollection;
 		$this->children = new ArrayCollection;
+	}
+
+	/**
+	 * @return Compartment[]|ArrayCollection
+	 */
+	public function getCompartments()
+	{
+		return $this->compartments;
+	}
+
+	public function setCompartments(array $data)
+	{
+		self::changeCollection($this->compartments, $data, [$this, 'addCompartment']);
+	}
+
+	public function addCompartment(Entity $entity)
+	{
+		if (!($entity instanceof Compartment))
+			throw new EntityLocationException($entity->getType());
+
+		$this->compartments->add($entity);
+		return $this;
+	}
+
+	public function removeCompartment(Entity $compartment)
+	{
+		$this->compartments->removeElement($compartment);
+		return $this;
 	}
 
 	/**
@@ -554,6 +593,16 @@ class Structure extends Entity
 class Atomic extends Entity
 {
 	/**
+	 * @var ArrayCollection
+	 * @ORM\ManyToMany(targetEntity="Compartment")
+	 * @ORM\JoinTable(name="ep_entity_location",
+	 *     joinColumns={@ORM\JoinColumn(name="childEntityId")},
+	 *     inverseJoinColumns={@ORM\JoinColumn(name="parentEntityId")}
+	 * )
+	 */
+	protected $compartments;
+
+	/**
 	 * @ORM\ManyToMany(targetEntity="Entity")
 	 * @ORM\JoinTable(name="ep_entity_composition",
 	 *     joinColumns={@ORM\JoinColumn(name="childEntityId")},
@@ -565,7 +614,36 @@ class Atomic extends Entity
 	public function __construct()
 	{
 		parent::__construct();
+		$this->compartments = new ArrayCollection;
 		$this->parents = new ArrayCollection;
+	}
+
+	/**
+	 * @return Compartment[]|ArrayCollection
+	 */
+	public function getCompartments()
+	{
+		return $this->compartments;
+	}
+
+	public function setCompartments(array $data)
+	{
+		self::changeCollection($this->compartments, $data, [$this, 'addCompartment']);
+	}
+
+	public function addCompartment(Entity $entity)
+	{
+		if (!($entity instanceof Compartment))
+			throw new EntityLocationException($entity->getType());
+
+		$this->compartments->add($entity);
+		return $this;
+	}
+
+	public function removeCompartment(Entity $compartment)
+	{
+		$this->compartments->removeElement($compartment);
+		return $this;
 	}
 
 	/**

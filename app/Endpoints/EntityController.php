@@ -140,6 +140,7 @@ final class EntityController extends WritableRepositoryController
 		elseif ($entity instanceof Structure)
 		{
 			return [
+				'compartments' => $entity->getCompartments()->map(self::identifierGetter())->toArray(),
 				'parents' => $entity->getParents()->map(self::identifierGetter())->toArray(),
 				'children' => $entity->getChildren()->map(self::identifierGetter())->toArray(),
 			];
@@ -147,6 +148,7 @@ final class EntityController extends WritableRepositoryController
 		elseif ($entity instanceof Atomic)
 		{
 			return [
+				'compartments' => $entity->getCompartments()->map(self::identifierGetter())->toArray(),
 				'parents' => $entity->getParents()->map(self::identifierGetter())->toArray(),
 				'states' => $this->repository->findAtomicStates($entity)->map(function(AtomicState $state)
 				{
