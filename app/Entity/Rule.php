@@ -40,7 +40,7 @@ final class RuleStatus extends ConsistenceEnum
  * @ORM\Entity
  * @ORM\Table(name="ep_reaction")
  */
-class Rule implements IdentifiedObject, IAnnotatedObject
+class Rule implements IdentifiedObject, IAnnotatedObject, IBcsNoteObject
 {
 	use Identifier;
 
@@ -106,11 +106,18 @@ class Rule implements IdentifiedObject, IAnnotatedObject
 	 */
 	protected $organisms;
 
+	/**
+	 * @var ArrayCollection
+	 * @ORM\OneToMany(targetEntity="EntityNote", mappedBy="entity", cascade={"persist", "remove"})
+	 */
+	protected $notes;
+
 	public function __construct()
 	{
 		$this->classifications = new ArrayCollection;
 		$this->annotations = new ArrayCollection;
 		$this->organisms = new ArrayCollection;
+		$this->notes = new ArrayCollection;
 	}
 
 	/**
@@ -300,5 +307,23 @@ class Rule implements IdentifiedObject, IAnnotatedObject
 	public function getOrganisms()
 	{
 		return $this->organisms;
+	}
+
+	/**
+	 * @return ArrayCollection
+	 */
+	public function getNotes(): Collection
+	{
+		return $this->notes;
+	}
+
+	public function addNote(BcsNote $note): void
+	{
+		$this->notes->add($note);
+	}
+
+	public function removeNote(BcsNote $note): void
+	{
+		$this->notes->removeElement($note);
 	}
 }

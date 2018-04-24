@@ -33,6 +33,7 @@ return function(App $app)
 	$addRwController(Ctl\EntityNoteController::class, '/entities/{entity-id:\\d+}/notes');
 	$addRwController(Ctl\RuleController::class, '/rules');
 	$addRwController(Ctl\RuleAnnotationsController::class, '/rules/{rule-id:\\d+}/annotations');
+	$addRwController(Ctl\RuleNoteController::class, '/rules/{rule-id:\\d+}/notes');
 
 	// entities
 	$app->post('/entities/{id:\\d+}/status', Ctl\EntityController::class . ':editStatus');

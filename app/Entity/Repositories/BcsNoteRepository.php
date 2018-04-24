@@ -4,22 +4,27 @@ namespace App\Entity\Repositories;
 
 use App\Entity\Annotation;
 use App\Entity\AnnotationTerm;
+use App\Entity\BcsNote;
 use App\Entity\Entity;
 use App\Entity\EntityAnnotation;
+use App\Entity\EntityNote;
 use App\Entity\IAnnotatedObject;
+use App\Entity\IBcsNoteObject;
 use App\Entity\IdentifiedObject;
 use App\Entity\Rule;
 use App\Entity\RuleAnnotation;
+use App\Entity\RuleNote;
+use App\Exceptions\InvalidArgumentException;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 
-interface AnnotationRepository extends IDependentRepository
+interface BcsNoteRepository extends IDependentRepository
 {
 }
 
-abstract class AnnotationRepositoryImpl implements AnnotationRepository
+abstract class BcsNoteRepositoryImpl implements AnnotationRepository
 {
-	/** @var IAnnotatedObject|IdentifiedObject */
+	/** @var IBcsNoteObject|IdentifiedObject */
 	protected $object;
 
 	/** @var EntityManager */
@@ -32,28 +37,25 @@ abstract class AnnotationRepositoryImpl implements AnnotationRepository
 
 	abstract protected static function getClassName(): string;
 	abstract protected static function getParentClassName(): string;
+	abstract protected static function getParentKeyName(): string;
 
-	protected function buildListQuery(?AnnotationTerm $term): QueryBuilder
+	protected function buildListQuery(): QueryBuilder
 	{
 		$query = $this->em->createQueryBuilder()
-			->from(static::getClassName(), 'a')
-			->where('a.itemId = :id')
-			->setParameter('id', $this->object->getId());
-
-		if ($term)
-			$query->andWhere('a.termType = :type')
-				->setParameter('type', $term->getValue());
+			->from(static::getClassName(), 'n')
+			->where('n.' . static::getParentKeyName() . ' = :object')
+			->setParameter('object', $this->object);
 
 		return $query;
 	}
 
 	public function getList(array $filter, array $sort, array $limit): array
 	{
-		$query = $this->buildListQuery($filter['term'] ?? null)
-			->select('a.id, a.termType, a.termId');
+		$query = $this->buildListQuery()
+			->select('n.id, n.text');
 
 		foreach ($sort as $by => $how)
-			$query->addOrderBy('a.' . $by, $how ?: null);
+			$query->addOrderBy('n.' . $by, $how ?: null);
 
 		if ($limit['limit'] > 0)
 			$query->setMaxResults($limit['limit'])->setFirstResult($limit['offset']);
@@ -63,15 +65,15 @@ abstract class AnnotationRepositoryImpl implements AnnotationRepository
 
 	public function getNumResults(array $filter): int
 	{
-		return (int)$this->buildListQuery($filter['term'] ?? null)
-			->select('COUNT(a)')
+		return (int)$this->buildListQuery()
+			->select('COUNT(n)')
 			->getQuery()
-			->getScalarResult()[0][1];
+			->getArrayResult()[0][1];
 	}
 
 	public function remove($object): void
 	{
-		$this->object->removeAnnotation($object);
+		$this->object->removeNote($object);
 	}
 
 	public function setParent(IdentifiedObject $object): void
@@ -85,25 +87,25 @@ abstract class AnnotationRepositoryImpl implements AnnotationRepository
 
 	/**
 	 * @param int $id
-	 * @return Annotation|null
+	 * @return BcsNote|null
 	 */
 	public function get(int $id)
 	{
 		return $this->em->getRepository(static::getClassName())->findOneBy([
 			'id' => $id,
-			'itemId' => $this->object->getId(),
-		]);
+			static::getParentKeyName() => $this->object->getId()]
+		);
 	}
 }
 
 /**
  * @property-read Entity $object
  */
-final class EntityAnnotationRepositoryImpl extends AnnotationRepositoryImpl
+final class EntityNoteRepository extends BcsNoteRepositoryImpl
 {
 	protected static function getClassName(): string
 	{
-		return EntityAnnotation::class;
+		return EntityNote::class;
 	}
 
 	protected static function getParentClassName(): string
@@ -111,8 +113,13 @@ final class EntityAnnotationRepositoryImpl extends AnnotationRepositoryImpl
 		return Entity::class;
 	}
 
+	protected static function getParentKeyName(): string
+	{
+		return 'entity';
+	}
+
 	/**
-	 * @param EntityAnnotation $object
+	 * @param EntityNote $object
 	 */
 	public function add($object): void
 	{
@@ -123,11 +130,11 @@ final class EntityAnnotationRepositoryImpl extends AnnotationRepositoryImpl
 /**
  * @property-read Rule $object
  */
-final class RuleAnnotationRepositoryImpl extends AnnotationRepositoryImpl
+final class RuleNoteRepository extends BcsNoteRepositoryImpl
 {
 	protected static function getClassName(): string
 	{
-		return RuleAnnotation::class;
+		return RuleNote::class;
 	}
 
 	protected static function getParentClassName(): string
@@ -135,8 +142,13 @@ final class RuleAnnotationRepositoryImpl extends AnnotationRepositoryImpl
 		return Rule::class;
 	}
 
+	protected static function getParentKeyName(): string
+	{
+		return 'rule';
+	}
+
 	/**
-	 * @param RuleAnnotation $object
+	 * @param RuleNote $object
 	 */
 	public function add($object): void
 	{

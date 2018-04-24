@@ -8,13 +8,11 @@ use App\Entity\
 };
 use App\Exceptions\
 {
-	ApiException, InternalErrorException, InvalidArgumentException, InvalidEnumFieldValueException, MalformedInputException, NonExistingObjectException, UniqueKeyViolationException
+	InvalidArgumentException, InvalidEnumFieldValueException, MalformedInputException, NonExistingObjectException, UniqueKeyViolationException
 };
 use App\Helpers\ArgumentParser;
 use App\Helpers\Validators;
 use Consistence\Enum\InvalidEnumValueException;
-use Doctrine\ORM\ORMException;
-use Slim\Container;
 use Slim\Http\{Request, Response};
 
 /**
@@ -197,11 +195,11 @@ final class EntityController extends WritableRepositoryController
 	}
 
 	/**
-	 * @param Entity $entity
+	 * @param Entity         $entity
 	 * @param ArgumentParser $data
-	 * @throws \Exception
+	 * @param bool           $insert
 	 */
-	protected function setData($entity, ArgumentParser $data): void
+	protected function setData($entity, ArgumentParser $data, bool $insert): void
 	{
 		Validators::validate($data, 'entity', 'invalid data for entity');
 
@@ -227,6 +225,9 @@ final class EntityController extends WritableRepositoryController
 				throw new InvalidArgumentException('status', $data->getString('status'), 'must be one of: ' . implode(',', EntityStatus::getAvailableValues()));
 			}
 		}
+
+		if ($insert && (!$data->hasKey('code') || !$data->hasKey('name')))
+			throw new MalformedInputException('Input doesn\'t contain all required fields');
 
 		if ($entity instanceof Compartment)
 		{

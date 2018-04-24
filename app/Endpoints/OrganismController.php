@@ -5,14 +5,6 @@ namespace App\Controllers;
 use App\Entity\Organism;
 use App\Entity\Repositories\OrganismRepository;
 use App\Entity\Repositories\OrganismRepositoryImpl;
-use App\Exceptions\
-{
-	ApiException, InternalErrorException, NonExistingObjectException
-};
-use App\Helpers\ArgumentParser;
-use Doctrine\ORM\ORMException;
-use Slim\Container;
-use Slim\Http\{Request, Response};
 
 /**
  * @property-read OrganismRepository $repository

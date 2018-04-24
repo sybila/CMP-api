@@ -3,18 +3,9 @@
 namespace App\Controllers;
 
 use App\Entity\Classification;
-use App\Entity\EntityClassification;
 use App\Entity\Repositories\ClassificationRepository;
 use App\Entity\Repositories\ClassificationRepositoryImpl;
-use App\Entity\RuleClassification;
-use App\Exceptions\
-{
-	ApiException, InternalErrorException, InvalidArgumentException, NonExistingObjectException
-};
 use App\Helpers\ArgumentParser;
-use Doctrine\ORM\ORMException;
-use Slim\Container;
-use Slim\Http\{Request, Response};
 
 /**
  * @property-read ClassificationRepository $repository

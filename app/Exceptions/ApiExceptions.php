@@ -28,7 +28,7 @@ abstract class ApiException extends \Exception
 
 	public function getHttpCode(): int
 	{
-		return 402;
+		return 400;
 	}
 
 	public function getAdditionalData(): array

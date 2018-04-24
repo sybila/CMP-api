@@ -52,7 +52,7 @@ final class EntityStatus extends ConsistenceEnum
  * @ORM\DiscriminatorColumn(name="hierarchy_type", type="string")
  * @ORM\DiscriminatorMap({0 = "AtomicState", 1 = "Compartment", 2 = "Complex", 3 = "Structure", 4 = "Atomic"})
  */
-abstract class Entity implements IdentifiedObject, IAnnotatedObject
+abstract class Entity implements IdentifiedObject, IAnnotatedObject, IBcsNoteObject
 {
 	use ChangeCollection;
 	use Identifier;
@@ -129,12 +129,19 @@ abstract class Entity implements IdentifiedObject, IAnnotatedObject
 	 */
 	protected $organisms;
 
+	/**
+	 * @var ArrayCollection
+	 * @ORM\OneToMany(targetEntity="EntityNote", mappedBy="entity", cascade={"persist", "remove"})
+	 */
+	protected $notes;
+
 	public function __construct()
 	{
 		$this->internalType = 'entity';
 		$this->classifications = new ArrayCollection;
 		$this->annotations = new ArrayCollection;
 		$this->organisms = new ArrayCollection;
+		$this->notes = new ArrayCollection;
 	}
 
 	public function getType(): string
@@ -319,6 +326,24 @@ abstract class Entity implements IdentifiedObject, IAnnotatedObject
 	public function getOrganisms()
 	{
 		return $this->organisms;
+	}
+
+	/**
+	 * @return ArrayCollection
+	 */
+	public function getNotes(): Collection
+	{
+		return $this->notes;
+	}
+
+	public function addNote(BcsNote $note): void
+	{
+		$this->notes->add($note);
+	}
+
+	public function removeNote(BcsNote $note): void
+	{
+		$this->notes->removeElement($note);
 	}
 }
 

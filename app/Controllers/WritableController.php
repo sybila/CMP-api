@@ -27,7 +27,7 @@ abstract class WritableRepositoryController extends RepositoryController
 	 */
 	protected $beforeDelete = [];
 
-	abstract protected function setData($entity, ArgumentParser $body): void;
+	abstract protected function setData($entity, ArgumentParser $body, bool $insert): void;
 	abstract protected function createObject(ArgumentParser $body): IdentifiedObject;
 
 	protected function getModifyId(ArgumentParser $args): int
@@ -40,7 +40,7 @@ abstract class WritableRepositoryController extends RepositoryController
 		$this->runEvents($this->beforeRequest, $request, $response, $args);
 		$body = new ArgumentParser($request->getParsedBody());
 		$entity = $this->createObject($body);
-		$this->setData($entity, $body);
+		$this->setData($entity, $body, true);
 		$this->runEvents($this->beforeInsert, $entity);
 		$this->orm->persist($entity);
 		$this->orm->flush();
@@ -51,7 +51,7 @@ abstract class WritableRepositoryController extends RepositoryController
 	{
 		$this->runEvents($this->beforeRequest, $request, $response, $args);
 		$entity = $this->getObject($this->getModifyId($args));
-		$this->setData($entity, new ArgumentParser($request->getParsedBody()));
+		$this->setData($entity, new ArgumentParser($request->getParsedBody()), false);
 		$this->runEvents($this->beforeUpdate, $entity);
 		$this->orm->persist($entity);
 		$this->orm->flush();

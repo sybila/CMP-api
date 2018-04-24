@@ -4,16 +4,9 @@ namespace App\Controllers;
 
 use App\Entity\
 {
-	Classification, Repositories\RuleRepository, Repositories\RuleRepositoryImpl, RuleAnnotation, RuleClassification, Rule, Organism, RuleStatus
-};
-use App\Exceptions\
-{
-	ApiException, InternalErrorException, NonExistingObjectException
+	Repositories\RuleRepository, Repositories\RuleRepositoryImpl, RuleAnnotation, Rule, RuleStatus
 };
 use App\Helpers\ArgumentParser;
-use Doctrine\ORM\ORMException;
-use Slim\Container;
-use Slim\Http\{Request, Response};
 
 /**
  * TODO: make writable

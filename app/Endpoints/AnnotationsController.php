@@ -10,17 +10,15 @@ use App\Entity\IdentifiedObject;
 use App\Entity\Repositories\AnnotationRepository;
 use App\Entity\Repositories\EntityAnnotationRepositoryImpl;
 use App\Entity\Repositories\EntityRepositoryImpl;
-use App\Entity\Repositories\IRepository;
 use App\Entity\Repositories\RuleAnnotationRepositoryImpl;
 use App\Entity\Repositories\RuleRepository;
 use App\Entity\Repositories\RuleRepositoryImpl;
 use App\Entity\RuleAnnotation;
 use App\Exceptions\InvalidEnumFieldValueException;
 use App\Exceptions\MalformedInputException;
-use App\Exceptions\NonExistingObjectException;
 use App\Helpers\ArgumentParser;
 use Consistence\Enum\InvalidEnumValueException;
-use Doctrine\ORM\EntityManager;
+use Slim\Container;
 
 /**
  * @property-read AnnotationRepository $repository
@@ -28,6 +26,16 @@ use Doctrine\ORM\EntityManager;
  */
 abstract class AnnotationsController extends ParentedRepositoryController
 {
+	public function __construct(Container $c)
+	{
+		parent::__construct($c);
+		$this->beforeInsert[] = function(Annotation $entity)
+		{
+			if (!$entity->getTermType() || !$entity->getTermId())
+				throw new MalformedInputException('TermType and TermId fields are necessary!');
+		};
+	}
+
 	protected static function getAllowedSort(): array
 	{
 		return ['id', 'name'];
@@ -55,11 +63,15 @@ abstract class AnnotationsController extends ParentedRepositoryController
 	}
 
 	/**
-	 * @param Annotation $entity
+	 * @param Annotation     $entity
 	 * @param ArgumentParser $body
+	 * @param bool           $insert
 	 */
-	protected function setData($entity, ArgumentParser $body): void
+	protected function setData($entity, ArgumentParser $body, bool $insert): void
 	{
+		if ($insert && (!$body->hasKey('termId') || !$body->hasKey('termType')))
+			throw new MalformedInputException('Annotation TermId and TermType must be set!');
+
 		if ($body->hasKey('termId'))
 			$entity->setTermId($body->getString('termId'));
 		if ($body->hasKey('termType'))
@@ -95,22 +107,14 @@ class EntityAnnotationsController extends AnnotationsController
 		return new EntityAnnotation;
 	}
 
-	protected function getParentObject(ArgumentParser $args): IdentifiedObject
-	{
-		if (!$args->hasKey('entity-id'))
-			throw new MalformedInputException('Missing key entity-id');
-
-		try {
-			return $this->parentRepository->get($args->getInt('entity-id'));
-		}
-		catch (\Exception $e) {
-			throw new NonExistingObjectException($args->getString('rule-id'), 'rule');
-		}
-	}
-
 	protected static function getParentRepositoryClassName(): string
 	{
 		return EntityRepositoryImpl::class;
+	}
+
+	protected function getParentObjectInfo(): array
+	{
+		return ['entity-id', 'entity'];
 	}
 }
 
@@ -129,21 +133,13 @@ class RuleAnnotationsController extends AnnotationsController
 		return new RuleAnnotation;
 	}
 
-	protected function getParentObject(ArgumentParser $args): IdentifiedObject
-	{
-		if (!$args->hasKey('rule-id'))
-			throw new MalformedInputException('Missing key rule-id');
-
-		try {
-			return $this->parentRepository->get($args->getInt('rule-id'));
-		}
-		catch (\Exception $e) {
-			throw new NonExistingObjectException($args->getString('rule-id'), 'rule');
-		}
-	}
-
 	protected static function getParentRepositoryClassName(): string
 	{
 		return RuleRepositoryImpl::class;
+	}
+
+	protected function getParentObjectInfo(): array
+	{
+		return ['rule-id', 'rule'];
 	}
 }

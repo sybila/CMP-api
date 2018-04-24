@@ -7,6 +7,7 @@ use App\Entity\Repositories\IDependentRepository;
 use App\Entity\Repositories\IRepository;
 use App\Exceptions\ApiException;
 use App\Exceptions\InternalErrorException;
+use App\Exceptions\MalformedInputException;
 use App\Exceptions\NonExistingObjectException;
 use App\Helpers\ArgumentParser;
 use Doctrine\ORM\EntityManager;
@@ -24,7 +25,21 @@ abstract class ParentedRepositoryController extends WritableRepositoryController
 	protected $parentRepository;
 
 	abstract protected static function getParentRepositoryClassName(): string;
-	abstract protected function getParentObject(ArgumentParser $args): IdentifiedObject;
+	abstract protected function getParentObjectInfo(): array;
+
+	protected function getParentObject(ArgumentParser $args): IdentifiedObject
+	{
+		$info = static::getParentObjectInfo();
+		if (!$args->hasKey($info[0]) || !is_scalar($args->get($info[0])))
+			throw new MalformedInputException('Missing key ' . $info[0]);
+
+		try {
+			return $this->parentRepository->get($args->getInt($info[0]));
+		}
+		catch (\Exception $e) {
+			throw new NonExistingObjectException($args->getString($info[0]), $info[1]);
+		}
+	}
 
 	public function __construct(Container $c)
 	{
