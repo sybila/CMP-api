@@ -88,7 +88,7 @@ final class EntityController extends WritableRepositoryController
 			throw new InvalidArgumentException('type', null);
 
 		$cls = array_search($type = $data->getString('type'), Entity::$classToType, true);
-		if (!$cls)
+		if (!$cls || $cls == AtomicState::class)
 			throw new InvalidArgumentException('type', $type);
 
 		return new $cls;
