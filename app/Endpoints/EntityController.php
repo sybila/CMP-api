@@ -260,6 +260,11 @@ final class EntityController extends WritableRepositoryController
 		elseif ($entity instanceof Structure)
 		{
 			Validators::validate($data, 'structure', 'invalid data for structure');
+			if ($data->hasKey('compartments'))
+			{
+				$entities = array_map(function($id) { return $this->getObject($id); }, $data->getArray('compartments'));
+				$entity->setCompartments($entities);
+			}
 			if ($data->hasKey('children'))
 			{
 				$entities = array_map(function($id) { return $this->getObject($id); }, $data->getArray('children'));
@@ -274,6 +279,11 @@ final class EntityController extends WritableRepositoryController
 		elseif ($entity instanceof Atomic)
 		{
 			Validators::validate($data, 'atomic', 'invalid data for atomic');
+			if ($data->hasKey('compartments'))
+			{
+				$entities = array_map(function($id) { return $this->getObject($id); }, $data->getArray('compartments'));
+				$entity->setCompartments($entities);
+			}
 			if ($data->hasKey('parents'))
 			{
 				$entities = array_map(function($id) { return $this->getObject($id); }, $data->getArray('parents'));
