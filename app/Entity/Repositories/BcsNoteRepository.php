@@ -52,7 +52,7 @@ abstract class BcsNoteRepositoryImpl implements AnnotationRepository
 	public function getList(array $filter, array $sort, array $limit): array
 	{
 		$query = $this->buildListQuery()
-			->select('n.id, n.text');
+			->select('n.id, n.text, n.user, n.inserted, n.updated');
 
 		foreach ($sort as $by => $how)
 			$query->addOrderBy('n.' . $by, $how ?: null);

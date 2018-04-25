@@ -1,11 +1,54 @@
 <?php
 
+use Doctrine\DBAL\Platforms\AbstractPlatform;
+use Doctrine\DBAL\Types\ConversionException;
 use Slim\Container;
 use App\Helpers;
 use Slim\Http\Request;
 use Slim\Http\Response;
+use Doctrine\DBAL\Types\Type;
+use Doctrine\DBAL\Types\DateTimeImmutableType;
 
 $config = require __DIR__ . '/../app/settings.php';
+
+class DateTimeJsonObject extends \DateTimeImmutable implements JsonSerializable
+{
+	public function jsonSerialize()
+	{
+		return $this->format(DATE_W3C);
+	}
+
+	public static function createFromFormat($format, $time, DateTimeZone $timezone = null)
+	{
+		return new static(DateTime::createFromFormat($format, $time, $timezone)->format(DateTime::ATOM));
+	}
+}
+
+class DateTimeJson extends DateTimeImmutableType
+{
+	public function convertToPHPValue($value, AbstractPlatform $platform)
+	{
+		if ($value === null || $value instanceof DateTimeJsonObject) {
+			return $value;
+		}
+
+		$dateTime = DateTimeJsonObject::createFromFormat($platform->getDateTimeFormatString(), $value);
+
+		if (!$dateTime)
+		{
+			throw ConversionException::conversionFailedFormat(
+				$value,
+				$this->getName(),
+				$platform->getDateTimeFormatString()
+			);
+		}
+
+		return $dateTime;
+	}
+}
+
+Type::overrideType('datetime', DateTimeJson::class);
+Type::overrideType('datetimetz', DateTimeJson::class);
 
 $c = new Container($config);
 unset($c['errorHandler']);
