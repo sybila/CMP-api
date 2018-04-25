@@ -2,6 +2,8 @@
 
 namespace App\Exceptions;
 
+use Symfony\Component\Validator\ConstraintViolationInterface;
+use Symfony\Component\Validator\ConstraintViolationListInterface;
 use Throwable;
 
 abstract class ApiException extends \Exception
@@ -67,10 +69,18 @@ class InvalidArgumentException extends ApiException
 class MalformedInputException extends ApiException
 {
 	const CODE = 704;
-	public function __construct(string $message, Throwable $previous = null)
+	public function __construct(string $message, ?ConstraintViolationListInterface $errors = null, Throwable $previous = null)
 	{
 		parent::__construct($previous)
 			->setMessage($message);
+
+		if ($errors)
+		{
+			$this->additional['errors'] = [];
+			/** @var ConstraintViolationInterface $error */
+			foreach ($errors as $error)
+				$this->additional['errors'][] = $error->getPropertyPath() . ': ' . $error->getMessage();
+		}
 	}
 }
 

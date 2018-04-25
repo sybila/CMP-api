@@ -25,8 +25,9 @@ class Validators
 		if (!self::$validator)
 			self::$validator = Validation::createValidator();
 
-		if (count(self::$validator->validate($data, self::$$rules)) > 0)
-			throw new MalformedInputException($message);
+		$errors = self::$validator->validate($data, self::$$rules);
+		if (count($errors) > 0)
+			throw new MalformedInputException($message, $errors);
 	}
 }
 
@@ -77,7 +78,7 @@ Validators::$structure = new Assert\Collection([
 Validators::$atomic = new Assert\Collection([
 	'fields' => [
 		'parents' => Validators::$identifierList,
-		'states' => Validators::$states,
+		'states' => new Assert\All([Validators::$states]),
 	],
 	'allowExtraFields' => true,
 	'allowMissingFields' => true,
