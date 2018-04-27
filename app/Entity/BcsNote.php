@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Helpers\DateTimeJson;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -31,20 +32,20 @@ abstract class BcsNote implements IdentifiedObject
 	protected $text;
 
 	/**
-	 * @var \DateTime
+	 * @var DateTimeJson
 	 * @ORM\Column(type="datetime")
 	 */
 	protected $inserted;
 
 	/**
-	 * @var \DateTime
+	 * @var DateTimeJson
 	 * @ORM\Column(type="datetime")
 	 */
 	protected $updated;
 
 	public function __construct()
 	{
-		$this->inserted = new \DateTime;
+		$this->inserted = new DateTimeJson;
 	}
 
 	public function getUser(): int
@@ -67,17 +68,17 @@ abstract class BcsNote implements IdentifiedObject
 		$this->text = $text;
 	}
 
-	public function getInserted(): \DateTime
+	public function getInserted(): DateTimeJson
 	{
 		return $this->inserted;
 	}
 
-	public function getUpdated(): \DateTime
+	public function getUpdated(): DateTimeJson
 	{
 		return $this->updated;
 	}
 
-	public function setUpdated(\DateTime $updated): void
+	public function setUpdated(DateTimeJson $updated): void
 	{
 		$this->updated = $updated;
 	}

@@ -11,6 +11,7 @@ use App\Entity\Repositories\EntityNoteRepository;
 use App\Entity\Repositories\EntityRepositoryImpl;
 use App\Exceptions\MalformedInputException;
 use App\Helpers\ArgumentParser;
+use App\Helpers\DateTimeJson;
 
 /**
  * @property-read BcsNoteRepository $repository
@@ -49,7 +50,7 @@ class EntityNoteController extends ParentedRepositoryController
 		if ($insert && !$body->hasKey('text'))
 			throw new MalformedInputException('Input doesn\'t contain all required fields');
 
-		$entity->setUpdated(new \DateTime);
+		$entity->setUpdated(new DateTimeJson);
 	}
 
 	protected static function getObjectName(): string

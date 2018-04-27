@@ -64,7 +64,7 @@ class DoctrineTracyPanel implements IBarPanel, \Doctrine\DBAL\Logging\SQLLogger
 			foreach ($this->queries as $data)
 			{
 				[$sql, $params, $time] = $data;
-				$html .= sprintf($baseRow, \Nette\Database\Helpers::dumpSql($sql), number_format($time, 3), implode(', ', $params));
+				$html .= sprintf($baseRow, \Nette\Database\Helpers::dumpSql($sql), number_format($time, 3), implode(', ', $params ?: []));
 			}
 		}
 
