@@ -13,7 +13,7 @@ if (!\Tracy\Debugger::$productionMode)
 	$panel = new App\Helpers\DoctrineTracyPanel;
 	\Tracy\Debugger::getBar()->addPanel($panel);
 	/** @var \Doctrine\ORM\EntityManager $em */
-	$em = $c['em'];
+	$em = $c[\Doctrine\ORM\EntityManager::class];
 	$em->getConfiguration()->setSQLLogger($panel);
 }
 
