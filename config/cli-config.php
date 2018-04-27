@@ -1,7 +1,13 @@
 <?php
+
+use App\Helpers\DateTimeJsonType;
+use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\Tools\Console\ConsoleRunner;
 
 require __DIR__ . '/../vendor/autoload.php';
+
+Type::overrideType('datetime', DateTimeJsonType::class);
+Type::overrideType('datetimetz', DateTimeJsonType::class);
 
 $settings = include __DIR__ . '/../app/settings.php';
 $settings = $settings['settings']['doctrine'];
