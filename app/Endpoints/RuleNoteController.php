@@ -7,7 +7,6 @@ use App\Entity\IdentifiedObject;
 use App\Entity\Repositories\BcsNoteRepository;
 use App\Entity\Repositories\RuleNoteRepository;
 use App\Entity\Repositories\RuleRepository;
-use App\Entity\Repositories\RuleRepositoryImpl;
 use App\Entity\RuleNote;
 use App\Exceptions\MalformedInputException;
 use App\Helpers\ArgumentParser;
@@ -60,7 +59,7 @@ class RuleNoteController extends ParentedRepositoryController
 
 	protected static function getParentRepositoryClassName(): string
 	{
-		return RuleRepositoryImpl::class;
+		return RuleRepository::class;
 	}
 
 	protected static function getRepositoryClassName(): string

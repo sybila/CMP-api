@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Entity\IdentifiedObject;
+use App\Entity\Repositories\IEndpointRepository;
 use App\Entity\Repositories\IRepository;
 use App\Exceptions\ApiException;
 use App\Exceptions\InternalErrorException;
@@ -19,7 +20,7 @@ abstract class RepositoryController extends AbstractController
 	use SortableController;
 	use PageableController;
 
-	/** @var IRepository */
+	/** @var IEndpointRepository */
 	protected $repository;
 
 	/**
@@ -60,8 +61,7 @@ abstract class RepositoryController extends AbstractController
 	public function __construct(Container $c)
 	{
 		parent::__construct($c);
-		$className = static::getRepositoryClassName();
-		$this->repository = new $className($c['em']);
+		$this->repository = $c->get(static::getRepositoryClassName());
 	}
 
 	public function read(Request $request, Response $response, ArgumentParser $args)
@@ -89,19 +89,28 @@ abstract class RepositoryController extends AbstractController
 	}
 
 	/**
-	 * @param int $id
+	 * TODO: Refactor!
+	 * @param int                      $id
+	 * @param IEndpointRepository|null $repository
+	 * @param string|null              $objectName
 	 * @return mixed
-	 * @throws ApiException
+	 * @throws InternalErrorException
+	 * @throws NonExistingObjectException
 	 */
-	protected function getObject(int $id)
+	protected function getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
 	{
+		if (!$repository)
+			$repository = $this->repository;
+		if (!$objectName)
+			$objectName = static::getObjectName();
+
 		try {
-			$ent = $this->repository->get($id);
+			$ent = $repository->get($id);
 			if (!$ent)
-				throw new NonExistingObjectException($id, static::getObjectName());
+				throw new NonExistingObjectException($id, $objectName);
 		}
 		catch (ORMException $e) {
-			throw new InternalErrorException('Failed getting ' . static::getObjectName() . ' ID ' . $id, $e);
+			throw new InternalErrorException('Failed getting ' . $objectName . ' ID ' . $id, $e);
 		}
 
 		return $ent;

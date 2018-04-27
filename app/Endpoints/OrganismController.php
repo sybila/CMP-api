@@ -4,7 +4,6 @@ namespace App\Controllers;
 
 use App\Entity\Organism;
 use App\Entity\Repositories\OrganismRepository;
-use App\Entity\Repositories\OrganismRepositoryImpl;
 
 /**
  * @property-read OrganismRepository $repository
@@ -32,7 +31,7 @@ final class OrganismController extends RepositoryController
 
 	protected static function getRepositoryClassName(): string
 	{
-		return OrganismRepositoryImpl::class;
+		return OrganismRepository::class;
 	}
 
 	protected static function getObjectName(): string

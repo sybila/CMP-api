@@ -17,8 +17,9 @@ use App\Entity\RuleNote;
 use App\Exceptions\InvalidArgumentException;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
+use Psr\Container\ContainerInterface;
 
-interface BcsNoteRepository extends IDependentRepository
+interface BcsNoteRepository extends IDependentEndpointRepository
 {
 }
 

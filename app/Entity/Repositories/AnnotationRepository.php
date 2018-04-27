@@ -12,8 +12,9 @@ use App\Entity\Rule;
 use App\Entity\RuleAnnotation;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
+use Psr\Container\ContainerInterface;
 
-interface AnnotationRepository extends IDependentRepository
+interface AnnotationRepository extends IDependentEndpointRepository
 {
 }
 

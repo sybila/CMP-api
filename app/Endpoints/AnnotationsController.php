@@ -9,10 +9,9 @@ use App\Entity\EntityRepository;
 use App\Entity\IdentifiedObject;
 use App\Entity\Repositories\AnnotationRepository;
 use App\Entity\Repositories\EntityAnnotationRepositoryImpl;
-use App\Entity\Repositories\EntityRepositoryImpl;
+use App\Entity\Repositories\EntityRepository;
 use App\Entity\Repositories\RuleAnnotationRepositoryImpl;
 use App\Entity\Repositories\RuleRepository;
-use App\Entity\Repositories\RuleRepositoryImpl;
 use App\Entity\RuleAnnotation;
 use App\Exceptions\InvalidEnumFieldValueException;
 use App\Exceptions\MalformedInputException;
@@ -109,7 +108,7 @@ class EntityAnnotationsController extends AnnotationsController
 
 	protected static function getParentRepositoryClassName(): string
 	{
-		return EntityRepositoryImpl::class;
+		return EntityRepository::class;
 	}
 
 	protected function getParentObjectInfo(): array
@@ -135,7 +134,7 @@ class RuleAnnotationsController extends AnnotationsController
 
 	protected static function getParentRepositoryClassName(): string
 	{
-		return RuleRepositoryImpl::class;
+		return RuleRepository::class;
 	}
 
 	protected function getParentObjectInfo(): array

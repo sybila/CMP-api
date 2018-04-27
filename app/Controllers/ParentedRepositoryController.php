@@ -3,25 +3,21 @@
 namespace App\Controllers;
 
 use App\Entity\IdentifiedObject;
-use App\Entity\Repositories\IDependentRepository;
-use App\Entity\Repositories\IRepository;
-use App\Exceptions\ApiException;
-use App\Exceptions\InternalErrorException;
+use App\Entity\Repositories\IDependentEndpointRepository;
+use App\Entity\Repositories\IEndpointRepository;
 use App\Exceptions\MalformedInputException;
 use App\Exceptions\NonExistingObjectException;
 use App\Helpers\ArgumentParser;
-use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\ORMException;
 use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;
 
 /**
- * @property-read IDependentRepository $repository
+ * @property-read IDependentEndpointRepository $repository
  */
 abstract class ParentedRepositoryController extends WritableRepositoryController
 {
-	/** @var IRepository */
+	/** @var IEndpointRepository */
 	protected $parentRepository;
 
 	abstract protected static function getParentRepositoryClassName(): string;
@@ -44,8 +40,7 @@ abstract class ParentedRepositoryController extends WritableRepositoryController
 	public function __construct(Container $c)
 	{
 		parent::__construct($c);
-		$className = static::getParentRepositoryClassName();
-		$this->parentRepository = new $className($c['em']);
+		$this->parentRepository = $c->get(static::getParentRepositoryClassName());
 
 		$this->beforeRequest[] = function(Request $request, Response $response, ArgumentParser $args)
 		{

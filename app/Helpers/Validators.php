@@ -68,6 +68,7 @@ Validators::$complex = new Assert\Collection([
 
 Validators::$structure = new Assert\Collection([
 	'fields' => [
+		'compartments' => Validators::$identifierList,
 		'parents' => Validators::$identifierList,
 		'children' => Validators::$identifierList,
 	],
@@ -77,6 +78,7 @@ Validators::$structure = new Assert\Collection([
 
 Validators::$atomic = new Assert\Collection([
 	'fields' => [
+		'compartments' => Validators::$identifierList,
 		'parents' => Validators::$identifierList,
 		'states' => new Assert\All([Validators::$states]),
 	],
@@ -90,6 +92,8 @@ Validators::$entity = new Assert\Collection([
 		'code' => Validators::$code,
 		'description' => new Assert\Type(['type' => 'string']),
 		'status' => new Assert\Type(['type' => 'string']),
+		'classifications' => Validators::$identifierList,
+		'organisms' => Validators::$identifierList,
 	],
 	'allowExtraFields' => true,
 	'allowMissingFields' => true,

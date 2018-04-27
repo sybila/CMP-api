@@ -4,7 +4,6 @@ namespace App\Controllers;
 
 use App\Entity\Classification;
 use App\Entity\Repositories\ClassificationRepository;
-use App\Entity\Repositories\ClassificationRepositoryImpl;
 use App\Helpers\ArgumentParser;
 
 /**
@@ -41,7 +40,7 @@ final class ClassificationController extends RepositoryController
 
 	protected static function getRepositoryClassName(): string
 	{
-		return ClassificationRepositoryImpl::class;
+		return ClassificationRepository::class;
 	}
 
 	protected static function getObjectName(): string

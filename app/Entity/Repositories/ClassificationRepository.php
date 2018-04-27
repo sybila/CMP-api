@@ -9,7 +9,7 @@ use App\Exceptions\InvalidArgumentException;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 
-interface ClassificationRepository extends IRepository
+interface ClassificationRepository extends IEndpointRepository
 {
 }
 

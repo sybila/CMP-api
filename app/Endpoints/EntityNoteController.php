@@ -7,8 +7,8 @@ use App\Entity\EntityNote;
 use App\Entity\EntityRepository;
 use App\Entity\IdentifiedObject;
 use App\Entity\Repositories\BcsNoteRepository;
+use App\Entity\Repositories\EntityRepository;
 use App\Entity\Repositories\EntityNoteRepository;
-use App\Entity\Repositories\EntityRepositoryImpl;
 use App\Exceptions\MalformedInputException;
 use App\Helpers\ArgumentParser;
 use App\Helpers\DateTimeJson;
@@ -60,7 +60,7 @@ class EntityNoteController extends ParentedRepositoryController
 
 	protected static function getParentRepositoryClassName(): string
 	{
-		return EntityRepositoryImpl::class;
+		return EntityRepository::class;
 	}
 
 	protected static function getRepositoryClassName(): string

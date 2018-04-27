@@ -13,7 +13,7 @@ abstract class AbstractController
 
 	public function __construct(Container $c)
 	{
-		$this->orm = $c->get('em');
+		$this->orm = $c->get(EntityManager::class);
 	}
 
 	protected static function formatOk(Response $response, array $data = null): Response

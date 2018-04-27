@@ -7,7 +7,7 @@ use App\Entity\RuleStatus;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 
-interface RuleRepository extends IRepository
+interface RuleRepository extends IEndpointRepository
 {
 }
 

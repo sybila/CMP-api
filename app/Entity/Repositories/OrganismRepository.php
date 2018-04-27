@@ -6,7 +6,7 @@ use App\Entity\Organism;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 
-interface OrganismRepository extends IRepository
+interface OrganismRepository extends IEndpointRepository
 {
 }
 

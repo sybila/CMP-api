@@ -1,13 +1,14 @@
 <?php
 
-
 use App\Helpers\DateTimeJsonType;
-use Slim\Container;
+use App\Entity\Repositories as EntityRepo;
+use App\Entity\Authentication\Repository as AuthRepo;
 use App\Helpers;
+use Doctrine\ORM\EntityManager;
+use Doctrine\DBAL\Types\Type;
+use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;
-use Doctrine\DBAL\Types\Type;
-
 
 $config = require __DIR__ . '/../app/settings.php';
 
@@ -33,7 +34,7 @@ unset($c['logger']);
 //};
 
 // Doctrine
-$c['em'] = function (Container $c)
+$c[EntityManager::class] = function (Container $c)
 {
 	$settings = $c->settings;
 	$config = \Doctrine\ORM\Tools\Setup::createAnnotationMetadataConfiguration(
@@ -46,7 +47,7 @@ $c['em'] = function (Container $c)
 
 	$config->addCustomStringFunction('TYPE', \App\Doctrine\ORM\Query\Functions\TypeFunction::class);
 
-	return \Doctrine\ORM\EntityManager::create($settings['doctrine']['connection'], $config);
+	return EntityManager::create($settings['doctrine']['connection'], $config);
 };
 
 $c['foundHandler'] = function (Container $c)
@@ -100,6 +101,98 @@ $c['errorHandler'] = function(Container $c)
 			'message' => '',
 		]);
 	};
+};
+
+$c[EntityRepo\ClassificationRepository::class] = function(Container $c)
+{
+	return new EntityRepo\ClassificationRepositoryImpl($c[EntityManager::class]);
+};
+
+$c[EntityRepo\OrganismRepository::class] = function(Container $c)
+{
+	return new EntityRepo\OrganismRepositoryImpl($c[EntityManager::class]);
+};
+
+$c[EntityRepo\EntityRepository::class] = function(Container $c)
+{
+	return new EntityRepo\EntityRepositoryImpl($c[EntityManager::class]);
+};
+
+$c[EntityRepo\RuleRepository::class] = function(Container $c)
+{
+	return new EntityRepo\RuleRepositoryImpl($c[EntityManager::class]);
+};
+
+$c[EntityRepo\EntityAnnotationRepositoryImpl::class] = function(Container $c)
+{
+	return new EntityRepo\EntityAnnotationRepositoryImpl($c[EntityManager::class]);
+};
+
+$c[EntityRepo\RuleAnnotationRepositoryImpl::class] = function(Container $c)
+{
+	return new EntityRepo\RuleAnnotationRepositoryImpl($c[EntityManager::class]);
+};
+
+$c[EntityRepo\EntityNoteRepository::class] = function(Container $c)
+{
+	return new EntityRepo\EntityNoteRepository($c[EntityManager::class]);
+};
+
+$c[EntityRepo\RuleNoteRepository::class] = function(Container $c)
+{
+	return new EntityRepo\RuleNoteRepository($c[EntityManager::class]);
+};
+
+$c[AuthRepo\ClientRepository::class] = function(Container $c)
+{
+	return new AuthRepo\ClientRepository($c[EntityManager::class]);
+};
+
+$c[AuthRepo\UserRepository::class] = function(Container $c)
+{
+	return new AuthRepo\UserRepository($c[EntityManager::class]);
+};
+
+$c[AuthRepo\ScopeRepository::class] = function(Container $c)
+{
+	return new AuthRepo\ScopeRepository($c[EntityManager::class]);
+};
+
+$c[AuthRepo\AccessTokenRepository::class] = function(Container $c)
+{
+	return new AuthRepo\AccessTokenRepository($c);
+};
+
+$c[AuthRepo\RefreshTokenRepository::class] = function(Container $c)
+{
+	return new AuthRepo\RefreshTokenRepository($c);
+};
+
+$c[\League\OAuth2\Server\AuthorizationServer::class] = function(Container $c)
+{
+	$srv = new \League\OAuth2\Server\AuthorizationServer(
+		$c[AuthRepo\ClientRepository::class],
+		$c[AuthRepo\AccessTokenRepository::class],
+		$c[AuthRepo\ScopeRepository::class],
+		$c->settings['oauth']['privateKey'],
+		$c->settings['oauth']['encryptionKey']
+	);
+
+	$srv->enableGrantType(new \League\OAuth2\Server\Grant\RefreshTokenGrant(
+		$c[AuthRepo\RefreshTokenRepository::class]
+	));
+
+//	$srv->enableGrantType();
+
+	return $srv;
+};
+
+$c[\League\OAuth2\Server\ResourceServer::class] = function(Container $c)
+{
+	return new \League\OAuth2\Server\ResourceServer(
+		$c[\App\Entity\Authentication\Repository\AccessTokenRepository::class],
+		$c->settings['oauth']['publicKey']
+	);
 };
 
 return $c;

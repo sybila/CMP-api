@@ -4,7 +4,7 @@ namespace App\Controllers;
 
 use App\Entity\
 {
-	Repositories\RuleRepository, Repositories\RuleRepositoryImpl, RuleAnnotation, Rule, RuleStatus
+	Repositories\RuleRepository, RuleAnnotation, Rule, RuleStatus
 };
 use App\Helpers\ArgumentParser;
 
@@ -66,7 +66,7 @@ final class RuleController extends RepositoryController
 
 	protected static function getRepositoryClassName(): string
 	{
-		return RuleRepositoryImpl::class;
+		return RuleRepository::class;
 	}
 
 	protected static function getObjectName(): string

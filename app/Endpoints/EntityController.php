@@ -4,23 +4,50 @@ namespace App\Controllers;
 
 use App\Entity\
 {
-	AnnotationTerm, Atomic, AtomicState, Compartment, Complex, Entity, EntityAnnotation, EntityStatus, IdentifiedObject, Repositories\EntityRepository, Repositories\EntityRepositoryImpl, Repositories\IRepository, Structure
+	AnnotationTerm,
+	Atomic,
+	AtomicState,
+	Compartment,
+	Complex,
+	Entity,
+	EntityAnnotation,
+	EntityStatus,
+	IdentifiedObject,
+	Repositories\ClassificationRepository,
+	Repositories\EntityRepository,
+	Repositories\IEndpointRepository,
+	Repositories\OrganismRepository,
+	Structure
 };
 use App\Exceptions\
 {
-	InvalidArgumentException, InvalidEnumFieldValueException, MalformedInputException, NonExistingObjectException, UniqueKeyViolationException
+	InvalidArgumentException, InvalidEnumFieldValueException, MalformedInputException, UniqueKeyViolationException
 };
 use App\Helpers\ArgumentParser;
 use App\Helpers\Validators;
 use Consistence\Enum\InvalidEnumValueException;
+use Slim\Container;
 use Slim\Http\{Request, Response};
 
 /**
  * @property-read EntityRepository $repository
- * @method Entity getObject(int $id)
+ * @method Entity getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
 final class EntityController extends WritableRepositoryController
 {
+	/** @var ClassificationRepository */
+	private $classificationRepository;
+
+	/** @var OrganismRepository */
+	private $organismRepository;
+
+	public function __construct(Container $c)
+	{
+		parent::__construct($c);
+		$this->classificationRepository = $c->get(ClassificationRepository::class);
+		$this->organismRepository = $c->get(OrganismRepository::class);
+	}
+
 	protected static function getAllowedSort(): array
 	{
 		return ['id', 'name', 'type', 'code'];
@@ -229,6 +256,22 @@ final class EntityController extends WritableRepositoryController
 		if ($insert && (!$data->hasKey('code') || !$data->hasKey('name')))
 			throw new MalformedInputException('Input doesn\'t contain all required fields');
 
+		if ($data->hasKey('classifications'))
+		{
+			$classifications = array_map(function($id) {
+				return $this->getObject((int)$id, $this->classificationRepository, 'classification');
+			}, $data->getArray('classifications'));
+			$entity->setClassifications($classifications);
+		}
+
+		if ($data->hasKey('organisms'))
+		{
+			$organisms = array_map(function($id) {
+				return $this->getObject((int)$id, $this->organismRepository, 'organism');
+			}, $data->getArray('organisms'));
+			$entity->setOrganisms($organisms);
+		}
+
 		if ($entity instanceof Compartment)
 		{
 			Validators::validate($data, 'compartment', 'invalid data for compartment');
@@ -301,6 +344,6 @@ final class EntityController extends WritableRepositoryController
 
 	protected static function getRepositoryClassName(): string
 	{
-		return EntityRepositoryImpl::class;
+		return EntityRepository::class;
 	}
 }

@@ -12,7 +12,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 
-interface EntityRepository extends IRepository
+interface EntityRepository extends IEndpointRepository
 {
 	public function getByCode(string $code): ?Entity;
 

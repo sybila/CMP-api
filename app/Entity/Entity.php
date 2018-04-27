@@ -269,6 +269,11 @@ abstract class Entity implements IdentifiedObject, IAnnotatedObject, IBcsNoteObj
 		return $this->classifications;
 	}
 
+	public function setClassifications(array $data)
+	{
+		self::changeCollection($this->classifications, $data, [$this, 'addClassification']);
+	}
+
 	/**
 	 * @param EntityAnnotation $annotation
 	 */
@@ -301,7 +306,7 @@ abstract class Entity implements IdentifiedObject, IAnnotatedObject, IBcsNoteObj
 	 *
 	 * @return Entity
 	 */
-	public function addOrganism(\App\Entity\Organism $organism)
+	public function addOrganism(Organism $organism)
 	{
 		$this->organisms[] = $organism;
 
@@ -313,9 +318,14 @@ abstract class Entity implements IdentifiedObject, IAnnotatedObject, IBcsNoteObj
 	 *
 	 * @param \App\Entity\Organism $organism
 	 */
-	public function removeOrganism(\App\Entity\Organism $organism)
+	public function removeOrganism(Organism $organism)
 	{
 		$this->organisms->removeElement($organism);
+	}
+
+	public function setOrganisms(array $data)
+	{
+		self::changeCollection($this->organisms, $data);
 	}
 
 	/**
