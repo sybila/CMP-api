@@ -4,7 +4,6 @@ namespace App\Controllers;
 
 use App\Entity\BcsNote;
 use App\Entity\EntityNote;
-use App\Entity\EntityRepository;
 use App\Entity\IdentifiedObject;
 use App\Entity\Repositories\BcsNoteRepository;
 use App\Entity\Repositories\EntityRepository;

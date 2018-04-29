@@ -5,7 +5,6 @@ namespace App\Controllers;
 use App\Entity\Annotation;
 use App\Entity\AnnotationTerm;
 use App\Entity\EntityAnnotation;
-use App\Entity\EntityRepository;
 use App\Entity\IdentifiedObject;
 use App\Entity\Repositories\AnnotationRepository;
 use App\Entity\Repositories\EntityAnnotationRepositoryImpl;

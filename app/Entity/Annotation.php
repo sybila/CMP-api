@@ -17,6 +17,7 @@ final class AnnotationTerm extends ConsistenceEnum
 	const PUBCHEM = 'pubchem';
 	const UNIPROT = 'uniprot';
 	const URL = 'url';
+	const NCBI = 'ncbi';
 }
 
 interface IAnnotatedObject
