@@ -22,7 +22,7 @@ use Slim\Container;
  * @property-read AnnotationRepository $repository
  * @method Annotation getObject(int $id)
  */
-abstract class AnnotationsController extends ParentedRepositoryController
+abstract class BcsAnnotationsController extends ParentedRepositoryController
 {
 	public function __construct(Container $c)
 	{
@@ -93,7 +93,7 @@ abstract class AnnotationsController extends ParentedRepositoryController
 /**
  * @property-read EntityRepository $parentRepository
  */
-class EntityAnnotationsController extends AnnotationsController
+class EntityBcsAnnotationsController extends BcsAnnotationsController
 {
 	protected static function getRepositoryClassName(): string
 	{
@@ -119,7 +119,7 @@ class EntityAnnotationsController extends AnnotationsController
 /**
  * @property-read RuleRepository $parentRepository
  */
-class RuleAnnotationsController extends AnnotationsController
+class RuleBcsAnnotationsController extends BcsAnnotationsController
 {
 	protected static function getRepositoryClassName(): string
 	{

@@ -433,6 +433,43 @@ resourceTypes:
       710 - Invalid entity specified as location (must be Compartment), error details: {given: given type}
       711 - Invalid entity specified as parent, error details: {parent: parent type, child: child type}
 
+/annotations:
+  /types:
+    description: List of valid annotation term types - databases
+    get:
+      responses:
+        200:
+          body:
+            application/json:
+              properties:
+                status: ResponseStatus
+                code: ResponseCode
+                data:
+                  type: list
+                  items: string
+  /link:
+    /{type}:
+      uriParameters:
+        type: string
+      description: Generate link to particular database from ID
+      get:
+        queryParameters:
+          id:
+            type: string
+        responses:
+          200:
+            body:
+              application/json:
+                properties:
+                  status: ResponseStatus
+                  code: ResponseCode
+                  data:
+                    type: object
+                    properties:
+                      url:
+                        type: string
+                        description: URL address of object defined by parameter ID in database {type}
+
 /classifications:
   get:
     is: [Collection: {type: Classification}, Sortable: {keys: 'id, name'}, Pageable, Limitable]

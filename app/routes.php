@@ -6,9 +6,63 @@ use Slim\App;
 use Slim\Http\Request;
 use Slim\Http\Response;
 
+class RouteHelper
+{
+	const LIST = 0x01;
+	const DETAIL = 0x02;
+	const ADD = 0x04;
+	const EDIT = 0x08;
+	const DELETE = 0x10;
+
+	const ALL = self::LIST | self::DETAIL | self::ADD | self::EDIT | self::DELETE;
+
+	/** @var App */
+	public static $app;
+
+	/** @var string */
+	private $path;
+
+	/** @var string */
+	private $className;
+
+	/** @var int */
+	private $mask = self::ALL;
+
+	public function setRoute(string $className, string $path): RouteHelper
+	{
+		$this->className = $className;
+		$this->path = $path;
+		return $this;
+	}
+
+	public function setMask(int $mask): RouteHelper
+	{
+		$this->mask = $mask;
+		return $this;
+	}
+
+	public function register(string $idName = 'id')
+	{
+		if ($this->mask & self::LIST)
+			self::$app->get($this->path, $this->className . ':read');
+
+		if ($this->mask & self::DETAIL)
+			self::$app->get($this->path . '/{' . $idName . ':(?:\\d,?)+}', $this->className . ':readIdentified');
+
+		if ($this->mask & self::ADD)
+			self::$app->post($this->path, $this->className . ':add');
+
+		if ($this->mask & self::EDIT)
+			self::$app->put($this->path . '/{' . $idName . ':\\d+}', $this->className . ':edit');
+
+		if ($this->mask & self::DELETE)
+			self::$app->delete($this->path . '/{' . $idName . ':\\d+}', $this->className . ':delete');
+	}
+}
+
 return function(App $app)
 {
-	$multiIdRegex = '{id:(?:\\d,?)+}';
+	RouteHelper::$app = $app;
 
 	// main
 	$app->get('/', function (Request $request, Response $response, Helpers\ArgumentParser $args)
@@ -16,34 +70,43 @@ return function(App $app)
 		return $response->withRedirect('/version');
 	});
 
-	$addRwController = function(string $className, string $path, string $idName = 'id') use ($app, $multiIdRegex)
-	{
-		$app->get($path, $className . ':read');
-		$app->get($path . '/{' . $idName . ':(?:\\d,?)+}', $className . ':readIdentified');
-		$app->post($path, $className . ':add');
-		$app->put($path . '/{' . $idName . ':\\d+}', $className . ':edit');
-		$app->delete($path . '/{' . $idName . ':\\d+}', $className . ':delete');
-	};
-
 	// version
 	$app->get('/version', Ctl\VersionController::class);
 
-	$addRwController(Ctl\EntityController::class, '/entities');
-	$addRwController(Ctl\EntityAnnotationsController::class, '/entities/{entity-id:\\d+}/annotations');
-	$addRwController(Ctl\EntityNoteController::class, '/entities/{entity-id:\\d+}/notes');
-	$addRwController(Ctl\RuleController::class, '/rules');
-	$addRwController(Ctl\RuleAnnotationsController::class, '/rules/{rule-id:\\d+}/annotations');
-	$addRwController(Ctl\RuleNoteController::class, '/rules/{rule-id:\\d+}/notes');
+	// annotations
+	$app->get('/annotations/types', Ctl\AnnotationController::class . ':readTypes');
+	$app->get('/annotations/link/{type}', Ctl\AnnotationController::class . ':readLink');
+
+	(new RouteHelper)
+		->setRoute(Ctl\ClassificationController::class, '/classifications')
+		->setMask(RouteHelper::ALL & ~RouteHelper::LIST)
+		->register();
+	(new RouteHelper)
+		->setRoute(Ctl\OrganismController::class, '/organisms')
+		->register();
+	(new RouteHelper)
+		->setRoute(Ctl\EntityController::class, '/entities')
+		->register();
+	(new RouteHelper)
+		->setRoute(Ctl\EntityBcsAnnotationsController::class, '/entities/{entity-id:\\d+}/annotations')
+		->register();
+	(new RouteHelper)
+		->setRoute(Ctl\EntityNoteController::class, '/entities/{entity-id:\\d+}/notes')
+		->register();
+	(new RouteHelper)
+		->setRoute(Ctl\RuleController::class, '/rules')
+		->register();
+	(new RouteHelper)
+		->setRoute(Ctl\RuleBcsAnnotationsController::class, '/rules/{rule-id:\\d+}/annotations')
+		->register();
+	(new RouteHelper)
+		->setRoute(Ctl\RuleNoteController::class, '/rules/{rule-id:\\d+}/notes')
+		->register();
 
 	// entities
 	$app->post('/entities/{id:\\d+}/status', Ctl\EntityController::class . ':editStatus');
 	$app->get('/entities/{code}', Ctl\EntityController::class . ':readCode');
 
-	// organisms
-	$app->get('/organisms/' . $multiIdRegex, Ctl\OrganismController::class . ':readIdentified');
-	$app->get('/organisms', Ctl\OrganismController::class . ':read');
-
-	// Classifications
-	$app->get('/classifications/' . $multiIdRegex, Ctl\ClassificationController::class . ':readIdentified');
+	// classifications
 	$app->get('/classifications[/{type}]', Ctl\ClassificationController::class . ':read');
 };

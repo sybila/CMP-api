@@ -2,6 +2,8 @@
 
 namespace App\Helpers;
 
+use App\Entity\Classification;
+use App\Entity\Entity;
 use App\Exceptions\MalformedInputException;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Validation;
@@ -12,6 +14,8 @@ class Validators
 
 	public static $code;
 	public static $identifierList;
+	public static $classification;
+	public static $organism;
 	public static $states;
 	public static $compartment;
 	public static $complex;
@@ -47,6 +51,24 @@ Validators::$states = new Assert\Collection([
 		'code' => new Assert\NotBlank(),
 		'description' => new Assert\Type(['type' => 'string']),
 	],
+]);
+
+Validators::$classification = new Assert\Collection([
+	'fields' => [
+		'type' => new Assert\Choice(array_values(Classification::$classToType)),
+		'name' => new Assert\Type(['type' => 'string']),
+	],
+	'allowExtraFields' => true,
+	'allowMissingFields' => true,
+]);
+
+Validators::$organism = new Assert\Collection([
+	'fields' => [
+		'name' => new Assert\Type(['type' => 'string']),
+		'code' => new Assert\Type(['type' => 'string']),
+	],
+	'allowExtraFields' => true,
+	'allowMissingFields' => true,
 ]);
 
 Validators::$compartment = new Assert\Collection([
@@ -90,6 +112,7 @@ Validators::$entity = new Assert\Collection([
 	'fields' => [
 		'name' => new Assert\Type(['type' => 'string']),
 		'code' => Validators::$code,
+		'type' => new Assert\Choice(array_values(Entity::$classToType)),
 		'description' => new Assert\Type(['type' => 'string']),
 		'status' => new Assert\Type(['type' => 'string']),
 		'classifications' => Validators::$identifierList,
