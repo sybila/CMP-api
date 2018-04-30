@@ -4,10 +4,7 @@ namespace App\Controllers;
 
 use App\Entity\IdentifiedObject;
 use App\Entity\Repositories\IEndpointRepository;
-use App\Entity\Repositories\IRepository;
-use App\Exceptions\ApiException;
 use App\Exceptions\InternalErrorException;
-use App\Exceptions\MalformedInputException;
 use App\Exceptions\NonExistingObjectException;
 use App\Helpers\ArgumentParser;
 use Doctrine\ORM\ORMException;

@@ -17,6 +17,7 @@ use App\Exceptions\MalformedInputException;
 use App\Helpers\ArgumentParser;
 use Consistence\Enum\InvalidEnumValueException;
 use Slim\Container;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @property-read AnnotationRepository $repository
@@ -87,6 +88,14 @@ abstract class BcsAnnotationsController extends ParentedRepositoryController
 	protected static function getObjectName(): string
 	{
 		return 'annotation';
+	}
+
+	protected function getValidator(): Assert\Collection
+	{
+		return new Assert\Collection([
+			'termId' => new Assert\NotBlank(),
+			'termType' => new Assert\Choice(array_values(AnnotationTerm::getAvailableValues())),
+		]);
 	}
 }
 

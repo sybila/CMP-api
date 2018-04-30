@@ -11,6 +11,7 @@ use App\Entity\RuleNote;
 use App\Exceptions\MalformedInputException;
 use App\Helpers\ArgumentParser;
 use App\Helpers\DateTimeJson;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @property-read BcsNoteRepository $repository
@@ -75,5 +76,12 @@ class RuleNoteController extends ParentedRepositoryController
 	protected function getParentObjectInfo(): array
 	{
 		return ['rule-id', 'rule'];
+	}
+
+	protected function getValidator(): Assert\Collection
+	{
+		return new Assert\Collection([
+			'text' => new Assert\NotBlank(),
+		]);
 	}
 }

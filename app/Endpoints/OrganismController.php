@@ -7,7 +7,7 @@ use App\Entity\Organism;
 use App\Entity\Repositories\OrganismRepository;
 use App\Exceptions\MalformedInputException;
 use App\Helpers\ArgumentParser;
-use App\Helpers\Validators;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @property-read OrganismRepository $repository
@@ -50,8 +50,6 @@ final class OrganismController extends WritableRepositoryController
 	 */
 	protected function setData($organism, ArgumentParser $body, bool $insert): void
 	{
-		Validators::validate($body, 'organism', 'invalid data for organism');
-
 		if ($body->hasKey('name'))
 			$organism->setName($body->getString('name'));
 		if ($body->hasKey('code'))
@@ -64,5 +62,13 @@ final class OrganismController extends WritableRepositoryController
 	protected function createObject(ArgumentParser $body): IdentifiedObject
 	{
 		return new Organism;
+	}
+
+	protected function getValidator(): Assert\Collection
+	{
+		return new Assert\Collection([
+			'name' => new Assert\Type(['type' => 'string']),
+			'code' => new Assert\Type(['type' => 'string']),
+		]);
 	}
 }

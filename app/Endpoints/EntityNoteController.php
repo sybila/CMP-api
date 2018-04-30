@@ -11,6 +11,7 @@ use App\Entity\Repositories\EntityNoteRepository;
 use App\Exceptions\MalformedInputException;
 use App\Helpers\ArgumentParser;
 use App\Helpers\DateTimeJson;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @property-read BcsNoteRepository $repository
@@ -75,5 +76,12 @@ class EntityNoteController extends ParentedRepositoryController
 	protected function getParentObjectInfo(): array
 	{
 		return ['entity-id', 'entity'];
+	}
+
+	protected function getValidator(): Assert\Collection
+	{
+		return new Assert\Collection([
+			'text' => new Assert\NotBlank(),
+		]);
 	}
 }

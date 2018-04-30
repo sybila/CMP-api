@@ -28,6 +28,7 @@ use App\Helpers\Validators;
 use Consistence\Enum\InvalidEnumValueException;
 use Slim\Container;
 use Slim\Http\{Request, Response};
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @property-read EntityRepository $repository
@@ -228,8 +229,6 @@ final class EntityController extends WritableRepositoryController
 	 */
 	protected function setData($entity, ArgumentParser $data, bool $insert): void
 	{
-		Validators::validate($data, 'entity', 'invalid data for entity');
-
 		if ($data->hasKey('name'))
 			$entity->setName($data->getString('name'));
 		if ($data->hasKey('code'))
@@ -272,9 +271,10 @@ final class EntityController extends WritableRepositoryController
 			$entity->setOrganisms($organisms);
 		}
 
+		$this->validate($data, $this->getSpecificValidator($data->getString('type')));
+
 		if ($entity instanceof Compartment)
 		{
-			Validators::validate($data, 'compartment', 'invalid data for compartment');
 			if ($data->hasKey('parent'))
 			{
 				if ($data->hasValue('parent'))
@@ -288,7 +288,6 @@ final class EntityController extends WritableRepositoryController
 		}
 		elseif ($entity instanceof Complex)
 		{
-			Validators::validate($data, 'complex', 'invalid data for complex');
 			if ($data->hasKey('compartments'))
 			{
 				$entities = array_map(function($id) { return $this->getObject($id); }, $data->getArray('compartments'));
@@ -302,7 +301,6 @@ final class EntityController extends WritableRepositoryController
 		}
 		elseif ($entity instanceof Structure)
 		{
-			Validators::validate($data, 'structure', 'invalid data for structure');
 			if ($data->hasKey('compartments'))
 			{
 				$entities = array_map(function($id) { return $this->getObject($id); }, $data->getArray('compartments'));
@@ -321,7 +319,6 @@ final class EntityController extends WritableRepositoryController
 		}
 		elseif ($entity instanceof Atomic)
 		{
-			Validators::validate($data, 'atomic', 'invalid data for atomic');
 			if ($data->hasKey('compartments'))
 			{
 				$entities = array_map(function($id) { return $this->getObject($id); }, $data->getArray('compartments'));
@@ -335,6 +332,50 @@ final class EntityController extends WritableRepositoryController
 			if ($data->hasKey('states'))
 				$this->setStates($entity, $data->getArray('states'));
 		}
+	}
+
+	protected function getValidator(): Assert\Collection
+	{
+		return new Assert\Collection([
+			'name' => new Assert\Type(['type' => 'string']),
+			'code' => Validators::$code,
+			'type' => new Assert\Choice(array_values(Entity::$classToType)),
+			'description' => new Assert\Type(['type' => 'string']),
+			'status' => new Assert\Type(['type' => 'string']),
+			'classifications' => Validators::$identifierList,
+			'organisms' => Validators::$identifierList,
+		]);
+	}
+
+	protected function getSpecificValidator(string $type): Assert\Collection
+	{
+		switch ($type)
+		{
+			case 'compartment': return new Assert\Collection([
+				'parent' => Validators::$identifier
+			]);
+			case 'complex': return new Assert\Collection([
+				'compartments' => Validators::$identifierList,
+				'children' => Validators::$identifierList,
+			]);
+			case 'structure': return new Assert\Collection([
+				'compartments' => Validators::$identifierList,
+				'parents' => Validators::$identifierList,
+				'children' => Validators::$identifierList,
+			]);
+			case 'atomic': return new Assert\Collection([
+				'compartments' => Validators::$identifierList,
+				'parents' => Validators::$identifierList,
+				'states' => new Assert\All([
+					new Assert\Collection([
+						'code' => new Assert\NotBlank(),
+						'description' => new Assert\Type(['type' => 'string']),
+					])
+				]),
+			]);
+		}
+
+		return null;
 	}
 
 	protected static function getObjectName(): string

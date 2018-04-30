@@ -8,7 +8,7 @@ use App\Entity\Repositories\ClassificationRepository;
 use App\Exceptions\InvalidArgumentException;
 use App\Exceptions\MalformedInputException;
 use App\Helpers\ArgumentParser;
-use App\Helpers\Validators;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @property-read ClassificationRepository $repository
@@ -59,8 +59,6 @@ final class ClassificationController extends WritableRepositoryController
 	 */
 	protected function setData($classification, ArgumentParser $body, bool $insert): void
 	{
-		Validators::validate($body, 'classification', 'invalid data for classification');
-
 		if ($body->hasKey('name'))
 			$classification->setName($body->getString('name'));
 
@@ -78,5 +76,13 @@ final class ClassificationController extends WritableRepositoryController
 			throw new InvalidArgumentException('type', $type);
 
 		return new $cls;
+	}
+
+	protected function getValidator(): Assert\Collection
+	{
+		return new Assert\Collection([
+			'type' => new Assert\Choice(array_values(Classification::$classToType)),
+			'name' => new Assert\Type(['type' => 'string']),
+		]);
 	}
 }
