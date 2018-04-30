@@ -20,6 +20,20 @@ final class AnnotationTerm extends ConsistenceEnum
 	const NCBI = 'ncbi';
 	const CBS = 'cbs';
 
+	public static $names = [
+		self::BIONUMBERS => 'Bionumbers',
+		self::CHEBI => 'Chebi',
+		self::DOI => 'Digital Object Identifier',
+		self::EC => 'GenomeNet: Enzyme',
+		self::GO => 'Gene Ontology Consortium',
+		self::KEGG => 'Kegg',
+		self::PUBCHEM => 'PubChem',
+		self::UNIPROT => 'Uniprot',
+		self::URL => 'URL Address',
+		self::NCBI => 'National Center for Biotechnology Information',
+		self::CBS => 'Cyanobase',
+	];
+
 	public function getLink($id)
 	{
 		switch ($this->getValue())

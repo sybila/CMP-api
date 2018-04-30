@@ -149,6 +149,14 @@ types:
   ObjectStatus:
     type: string
     enum: ["new", "active"]
+  AnnotationType:
+    properties:
+      name:
+        type: string
+        description: User-friendly database name
+      code:
+        type: string
+        description: Database code to be used within API requests/responses
 
 traits:
   Collection:
@@ -445,8 +453,7 @@ resourceTypes:
                 status: ResponseStatus
                 code: ResponseCode
                 data:
-                  type: list
-                  items: string
+                  type: AnnotationType[]
   /link:
     /{type}:
       uriParameters:
