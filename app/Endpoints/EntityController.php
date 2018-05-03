@@ -271,7 +271,7 @@ final class EntityController extends WritableRepositoryController
 			$entity->setOrganisms($organisms);
 		}
 
-		$this->validate($data, $this->getSpecificValidator($data->getString('type')));
+		$this->validate($data, $this->getSpecificValidator($entity->getType()));
 
 		if ($entity instanceof Compartment)
 		{
