@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Exceptions\EntityClassificationException;
 use App\Exceptions\EntityHierarchyException;
 use App\Exceptions\EntityLocationException;
 use App\Helpers\
@@ -235,41 +236,28 @@ abstract class Entity implements IdentifiedObject, IAnnotatedObject, IBcsNoteObj
 		$this->description = $description;
 	}
 
-	/**
-	 * Add classification
-	 *
-	 * @param \App\Entity\EntityClassification $classification
-	 *
-	 * @return Entity
-	 */
-	public function addClassification(\App\Entity\EntityClassification $classification)
+	public function addClassification(Classification $classification): void
 	{
-		$this->classifications[] = $classification;
+		if (!($classification instanceof EntityClassification))
+			throw new EntityClassificationException;
 
-		return $this;
+		$this->classifications[] = $classification;
 	}
 
-	/**
-	 * Remove classification
-	 *
-	 * @param \App\Entity\EntityClassification $classification
-	 */
-	public function removeClassification(\App\Entity\EntityClassification $classification)
+	public function removeClassification(Classification $classification): void
 	{
 		$this->classifications->removeElement($classification);
 	}
 
 	/**
-	 * Get classifications
-	 *
 	 * @return EntityClassification[]|Collection
 	 */
-	public function getClassifications()
+	public function getClassifications(): Collection
 	{
 		return $this->classifications;
 	}
 
-	public function setClassifications(array $data)
+	public function setClassifications(array $data): void
 	{
 		self::changeCollection($this->classifications, $data, [$this, 'addClassification']);
 	}

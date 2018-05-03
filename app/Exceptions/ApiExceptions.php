@@ -148,7 +148,6 @@ class EntityLocationException extends ApiException
 	}
 }
 
-
 class EntityHierarchyException extends ApiException
 {
 	const CODE = 711;
@@ -161,5 +160,16 @@ class EntityHierarchyException extends ApiException
 			'parent' => $parent,
 			'child' => $child,
 		];
+	}
+}
+
+class EntityClassificationException extends ApiException
+{
+	const CODE = 712;
+
+	public function __construct(Throwable $previous = null)
+	{
+		parent::__construct($previous)
+			->setMessage('Entities must have classification with type "entity"');
 	}
 }

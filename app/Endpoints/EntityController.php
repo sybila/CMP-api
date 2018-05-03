@@ -11,6 +11,7 @@ use App\Entity\
 	Complex,
 	Entity,
 	EntityAnnotation,
+	EntityClassification,
 	EntityStatus,
 	IdentifiedObject,
 	Repositories\ClassificationRepository,
