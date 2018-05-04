@@ -1,10 +1,8 @@
-.idea
+/.idea
 cache/*
 logs/*
+/proxies
 settings.local.php
-vendor
-composer.lock
-deploy.php
-docs
-node_modules
-package-lock.json
+/vendor
+/composer.lock
+/www/docs
