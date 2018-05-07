@@ -25,32 +25,22 @@ class EntityNoteController extends ParentedRepositoryController
 		return ['id'];
 	}
 
-	/**
-	 * @param BcsNote $entity
-	 * @return array
-	 */
-	protected function getData($entity): array
+	protected function getData(IdentifiedObject $object): array
 	{
+		/** @var BcsNote $object */
 		return [
-			'id' => $entity->getId(),
-			'text' => $entity->getText(),
+			'id' => $object->getId(),
+			'text' => $object->getText(),
 		];
 	}
 
-	/**
-	 * @param BcsNote        $entity
-	 * @param ArgumentParser $body
-	 * @param bool           $insert
-	 */
-	protected function setData($entity, ArgumentParser $body, bool $insert): void
+	protected function setData(IdentifiedObject $note, ArgumentParser $body): void
 	{
+		/** @var BcsNote $note */
 		if ($body->hasKey('text'))
-			$entity->setText($body->getString('text'));
+			$note->setText($body->getString('text'));
 
-		if ($insert && !$body->hasKey('text'))
-			throw new MalformedInputException('Input doesn\'t contain all required fields');
-
-		$entity->setUpdated(new DateTimeJson);
+		$note->setUpdated(new DateTimeJson);
 	}
 
 	protected static function getObjectName(): string
@@ -83,5 +73,12 @@ class EntityNoteController extends ParentedRepositoryController
 		return new Assert\Collection([
 			'text' => new Assert\NotBlank(),
 		]);
+	}
+
+	protected function checkInsertObject(IdentifiedObject $note): void
+	{
+		/** @var BcsNote $note */
+		if ($note->getText() == '')
+			throw new MalformedInputException('Input doesn\'t contain all required fields');
 	}
 }

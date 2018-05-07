@@ -20,16 +20,13 @@ final class OrganismController extends WritableRepositoryController
 		return ['id', 'name', 'code'];
 	}
 
-	/**
-	 * @param Organism $entity
-	 * @return array
-	 */
-	protected function getData($entity): array
+	protected function getData(IdentifiedObject $object): array
 	{
+		/** @var Organism $object */
 		return [
-			'id' => $entity->getId(),
-			'name' => $entity->getName(),
-			'code' => $entity->getCode(),
+			'id' => $object->getId(),
+			'name' => $object->getName(),
+			'code' => $object->getCode(),
 		];
 	}
 
@@ -43,20 +40,13 @@ final class OrganismController extends WritableRepositoryController
 		return 'organism';
 	}
 
-	/**
-	 * @param Organism $organism
-	 * @param ArgumentParser $body
-	 * @param bool           $insert
-	 */
-	protected function setData($organism, ArgumentParser $body, bool $insert): void
+	protected function setData(IdentifiedObject $organism, ArgumentParser $body): void
 	{
+		/** @var Organism $organism */
 		if ($body->hasKey('name'))
 			$organism->setName($body->getString('name'));
 		if ($body->hasKey('code'))
 			$organism->setCode($body->getString('code'));
-
-		if ($insert && ($organism->getName() == '' || $organism->getCode() == ''))
-			throw new MalformedInputException('Input doesn\'t contain all required fields');
 	}
 
 	protected function createObject(ArgumentParser $body): IdentifiedObject
@@ -70,5 +60,12 @@ final class OrganismController extends WritableRepositoryController
 			'name' => new Assert\Type(['type' => 'string']),
 			'code' => new Assert\Type(['type' => 'string']),
 		]);
+	}
+
+	protected function checkInsertObject(IdentifiedObject $organism): void
+	{
+		/** @var Organism $organism */
+		if ($organism->getName() == '' || $organism->getCode() == '')
+			throw new MalformedInputException('Input doesn\'t contain all required fields');
 	}
 }

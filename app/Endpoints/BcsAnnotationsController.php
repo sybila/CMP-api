@@ -48,41 +48,36 @@ abstract class BcsAnnotationsController extends ParentedRepositoryController
 		return [];
 	}
 
-	/**
-	 * @param Annotation $entity
-	 * @return array
-	 */
-	protected function getData($entity): array
+	protected function getData(IdentifiedObject $object): array
 	{
+		/** @var Annotation $annotation */
 		return [
-			'id' => $entity->getId(),
-			'termId' => $entity->getTermId(),
-			'termType' => (string)$entity->getTermType(),
+			'id' => $annotation->getId(),
+			'termId' => $annotation->getTermId(),
+			'termType' => (string)$annotation->getTermType(),
 		];
 	}
 
-	/**
-	 * @param Annotation     $entity
-	 * @param ArgumentParser $body
-	 * @param bool           $insert
-	 */
-	protected function setData($entity, ArgumentParser $body, bool $insert): void
+	protected function getTermType(ArgumentParser $body): AnnotationTerm
 	{
-		if ($insert && (!$body->hasKey('termId') || !$body->hasKey('termType')))
-			throw new MalformedInputException('Annotation TermId and TermType must be set!');
+		if (!$body->hasKey('termType'))
+			throw new MalformedInputException('Annotation TermType must be set!');
 
-		if ($body->hasKey('termId'))
-			$entity->setTermId($body->getString('termId'));
-		if ($body->hasKey('termType'))
-		{
-			try {
-				$term = AnnotationTerm::get(strtolower($body->getString('termType')));
-				$entity->setTermType($term);
-			}
-			catch (InvalidEnumValueException $e) {
-				throw new InvalidEnumFieldValueException('termType', $body->getString('termType'), implode(', ', AnnotationTerm::getAvailableValues()));
-			}
+		try {
+			return AnnotationTerm::get(strtolower($body->getString('termType')));
 		}
+		catch (InvalidEnumValueException $e) {
+			throw new InvalidEnumFieldValueException('termType', $body->getString('termType'), implode(', ', AnnotationTerm::getAvailableValues()));
+		}
+	}
+
+	protected function setData(IdentifiedObject $annotation, ArgumentParser $body): void
+	{
+		/** @var Annotation $annotation */
+		if ($body->hasKey('termId'))
+			$annotation->setTermId($body->getString('termId'));
+		if ($body->hasKey('termType'))
+			$annotation->setTermType($this->getTermType($body));
 	}
 
 	protected static function getObjectName(): string
@@ -96,6 +91,13 @@ abstract class BcsAnnotationsController extends ParentedRepositoryController
 			'termId' => new Assert\NotBlank(),
 			'termType' => new Assert\Choice(array_values(AnnotationTerm::getAvailableValues())),
 		]);
+	}
+
+	protected function checkInsertObject(IdentifiedObject $annotation): void
+	{
+		/** @var Annotation $annotation */
+		if (!$annotation->getTermId())
+			throw new MalformedInputException('Annotation TermId must be set!');
 	}
 }
 
@@ -111,7 +113,7 @@ class EntityBcsAnnotationsController extends BcsAnnotationsController
 
 	protected function createObject(ArgumentParser $body): IdentifiedObject
 	{
-		return new EntityAnnotation;
+		return new EntityAnnotation($this->getTermType($body));
 	}
 
 	protected static function getParentRepositoryClassName(): string
@@ -137,7 +139,7 @@ class RuleBcsAnnotationsController extends BcsAnnotationsController
 
 	protected function createObject(ArgumentParser $body): IdentifiedObject
 	{
-		return new RuleAnnotation;
+		return new RuleAnnotation($this->getTermType($body));
 	}
 
 	protected static function getParentRepositoryClassName(): string

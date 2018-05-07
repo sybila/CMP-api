@@ -29,16 +29,13 @@ final class ClassificationController extends WritableRepositoryController
 		return [];
 	}
 
-	/**
-	 * @param Classification $entity
-	 * @return array
-	 */
-	protected function getData($entity): array
+	protected function getData(IdentifiedObject $object): array
 	{
+		/** @var Classification $object */
 		return [
-			'id' => $entity->getId(),
-			'name' => $entity->getName(),
-			'type' => Classification::$classToType[get_class($entity)],
+			'id' => $object->getId(),
+			'name' => $object->getName(),
+			'type' => Classification::$classToType[get_class($object)],
 		];
 	}
 
@@ -52,18 +49,11 @@ final class ClassificationController extends WritableRepositoryController
 		return 'classification';
 	}
 
-	/**
-	 * @param Classification $classification
-	 * @param ArgumentParser $body
-	 * @param bool           $insert
-	 */
-	protected function setData($classification, ArgumentParser $body, bool $insert): void
+	protected function setData(IdentifiedObject $classification, ArgumentParser $body): void
 	{
+		/** @var Classification $classification */
 		if ($body->hasKey('name'))
 			$classification->setName($body->getString('name'));
-
-		if ($insert && $classification->getName() == '')
-			throw new MalformedInputException('Input doesn\'t contain all required fields');
 	}
 
 	protected function createObject(ArgumentParser $body): IdentifiedObject
@@ -84,5 +74,12 @@ final class ClassificationController extends WritableRepositoryController
 			'type' => new Assert\Choice(array_values(Classification::$classToType)),
 			'name' => new Assert\Type(['type' => 'string']),
 		]);
+	}
+
+	protected function checkInsertObject(IdentifiedObject $classification): void
+	{
+		/** @var Classification $classification */
+		if ($classification->getName() == '')
+			throw new MalformedInputException('Input doesn\'t contain all required fields');
 	}
 }

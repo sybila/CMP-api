@@ -117,6 +117,11 @@ abstract class Annotation implements IdentifiedObject
 	 */
 	protected $itemId;
 
+	public function __construct(AnnotationTerm $term)
+	{
+		$this->termType = $term;
+	}
+
 	/**
 	 * @param AnnotationTerm $value
 	 */

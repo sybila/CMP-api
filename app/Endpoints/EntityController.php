@@ -106,43 +106,35 @@ final class EntityController extends WritableRepositoryController
 		return self::formatOk($response, null);
 	}
 
-	/**
-	 * @param ArgumentParser $data
-	 * @return Entity
-	 * @throws InvalidArgumentException
-	 */
-	protected function createObject(ArgumentParser $data): IdentifiedObject
+	protected function createObject(ArgumentParser $body): IdentifiedObject
 	{
-		if (!$data->hasKey('type'))
+		if (!$body->hasKey('type'))
 			throw new InvalidArgumentException('type', null);
 
-		$cls = array_search($type = $data->getString('type'), Entity::$classToType, true);
+		$cls = array_search($type = $body->getString('type'), Entity::$classToType, true);
 		if (!$cls || $cls == AtomicState::class)
 			throw new InvalidArgumentException('type', $type);
 
 		return new $cls;
 	}
 
-	/**
-	 * @param Entity $entity
-	 * @return array
-	 */
-	protected function getData($entity): array
+	protected function getData(IdentifiedObject $object): array
 	{
+		/** @var Entity $object */
 		return [
-			'id' => $entity->getId(),
-			'name' => $entity->getName(),
-			'description' => $entity->getDescription(),
-			'code' => $entity->getCode(),
-			'type' => $entity->getType(),
-			'status' => (string)$entity->getStatus(),
-			'classifications' => $entity->getClassifications()->map(self::identifierGetter())->toArray(),
-			'organisms' => $entity->getOrganisms()->map(self::identifierGetter())->toArray(),
-			'annotations' => $entity->getAnnotations()->map(function(EntityAnnotation $annotation)
+			'id' => $object->getId(),
+			'name' => $object->getName(),
+			'description' => $object->getDescription(),
+			'code' => $object->getCode(),
+			'type' => $object->getType(),
+			'status' => (string)$object->getStatus(),
+			'classifications' => $object->getClassifications()->map(self::identifierGetter())->toArray(),
+			'organisms' => $object->getOrganisms()->map(self::identifierGetter())->toArray(),
+			'annotations' => $object->getAnnotations()->map(function(EntityAnnotation $annotation)
 			{
 				return ['id' => $annotation->getTermId(), 'type' => $annotation->getTermType()];
 			})->toArray(),
-		] + $this->getSpecificData($entity);
+		] + $this->getSpecificData($object);
 	}
 
 	private function getSpecificData(Entity $entity): array
@@ -223,13 +215,9 @@ final class EntityController extends WritableRepositoryController
 			$this->orm->remove($state);
 	}
 
-	/**
-	 * @param Entity         $entity
-	 * @param ArgumentParser $data
-	 * @param bool           $insert
-	 */
-	protected function setData($entity, ArgumentParser $data, bool $insert): void
+	protected function setData(IdentifiedObject $entity, ArgumentParser $data): void
 	{
+		/** @var Entity $entity */
 		if ($data->hasKey('name'))
 			$entity->setName($data->getString('name'));
 		if ($data->hasKey('code'))
@@ -252,9 +240,6 @@ final class EntityController extends WritableRepositoryController
 				throw new InvalidArgumentException('status', $data->getString('status'), 'must be one of: ' . implode(',', EntityStatus::getAvailableValues()));
 			}
 		}
-
-		if ($insert && (!$data->hasKey('code') || !$data->hasKey('name')))
-			throw new MalformedInputException('Input doesn\'t contain all required fields');
 
 		if ($data->hasKey('classifications'))
 		{
@@ -387,5 +372,12 @@ final class EntityController extends WritableRepositoryController
 	protected static function getRepositoryClassName(): string
 	{
 		return EntityRepository::class;
+	}
+
+	protected function checkInsertObject(IdentifiedObject $entity): void
+	{
+		/** @var Entity $entity */
+		if ($entity->getCode() == '' || $entity->getName() == '')
+			throw new MalformedInputException('Input doesn\'t contain all required fields');
 	}
 }

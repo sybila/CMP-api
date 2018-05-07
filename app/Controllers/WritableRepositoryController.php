@@ -30,8 +30,25 @@ abstract class WritableRepositoryController extends RepositoryController
 	 */
 	protected $beforeDelete = [];
 
-	abstract protected function setData($entity, ArgumentParser $body, bool $insert): void;
+	/**
+	 * fill $object with data from $body, do additional validations
+	 * @param IdentifiedObject $object
+	 * @param ArgumentParser   $body
+	 */
+	abstract protected function setData(IdentifiedObject $object, ArgumentParser $body): void;
+
+	/**
+	 * Create object to be inserted, can be as simple as `return new SomeObject;`
+	 * @param ArgumentParser $body request body
+	 * @return IdentifiedObject
+	 */
 	abstract protected function createObject(ArgumentParser $body): IdentifiedObject;
+
+	/**
+	 * Check object to be inserted if it contains all required fields
+	 * @param IdentifiedObject $object
+	 */
+	abstract protected function checkInsertObject(IdentifiedObject $object): void;
 
 	protected function getModifyId(ArgumentParser $args): int
 	{
@@ -44,29 +61,30 @@ abstract class WritableRepositoryController extends RepositoryController
 
 		$body = new ArgumentParser($request->getParsedBody());
 		$this->validate($body, $this->getValidator());
-		$entity = $this->createObject($body);
-		$this->setData($entity, $body, true);
+		$object = $this->createObject($body);
+		$this->setData($object, $body);
+		$this->checkInsertObject($object);
 
-		$this->runEvents($this->beforeInsert, $entity);
+		$this->runEvents($this->beforeInsert, $object);
 
-		$this->orm->persist($entity);
+		$this->orm->persist($object);
 		$this->orm->flush();
-		return self::formatInsert($response, $entity->getId());
+		return self::formatInsert($response, $object->getId());
 	}
 
 	public function edit(Request $request, Response $response, ArgumentParser $args): Response
 	{
 		$this->runEvents($this->beforeRequest, $request, $response, $args);
 
-		$entity = $this->getObject($this->getModifyId($args));
+		$object = $this->getObject($this->getModifyId($args));
 
 		$body = new ArgumentParser($request->getParsedBody());
 		$this->validate($body, $this->getValidator());
-		$this->setData($entity, $body, false);
+		$this->setData($object, $body);
 
-		$this->runEvents($this->beforeUpdate, $entity);
+		$this->runEvents($this->beforeUpdate, $object);
 
-		$this->orm->persist($entity);
+		$this->orm->persist($object);
 		$this->orm->flush();
 		return self::formatOk($response);
 	}

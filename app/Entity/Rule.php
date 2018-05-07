@@ -69,6 +69,12 @@ class Rule implements IdentifiedObject, IAnnotatedObject, IBcsNoteObject
 	protected $equation;
 
 	/**
+	 * @var string
+	 * @ORM\Column(name="description",type="string")
+	 */
+	protected $description;
+
+	/**
 	 * @var int
 	 * @ORM\Column(name="active",type="integer")
 	 */
@@ -325,5 +331,15 @@ class Rule implements IdentifiedObject, IAnnotatedObject, IBcsNoteObject
 	public function removeNote(BcsNote $note): void
 	{
 		$this->notes->removeElement($note);
+	}
+
+	public function getDescription(): string
+	{
+		return $this->description;
+	}
+
+	public function setDescription(string $description): void
+	{
+		$this->description = $description;
 	}
 }

@@ -4,9 +4,11 @@ namespace App\Controllers;
 
 use App\Entity\
 {
-	Repositories\RuleRepository, RuleAnnotation, Rule, RuleStatus
+	IdentifiedObject, Repositories\RuleRepository, RuleAnnotation, Rule, RuleStatus
 };
 use App\Helpers\ArgumentParser;
+use App\Helpers\Validators;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * TODO: make writable
@@ -25,43 +27,36 @@ final class RuleController extends RepositoryController
 		return new Rule;
 	}
 
-	/**
-	 * @param Rule $entity
-	 * @return array
-	 */
-	protected function getData($entity): array
+	protected function getData(IdentifiedObject $object): array
 	{
+		/** @var Rule $object */
 		return [
-			'id' => $entity->getId(),
-			'name' => $entity->getName(),
-			'equation' => $entity->getEquation(),
-			'code' => $entity->getCode(),
-			'modifier' => $entity->getModifier(),
-			'status' => (string)$entity->getStatus(),
-			'classifications' => $entity->getClassifications()->map(self::identifierGetter())->toArray(),
-			'organisms' => $entity->getOrganisms()->map(self::identifierGetter())->toArray(),
-			'annotations' => $entity->getAnnotations()->map(function(RuleAnnotation $annotation)
+			'id' => $object->getId(),
+			'name' => $object->getName(),
+			'equation' => $object->getEquation(),
+			'code' => $object->getCode(),
+			'modifier' => $object->getModifier(),
+			'status' => (string)$object->getStatus(),
+			'classifications' => $object->getClassifications()->map(self::identifierGetter())->toArray(),
+			'organisms' => $object->getOrganisms()->map(self::identifierGetter())->toArray(),
+			'annotations' => $object->getAnnotations()->map(function(RuleAnnotation $annotation)
 			{
 				return ['id' => $annotation->getTermId(), 'type' => $annotation->getTermType()];
 			})->toArray(),
 		];
 	}
 
-	/**
-	 * @param Rule $entity
-	 * @param ArgumentParser $data
-	 * @throws \Exception
-	 */
-	protected function setData($entity, ArgumentParser $data): void
+	protected function setData(IdentifiedObject $rule, ArgumentParser $data): void
 	{
+		/** @var Rule $rule */
 		if ($data->hasKey('name'))
-			$entity->setName($data->getString('name'));
+			$rule->setName($data->getString('name'));
 		if ($data->hasKey('code'))
-			$entity->setCode($data->getString('code'));
+			$rule->setCode($data->getString('code'));
 		if ($data->hasKey('description'))
-			$entity->setDescription($data->getString('description'));
+			$rule->setDescription($data->getString('description'));
 		if ($data->hasKey('status'))
-			$entity->setStatus(RuleStatus::fromInt($data->getInt('status')));
+			$rule->setStatus(RuleStatus::fromInt($data->getInt('status')));
 	}
 
 	protected static function getRepositoryClassName(): string
@@ -73,4 +68,27 @@ final class RuleController extends RepositoryController
 	{
 		return 'rule';
 	}
+
+	protected function createObject(ArgumentParser $body): IdentifiedObject
+	{
+		return new Rule;
+	}
+
+//	protected function getValidator(): Assert\Collection
+//	{
+//		return new Assert\Collection([
+//			'name' => new Assert\Type(['type' => 'string']),
+//			'equation' => new Assert\Type(['type' => 'string']),
+//			'modifier' => new Assert\Type(['type' => 'string']),
+//			'description' => new Assert\Type(['type' => 'string']),
+//			'status' => new Assert\Type(['type' => 'string']),
+//			'classifications' => Validators::$identifierList,
+//			'organisms' => Validators::$identifierList,
+//		]);
+//	}
+//
+//	protected function checkInsertObject(IdentifiedObject $rule): void
+//	{
+//		/** @var Rule $rule */
+//	}
 }

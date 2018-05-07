@@ -28,7 +28,7 @@ abstract class RepositoryController extends AbstractController
 
 	abstract protected static function getRepositoryClassName(): string;
 	abstract protected static function getObjectName(): string;
-	abstract protected function getData($entity): array;
+	abstract protected function getData(IdentifiedObject $object): array;
 
 	/**
 	 * @param array $events
