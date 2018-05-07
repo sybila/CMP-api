@@ -5,7 +5,7 @@ namespace App\Controllers;
 use App\Entity\IdentifiedObject;
 use App\Entity\Repositories\IDependentEndpointRepository;
 use App\Entity\Repositories\IEndpointRepository;
-use App\Exceptions\MalformedInputException;
+use App\Exceptions\MissingRequiredKeyException;
 use App\Exceptions\NonExistingObjectException;
 use App\Helpers\ArgumentParser;
 use Slim\Container;
@@ -27,7 +27,7 @@ abstract class ParentedRepositoryController extends WritableRepositoryController
 	{
 		$info = static::getParentObjectInfo();
 		if (!$args->hasKey($info[0]) || !is_scalar($args->get($info[0])))
-			throw new MalformedInputException('Missing key ' . $info[0]);
+			throw new MissingRequiredKeyException($info[0]);
 
 		try {
 			return $this->parentRepository->get($args->getInt($info[0]));

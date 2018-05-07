@@ -56,31 +56,49 @@ class UniqueKeyViolationException extends ApiException
 	}
 }
 
+/**
+ * thrown when some argument/key is invalid for reason which can not be explained by other exceptions
+ */
 class InvalidArgumentException extends ApiException
 {
 	const CODE = 702;
-	public function __construct(string $name, ?string $argument, string $message = "", Throwable $previous = null)
+	public function __construct(string $name, ?string $argument, string $message, Throwable $previous = null)
 	{
 		parent::__construct($previous)
-			->setMessage('Invalid argument "%s" for %s%s', $argument, $name, ($message ? (': ' . $message) : ''));
+			->setMessage('Invalid argument "%s" for %s: %s', $argument, $name, $message);
+
+		$this->additional['key'] = $name;
+		$this->additional['message'] = $message;
 	}
 }
 
+class MissingRequiredKeyException extends ApiException
+{
+	const CODE = 705;
+	public function __construct(string $key, ?Throwable $previous = null)
+	{
+		parent::__construct($previous)
+			->setMessage('Missing or empty required key %s', $key);
+
+		$this->additional['key'] = $key;
+	}
+}
+
+/**
+ * thrown when input validation by Symfony Validator fails
+ */
 class MalformedInputException extends ApiException
 {
 	const CODE = 704;
-	public function __construct(string $message, ?ConstraintViolationListInterface $errors = null, Throwable $previous = null)
+	public function __construct(string $message, ConstraintViolationListInterface $errors, Throwable $previous = null)
 	{
 		parent::__construct($previous)
 			->setMessage($message);
 
-		if ($errors)
-		{
-			$this->additional['errors'] = [];
-			/** @var ConstraintViolationInterface $error */
-			foreach ($errors as $error)
-				$this->additional['errors'][] = $error->getPropertyPath() . ': ' . $error->getMessage();
-		}
+		$this->additional['errors'] = [];
+		/** @var ConstraintViolationInterface $error */
+		foreach ($errors as $error)
+			$this->additional['errors'][] = ['key' => $error->getPropertyPath(), 'message' => $error->getMessage()];
 	}
 }
 
@@ -94,13 +112,32 @@ class InvalidSortFieldException extends ApiException
 	}
 }
 
+class InvalidEnumValueException extends ApiException
+{
+	const CODE = 706;
+	public function __construct(string $key, string $value, array $allowed, ?Throwable $previous = null)
+	{
+		parent::__construct($previous)
+			->setMessage(
+				'Invalid value %s for field %s (must be one of %s)',
+				$value, $key, implode(', ', $allowed)
+			);
+
+		$this->additional['key'] = $key;
+		$this->additional['allowed'] = $allowed;
+	}
+}
+
 class InvalidTypeException extends ApiException
 {
 	const CODE = 701;
-	public function __construct(string $message, ?Throwable $previous = null)
+	public function __construct(string $key, string $type, ?Throwable $previous = null)
 	{
 		parent::__construct($previous)
-			->setMessage($message);
+			->setMessage('Value of "%s" can\' be converted to %s.', $key, $type);
+
+		$this->additional['type'] = $type;
+		$this->additional['key'] = $key;
 	}
 }
 

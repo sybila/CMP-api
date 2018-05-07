@@ -5,8 +5,7 @@ namespace App\Controllers;
 use App\Entity\Classification;
 use App\Entity\IdentifiedObject;
 use App\Entity\Repositories\ClassificationRepository;
-use App\Exceptions\InvalidArgumentException;
-use App\Exceptions\MalformedInputException;
+use App\Exceptions\MissingRequiredKeyException;
 use App\Helpers\ArgumentParser;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -59,12 +58,9 @@ final class ClassificationController extends WritableRepositoryController
 	protected function createObject(ArgumentParser $body): IdentifiedObject
 	{
 		if (!$body->hasKey('type'))
-			throw new InvalidArgumentException('type', null);
+			throw new MissingRequiredKeyException('type');
 
-		$cls = array_search($type = $body->getString('type'), Classification::$classToType, true);
-		if (!$cls)
-			throw new InvalidArgumentException('type', $type);
-
+		$cls = array_search($body['type'], Classification::$classToType, true);
 		return new $cls;
 	}
 
@@ -80,6 +76,6 @@ final class ClassificationController extends WritableRepositoryController
 	{
 		/** @var Classification $classification */
 		if ($classification->getName() == '')
-			throw new MalformedInputException('Input doesn\'t contain all required fields');
+			throw new MissingRequiredKeyException('name');
 	}
 }

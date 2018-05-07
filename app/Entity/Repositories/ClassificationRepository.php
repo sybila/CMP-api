@@ -5,7 +5,7 @@ namespace App\Entity\Repositories;
 use App\Entity\Classification;
 use App\Entity\EntityClassification;
 use App\Entity\RuleClassification;
-use App\Exceptions\InvalidArgumentException;
+use App\Exceptions\InvalidEnumValueException;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 
@@ -39,7 +39,7 @@ class ClassificationRepositoryImpl implements ClassificationRepository
 			elseif ($type == 'rule')
 				$query->where('c INSTANCE OF ' . RuleClassification::class);
 			else
-				throw new InvalidArgumentException('type', $type);
+				throw new InvalidEnumValueException('type', $type, ['entity', 'rule']);
 		}
 
 		return $query;

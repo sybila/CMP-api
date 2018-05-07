@@ -12,11 +12,8 @@ use App\Entity\Repositories\EntityRepository;
 use App\Entity\Repositories\RuleAnnotationRepositoryImpl;
 use App\Entity\Repositories\RuleRepository;
 use App\Entity\RuleAnnotation;
-use App\Exceptions\InvalidEnumFieldValueException;
-use App\Exceptions\MalformedInputException;
+use App\Exceptions\MissingRequiredKeyException;
 use App\Helpers\ArgumentParser;
-use Consistence\Enum\InvalidEnumValueException;
-use Slim\Container;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -25,16 +22,6 @@ use Symfony\Component\Validator\Constraints as Assert;
  */
 abstract class BcsAnnotationsController extends ParentedRepositoryController
 {
-	public function __construct(Container $c)
-	{
-		parent::__construct($c);
-		$this->beforeInsert[] = function(Annotation $entity)
-		{
-			if (!$entity->getTermType() || !$entity->getTermId())
-				throw new MalformedInputException('TermType and TermId fields are necessary!');
-		};
-	}
-
 	protected static function getAllowedSort(): array
 	{
 		return ['id', 'name'];
@@ -61,14 +48,9 @@ abstract class BcsAnnotationsController extends ParentedRepositoryController
 	protected function getTermType(ArgumentParser $body): AnnotationTerm
 	{
 		if (!$body->hasKey('termType'))
-			throw new MalformedInputException('Annotation TermType must be set!');
+			throw new MissingRequiredKeyException('termType');
 
-		try {
-			return AnnotationTerm::get(strtolower($body->getString('termType')));
-		}
-		catch (InvalidEnumValueException $e) {
-			throw new InvalidEnumFieldValueException('termType', $body->getString('termType'), implode(', ', AnnotationTerm::getAvailableValues()));
-		}
+		return AnnotationTerm::tryGet('termType', $body->getString('termType'));
 	}
 
 	protected function setData(IdentifiedObject $annotation, ArgumentParser $body): void
@@ -96,8 +78,8 @@ abstract class BcsAnnotationsController extends ParentedRepositoryController
 	protected function checkInsertObject(IdentifiedObject $annotation): void
 	{
 		/** @var Annotation $annotation */
-		if (!$annotation->getTermId())
-			throw new MalformedInputException('Annotation TermId must be set!');
+		if ($annotation->getTermId() == '')
+			throw new MissingRequiredKeyException('termId');
 	}
 }
 

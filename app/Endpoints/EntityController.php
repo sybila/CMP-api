@@ -11,7 +11,6 @@ use App\Entity\
 	Complex,
 	Entity,
 	EntityAnnotation,
-	EntityClassification,
 	EntityStatus,
 	IdentifiedObject,
 	Repositories\ClassificationRepository,
@@ -22,11 +21,10 @@ use App\Entity\
 };
 use App\Exceptions\
 {
-	InvalidArgumentException, InvalidEnumFieldValueException, MalformedInputException, UniqueKeyViolationException
+	InvalidArgumentException, MissingRequiredKeyException, UniqueKeyViolationException
 };
 use App\Helpers\ArgumentParser;
 use App\Helpers\Validators;
-use Consistence\Enum\InvalidEnumValueException;
 use Slim\Container;
 use Slim\Http\{Request, Response};
 use Symfony\Component\Validator\Constraints as Assert;
@@ -65,13 +63,7 @@ final class EntityController extends WritableRepositoryController
 			if (count($parts) !== 2)
 				throw new InvalidArgumentException('annotation', $args->getString('annotation'), 'must be in format term:id');
 
-			try {
-				$term = AnnotationTerm::get(strtolower($parts[0]));
-			}
-			catch (InvalidEnumValueException $e) {
-				throw new InvalidEnumFieldValueException('termType', $parts[0], implode(', ', AnnotationTerm::getAvailableValues()));
-			}
-
+			$term = AnnotationTerm::tryGet('annotationTerm', strtolower($parts[0]));
 			$filter['annotation'] = ['type' => $term, 'id' => $parts[1]];
 		}
 		elseif ($args->hasKey('name'))
@@ -93,15 +85,10 @@ final class EntityController extends WritableRepositoryController
 	{
 		$entity = $this->getObject($args->getInt('id'));
 		$body = new ArgumentParser($request->getParsedBody());
-		try {
-			$status = EntityStatus::get($body->getString('status'));
-			$entity->setStatus($status);
-			$this->orm->persist($entity);
-			$this->orm->flush();
-		}
-		catch (InvalidEnumValueException $e) {
-			throw new InvalidArgumentException('status', $body->getString('status'), implode(', ', EntityStatus::getAvailableValues()));
-		}
+		$status = EntityStatus::tryGet('status', $body->getString('status'));
+		$entity->setStatus($status);
+		$this->orm->persist($entity);
+		$this->orm->flush();
 
 		return self::formatOk($response, null);
 	}
@@ -109,12 +96,9 @@ final class EntityController extends WritableRepositoryController
 	protected function createObject(ArgumentParser $body): IdentifiedObject
 	{
 		if (!$body->hasKey('type'))
-			throw new InvalidArgumentException('type', null);
+			throw new MissingRequiredKeyException('type');
 
-		$cls = array_search($type = $body->getString('type'), Entity::$classToType, true);
-		if (!$cls || $cls == AtomicState::class)
-			throw new InvalidArgumentException('type', $type);
-
+		$cls = array_search($body['type'], Entity::$classToType, true);
 		return new $cls;
 	}
 
@@ -232,14 +216,7 @@ final class EntityController extends WritableRepositoryController
 		if ($data->hasKey('description'))
 			$entity->setDescription($data->getString('description'));
 		if ($data->hasKey('status'))
-		{
-			try {
-				$entity->setStatus(EntityStatus::get($data->getString('status')));
-			}
-			catch (InvalidEnumValueException $e) {
-				throw new InvalidArgumentException('status', $data->getString('status'), 'must be one of: ' . implode(',', EntityStatus::getAvailableValues()));
-			}
-		}
+			$entity->setStatus(EntityStatus::tryGet('status', $data->getString('status')));
 
 		if ($data->hasKey('classifications'))
 		{
@@ -377,7 +354,9 @@ final class EntityController extends WritableRepositoryController
 	protected function checkInsertObject(IdentifiedObject $entity): void
 	{
 		/** @var Entity $entity */
-		if ($entity->getCode() == '' || $entity->getName() == '')
-			throw new MalformedInputException('Input doesn\'t contain all required fields');
+		if ($entity->getCode() == '')
+			throw new MissingRequiredKeyException('code');
+		if ($entity->getName() == '')
+			throw new MissingRequiredKeyException('name');
 	}
 }

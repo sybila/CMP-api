@@ -2,22 +2,15 @@
 
 namespace App\Entity\Repositories;
 
-use App\Entity\Annotation;
-use App\Entity\AnnotationTerm;
 use App\Entity\BcsNote;
 use App\Entity\Entity;
-use App\Entity\EntityAnnotation;
 use App\Entity\EntityNote;
-use App\Entity\IAnnotatedObject;
 use App\Entity\IBcsNoteObject;
 use App\Entity\IdentifiedObject;
 use App\Entity\Rule;
-use App\Entity\RuleAnnotation;
 use App\Entity\RuleNote;
-use App\Exceptions\InvalidArgumentException;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
-use Psr\Container\ContainerInterface;
 
 interface BcsNoteRepository extends IDependentEndpointRepository
 {

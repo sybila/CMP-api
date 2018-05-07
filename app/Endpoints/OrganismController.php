@@ -5,7 +5,7 @@ namespace App\Controllers;
 use App\Entity\IdentifiedObject;
 use App\Entity\Organism;
 use App\Entity\Repositories\OrganismRepository;
-use App\Exceptions\MalformedInputException;
+use App\Exceptions\MissingRequiredKeyException;
 use App\Helpers\ArgumentParser;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -65,7 +65,9 @@ final class OrganismController extends WritableRepositoryController
 	protected function checkInsertObject(IdentifiedObject $organism): void
 	{
 		/** @var Organism $organism */
-		if ($organism->getName() == '' || $organism->getCode() == '')
-			throw new MalformedInputException('Input doesn\'t contain all required fields');
+		if ($organism->getName() == '')
+			throw new MissingRequiredKeyException('name');
+		if ($organism->getCode() == '')
+			throw new MissingRequiredKeyException('code');
 	}
 }

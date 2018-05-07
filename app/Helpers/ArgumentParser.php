@@ -47,7 +47,7 @@ class ArgumentParser implements \ArrayAccess, \IteratorAggregate
 		if (is_array($value))
 			return $value;
 		else
-			$this->doThrow($key, 'array');
+			throw new InvalidTypeException($key, 'array');
 	}
 
 	public function getInt(string $key): int
@@ -56,7 +56,7 @@ class ArgumentParser implements \ArrayAccess, \IteratorAggregate
 		if (is_numeric($value))
 			return $value;
 		else
-			$this->doThrow($key, 'int');
+			throw new InvalidTypeException($key, 'int');
 	}
 
 	public function getString(string $key): string
@@ -65,7 +65,7 @@ class ArgumentParser implements \ArrayAccess, \IteratorAggregate
 		if (is_scalar($value))
 			return $value;
 		else
-			$this->doThrow($key, 'string');
+			throw new InvalidTypeException($key, 'string');
 	}
 
 	public function getFloat(string $key): float
@@ -74,7 +74,7 @@ class ArgumentParser implements \ArrayAccess, \IteratorAggregate
 		if ((string)((float)$value) === (string)$value)
 			return $value;
 		else
-			$this->doThrow($key, 'float');
+			throw new InvalidTypeException($key, 'float');
 	}
 
 	public function getBool(string $key): bool
@@ -85,12 +85,7 @@ class ArgumentParser implements \ArrayAccess, \IteratorAggregate
 		elseif ($value === '1' || $value === '0')
 			return (bool)((int)$value);
 		else
-			$this->doThrow($key, 'bool');
-	}
-
-	protected function doThrow(string $key, string $type): void
-	{
-		throw new InvalidTypeException('Value of "' . $key . '" can\' be converted to ' . $type . '.');
+			throw new InvalidTypeException($key, 'bool');
 	}
 
 	// ============================== ArrayAccess

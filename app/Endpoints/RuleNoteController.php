@@ -8,7 +8,7 @@ use App\Entity\Repositories\BcsNoteRepository;
 use App\Entity\Repositories\RuleNoteRepository;
 use App\Entity\Repositories\RuleRepository;
 use App\Entity\RuleNote;
-use App\Exceptions\MalformedInputException;
+use App\Exceptions\MissingRequiredKeyException;
 use App\Helpers\ArgumentParser;
 use App\Helpers\DateTimeJson;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -79,6 +79,6 @@ class RuleNoteController extends ParentedRepositoryController
 	{
 		/** @var BcsNote $note */
 		if ($note->getText() == '')
-			throw new MalformedInputException('Input doesn\'t contain all required fields');
+			throw new MissingRequiredKeyException('text');
 	}
 }
