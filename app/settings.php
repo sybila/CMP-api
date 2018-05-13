@@ -2,7 +2,7 @@
 
 $cacheDir = __DIR__ . '/../cache';
 
-return (require __DIR__ . '/settings.local.php') + [
+return array_replace_recursive([
 	'settings' => [
 		'tracy' => [
 			'logDir' => __DIR__ . '/../logs',
@@ -27,6 +27,7 @@ return (require __DIR__ . '/settings.local.php') + [
 			]
 		],
 		'addContentLengthHeader' => false,
+		'outputBuffering' => false,
 		'routerCacheFile' => $cacheDir . '/router.data',
 		'doctrine' => [
 			'meta' => [
@@ -48,5 +49,5 @@ return (require __DIR__ . '/settings.local.php') + [
 				]
 			]
 		]
-	],
-];
+	]
+], require __DIR__ . '/settings.local.php');
