@@ -155,6 +155,7 @@ abstract class Entity implements IdentifiedObject, IAnnotatedObject, IBcsNoteObj
 		$this->organisms = new ArrayCollection;
 		$this->notes = new ArrayCollection;
 		$this->compartments = new ArrayCollection;
+		$this->status = EntityStatus::get(EntityStatus::PENDING)->toInt();
 	}
 
 	public function getType(): string
@@ -169,7 +170,7 @@ abstract class Entity implements IdentifiedObject, IAnnotatedObject, IBcsNoteObj
 	 *
 	 * @return Entity
 	 */
-	public function setName($name)
+	public function setName($name): ?string
 	{
 		$this->name = $name;
 
@@ -205,7 +206,7 @@ abstract class Entity implements IdentifiedObject, IAnnotatedObject, IBcsNoteObj
 	 *
 	 * @return string
 	 */
-	public function getCode()
+	public function getCode(): ?string
 	{
 		return $this->code;
 	}

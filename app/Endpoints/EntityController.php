@@ -22,10 +22,7 @@ use App\Entity\
 use App\Exceptions\
 {
 	CompartmentLocationException,
-	EntityHierarchyException,
-	EntityLocationException,
 	InvalidArgumentException,
-	InvalidTypeException,
 	MissingRequiredKeyException,
 	UniqueKeyViolationException
 };

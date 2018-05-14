@@ -28,7 +28,7 @@ abstract class Classification implements IdentifiedObject
 	/**
 	 * @return string
 	 */
-	public function getName(): string
+	public function getName(): ?string
 	{
 		return $this->name;
 	}

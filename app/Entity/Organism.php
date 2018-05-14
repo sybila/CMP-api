@@ -24,7 +24,7 @@ class Organism implements IdentifiedObject
 	 */
 	protected $code;
 
-	public function getCode(): string
+	public function getCode(): ?string
 	{
 		return $this->code;
 	}
@@ -37,7 +37,7 @@ class Organism implements IdentifiedObject
 	/**
 	 * @return string
 	 */
-	public function getName(): string
+	public function getName(): ?string
 	{
 		return $this->name;
 	}
