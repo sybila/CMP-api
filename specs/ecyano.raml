@@ -487,12 +487,18 @@ resourceTypes:
 /classifications:
   get:
     is: [Collection: {type: Classification}, Sortable: {keys: 'id, name'}, Pageable, Limitable]
+  post:
+    is: [Insert: {type: Classification}]
   /{id}:
     uriParameters:
       id:
         UrlIdentifierList
     get:
-      is: [ObjectList: {type: Organism}]
+      is: [ObjectList: {type: Classification}]
+    put:
+      is: [Update: {type: Classification}]
+    delete:
+      is: [Delete]
   /{type}:
     uriParameters:
       type:
@@ -502,12 +508,18 @@ resourceTypes:
 /organisms:
   get:
     is: [Collection: {type: Organism}, Sortable: {keys: 'id, name, type'}, Pageable, Limitable]
+  post:
+    is: [Insert: {type: Organism}]
   /{id}:
     uriParameters:
       id:
         UrlIdentifierList
     get:
       is: [ObjectList: {type: Organism}]
+    put:
+      is: [Update: {type: Organism}]
+    delete:
+      is: [Delete]
 
 /entities:
   description: Entity Signatures
