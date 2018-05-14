@@ -360,7 +360,7 @@ abstract class Entity implements IdentifiedObject, IAnnotatedObject, IBcsNoteObj
 /**
  * @ORM\Entity
  */
-final class Compartment extends Entity
+class Compartment extends Entity
 {
 	/**
 	 * @var ArrayCollection
@@ -447,7 +447,7 @@ final class Compartment extends Entity
 /**
  * @ORM\Entity
  */
-final class Complex extends Entity
+class Complex extends Entity
 {
 	/**
 	 * @var ArrayCollection
@@ -525,7 +525,7 @@ final class Complex extends Entity
 /**
  * @ORM\Entity
  */
-final class Structure extends Entity
+class Structure extends Entity
 {
 
 
@@ -644,7 +644,7 @@ final class Structure extends Entity
 /**
  * @ORM\Entity
  */
-final class Atomic extends Entity
+class Atomic extends Entity
 {
 	/**
 	 * @ORM\ManyToMany(targetEntity="Entity")
@@ -721,7 +721,7 @@ final class Atomic extends Entity
 /**
  * @ORM\Entity
  */
-final class AtomicState extends Entity
+class AtomicState extends Entity
 {
 	/**
 	 * @var int
