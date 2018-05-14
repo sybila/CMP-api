@@ -131,6 +131,17 @@ abstract class Entity implements IdentifiedObject, IAnnotatedObject, IBcsNoteObj
 	protected $organisms;
 
 	/**
+	 * FIXME: move to children when we have proper schema
+	 * @var ArrayCollection
+	 * @ORM\ManyToMany(targetEntity="Compartment")
+	 * @ORM\JoinTable(name="ep_entity_location",
+	 *     joinColumns={@ORM\JoinColumn(name="childEntityId")},
+	 *     inverseJoinColumns={@ORM\JoinColumn(name="parentEntityId")}
+	 * )
+	 */
+	protected $compartments;
+
+	/**
 	 * @var ArrayCollection
 	 * @ORM\OneToMany(targetEntity="EntityNote", mappedBy="entity", cascade={"persist", "remove"})
 	 */
@@ -143,6 +154,7 @@ abstract class Entity implements IdentifiedObject, IAnnotatedObject, IBcsNoteObj
 		$this->annotations = new ArrayCollection;
 		$this->organisms = new ArrayCollection;
 		$this->notes = new ArrayCollection;
+		$this->compartments = new ArrayCollection;
 	}
 
 	public function getType(): string
@@ -348,11 +360,11 @@ abstract class Entity implements IdentifiedObject, IAnnotatedObject, IBcsNoteObj
 /**
  * @ORM\Entity
  */
-class Compartment extends Entity
+final class Compartment extends Entity
 {
 	/**
 	 * @var ArrayCollection
-	 * @ORM\ManyToMany(targetEntity="Entity")
+	 * @ORM\ManyToMany(targetEntity="Compartment")
 	 * @ORM\JoinTable(name="ep_entity_location",
 	 *     joinColumns={@ORM\JoinColumn(name="childEntityId")},
 	 *     inverseJoinColumns={@ORM\JoinColumn(name="parentEntityId")}
@@ -360,10 +372,21 @@ class Compartment extends Entity
 	 */
 	protected $parents;
 
+	/**
+	 * @var ArrayCollection
+	 * @ORM\ManyToMany(targetEntity="Compartment")
+	 * @ORM\JoinTable(name="ep_entity_location",
+	 *     joinColumns={@ORM\JoinColumn(name="parentEntityId")},
+	 *     inverseJoinColumns={@ORM\JoinColumn(name="childEntityId")}
+	 * )
+	 */
+	protected $children;
+
 	public function __construct()
 	{
 		parent::__construct();
 		$this->parents = new ArrayCollection;
+		$this->children = new ArrayCollection;
 	}
 
 	/**
@@ -391,23 +414,41 @@ class Compartment extends Entity
 	{
 		$this->parents->removeElement($parent);
 	}
+
+	/**
+	 * @return Entity[]|ArrayCollection
+	 */
+	public function getChildren()
+	{
+		return $this->children;
+	}
+
+	public function setChildren(array $data)
+	{
+		self::changeCollection($this->children, $data, [$this, 'addChild']);
+	}
+
+	public function addChild(Entity $entity)
+	{
+		if (!($entity instanceof Compartment))
+			throw new EntityHierarchyException('compartment', $entity->getType());
+
+		$this->children->add($entity);
+		return $this;
+	}
+
+	public function removeChild(Entity $entity)
+	{
+		$this->children->removeElement($entity);
+		return $this;
+	}
 }
 
 /**
  * @ORM\Entity
  */
-class Complex extends Entity
+final class Complex extends Entity
 {
-	/**
-	 * @var ArrayCollection
-	 * @ORM\ManyToMany(targetEntity="Compartment")
-	 * @ORM\JoinTable(name="ep_entity_location",
-	 *     joinColumns={@ORM\JoinColumn(name="childEntityId")},
-	 *     inverseJoinColumns={@ORM\JoinColumn(name="parentEntityId")}
-	 * )
-	 */
-	protected $compartments;
-
 	/**
 	 * @var ArrayCollection
 	 * @ORM\ManyToMany(targetEntity="Entity")
@@ -421,7 +462,6 @@ class Complex extends Entity
 	public function __construct()
 	{
 		parent::__construct();
-		$this->compartments = new ArrayCollection;
 		$this->children = new ArrayCollection;
 	}
 
@@ -485,17 +525,9 @@ class Complex extends Entity
 /**
  * @ORM\Entity
  */
-class Structure extends Entity
+final class Structure extends Entity
 {
-	/**
-	 * @var ArrayCollection
-	 * @ORM\ManyToMany(targetEntity="Compartment")
-	 * @ORM\JoinTable(name="ep_entity_location",
-	 *     joinColumns={@ORM\JoinColumn(name="childEntityId")},
-	 *     inverseJoinColumns={@ORM\JoinColumn(name="parentEntityId")}
-	 * )
-	 */
-	protected $compartments;
+
 
 	/**
 	 * @var ArrayCollection
@@ -520,7 +552,6 @@ class Structure extends Entity
 	public function __construct()
 	{
 		parent::__construct();
-		$this->compartments = new ArrayCollection;
 		$this->parents = new ArrayCollection;
 		$this->children = new ArrayCollection;
 	}
@@ -613,18 +644,8 @@ class Structure extends Entity
 /**
  * @ORM\Entity
  */
-class Atomic extends Entity
+final class Atomic extends Entity
 {
-	/**
-	 * @var ArrayCollection
-	 * @ORM\ManyToMany(targetEntity="Compartment")
-	 * @ORM\JoinTable(name="ep_entity_location",
-	 *     joinColumns={@ORM\JoinColumn(name="childEntityId")},
-	 *     inverseJoinColumns={@ORM\JoinColumn(name="parentEntityId")}
-	 * )
-	 */
-	protected $compartments;
-
 	/**
 	 * @ORM\ManyToMany(targetEntity="Entity")
 	 * @ORM\JoinTable(name="ep_entity_composition",
@@ -637,7 +658,6 @@ class Atomic extends Entity
 	public function __construct()
 	{
 		parent::__construct();
-		$this->compartments = new ArrayCollection;
 		$this->parents = new ArrayCollection;
 	}
 
@@ -701,7 +721,7 @@ class Atomic extends Entity
 /**
  * @ORM\Entity
  */
-class AtomicState extends Entity
+final class AtomicState extends Entity
 {
 	/**
 	 * @var int

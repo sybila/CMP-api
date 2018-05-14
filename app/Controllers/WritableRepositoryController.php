@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Entity\IdentifiedObject;
 use App\Helpers\ArgumentParser;
+use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -11,6 +12,9 @@ use Symfony\Component\Validator\Constraints as Assert;
 abstract class WritableRepositoryController extends RepositoryController
 {
 	use ValidatedController;
+
+	/** @var \stdClass */
+	private $data;
 
 	/**
 	 * function($entity)
@@ -29,6 +33,12 @@ abstract class WritableRepositoryController extends RepositoryController
 	 * @var callable[]
 	 */
 	protected $beforeDelete = [];
+
+	public function __construct(Container $c)
+	{
+		parent::__construct($c);
+		$this->data = $c['persistentData'];
+	}
 
 	/**
 	 * fill $object with data from $body, do additional validations
@@ -68,6 +78,7 @@ abstract class WritableRepositoryController extends RepositoryController
 		$this->runEvents($this->beforeInsert, $object);
 
 		$this->orm->persist($object);
+		//FIXME: flush shouldn't be called here but in FlushMiddleware, but then we can't get inserted object id
 		$this->orm->flush();
 		return self::formatInsert($response, $object->getId());
 	}
@@ -85,7 +96,7 @@ abstract class WritableRepositoryController extends RepositoryController
 		$this->runEvents($this->beforeUpdate, $object);
 
 		$this->orm->persist($object);
-		$this->orm->flush();
+		$this->data->needsFlush = true;
 		return self::formatOk($response);
 	}
 
@@ -95,7 +106,7 @@ abstract class WritableRepositoryController extends RepositoryController
 		$entity = $this->getObject($this->getModifyId($args));
 		$this->runEvents($this->beforeDelete, $entity);
 		$this->orm->remove($entity);
-		$this->orm->flush();
+		$this->data->needsFlush = true;
 		return self::formatOk($response);
 	}
 

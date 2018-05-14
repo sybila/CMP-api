@@ -18,13 +18,13 @@ interface EntityRepository extends IEndpointRepository
 
 	/**
 	 * @param Compartment $entity
-	 * @return Complex[]|ArrayCollection|\Doctrine\ORM\QueryBuilder
+	 * @return Entity[]|ArrayCollection
 	 */
-	public function findComplexChildren(Compartment $entity): ArrayCollection;
+	public function findCompartmentComponents(Compartment $entity): ArrayCollection;
 
 	/**
 	 * @param Atomic $entity
-	 * @return AtomicState[]|ArrayCollection|\Doctrine\ORM\QueryBuilder
+	 * @return AtomicState[]|ArrayCollection
 	 */
 	public function findAtomicStates(Atomic $entity): ArrayCollection;
 }
@@ -105,10 +105,10 @@ class EntityRepositoryImpl implements EntityRepository
 			->getScalarResult()[0][1];
 	}
 
-	public function findComplexChildren(Compartment $entity): ArrayCollection
+	public function findCompartmentComponents(Compartment $entity): ArrayCollection
 	{
 		return new ArrayCollection($this->em
-			->createQuery('SELECT c FROM \\App\\Entity\\Complex c INNER JOIN c.compartments cm WHERE cm.id = :id')
+			->createQuery('SELECT e FROM \\App\\Entity\\Entity e INNER JOIN e.compartments em WHERE em.id = :id AND e NOT INSTANCE OF \\App\\Entity\\Compartment')
 			->setParameters(['id' => $entity->getId()])
 			->getResult());
 	}

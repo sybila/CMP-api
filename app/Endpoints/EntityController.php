@@ -21,7 +21,13 @@ use App\Entity\
 };
 use App\Exceptions\
 {
-	InvalidArgumentException, MissingRequiredKeyException, UniqueKeyViolationException
+	CompartmentLocationException,
+	EntityHierarchyException,
+	EntityLocationException,
+	InvalidArgumentException,
+	InvalidTypeException,
+	MissingRequiredKeyException,
+	UniqueKeyViolationException
 };
 use App\Helpers\ArgumentParser;
 use App\Helpers\Validators;
@@ -126,11 +132,12 @@ final class EntityController extends WritableRepositoryController
 		if ($entity instanceof Compartment)
 		{
 			return [
-				'children' => $this->repository
-					->findComplexChildren($entity)
+				'parent' => (($parent = $entity->getParents()->first()) ? $parent->getId() : null),
+				'children' => $entity->getChildren()->map(self::identifierGetter())->toArray(),
+				'components' => $this->repository
+					->findCompartmentComponents($entity)
 					->map(self::identifierGetter())
 					->toArray(),
-				'parent' => (($parent = $entity->getParents()->first()) ? $parent->getId() : null)
 			];
 		}
 		elseif ($entity instanceof Complex)
@@ -248,6 +255,42 @@ final class EntityController extends WritableRepositoryController
 				else
 					$entity->setParents([]);
 			}
+
+			if ($data->hasKey('children'))
+			{
+				$entities = array_map(function($id) { return $this->getObject($id); }, $data->getArray('children'));
+				$entity->setChildren($entities);
+			}
+
+			if ($data->hasKey('components'))
+			{
+				$componentIds = $data->getArray('components');
+
+				/** @var Complex|Structure|Atomic $component */
+				foreach ($this->repository->findCompartmentComponents($entity) as $component)
+				{
+					if (($key = array_search($component->getId(), $componentIds)) !== false)
+						unset($componentIds[$key]);
+					else
+					{
+						$component->removeCompartment($entity);
+						$this->orm->persist($component);
+					}
+				}
+
+				foreach ($componentIds as $componentId)
+				{
+					$component = $this->getObject((int)$componentId);
+
+					if ($component instanceof Complex or $component instanceof Structure or $component instanceof Atomic)
+					{
+						$component->addCompartment($entity);
+						$this->orm->persist($component);
+					}
+					else
+						throw new CompartmentLocationException;
+				}
+			}
 		}
 		elseif ($entity instanceof Complex)
 		{
@@ -315,7 +358,9 @@ final class EntityController extends WritableRepositoryController
 		switch ($type)
 		{
 			case 'compartment': return new Assert\Collection([
-				'parent' => Validators::$identifier
+				'parent' => Validators::$identifier,
+				'children' => Validators::$identifierList,
+				'components' => Validators::$identifierList,
 			]);
 			case 'complex': return new Assert\Collection([
 				'compartments' => Validators::$identifierList,
@@ -333,7 +378,7 @@ final class EntityController extends WritableRepositoryController
 					new Assert\Collection([
 						'code' => new Assert\NotBlank(),
 						'description' => new Assert\Type(['type' => 'string']),
-					])
+					]),
 				]),
 			]);
 		}

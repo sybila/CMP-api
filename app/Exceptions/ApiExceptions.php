@@ -185,6 +185,17 @@ class EntityLocationException extends ApiException
 	}
 }
 
+class CompartmentLocationException extends ApiException
+{
+	const CODE = 712;
+
+	public function __construct(Throwable $previous = null)
+	{
+		parent::__construct($previous)
+			->setMessage('Entity location cannot be specified for Compartment');
+	}
+}
+
 class EntityHierarchyException extends ApiException
 {
 	const CODE = 711;

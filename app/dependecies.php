@@ -33,6 +33,11 @@ unset($c['logger']);
 //	]);
 //};
 
+$c['persistentData'] = function (Container $c)
+{
+	return (object)['needsFlush' => false];
+};
+
 // Doctrine
 $c[EntityManager::class] = function (Container $c)
 {

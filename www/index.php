@@ -17,6 +17,8 @@ if (!\Tracy\Debugger::$productionMode)
 	$em->getConfiguration()->setSQLLogger($panel);
 }
 
+$app->add(\App\Helpers\FlushDatabaseMiddleware::class);
+
 $app->add(function(Request $request, Response $response, callable $next) {
 	/** @var Response $response */
 	$response = $next($request, $response);
