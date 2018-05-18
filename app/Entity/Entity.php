@@ -163,66 +163,29 @@ abstract class Entity implements IdentifiedObject, IAnnotatedObject, IBcsNoteObj
 		return self::$classToType[get_class($this)];
 	}
 
-	/**
-	 * Set name
-	 *
-	 * @param string $name
-	 *
-	 * @return Entity
-	 */
-	public function setName($name): ?string
+	public function setName(string $name): void
 	{
 		$this->name = $name;
-
-		return $this;
 	}
 
-	/**
-	 * Get name
-	 *
-	 * @return string
-	 */
-	public function getName()
+	public function getName(): ?string
 	{
 		return $this->name;
 	}
 
-	/**
-	 * Set code
-	 *
-	 * @param string $code
-	 *
-	 * @return Entity
-	 */
-	public function setCode($code)
+	public function setCode($code): void
 	{
 		$this->code = $code;
-
-		return $this;
 	}
 
-	/**
-	 * Get code
-	 *
-	 * @return string
-	 */
 	public function getCode(): ?string
 	{
 		return $this->code;
 	}
 
-	/**
-	 * Set status
-	 *
-	 * @param EntityStatus $status
-	 *
-	 * @return Entity
-	 */
-	public function setStatus(EntityStatus $status)
+	public function setStatus(EntityStatus $status): void
 	{
 		$this->status = $status->toInt();
-
-		return $this;
 	}
 
 	public function getStatus(): EntityStatus
@@ -233,17 +196,11 @@ abstract class Entity implements IdentifiedObject, IAnnotatedObject, IBcsNoteObj
 		return EntityStatus::fromInt($this->status);
 	}
 
-	/**
-	 * @return string
-	 */
 	public function getDescription(): ?string
 	{
 		return $this->description;
 	}
 
-	/**
-	 * @param string $description
-	 */
 	public function setDescription(string $description): void
 	{
 		$this->description = $description;
@@ -276,7 +233,7 @@ abstract class Entity implements IdentifiedObject, IAnnotatedObject, IBcsNoteObj
 	}
 
 	/**
-	 * @param EntityAnnotation $annotation
+	 * @param EntityAnnotation|Annotation $annotation
 	 */
 	public function addAnnotation(Annotation $annotation): void
 	{
@@ -285,7 +242,7 @@ abstract class Entity implements IdentifiedObject, IAnnotatedObject, IBcsNoteObj
 	}
 
 	/**
-	 * @param EntityAnnotation $annotation
+	 * @param EntityAnnotation|Annotation $annotation
 	 */
 	public function removeAnnotation(Annotation $annotation): void
 	{
@@ -300,38 +257,22 @@ abstract class Entity implements IdentifiedObject, IAnnotatedObject, IBcsNoteObj
 		return $this->annotations;
 	}
 
-	/**
-	 * Add organism
-	 *
-	 * @param \App\Entity\Organism $organism
-	 *
-	 * @return Entity
-	 */
-	public function addOrganism(Organism $organism)
+	public function addOrganism(Organism $organism): void
 	{
 		$this->organisms[] = $organism;
-
-		return $this;
 	}
 
-	/**
-	 * Remove organism
-	 *
-	 * @param \App\Entity\Organism $organism
-	 */
-	public function removeOrganism(Organism $organism)
+	public function removeOrganism(Organism $organism): void
 	{
 		$this->organisms->removeElement($organism);
 	}
 
-	public function setOrganisms(array $data)
+	public function setOrganisms(array $data): void
 	{
 		self::changeCollection($this->organisms, $data);
 	}
 
 	/**
-	 * Get organisms
-	 *
 	 * @return Organism[]|Collection
 	 */
 	public function getOrganisms()
@@ -340,7 +281,7 @@ abstract class Entity implements IdentifiedObject, IAnnotatedObject, IBcsNoteObj
 	}
 
 	/**
-	 * @return ArrayCollection
+	 * @return EntityNote[]|Collection
 	 */
 	public function getNotes(): Collection
 	{
