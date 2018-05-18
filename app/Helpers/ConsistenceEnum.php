@@ -29,7 +29,7 @@ abstract class ConsistenceEnum extends Enum implements \JsonSerializable
 			return static::get($value);
 		}
 		catch (EnumException $e) {
-			throw new ApiException($key, $value, static::getAvailableValues());
+			throw new ApiException($key, $value, array_values(static::getAvailableValues()));
 		}
 	}
 }

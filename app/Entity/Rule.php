@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use App\Exceptions\RuleClassificationException;
+use App\Helpers\ChangeCollection;
 use App\Helpers\ConsistenceEnum;
 use Consistence\Enum\InvalidEnumValueException;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -42,6 +44,7 @@ final class RuleStatus extends ConsistenceEnum
  */
 class Rule implements IdentifiedObject, IAnnotatedObject, IBcsNoteObject
 {
+	use ChangeCollection;
 	use Identifier;
 
 	/**
@@ -124,140 +127,92 @@ class Rule implements IdentifiedObject, IAnnotatedObject, IBcsNoteObject
 		$this->annotations = new ArrayCollection;
 		$this->organisms = new ArrayCollection;
 		$this->notes = new ArrayCollection;
+		$this->status = RuleStatus::get(RuleStatus::PENDING)->toInt();
+		//FIXME
+		$this->isValid = false;
 	}
 
-	/**
-	 * @return mixed
-	 */
 	public function getCode(): ?string
 	{
 		return $this->code;
 	}
 
-	/**
-	 * @param mixed $code
-	 */
 	public function setCode(string $code): void
 	{
 		$this->code = $code;
 	}
 
-	/**
-	 * @return mixed
-	 */
 	public function getModifier(): ?string
 	{
 		return $this->modifier;
 	}
 
-	/**
-	 * @param mixed $modifier
-	 */
 	public function setModifier(string $modifier): void
 	{
 		$this->modifier = $modifier;
 	}
 
-	/**
-	 * @return mixed
-	 */
-	public function getEquation(): string
+	public function getEquation(): ?string
 	{
 		return $this->equation;
 	}
 
-	/**
-	 * @param mixed $equation
-	 */
 	public function setEquation(string $equation): void
 	{
 		$this->equation = $equation;
 	}
 
-	/**
-	 * Set name
-	 *
-	 * @param string $name
-	 *
-	 * @return Rule
-	 */
-	public function setName($name)
+	public function setName(string $name): void
 	{
 		$this->name = $name;
-
-		return $this;
 	}
 
-	/**
-	 * Get name
-	 *
-	 * @return string
-	 */
-	public function getName()
+	public function getName(): ?string
 	{
 		return $this->name;
 	}
 
-	/**
-	 * Set status
-	 *
-	 * @param RuleStatus $status
-	 *
-	 * @return Rule
-	 */
-	public function setStatus(RuleStatus $status)
+	public function setStatus(RuleStatus $status): void
 	{
 		$this->status = $status->toInt();
-
-		return $this;
 	}
 
-	/**
-	 * Get status
-	 *
-	 * @return RuleStatus
-	 */
-	public function getStatus()
+	public function getStatus(): RuleStatus
 	{
+		if ($this->status === null)
+			return RuleStatus::get(RuleStatus::ACTIVE);
+
 		return RuleStatus::fromInt($this->status);
 	}
 
-	/**
-	 * Add classification
-	 *
-	 * @param RuleClassification $classification
-	 *
-	 * @return Rule
-	 */
-	public function addClassification(RuleClassification $classification)
+	public function addClassification(Classification $classification)
 	{
-		$this->classifications[] = $classification;
+		if (!($classification instanceof RuleClassification))
+			throw new RuleClassificationException;
 
-		return $this;
+		$this->classifications[] = $classification;
 	}
 
-	/**
-	 * Remove classification
-	 *
-	 * @param RuleClassification $classification
-	 */
 	public function removeClassification(RuleClassification $classification)
 	{
 		$this->classifications->removeElement($classification);
 	}
 
 	/**
-	 * Get classifications
-	 *
 	 * @return RuleClassification[]|Collection
 	 */
-	public function getClassifications()
+	public function getClassifications(): Collection
 	{
 		return $this->classifications;
 	}
 
+	public function setClassifications(array $data): void
+	{
+		self::changeCollection($this->classifications, $data, [$this, 'addClassification']);
+	}
+
 	/**
-	 * @param RuleAnnotation $annotation
+	 * @param RuleAnnotation|Annotation $annotation
 	 */
 	public function addAnnotation(Annotation $annotation): void
 	{
@@ -265,9 +220,6 @@ class Rule implements IdentifiedObject, IAnnotatedObject, IBcsNoteObject
 		$annotation->setRule($this);
 	}
 
-	/**
-	 * @param RuleAnnotation $annotation
-	 */
 	public function removeAnnotation(Annotation $annotation): void
 	{
 		$this->annotations->removeElement($annotation);
@@ -281,53 +233,48 @@ class Rule implements IdentifiedObject, IAnnotatedObject, IBcsNoteObject
 		return $this->annotations;
 	}
 
-	/**
-	 * Add organism
-	 *
-	 * @param Organism $organism
-	 *
-	 * @return Rule
-	 */
-	public function addOrganism(Organism $organism)
+	public function addOrganism(Organism $organism): void
 	{
 		$this->organisms[] = $organism;
-
-		return $this;
 	}
 
-	/**
-	 * Remove organism
-	 *
-	 * @param Organism $organism
-	 */
-	public function removeOrganism(Organism $organism)
+	public function removeOrganism(Organism $organism): void
 	{
 		$this->organisms->removeElement($organism);
 	}
 
 	/**
-	 * Get organisms
-	 *
 	 * @return Organism[]|Collection
 	 */
-	public function getOrganisms()
+	public function getOrganisms(): Collection
 	{
 		return $this->organisms;
 	}
 
+	public function setOrganisms(array $data): void
+	{
+		self::changeCollection($this->organisms, $data);
+	}
+
 	/**
-	 * @return ArrayCollection
+	 * @return RuleNote[]|Collection
 	 */
 	public function getNotes(): Collection
 	{
 		return $this->notes;
 	}
 
+	/**
+	 * @param RuleNote|BcsNote $note
+	 */
 	public function addNote(BcsNote $note): void
 	{
 		$this->notes->add($note);
 	}
 
+	/**
+	 * @param RuleNote|BcsNote $note
+	 */
 	public function removeNote(BcsNote $note): void
 	{
 		$this->notes->removeElement($note);

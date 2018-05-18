@@ -221,3 +221,37 @@ class EntityClassificationException extends ApiException
 			->setMessage('Entities must have classification with type "entity"');
 	}
 }
+
+class RuleEquationException extends ApiException
+{
+	const CODE = 720;
+
+	public function __construct(\stdClass $result, Throwable $previous = null)
+	{
+		$expected = null;
+		if (!empty($result->expected))
+			$expected = implode('", "', $result->expected);
+
+		$expectedMessage = '';
+		if ($expected)
+			$expectedMessage = ', expected one of: "' . $expected . '"';
+
+		parent::__construct($previous)
+			->setMessage('Invalid equation specified, unexpected token: "%s"%s', $result->unexpected, $expectedMessage);
+
+		$this->additional['unexpected'] = $result->unexpected;
+		$this->additional['expected'] = $result->expected ?? null;
+		$this->additional['position'] = $result->start;
+	}
+}
+
+class RuleClassificationException extends ApiException
+{
+	const CODE = 721;
+
+	public function __construct(Throwable $previous = null)
+	{
+		parent::__construct($previous)
+			->setMessage('Rules must have classification with type "rule"');
+	}
+}
