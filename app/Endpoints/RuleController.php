@@ -49,19 +49,20 @@ final class RuleController extends WritableRepositoryController
 		return new Rule;
 	}
 
-	protected function getData(IdentifiedObject $object): array
+	protected function getData(IdentifiedObject $rule): array
 	{
-		/** @var Rule $object */
+		/** @var Rule $rule */
 		return [
-			'id' => $object->getId(),
-			'name' => $object->getName(),
-			'equation' => $object->getEquation(),
-			'code' => $object->getCode(),
-			'modifier' => $object->getModifier(),
-			'status' => (string)$object->getStatus(),
-			'classifications' => $object->getClassifications()->map(self::identifierGetter())->toArray(),
-			'organisms' => $object->getOrganisms()->map(self::identifierGetter())->toArray(),
-			'annotations' => $object->getAnnotations()->map(function(RuleAnnotation $annotation)
+			'id' => $rule->getId(),
+			'name' => $rule->getName(),
+			'equation' => $rule->getEquation(),
+			'description' => $rule->getDescription(),
+			'code' => $rule->getCode(),
+			'modifier' => $rule->getModifier(),
+			'status' => (string)$rule->getStatus(),
+			'classifications' => $rule->getClassifications()->map(self::identifierGetter())->toArray(),
+			'organisms' => $rule->getOrganisms()->map(self::identifierGetter())->toArray(),
+			'annotations' => $rule->getAnnotations()->map(function(RuleAnnotation $annotation)
 			{
 				return ['id' => $annotation->getTermId(), 'type' => $annotation->getTermType()];
 			})->toArray(),
