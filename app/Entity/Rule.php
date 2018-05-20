@@ -280,7 +280,7 @@ class Rule implements IdentifiedObject, IAnnotatedObject, IBcsNoteObject
 		$this->notes->removeElement($note);
 	}
 
-	public function getDescription(): string
+	public function getDescription(): ?string
 	{
 		return $this->description;
 	}
