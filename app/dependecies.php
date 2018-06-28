@@ -3,6 +3,7 @@
 use App\Helpers\DateTimeJsonType;
 use App\Entity\Repositories as EntityRepo;
 use App\Entity\Authentication\Repository as AuthRepo;
+use App\Model\Repositories as ModelRepo;
 use App\Helpers;
 use Doctrine\ORM\EntityManager;
 use Doctrine\DBAL\Types\Type;
@@ -146,6 +147,11 @@ $c[EntityRepo\EntityNoteRepository::class] = function(Container $c)
 $c[EntityRepo\RuleNoteRepository::class] = function(Container $c)
 {
 	return new EntityRepo\RuleNoteRepository($c[EntityManager::class]);
+};
+
+$c[EntityRepo\ModelRepository::class] = function(Container $c)
+{
+	return new EntityRepo\ModelRepository($c[EntityManager::class]);
 };
 
 $c[AuthRepo\ClientRepository::class] = function(Container $c)

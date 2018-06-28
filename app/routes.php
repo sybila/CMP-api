@@ -102,6 +102,9 @@ return function(App $app)
 	(new RouteHelper)
 		->setRoute(Ctl\RuleNoteController::class, '/rules/{rule-id:\\d+}/notes')
 		->register();
+	(new RouteHelper)
+		->setRoute(Ctl\ModelController::class, '/models')
+		->register();
 
 	// entities
 	$app->post('/entities/{id:\\d+}/status', Ctl\EntityController::class . ':editStatus');
