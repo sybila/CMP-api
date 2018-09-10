@@ -31,7 +31,9 @@ use App\Exceptions\
 use App\Helpers\ArgumentParser;
 use App\Helpers\Validators;
 use Slim\Container;
-use Slim\Http\{Request, Response};
+use Slim\Http\{
+	Request, Response
+};
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -51,13 +53,48 @@ final class ModelController extends WritableRepositoryController
 		$this->modelRepository = $c->get(ModelRepository::class);
 	}
 
-	protected function setData(IdentifiedObject $object, ArgumentParser $body): void
-	{ //todo
+	protected static function getAllowedSort(): array
+	{
+		return ['id, name, userId, approvedId, status'];
+	}
+
+	protected function getData(IdentifiedObject $model): array
+	{
+		/** @var Model $model */
+		return [
+			'id' => $model->getId(),
+			'name' => $model->getName(),
+			'userId' => $model->getUserId(),
+			'approvedId' => $model->getApprovedId(),
+			'status' => (string)$model->getStatus(),
+			'solver' => (string)$model->getSolver(),
+			'compartments' => $model->getCompartments(),
+		];
+	}
+
+	protected function setData(IdentifiedObject $model, ArgumentParser $data): void
+	{
+		/** @var Model $model */
+		if ($data->hasKey('name'))
+			$model->setName($data->getString('name'));
+		if ($data->hasKey('userId'))
+			$model->setUserId($data->getString('userId'));
+		if ($data->hasKey('approvedId'))
+			$model->setApprovedId($data->getString('approvedId'));
+		if ($data->hasKey('status'))
+			$model->setStatus($data->getString('status'));
+		if ($data->hasKey('solver'))
+			$model->setSolver($data->getString('solver'));
+
 	}
 
 	protected function createObject(ArgumentParser $body): IdentifiedObject
 	{
-		return null;
+		if (!$body->hasKey('type'))
+			throw new MissingRequiredKeyException('type');
+
+		$cls = array_search($body['type'], Entity::$classToType, true);
+		return new $cls;
 	}
 
 	protected function checkInsertObject(IdentifiedObject $object): void
@@ -65,25 +102,22 @@ final class ModelController extends WritableRepositoryController
 		//todo
 	}
 
-
-	public function add(Request $request, Response $response, ArgumentParser $args): Response
-	{
-		return null;
-	}
-
-	public function edit(Request $request, Response $response, ArgumentParser $args): Response
-	{
-		return null;
-	}
-
 	public function delete(Request $request, Response $response, ArgumentParser $args): Response
 	{
-		return null;
+		try {
+			$a = parent::delete($request, $response, $args);
+		} catch (\Exception $e) {
+			throw new InvalidArgumentException('annotation', $args->getString('annotation'), 'must be in format term:id');
+		}
+		return $a;
+
 	}
 
 	protected function getValidator(): Assert\Collection
 	{
-		return null;
+		return new Assert\Collection([
+			'name' => new Assert\Type(['type' => 'string']),
+		]);
 	}
 
 
@@ -97,13 +131,5 @@ final class ModelController extends WritableRepositoryController
 		return ModelRepository::Class;
 	}
 
-	protected function getData(IdentifiedObject $object): array
-	{
-		return null;
-	}
 
-	protected static function getAllowedSort(): array
-	{
-		return null;
-	}
 }

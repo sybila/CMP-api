@@ -14,30 +14,31 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 
 
-class ModelRepository implements IEndpointRepository
+class CompartmentRepository implements IEndpointRepository
 {
 
 	/** @var EntityManager * */
 	protected $em;
 
-	/** @var \Doctrine\ORM\ModelRepository */
+	/** @var \Doctrine\ORM\CompartmentRepository */
 	private $repository;
 
 	public function __construct(EntityManager $em)
 	{
 		$this->em = $em;
-		$this->repository = $em->getRepository(Model::class);
+		$this->repository = $em->getRepository(Compartment::class);
 	}
 
 	public function get(int $id)
 	{
-		return $this->em->find(Model::class, $id);
+		return $this->em->find(Compartment::class, $id);
+
 	}
 
 	public function getNumResults(array $filter): int
 	{
 		return ((int)$this->buildListQuery($filter)
-			->select('COUNT(m)')
+			->select('COUNT(c)')
 			->getQuery()
 			->getScalarResult());
 	}
@@ -45,7 +46,7 @@ class ModelRepository implements IEndpointRepository
 	public function getList(array $filter, array $sort, array $limit): array
 	{
 		$query = $this->buildListQuery($filter)
-			->select('m.id, m.name, m.unitId, m.userId, m.status, m.solver');
+			->select('c.id');
 
 
 		return $query->getQuery()->getArrayResult();
@@ -54,7 +55,7 @@ class ModelRepository implements IEndpointRepository
 	private function buildListQuery(array $filter): QueryBuilder
 	{
 		$query = $this->em->createQueryBuilder()
-			->from(Model::class, 'm');
+			->from(Model::class, 'c');
 
 
 		return $query;

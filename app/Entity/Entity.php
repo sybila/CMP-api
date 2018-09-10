@@ -72,6 +72,7 @@ abstract class Entity implements IdentifiedObject, IAnnotatedObject, IBcsNoteObj
 		Structure::class => 'structure',
 		Atomic::class => 'atomic',
 		AtomicState::class => 'state',
+		Model::class => 'model',
 	];
 
 	/**

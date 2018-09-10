@@ -3,7 +3,6 @@
 use App\Helpers\DateTimeJsonType;
 use App\Entity\Repositories as EntityRepo;
 use App\Entity\Authentication\Repository as AuthRepo;
-use App\Model\Repositories as ModelRepo;
 use App\Helpers;
 use Doctrine\ORM\EntityManager;
 use Doctrine\DBAL\Types\Type;
