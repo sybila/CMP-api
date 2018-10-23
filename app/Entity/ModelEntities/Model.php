@@ -73,15 +73,18 @@ class Model implements IdentifiedObject
 	 */
 	protected $solver;
 
+
 	/**
-	 * @ORM\OneToMany(targetEntity="Compartment", mappedBy="model")
-	 * @ORM\JoinTable(name="model_compartment",
-	 *     joinColumns={@ORM\JoinColumn(name="modelId")},
-	 *     inverseJoinColumns={@ORM\JoinColumn(name="compartmentId")}
-	 * )
 	 * @var ArrayCollection
+	 * @ORM\OneToMany(targetEntity="ModelCompartment", mappedBy="modelId")
 	 */
 	protected $compartments;
+
+	/**
+	 * @var ArrayCollection
+	 * @ORM\OneToMany(targetEntity="ModelReaction", mappedBy="modelId")
+	 */
+	protected $reactions;
 
 	/**
 	 * Get id
@@ -110,7 +113,7 @@ class Model implements IdentifiedObject
 	 *
 	 * @return Model
 	 */
-	public function setName($name)
+	public function setName($name): Model
 	{
 		$this->name = $name;
 		return $this;
@@ -134,7 +137,7 @@ class Model implements IdentifiedObject
 	 *
 	 * @return Model
 	 */
-	public function setUserId($userId)
+	public function setUserId($userId): Model
 	{
 		$this->userId = $userId;
 		return $this;
@@ -158,9 +161,32 @@ class Model implements IdentifiedObject
 	 *
 	 * @return Model
 	 */
-	public function setApprovedId($approvedId)
+	public function setApprovedId($approvedId): Model
 	{
 		$this->approvedId = $approvedId;
+		return $this;
+	}
+
+	/**
+	 * Get description
+	 *
+	 * @return string
+	 */
+	public function getDescription(): ?string
+	{
+		return $this->description;
+	}
+
+	/**
+	 * Set description
+	 *
+	 * @param string $description
+	 *
+	 * @return Model
+	 */
+	public function setDescription($description): Model
+	{
+		$this->description = $description;
 		return $this;
 	}
 
@@ -181,7 +207,7 @@ class Model implements IdentifiedObject
 	 *
 	 * @return Model
 	 */
-	public function setStatus($status)
+	public function setStatus($status): Model
 	{
 		$this->status = $status;
 		return $this;
@@ -205,12 +231,11 @@ class Model implements IdentifiedObject
 	 *
 	 * @return Model
 	 */
-	public function setSolver($solver)
+	public function setSolver($solver): Model
 	{
 		$this->solver = $solver;
 		return $this;
 	}
-
 
 	/**
 	 * @return Compartment[]|Collection
@@ -218,6 +243,14 @@ class Model implements IdentifiedObject
 	public function getCompartments(): Collection
 	{
 		return $this->compartments;
+	}
+
+	/**
+	 * @return Reaction[]|Collection
+	 */
+	public function getReactions(): Collection
+	{
+		return $this->reactions;
 	}
 
 }

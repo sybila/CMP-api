@@ -32,7 +32,6 @@ class ModelRepository implements IEndpointRepository
 	public function get(int $id)
 	{
 		return $this->em->find(Model::class, $id);
-
 	}
 
 	public function getNumResults(array $filter): int

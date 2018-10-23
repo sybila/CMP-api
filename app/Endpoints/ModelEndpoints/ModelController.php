@@ -2,8 +2,7 @@
 
 namespace App\Controllers;
 
-use App\Entity\
-{
+use App\Entity\{
 	AnnotationTerm,
 	Atomic,
 	AtomicState,
@@ -14,6 +13,8 @@ use App\Entity\
 	EntityStatus,
 	Model,
 	IdentifiedObject,
+	ModelCompartment,
+	ModelReaction,
 	Repositories\ClassificationRepository,
 	Repositories\EntityRepository,
 	Repositories\IEndpointRepository,
@@ -66,9 +67,17 @@ final class ModelController extends WritableRepositoryController
 			'name' => $model->getName(),
 			'userId' => $model->getUserId(),
 			'approvedId' => $model->getApprovedId(),
+			'description' => $model->getDescription(),
 			'status' => (string)$model->getStatus(),
 			'solver' => (string)$model->getSolver(),
-			'compartments' => $model->getCompartments(),
+			'compartments' => $model->getCompartments()->map(function(ModelCompartment $compartment)
+			{
+				return ['id' => $compartment->getId(), 'name' => $compartment->getName()];
+			})->toArray(),
+			'reactions' => $model->getReactions()->map(function(ModelReaction $reaction)
+			{
+				return ['id' => $reaction->getId(), 'name' => $reaction->getName()];
+			})->toArray(),
 		];
 	}
 
@@ -81,6 +90,8 @@ final class ModelController extends WritableRepositoryController
 			$model->setUserId($data->getString('userId'));
 		if ($data->hasKey('approvedId'))
 			$model->setApprovedId($data->getString('approvedId'));
+		if ($data->hasKey('description'))
+			$model->setDescription($data->getString('description'));
 		if ($data->hasKey('status'))
 			$model->setStatus($data->getString('status'));
 		if ($data->hasKey('solver'))
@@ -90,16 +101,16 @@ final class ModelController extends WritableRepositoryController
 
 	protected function createObject(ArgumentParser $body): IdentifiedObject
 	{
-		if (!$body->hasKey('type'))
-			throw new MissingRequiredKeyException('type');
-
-		$cls = array_search($body['type'], Entity::$classToType, true);
-		return new $cls;
+		if (!$body->hasKey('userId'))
+			throw new MissingRequiredKeyException('userId');
+		return new Model;
 	}
 
-	protected function checkInsertObject(IdentifiedObject $object): void
+	protected function checkInsertObject(IdentifiedObject $model): void
 	{
-		//todo
+		/** @var Model $model */
+		if ($model->getUserId() == NULL)
+			throw new MissingRequiredKeyException('userId');
 	}
 
 	public function delete(Request $request, Response $response, ArgumentParser $args): Response
@@ -117,6 +128,9 @@ final class ModelController extends WritableRepositoryController
 	{
 		return new Assert\Collection([
 			'name' => new Assert\Type(['type' => 'string']),
+			'userId' => new Assert\Type(['type' => 'integer']),
+			'description' => new Assert\Type(['type' => 'string']),
+			'status' => new Assert\Type(['type' => 'string']),
 		]);
 	}
 
@@ -129,6 +143,10 @@ final class ModelController extends WritableRepositoryController
 	protected static function getRepositoryClassName(): string
 	{
 		return ModelRepository::Class;
+	}
+
+	protected function getSub($entity) {
+		echo $entity;
 	}
 
 

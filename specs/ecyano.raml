@@ -20,6 +20,11 @@ types:
     type: array
     items: integer
     uniqueItems: true
+  OptionalIdentifier:
+    type: integer
+    minimum: 1
+    required: false
+    example: 15
   ResponseStatus:
     type: string
     enum: ['ok', 'error']
@@ -164,6 +169,127 @@ types:
       code:
         type: string
         description: Database code to be used within API requests/responses
+  ModelStatus:
+    type: string
+    enum: ["new", "TBA", "active"]
+  ListModel:
+    properties:
+      id: Identifier
+      userId: Identifier
+      approvedId: OptionalIdentifier
+      name:
+        type: string
+        description: Name of the model
+      solver:
+        type: string
+        description: Solver of the model
+      status: ModelStatus
+  Model:
+    type: ListModel
+    properties:
+      description: string
+      compartments:
+        type: IdentifierList
+        description: List of compartment IDs
+  ListModelCompartment:
+    properties:
+        id: Identifier
+        modelId: Identifier
+        name: string
+        spatialDimensions: integer
+        size: integer
+        isConstant: boolean
+  ModelCompartment:
+    type: ListModelCompartment
+    properties:
+      species:
+        type: IdentifierList
+        description: List of specie IDs
+      reactions:
+        type: IdentifierList
+        descripiton: List of reaction IDs
+      unitDefinitions:
+        type: IdentifierList
+        description: List of unit IDs
+  ListSpecie:
+    properties:
+      id: Identifier
+      compartmentId: Identifier
+      modelId: Identifier
+      name: string
+      equationType: string
+      initialExpression: string
+      boundaryCondition: string
+      hasOnlySubstanceUnits: boolean
+      isConstant: boolean
+  Specie:
+    type: ListSpecie
+      properties:
+        reactionItems:
+          type: IdentifierList
+          description: List of reactionItem IDs
+  ListReaction:
+    properties:
+      id: Identifier
+      modelId: Identifier
+      commpartmentId: Integer
+      name: string
+      reversible: boolean
+      fast: boolean
+  Reaction:
+    properties:
+      reactionItems:
+        type: IdentifierList
+        description: List of reactionItem IDs
+      functions:
+        type: IdentifierList
+        description: List of function IDs
+  ListFunction:
+    properties:
+      id: Identifier
+      reactionId: Identifier
+      name: string
+      formula: string
+  Function:
+    type: ListFunction
+  ListKineticLaw:
+    properties:
+      id: Identifier
+      reactionItemId: Identifier
+      equation: string
+  KineticLaw:
+    type: ListKineticLaw
+    #TBA LocalParameter IdentifierList
+
+#  ListModelRule:
+#    properties:
+#      id: Identifier
+#      modelId: Identifier
+#      specieId: OptionalIdentifier
+#      compartmentId: OptionalIdentifier
+#      parameterId: OptionalIdentifier
+#      ruleType: string
+#      equation: string
+#  ModelRule:
+#    type: ListModelRule
+#  ListConstraint:
+#  Constraint:
+#  ListUnit:
+#  Unit:
+#  ListUnitDefinition:
+#  UnitDefinition:
+#  ListEvent:
+#  Event:
+#  ListEventAssignment:
+#  EventAssignment:
+#  ListInitialAssignment:
+#  InitialAssignment:
+#  ListReactionItem:
+#  ReactionItem:
+#  ListLocalParameter:
+#  LocalParameter:
+#  ListSolverParameter:
+#  SolverParameter:
 
 traits:
   Collection:
@@ -576,183 +702,216 @@ resourceTypes:
         type: UrlIdentifierList
     get:
       is: [ObjectList: {type: Rule}]
-      /reactants:
-        get:
-          is: [IdCollection: {description: Get all products of this rule}]
+    /reactants:
+      get:
+        is: [IdCollection: {description: Get all products of this rule}]
       /products:
         get:
           is: [IdCollection: {description: Get all products of this rule}]
 
-# MODEL API PART FOLLOWS
-
-/compratments:
-    get:
-      is: [Collection: {type: Compartment}, Sortable: {'id, name, modelId'}]
-    post:
-      is: [Insert: {type: Compartment}]
-    /{id}:
-        get:
-          is: [ObjectList: {type: Compartment}]
-          /reactions:
-            get:
-              is: [IdCollection: {description: Get all reactions of this compartment}]
-          /rules:
-            get:
-              is: [IdCollection: {description: Get all rules of this compartment}]
-          /species:
-             get:
-               is: [IdCollection: {description: Get all species of this compartment}]
-          /units:
-             get:
-              is: [IdCollection: {description: Get all units of this compartment}]
-
-/constraints:
-    get:
-      is: [Collection: {type: Constraint}, Sortable: {'id, modelId'}]
-    post:
-      is: [Insert: {type: Constraint}]
-
-/events:
-    get:
-      is: [Collection: {type: Event}, Sortable: {'id, modelId'}]
-    post:
-      is: [Insert: {type: Event}]
-    /{id}:
-      get:
-        is: [ObjectList: {type: Event}]
-        /assignments:
-          get:
-            is: [IdCollection: {description: Get all event assignments of this event}]
-
-/initialAssignments:
-    get:
-      is: [Collection: {type: InitialAssignment}, Sortable: {'id, modelId'}]
-    post:
-      is: [Insert: {type: InitialAssignment}]
-    /{id}:
-      get:
-           is: [ObjectList: {type: InitialAssignment}]
+#Model part follows
 
 /models:
+  get:
+     is: [Collection: {type: ListModel}, Sortable: {keys: 'id, name, userId, approvedId, status'}]
+  post:
+    is: [Insert: {type: Model}]
+  /{id}:
     get:
-      is: [Collection: {type: Model}, Sortable: {'id, name, userId, approvedId, status'}]
-    post:
-      is: [Insert: {type: Model}]
+      is: [ObjectList: {type: Model}]
     put:
       is: [Update: {type: Model}]
-    delete: [Delete]
-      is:
-    /{id}:
-        get:
-          is: [ObjectList: {type: Model}]
-          /compartments:
-            get:
-              is: [IdCollection: {description: Get all compartments of this model}]
-          /constraints:
-            get:
-              is: [IdCollection: {description: Get all constraints of this model}]
-          /events:
-            get:
-              is: [IdCollection: {description: Get all events of this model}]
-          /initialAssignments:
-            get:
-              is: [IdCollection: {description: Get all initial assignments of this model}]
-          /modelRules:
-            get:
-              is: [IdCollection: {description: Get all rules of this model}]
-          /parameters:
-            get:
-              is: [IdCollection: {description: Get all parameters of this model}]
-          /reactions:
-            get:
-              is: [IdCollection: {description: Get all reactions of this model}]
-          /solverParameters:
-            get:
-              is: [IdCollection: {description: Get all solver parameters of this model}]
-          /species:
-            get:
-              is: [IdCollection: {description: Get all species of this model}]
-          /units:
-            get:
-              is: [IdCollection: {description: Get all unit of this model}]
-
-/modelRules:
-    get:
-      is: [Collection: {type: ModelRule}, Sortable: {'id, modelId'}]
-    post:
-      is: [Insert: {type:  ModelRule}]
-    /{id}:
+    delete:
+      is: [Delete]
+    /compartments:
       get:
-           is: [ObjectList: {type:  ModelRule}]
-      /parameters:
+        is: [Collection: {type: ListModelCompartment}, Sortable: {keys: 'id, name, modelId'}]
+      post:
+        is: [Insert: {type: ModelCompartment}]
+      /{id}:
         get:
-          is: [IdCollection: {description: Get all parameters of this rule}]
-
-/parameters:
-    get:
-      is: [Collection: {type: Parameter}, Sortable: {'id, modelId'}]
-    post:
-      is: [Insert: {type: Parameter}]
-    /{id}:
-      get:
-           is: [ObjectList: {type: Parameter}]
-      /rules:
-        get:
-          is: [IdCollection: {description: Get all rules of this parameter}]
-      /units:
-        get:
-          is: [IdCollection: {description: Get all units of this parameter}]
-
-/reactions:
-    get:
-      is: [Collection: {type: Reaction}, Sortable: {'id, modelId'}]
-    post:
-      is: [Insert: {type: Reaction}]
-    /{id}:
-      get:
-        is: [ObjectList: {type: Reaction}]
-        /functions:
+          is: [ObjectList: {type: ModelCompartment}]
+        put:
+          is: [Update: {type: ModelCompartment}]
+        delete:
+          is: [Delete]
+#        /rules:
+#          get:
+#            is: [Collection: {type: ListModelRule}, Sortable: {keys: 'id, modelId'}]
+#          post:
+#            is: [Insert: {type:  ModelRule}]
+#          /{id}:
+#            get:
+#              is: [ObjectList: {type:  ModelRule}]
+#            put:
+#              is: [Update: {type: ModelRule}]
+#            delete:
+#              is: [Delete]
+        /species:
           get:
-            is: [IdCollection: {description: Get all functions of this reaction}]
-        /reactionItems:
-          get:
-            is: [IdCollection: {description: Get all reaction items of this reaction}]
+            is: [Collection: {type: ListSpecie}, Sortable: {keys: 'id, modelId'}]
+          post:
+            is: [Insert: {type: Specie}]
           /{id}:
             get:
-              is: [ObjectList: {type: ReactionItem}]
-            /kinteticLaws:
+              is: [ObjectList: {type: Specie}]
+            put:
+              is: [Update: {type: Specie}]
+            delete:
+              is: [Delete]
+#            /rules:
+#              get:
+#                is: [Collection: {type: ListModelRule}, Sortable: {keys: 'id, modelId'}]
+#              post:
+#                is: [Insert: {type:  ModelRule}]
+#              /{id}:
+#                get:
+#                  is: [ObjectList: {type:  ModelRule}]
+#                put:
+#                  is: [Update: {type: ModelRule}]
+#                delete:
+#                  is: [Delete]
+            /reactionItems:
               get:
-                is: [IdCollection: {description: Get all kinetic laws of this reaction item}]
+                is: [Collection: {type: ListReactionItem}]
+              post:
+                  is: [Insert: {type:  ReactionItem}]
               /{id}:
                 get:
-                  is: [ObjectList: {type: KineticLaw}]
-                /units:
-                  get:
-                    is: [IdCollection: {description: Get all units of this kinetic law}]
-
-/solverParameters:
-    get:
-      is: [Collection: {type: SolverParameter}, Sortable: {'id, modelId'}]
-    post:
-      is: [Insert: {type: SolverParameter}]
-    /{id}:
+                  is: [ObjectList: {type:  ReactionItem}]
+                put:
+                  is: [Update: {type: Specie}]
+                delete:
+                  is: [Delete]
+    /reactions:
       get:
-           is: [ObjectList: {type: SolverParameter}]
-
-/species:
-    get:
-      is: [Collection: {type: Specie}, Sortable: {'id, modelId'}]
-    post:
-      is: [Insert: {type: Specie}]
-    /{id}:
-      get:
-           is: [ObjectList: {type: Specie}]
-
-/units:
-    get:
-      is: [Collection: {type: Unit}, Sortable: {'id, modelId'}]
-    post:
-      is: [Insert: {type: Unit}]
-    /{id}:
-      get:
-           is: [ObjectList: {type: Unit}]
+        is: [Collection: {type: ListReaction}]
+      post:
+        is: [Insert: {type: ModelReaction}]
+      /{id}:
+        get:
+          is: [ObjectList: {type: ModelReaction}]
+        put:
+          is: [Update: {type: ModelReaction}]
+        delete:
+          is: [Delete]
+      /reactionItems:
+        get:
+          is: [Collection: {type: ListReactionItem}]
+        post:
+            is: [Insert: {type:  ReactionItem}]
+        /{id}:
+          get:
+            is: [ObjectList: {type: ReactionItem}]
+          put:
+            is: [Update: {type: ReactionItem}]
+          delete:
+            is: [Delete]
+#      /functions:
+#        get:
+#          is: [Collection: {type: ListFunction}]
+#        post:
+#          is: [Insert: {type: Function}]
+#        /{id}:
+#          get:
+#            is: [ObjectList: {type: Function}]
+#          put:
+#            is: [Update: {type: Function}]
+#          delete:
+#            is: [Delete]
+#        /units:
+#          get:
+#            is: [Collection: {type: ListReactionItem}]
+#          post:
+#              is: [Insert: {type:  ReactionItem}]
+#          /{id}:
+#            get:
+#              is: [ObjectList: {type:  ReactionItem}]
+#            put:
+#              is: [Update: {type: Specie}]
+#            delete:
+#              is: [Delete]
+#    /constraints:
+#      get:
+#        is: [Collection: {type: ListConstraint}, Sortable: {keys: 'id, modelId'}]
+#      post:
+#        is: [Insert: {type: Constraint}]
+#      /{id}:
+#        get:
+#          is: [ObjectList: {type: Constraint}]
+#        put:
+#          is: [Update: {type: Constraint}]
+#        delete:
+#          is: [Delete]
+#    /events:
+#      get:
+#        is: [Collection: {type: ListEvent}, Sortable: {keys: 'id, modelId'}]
+#      post:
+#        is: [Insert: {type: Event}]
+#      /{id}:
+#        get:
+#          is: [ObjectList: {type: Event}]
+#        put:
+#          is: [Update: {type: Event}]
+#        delete:
+#          is: [Delete]
+#      /assignments:
+#        get:
+#          is: [Collection: {type: ListEventAssignment}, Sortable: {keys: 'id, modelId'}]
+#        post:
+#          is: [Insert: {type: EventAssignment}]
+#        /{id}:
+#          get:
+#            is: [ObjectList: {type: EventAssignment}]
+#          put:
+#            is: [Update: {type: EventAssignment}]
+#          delete:
+#            is: [Delete]
+#    /initialAssignments:
+#      get:
+#        is: [Collection: {type: ListInitialAssignment}, Sortable: {keys: 'id, modelId'}]
+#      post:
+#        is: [Insert: {type: InitialAssignment}]
+#      /{id}:
+#        get:
+#         is: [ObjectList: {type: InitialAssignment}]
+#        put:
+#          is: [Update: {type: InitialAssignment}]
+#        delete:
+#          is: [Delete]
+#    /rules:
+#      get:
+#        is: [Collection: {type: ListModelRule}, Sortable: {keys: 'id, modelId'}]
+#      post:
+#        is: [Insert: {type:  ModelRule}]
+#      /{id}:
+#        get:
+#          is: [ObjectList: {type:  ModelRule}]
+#        put:
+#          is: [Update: {type: ModelRule}]
+#        delete:
+#          is: [Delete]
+#    /solverParameters:
+#      get:
+#        is: [Collection: {type: ListSolverParameter}, Sortable: {keys: 'id, modelId'}]
+#      post:
+#        is: [Insert: {type: SolverParameter}]
+#      /{id}:
+#        get:
+#          is: [ObjectList: {type: SolverParameter}]
+#        put:
+#          is: [Update: {type: SolverParameter}]
+#       delete:
+#          is: [Delete]
+#    /units:
+#      get:
+#        is: [Collection: {type: ListUnit}, Sortable: {keys: 'id, modelId'}]
+#      post:
+#        is: [Insert: {type: Unit}]
+#      /{id}:
+#        get:
+#          is: [ObjectList: {type: Unit}]
+#        put:
+#          is: [Update: {type: Unit}]
+#        delete:
+#          is: [Delete]
