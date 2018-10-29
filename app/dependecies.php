@@ -148,6 +148,38 @@ $c[EntityRepo\RuleNoteRepository::class] = function(Container $c)
 	return new EntityRepo\RuleNoteRepository($c[EntityManager::class]);
 };
 
+$c[EntityRepo\ModelRepository::class] = function(Container $c)
+{
+	return new EntityRepo\ModelRepository($c[EntityManager::class]);
+};
+
+$c[EntityRepo\CompartmentRepository::class] = function(Container $c)
+{
+	return new EntityRepo\CompartmentRepository($c[EntityManager::class]);
+};
+
+$c[EntityRepo\SpecieRepository::class] = function(Container $c)
+{
+	return new EntityRepo\SpecieRepository($c[EntityManager::class]);
+};
+
+$c[EntityRepo\ModelRuleRepository::class] = function(Container $c)
+{
+	return new EntityRepo\ModelRuleRepository($c[EntityManager::class]);
+};
+
+$c[EntityRepo\ReactionRepository::class] = function(Container $c) {
+	return new EntityRepo\ReactionRepository($c[EntityManager::class]);
+};
+
+$c[EntityRepo\FunctionRepository::class] = function(Container $c) {
+	return new EntityRepo\FunctionRepository($c[EntityManager::class]);
+};
+
+$c[EntityRepo\ModelReactionItemRepository::class] = function(Container $c) {
+	return new EntityRepo\ModelReactionItemRepository($c[EntityManager::class]);
+};
+
 $c[AuthRepo\ClientRepository::class] = function(Container $c)
 {
 	return new AuthRepo\ClientRepository($c[EntityManager::class]);

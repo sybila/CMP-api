@@ -102,6 +102,27 @@ return function(App $app)
 	(new RouteHelper)
 		->setRoute(Ctl\RuleNoteController::class, '/rules/{rule-id:\\d+}/notes')
 		->register();
+	(new RouteHelper)
+		->setRoute(Ctl\ModelController::class, '/models')
+		->register();
+	(new RouteHelper)
+		->setRoute(Ctl\CompartmentController::class, '/models/{model-id:\\d+}/compartments')
+		->register();
+	(new RouteHelper)
+		->setRoute(Ctl\SpecieController::class, '/models/{model-id:\\d+}/compartments/{compartment-id:\\d+}/species')
+		->register();
+	(new RouteHelper)
+		->setRoute(Ctl\ReactionController::class, '/models/{model-id:\\d+}/reactions')
+		->register();
+	(new RouteHelper)
+		->setRoute(Ctl\FunctionController::class, '/models/{model-id:\\d+}/reactions/{reaction-id:\\d+}/functions')
+		->register();
+	(new RouteHelper)
+		->setRoute(Ctl\ReactionParentedReactionItemController::class, '/models/{model-id:\\d+}/reactions/{reaction-id:\\d+}/reactionItems')
+		->register();
+	(new RouteHelper)
+		->setRoute(Ctl\SpecieParentedReactionItemController::class, '/models/{model-id:\\d+}/compartments/{compartment-id:\\d+}/species/{specie-id:\\d+}/reactionItems')
+		->register();
 
 	// entities
 	$app->post('/entities/{id:\\d+}/status', Ctl\EntityController::class . ':editStatus');
