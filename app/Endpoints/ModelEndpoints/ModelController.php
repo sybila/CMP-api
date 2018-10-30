@@ -22,9 +22,9 @@ use App\Entity\{
 	Repositories\ModelRepository,
 	Structure
 };
-use App\Exceptions\
-{
+use App\Exceptions\{
 	CompartmentLocationException,
+	DependentResourcesBoundException,
 	InvalidArgumentException,
 	MissingRequiredKeyException,
 	UniqueKeyViolationException
@@ -115,21 +115,22 @@ final class ModelController extends WritableRepositoryController
 
 	public function delete(Request $request, Response $response, ArgumentParser $args): Response
 	{
-		try {
-			$a = parent::delete($request, $response, $args);
-		} catch (\Exception $e) {
-			throw new InvalidArgumentException('annotation', $args->getString('annotation'), 'must be in format term:id');
-		}
-		return $a;
-
+		$model = $this->getObject($args->getInt('id'));
+		if (!$model->getCompartments()->isEmpty())
+			throw new DependentResourcesBoundException('compartment');
+		if (!$model->getReactions()->isEmpty())
+			throw new DependentResourcesBoundException('reaction');
+		return parent::delete($request, $response, $args);
 	}
 
 	protected function getValidator(): Assert\Collection
 	{
 		return new Assert\Collection([
-			'name' => new Assert\Type(['type' => 'string']),
 			'userId' => new Assert\Type(['type' => 'integer']),
+			'name' => new Assert\Type(['type' => 'string']),
 			'description' => new Assert\Type(['type' => 'string']),
+			'visualisation' => new Assert\Type(['type' => 'string']),
+			'solver' => new Assert\Type(['type' => 'string']),
 			'status' => new Assert\Type(['type' => 'string']),
 		]);
 	}

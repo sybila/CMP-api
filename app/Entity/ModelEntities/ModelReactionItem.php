@@ -72,11 +72,9 @@ class ModelReactionItem implements IdentifiedObject
 	 * @return string
 	 * @ORM\Column(type="string")
 	 */
-	protected $stochiometry;
+	protected $stoichiometry;
 
 	protected $localParameters;
-
-
 
 
 	/**
@@ -209,28 +207,27 @@ class ModelReactionItem implements IdentifiedObject
 
 
 	/**
-	 * Get stochiometry
+	 * Get stoichiometry
 	 *
 	 * @return integer
 	 */
-	public function getStochiometry(): ?int
+	public function getStoichiometry(): ?int
 	{
-		return $this->stochiometry;
+		return $this->stoichiometry;
 	}
 
 	/**
-	 * Set stochiometry
+	 * Set stoichiometry
 	 *
-	 * @param integer $stochiometry
+	 * @param integer $stoichiometry
 	 *
 	 * @return ModelReactionItem
 	 */
-	public function setStochiometry($stochiometry): ModelReactionItem
+	public function setStochiometry($stoichiometry): ModelReactionItem
 	{
-		$this->stochiometry = $stochiometry;
+		$this->stoichiometry = $stoichiometry;
 		return $this;
 	}
-
 
 
 }

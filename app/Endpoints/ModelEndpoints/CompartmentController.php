@@ -19,6 +19,7 @@ use App\Exceptions\
 {
 	CompartmentLocationException,
 	InvalidArgumentException,
+	DependentResourcesBoundException,
 	MissingRequiredKeyException,
 	UniqueKeyViolationException
 };
@@ -97,23 +98,26 @@ final class CompartmentController extends ParentedRepositoryController
 		/** @var ModelCompartment $compartment */
 		if ($compartment->getModelId() == NULL)
 			throw new MissingRequiredKeyException('modelId');
+		if ($compartment->getIsConstant() == NULL)
+			throw new MissingRequiredKeyException('isConstant');
 	}
 
 	public function delete(Request $request, Response $response, ArgumentParser $args): Response
 	{
-		try {
-			$a = parent::delete($request, $response, $args);
-		} catch (\Exception $e) {
-			throw new InvalidArgumentException('annotation', $args->getString('annotation'), 'must be in format term:id');
-		}
-		return $a;
-
+		$compartment = $this->getObject($args->getInt('id'));
+		if (!$compartment->getSpecies()->isEmpty())
+			throw new DependentResourcesBoundException('specie');
+		return parent::delete($request, $response, $args);
 	}
 
 	protected function getValidator(): Assert\Collection
 	{
 		return new Assert\Collection([
 			'modelId' => new Assert\Type(['type' => 'integer']),
+			'isConstant' => new Assert\Type(['type' => 'integer']),
+			'name' => new Assert\Type(['type' => 'string']),
+			'spatialDimensions' => new Assert\Type(['type' => 'integer']),
+			'size' => new Assert\Type(['type' => 'integer']),
 			'isConstant' => new Assert\Type(['type' => 'integer']),
 		]);
 	}

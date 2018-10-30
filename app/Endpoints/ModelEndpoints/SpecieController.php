@@ -22,6 +22,7 @@ use App\Exceptions\
 	CompartmentLocationException,
 	InvalidArgumentException,
 	MissingRequiredKeyException,
+	DependentResourcesBoundException,
 	UniqueKeyViolationException
 };
 use App\Helpers\ArgumentParser;
@@ -92,24 +93,32 @@ final class SpecieController extends ParentedRepositoryController
 
 	protected function createObject(ArgumentParser $body): IdentifiedObject
 	{
+		if (!$body->hasKey('isConstant'))
+			throw new MissingRequiredKeyException('isConstant');
+		if (!$body->hasKey('hasOnlySubstanceUnits'))
+			throw new MissingRequiredKeyException('hasOnlySubstanceUnits');
 		return new ModelSpecie;
 	}
 
-	protected function checkInsertObject(IdentifiedObject $object): void
+	protected function checkInsertObject(IdentifiedObject $specie): void
 	{
-		//todo
+		/** @var ModelSpecie $specie */
+		if ($specie->getModelId() == NULL)
+			throw new MissingRequiredKeyException('modelId');
+		if ($specie->getCompartmentId() == NULL)
+			throw new MissingRequiredKeyException('compartmentId');
+		if ($specie->getHasOnlySubstanceUnits() == NULL)
+			throw new MissingRequiredKeyException('hasOnlySubstanceUnits');
+		if ($specie->getIsConstant() == NULL)
+			throw new MissingRequiredKeyException('isConstant');
 	}
 
 	public function delete(Request $request, Response $response, ArgumentParser $args): Response
 	{
-
-		try {
-			$a = parent::delete($request, $response, $args);
-		} catch (\Exception $e) {
-			throw new InvalidArgumentException('annotation', $args->getString('annotation'), 'must be in format term:id');
-		}
-		return $a;
-
+		$specie = $this->getObject($args->getInt('id'));
+		if (!$specie->getReactionItems()->isEmpty())
+			throw new DependentResourcesBoundException('reactionItem');
+		return parent::delete($request, $response, $args);
 	}
 
 	protected function getValidator(): Assert\Collection

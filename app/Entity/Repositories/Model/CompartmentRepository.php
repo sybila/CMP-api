@@ -57,7 +57,7 @@ class CompartmentRepository implements IDependentEndpointRepository
 		return $query->getQuery()->getArrayResult();
 	}
 
-	public function getParent() {
+	public function getParent():IdentifiedObject {
 		return $this->object;
 	}
 
@@ -66,7 +66,6 @@ class CompartmentRepository implements IDependentEndpointRepository
 		$className = static::getParentClassName();
 		if (!($object instanceof $className))
 			throw new \Exception('Parent of compartment must be ' . $className);
-
 		$this->object = $object;
 	}
 
@@ -76,8 +75,6 @@ class CompartmentRepository implements IDependentEndpointRepository
 			->from(ModelCompartment::class, 'c')
 			->where('c.modelId = :modelId')
 			->setParameter('modelId', $this->object->getId());
-
-
 		return $query;
 	}
 
