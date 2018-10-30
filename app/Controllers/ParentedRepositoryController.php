@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Entity\IdentifiedObject;
 use App\Entity\Repositories\IDependentEndpointRepository;
 use App\Entity\Repositories\IEndpointRepository;
+use App\Exceptions\DependentResourcesBoundException;
 use App\Exceptions\MissingRequiredKeyException;
 use App\Exceptions\NonExistingObjectException;
 use App\Helpers\ArgumentParser;
@@ -28,7 +29,9 @@ abstract class ParentedRepositoryController extends WritableRepositoryController
 		$info = static::getParentObjectInfo();
 		if (!$args->hasKey($info[0]) || !is_scalar($args->get($info[0])))
 			throw new MissingRequiredKeyException($info[0]);
-
+		if (!$this->parentRepository->get($args->getInt($info[0]))) {
+			throw new NonExistingObjectException($args->getString($info[0]), $info[1]);
+		}
 		try {
 			return $this->parentRepository->get($args->getInt($info[0]));
 		}
@@ -47,14 +50,14 @@ abstract class ParentedRepositoryController extends WritableRepositoryController
 			$this->repository->setParent($this->getParentObject($args));
 		};
 
-		$this->beforeInsert[] = function($entiity)
+		$this->beforeInsert[] = function($entity)
 		{
-			$this->repository->add($entiity);
+			$this->repository->add($entity);
 		};
 
-		$this->beforeDelete[] = function($entiity)
+		$this->beforeDelete[] = function($entity)
 		{
-			$this->repository->remove($entiity);
+			$this->repository->remove($entity);
 		};
 	}
 }

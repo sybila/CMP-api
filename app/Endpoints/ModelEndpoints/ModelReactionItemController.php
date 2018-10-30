@@ -6,6 +6,7 @@ use App\Entity\{
 	Entity,
 	ModelReaction,
 	ModelReactionItem,
+	ModelSpecie,
 	IdentifiedObject,
 	Repositories\IEndpointRepository,
 	Repositories\ModelReactionItemRepository,
@@ -19,6 +20,7 @@ use App\Exceptions\
 	CompartmentLocationException,
 	InvalidArgumentException,
 	MissingRequiredKeyException,
+	NonExistingObjectException,
 	UniqueKeyViolationException
 };
 use App\Helpers\ArgumentParser;
@@ -63,24 +65,14 @@ abstract class ModelReactionItemController extends ParentedRepositoryController
 			'specieId' => $reactionItem->getSpecieId()->getId(),
 			'reactionId' => $reactionItem->getReactionId()->getId(),
 			'name' => $reactionItem->getName(),
+			'stoichiometry' => $reactionItem->getStoichiometry(),
 			'isGlobal' => $reactionItem->getIsGlobal(),
 		];
 	}
 
-	protected function checkInsertObject(IdentifiedObject $object): void
-	{
-		//todo
-	}
-
 	public function delete(Request $request, Response $response, ArgumentParser $args): Response
 	{
-		try {
-			$a = parent::delete($request, $response, $args);
-		} catch (\Exception $e) {
-			throw new InvalidArgumentException('annotation', $args->getString('annotation'), 'must be in format term:id');
-		}
-		return $a;
-
+		return parent::delete($request, $response, $args);
 	}
 
 	protected function getValidator(): Assert\Collection
@@ -102,7 +94,8 @@ abstract class ModelReactionItemController extends ParentedRepositoryController
 
 }
 
-final class ReactionParentedReactionItemController extends ModelReactionItemController {
+final class ReactionParentedReactionItemController extends ModelReactionItemController
+{
 
 	protected static function getParentRepositoryClassName(): string
 	{
@@ -114,34 +107,49 @@ final class ReactionParentedReactionItemController extends ModelReactionItemCont
 		return ['reaction-id', 'reaction'];
 	}
 
+
 	protected function setData(IdentifiedObject $reactionItem, ArgumentParser $data): void
 	{
 		/** @var ModelReactionItem $reactionItem */
-		/*if(!$reactionItem->getReactionId())
-			$reactionItem->setReactionId($this->repository->getParent()->getId());
-		if ($data->hasKey('specieId'))
-			$reactionItem->setSpecieId($data->getInt('specieId'));
+		if (!$reactionItem->getReactionId())
+			$reactionItem->setReactionId($this->repository->getParent());
+		if ($data->hasKey('specieId')) {
+			$specie = $this->repository->getEntityManager()->find(ModelSpecie::class, $data->getInt('specieId'));
+			if($specie === null) {
+				throw new NonExistingObjectException($data->getInt('specieId'), 'specie');
+			}
+			$reactionItem->setSpecieId($specie);
+		}
 		if ($data->hasKey('name'))
 			$reactionItem->setName($data->getString('name'));
 		if ($data->hasKey('value'))
 			$reactionItem->setValue($data->getInt('value'));
-		if ($data->hasKey('stochiometry'))
-			$reactionItem->setStochiometry($data->getInt('stochiometry'));
+		if ($data->hasKey('stoichiometry'))
+			$reactionItem->setStochiometry($data->getInt('stoichiometry'));
 		if ($data->hasKey('isGlobal'))
-			$reactionItem->setIsGlobal($data->getInt('isGlobal'));*/
+			$reactionItem->setIsGlobal($data->getInt('isGlobal'));
+	}
+
+	protected function checkInsertObject(IdentifiedObject $reactionItem): void
+	{
+		/** @var ModelReactionItem $reactionItem */
+		if ($reactionItem->getReactionId() == NULL)
+			throw new MissingRequiredKeyException('reactionId');
+		if ($reactionItem->getSpecieId() == NULL)
+			throw new MissingRequiredKeyException('specieId');
 	}
 
 	protected function createObject(ArgumentParser $body): IdentifiedObject
 	{
 		if (!$body->hasKey('specieId'))
 			throw new MissingRequiredKeyException('specieId');
-
 		return new ModelReactionItem;
 	}
 }
 
 
-final class SpecieParentedReactionItemController extends ModelReactionItemController {
+final class SpecieParentedReactionItemController extends ModelReactionItemController
+{
 
 	protected static function getParentRepositoryClassName(): string
 	{
@@ -156,26 +164,38 @@ final class SpecieParentedReactionItemController extends ModelReactionItemContro
 	protected function setData(IdentifiedObject $reactionItem, ArgumentParser $data): void
 	{
 		/** @var ModelReactionItem $reactionItem */
-		/*if(!$reactionItem->getSpecieId())
-			$reactionItem->setSpecieId($this->repository->getParent()->getId());
-		if ($data->hasKey('reactionId'))
-			$reaction = $this->em->find(ModelReaction::class, $data->getInt('reactionKey'));
+		if (!$reactionItem->getSpecieId())
+			$reactionItem->setSpecieId($this->repository->getParent());
+		if ($data->hasKey('reactionId')) {
+			$reaction = $this->repository->getEntityManager()->find(ModelReaction::class, $data->getInt('reactionId'));
+			if($reaction === null) {
+				throw new NonExistingObjectException($data->getInt('reactionId'), 'reaction');
+			}
 			$reactionItem->setReactionId($reaction);
+		}
 		if ($data->hasKey('name'))
 			$reactionItem->setName($data->getString('name'));
 		if ($data->hasKey('value'))
 			$reactionItem->setValue($data->getInt('value'));
-		if ($data->hasKey('stochiometry'))
-			$reactionItem->setStochiometry($data->getInt('stochiometry'));
+		if ($data->hasKey('stoichiometry'))
+			$reactionItem->setStochiometry($data->getInt('stoichiometry'));
 		if ($data->hasKey('isGlobal'))
-			$reactionItem->setIsGlobal($data->getInt('isGlobal'));*/
+			$reactionItem->setIsGlobal($data->getInt('isGlobal'));
+	}
+
+	protected function checkInsertObject(IdentifiedObject $reactionItem): void
+	{
+		/** @var ModelReactionItem $reactionItem */
+		if ($reactionItem->getReactionId() == NULL)
+			throw new MissingRequiredKeyException('reactionId');
+		if ($reactionItem->getSpecieId() == NULL)
+			throw new MissingRequiredKeyException('specieId');
 	}
 
 	protected function createObject(ArgumentParser $body): IdentifiedObject
 	{
 		if (!$body->hasKey('reactionId'))
 			throw new MissingRequiredKeyException('reactionId');
-
 		return new ModelReactionItem;
 	}
 }

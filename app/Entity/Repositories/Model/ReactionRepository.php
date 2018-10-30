@@ -60,7 +60,7 @@ class ReactionRepository implements IDependentEndpointRepository
 	public function getList(array $filter, array $sort, array $limit): array
 	{
 		$query = $this->buildListQuery($filter)
-			->select('r.id, r.modelId, r.name, r.isReversible, r.isFast, r.equation');
+			->select('r.id, (r.modelId) as modelId,(r.compartmentId) as compartmentId, r.name, r.isReversible, r.isFast, r.rate');
 
 		return $query->getQuery()->getArrayResult();
 	}

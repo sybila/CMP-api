@@ -38,8 +38,8 @@ class ModelReaction implements IdentifiedObject
 
 
 	/**
-	 * @var int
-	 * @ORM\Column(type="integer", name="model_id")
+	 * @ORM\ManyToOne(targetEntity="Model", inversedBy="compartments")
+	 * @ORM\JoinColumn(name="model_id", referencedColumnName="id")
 	 */
 	protected $modelId;
 
@@ -61,7 +61,7 @@ class ModelReaction implements IdentifiedObject
 	 * @return string
 	 * @ORM\Column(type="string")
 	 */
-	protected $equation;
+	protected $rate;
 
 
 	/**
@@ -217,25 +217,25 @@ class ModelReaction implements IdentifiedObject
 
 
 	/**
-	 * Get equation
+	 * Get rate
 	 *
 	 * @return string
 	 */
-	public function getEquation(): ?string
+	public function getRate(): ?string
 	{
-		return $this->equation;
+		return $this->rate;
 	}
 
 	/**
-	 * Set equation
+	 * Set rate
 	 *
-	 * @param string $equation
+	 * @param string $rate
 	 *
 	 * @return ModelReaction
 	 */
-	public function setEquation($equation): ModelReaction
+	public function setRate($rate): ModelReaction
 	{
-		$this->equation = $equation;
+		$this->rate = $rate;
 		return $this;
 	}
 

@@ -9,6 +9,7 @@ use App\Entity\
 	IdentifiedObject,
 	ModelReaction,
 	ModelReactionItem,
+	ModelFunction,
 	Repositories\IEndpointRepository,
 	Repositories\ModelRepository,
 	Repositories\ModelReactionItemRepository,
@@ -57,10 +58,13 @@ final class ReactionController extends ParentedRepositoryController
 		/** @var ModelReaction $reaction */
 		return [
 			'id' => $reaction->getId(),
+			'modelId' => $reaction->getModelId(),
+			'compartmentId' => $reaction->getCompartmentId(),
 			'name' => $reaction->getName(),
-			'equation' => $reaction->getEquation(),
+			'equartion' => $reaction->getRate(),
 			'isReversible' => $reaction->getIsReversible(),
 			'isFast' => $reaction->getIsFast(),
+			'rate' => $reaction->getRate(),
 			'reactionItems' => $reaction->getReactionItems()->map(function (ModelReactionItem $reactionItem) {
 				return ['id' => $reactionItem->getId(), 'name' => $reactionItem->getName()];
 			})->toArray(),
@@ -83,31 +87,40 @@ final class ReactionController extends ParentedRepositoryController
 			$reaction->setIsReversible($data->getInt('isReversible'));
 		if ($data->hasKey('isFast'))
 			$reaction->setIsFast($data->getInt('isFast'));
-		if ($data->hasKey('equation'))
-			$reaction->setEquation($data->getString('equation'));
+		if ($data->hasKey('rate'))
+			$reaction->setRate($data->getString('rate'));
 
 
 	}
 
 	protected function createObject(ArgumentParser $body): IdentifiedObject
 	{
+		if (!$body->hasKey('isReversible'))
+			throw new MissingRequiredKeyException('isReversible');
+		if (!$body->hasKey('isFast'))
+			throw new MissingRequiredKeyException('isFast');
 		return new ModelReaction;
 	}
 
-	protected function checkInsertObject(IdentifiedObject $object): void
+	protected function checkInsertObject(IdentifiedObject $reaction): void
 	{
-		//todo
+		/** @var ModelReaction $reaction */
+		if ($reaction->getModelId() == NULL)
+			throw new MissingRequiredKeyException('modelId');
+		if ($reaction->isReversible() == NULL)
+			throw new MissingRequiredKeyException('isReversible');
+		if ($reaction->isFast() == NULL)
+			throw new MissingRequiredKeyException('isFast');
 	}
 
 	public function delete(Request $request, Response $response, ArgumentParser $args): Response
 	{
-		try {
-			$a = parent::delete($request, $response, $args);
-		} catch (\Exception $e) {
-			throw new InvalidArgumentException('annotation', $args->getString('annotation'), 'must be in format term:id');
-		}
-		return $a;
-
+		$specie = $this->getObject($args->getInt('id'));
+		if (!$specie->getReactionItems()->isEmpty())
+			throw new DependentResourcesBoundException('reactionItem');
+		if (!$specie->getFunctions()->isEmpty())
+			throw new DependentResourcesBoundException('function');
+		return parent::delete($request, $response, $args);
 	}
 
 	protected function getValidator(): Assert\Collection

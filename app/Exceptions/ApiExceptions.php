@@ -56,6 +56,23 @@ class UniqueKeyViolationException extends ApiException
 	}
 }
 
+class DependentResourcesBoundException extends ApiException
+{
+	const CODE = 409;
+	public function __construct(string $key, Throwable $previous = null)
+	{
+		parent::__construct($previous)
+			->setMessage('Object of type %s is bound', $key);
+
+		$this->additional = ['key' => $key];
+	}
+
+	public function getHttpCode(): int
+	{
+		return self::CODE;
+	}
+}
+
 /**
  * thrown when some argument/key is invalid for reason which can not be explained by other exceptions
  */
@@ -255,3 +272,5 @@ class RuleClassificationException extends ApiException
 			->setMessage('Rules must have classification with type "rule"');
 	}
 }
+
+
