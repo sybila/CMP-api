@@ -59,7 +59,7 @@ class ModelReactionItemRepository implements IDependentEndpointRepository
 	public function getList(array $filter, array $sort, array $limit): array
 	{
 		$query = $this->buildListQuery($filter)
-			->select('r.id, (r.reactionId) as reactionId, (r.specieId) as specieId, r.value, r.stoichiometry, r.isGlobal');
+			->select('r.id, (r.reactionId) as reactionId, (r.specieId) as specieId, r.type, r.value, r.stoichiometry, r.isGlobal');
 
 		return $query->getQuery()->getArrayResult();
 	}

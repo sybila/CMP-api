@@ -61,7 +61,6 @@ final class ReactionController extends ParentedRepositoryController
 			'modelId' => $reaction->getModelId(),
 			'compartmentId' => $reaction->getCompartmentId(),
 			'name' => $reaction->getName(),
-			'equartion' => $reaction->getRate(),
 			'isReversible' => $reaction->getIsReversible(),
 			'isFast' => $reaction->getIsFast(),
 			'rate' => $reaction->getRate(),

@@ -54,6 +54,12 @@ class ModelReactionItem implements IdentifiedObject
 	 * @var string
 	 * @ORM\Column(type="string")
 	 */
+	protected $type;
+
+	/**
+	 * @var string
+	 * @ORM\Column(type="string")
+	 */
 	protected $name;
 
 	/**
@@ -156,6 +162,30 @@ class ModelReactionItem implements IdentifiedObject
 	public function setName($name): ModelReactionItem
 	{
 		$this->name = $name;
+		return $this;
+	}
+
+	/**
+	 * Get type
+	 *
+	 * @return null|string
+	 */
+	public function getType(): ?string
+	{
+		return $this->type;
+	}
+
+
+	/**
+	 * Set type
+	 *
+	 * @param string $type
+	 *
+	 * @return ModelCompartment
+	 */
+	public function setType($type): ModelReactionItem
+	{
+		$this->type = $type;
 		return $this;
 	}
 
