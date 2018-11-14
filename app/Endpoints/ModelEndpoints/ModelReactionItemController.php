@@ -64,6 +64,7 @@ abstract class ModelReactionItemController extends ParentedRepositoryController
 			'id' => $reactionItem->getId(),
 			'specieId' => $reactionItem->getSpecieId()->getId(),
 			'reactionId' => $reactionItem->getReactionId()->getId(),
+			'type' => $reactionItem->getType(),
 			'name' => $reactionItem->getName(),
 			'stoichiometry' => $reactionItem->getStoichiometry(),
 			'isGlobal' => $reactionItem->getIsGlobal(),
@@ -122,6 +123,8 @@ final class ReactionParentedReactionItemController extends ModelReactionItemCont
 		}
 		if ($data->hasKey('name'))
 			$reactionItem->setName($data->getString('name'));
+		if ($data->hasKey('type'))
+			$reactionItem->setType($data->getString('type'));
 		if ($data->hasKey('value'))
 			$reactionItem->setValue($data->getInt('value'));
 		if ($data->hasKey('stoichiometry'))
