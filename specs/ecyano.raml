@@ -710,18 +710,18 @@ resourceTypes:
         get:
           is: [IdCollection: {description: Get all products of this rule}]
 
-#Model part follows
+#BCSRepositories part follows
 
 /models:
   get:
      is: [Collection: {type: ListModel}, Sortable: {keys: 'id, name, userId, approvedId, status'}]
   post:
-    is: [Insert: {type: Model}]
+    is: [Insert: {type: BCSRepositories}]
   /{id}:
     get:
-      is: [ObjectList: {type: Model}]
+      is: [ObjectList: {type: BCSRepositories}]
     put:
-      is: [Update: {type: Model}]
+      is: [Update: {type: BCSRepositories}]
     delete:
       is: [Delete]
     /compartments:

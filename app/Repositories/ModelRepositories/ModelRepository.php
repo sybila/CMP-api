@@ -45,7 +45,7 @@ class ModelRepository implements IEndpointRepository
 	public function getList(array $filter, array $sort, array $limit): array
 	{
 		$query = $this->buildListQuery($filter)
-			->select('m.id, m.name, m.userId, m.approvedId, m.status, m.solver');
+			->select('m.id, m.name, m.userId, m.approvedId, m.status');
 
 
 		return $query->getQuery()->getArrayResult();

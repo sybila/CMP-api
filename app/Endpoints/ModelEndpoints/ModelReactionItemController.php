@@ -10,9 +10,9 @@ use App\Entity\{
 	IdentifiedObject,
 	Repositories\IEndpointRepository,
 	Repositories\ModelReactionItemRepository,
-	Repositories\SpecieRepository,
-	Repositories\ReactionRepository,
-	Repositories\CompartmentRepository,
+	Repositories\ModelSpecieRepository,
+	Repositories\ModelReactionRepository,
+	Repositories\ModelCompartmentRepository,
 	Structure
 };
 use App\Exceptions\
@@ -33,7 +33,7 @@ use Slim\Http\{
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * @property-read ReactionRepository $repository
+ * @property-read ReactionItemRepository $repository
  * @method Entity getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
 abstract class ModelReactionItemController extends ParentedRepositoryController
@@ -95,12 +95,12 @@ abstract class ModelReactionItemController extends ParentedRepositoryController
 
 }
 
-final class ReactionParentedReactionItemController extends ModelReactionItemController
+final class ReactionParentedReactionItemController extends ModelLocalParameterController
 {
 
 	protected static function getParentRepositoryClassName(): string
 	{
-		return ReactionRepository::class;
+		return ModelReactionRepository::class;
 	}
 
 	protected function getParentObjectInfo(): array
@@ -151,12 +151,12 @@ final class ReactionParentedReactionItemController extends ModelReactionItemCont
 }
 
 
-final class SpecieParentedReactionItemController extends ModelReactionItemController
+final class SpecieParentedReactionItemController extends ModelLocalParameterController
 {
 
 	protected static function getParentRepositoryClassName(): string
 	{
-		return SpecieRepository::class;
+		return ModelSpecieRepository::class;
 	}
 
 	protected function getParentObjectInfo(): array

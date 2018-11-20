@@ -3,28 +3,24 @@
 namespace App\Controllers;
 
 use App\Entity\{
-	Compartment,
 	Entity,
 	ModelCompartment,
+	ModelUnitToDefinition,
 	ModelSpecie,
 	ModelReaction,
 	IdentifiedObject,
 	Repositories\IEndpointRepository,
 	Repositories\ModelRepository,
-	Repositories\CompartmentRepository,
-	Repositories\ReactionRepository,
+	Repositories\ModelCompartmentRepository,
+	Repositories\ModelReactionRepository,
 	Structure
 };
 use App\Exceptions\
 {
-	CompartmentLocationException,
-	InvalidArgumentException,
 	DependentResourcesBoundException,
-	MissingRequiredKeyException,
-	UniqueKeyViolationException
+	MissingRequiredKeyException
 };
 use App\Helpers\ArgumentParser;
-use App\Helpers\Validators;
 use Slim\Container;
 use Slim\Http\{
 	Request, Response
@@ -32,19 +28,19 @@ use Slim\Http\{
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * @property-read CompartmentRepository $repository
+ * @property-read ModelCompartmentRepository $repository
  * @method Entity getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
-final class CompartmentController extends ParentedRepositoryController
+final class ModelCompartmentController extends ParentedRepositoryController
 {
 
-	/** @var CompartmentRepository */
+	/** @var ModelCompartmentRepository */
 	private $compartmentRepository;
 
 	public function __construct(Container $c)
 	{
 		parent::__construct($c);
-		$this->compartmentRepository = $c->get(CompartmentRepository::class);
+		$this->compartmentRepository = $c->get(ModelCompartmentRepository::class);
 	}
 
 	protected static function getAllowedSort(): array
@@ -73,16 +69,11 @@ final class CompartmentController extends ParentedRepositoryController
 	protected function setData(IdentifiedObject $compartment, ArgumentParser $data): void
 	{
 		/** @var ModelCompartment $compartment */
-		if(!$compartment->getModelId())
-			$compartment->setModelId($this->repository->getParent());
-		if ($data->hasKey('name'))
-			$compartment->setName($data->getString('name'));
-		if ($data->hasKey('spatialDimensions'))
-			$compartment->setSpatialDimensions($data->getString('spatialDimensions'));
-		if ($data->hasKey('size'))
-			$compartment->setSize($data->getString('size'));
-		if ($data->hasKey('isConstant'))
-			$compartment->setIsConstant($data->getInt('isConstant'));
+		$compartment->getModelId() ?: $compartment->setModelId($this->repository->getParent());
+		!$data->hasKey('name') ?: $compartment->setName($data->getString('name'));
+		!$data->hasKey('spatialDimensions') ?: $compartment->setSpatialDimensions($data->getString('spatialDimensions'));
+		!$data->hasKey('size') ?: $compartment->setSize($data->getString('size'));
+		!$data->hasKey('isConstant') ?: $compartment->setIsConstant($data->getInt('isConstant'));
 	}
 
 	protected function createObject(ArgumentParser $body): IdentifiedObject
@@ -129,7 +120,7 @@ final class CompartmentController extends ParentedRepositoryController
 
 	protected static function getRepositoryClassName(): string
 	{
-		return CompartmentRepository::Class;
+		return ModelCompartmentRepository::Class;
 	}
 
 

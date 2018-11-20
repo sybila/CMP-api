@@ -10,9 +10,6 @@ use App\Helpers\
 {
 	ChangeCollection, ConsistenceEnum
 };
-use App\Exceptions\EntityException;
-use Consistence\Enum\InvalidEnumValueException;
-use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\Event\PreUpdateEventArgs;

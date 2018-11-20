@@ -22,7 +22,7 @@ use Symfony\Component\Translation\Tests\StringClass;
  * @ORM\Table(name="model_unit_definition")
  * @ORM\DiscriminatorColumn(name="hierarchy_type", type="string")
  */
-class ModelUnit implements IdentifiedObject
+class ModelUnitDefinition implements IdentifiedObject
 {
 
 	/**
@@ -33,46 +33,22 @@ class ModelUnit implements IdentifiedObject
 	 */
 	private $id;
 
+
 	/**
-	 * @ORM\ManyToOne(targetEntity="ModelUnit", inversedBy="referencedBy")
-	 * @ORM\JoinColumn(name="base_model_unit_id", referencedColumnName="id")
+	 * @ORM\ManyToOne(targetEntity="Model", inversedBy="compartments")
+	 * @ORM\JoinColumn(name="model_id", referencedColumnName="id")
 	 */
-	private $baseUnitId;
+	protected $modelId;
 
 	/**
-	 * @var ArrayCollection
-	 * @ORM\OneToMany(targetEntity="ModelUnit", mappedBy="baseUnitId")
-	 */
-	private $referencedBy;
-
-	/**
-	 * @var string
-	 * @ORM\Column(type="string")
-	 */
-	private $name;
-
-	/**
-	 * @var double
-	 * @ORM\Column(type="double")
-	 */
-	private $exponent;
-
-	/**
-	 * @var double
-	 * @ORM\Column(type="double")
-	 */
-	private $multiplier;
-
-
-	/**
-	 * @ORM\ManyToMany(targetEntity="ModelUnitDefinition")
+	 * @ORM\ManyToMany(targetEntity="ModelUnit")
 	 * @ORM\JoinTable(name="model_unit_to_definition",
-	 *     joinColumns={@ORM\JoinColumn(name="model_unit_id")},
-	 *     inverseJoinColumns={@ORM\JoinColumn(name="model_unit_definition_id")}
+	 *     joinColumns={@ORM\JoinColumn(name="model_unit_definition_id")},
+	 *     inverseJoinColumns={@ORM\JoinColumn(name="model_unit_id")}
 	 * )
 	 * @var ArrayCollection
 	 */
-	protected $definitions;
+	protected $units;
 
 	/**
 	 * Get id
@@ -84,6 +60,28 @@ class ModelUnit implements IdentifiedObject
 		return $this->id;
 	}
 
+	/**
+	 * Get modelId
+	 *
+	 * @return integer|null
+	 */
+	public function getModelId()
+	{
+		return $this->modelId;
+	}
+
+	/**
+	 * Set modelId
+	 *
+	 * @param integer $modelId
+	 *
+	 * @return ModelUnitToDefinition
+	 */
+	public function setModelId($modelId): ModelUnitToDefinition
+	{
+		$this->modelId = $modelId;
+		return $this;
+	}
 
 	/**
 	 * Get name

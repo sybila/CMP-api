@@ -157,7 +157,7 @@ class ModelReactionItem implements IdentifiedObject
 	 *
 	 * @param string $name
 	 *
-	 * @return ModelCompartment
+	 * @return ModelUnitToDefinition
 	 */
 	public function setName($name): ModelReactionItem
 	{
@@ -181,7 +181,7 @@ class ModelReactionItem implements IdentifiedObject
 	 *
 	 * @param string $type
 	 *
-	 * @return ModelCompartment
+	 * @return ModelUnitToDefinition
 	 */
 	public function setType($type): ModelReactionItem
 	{

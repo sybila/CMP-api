@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Entity\Repositories;
+namespace App\Repositories;
 
 use App\Entity\Atomic;
 use App\Entity\AtomicState;

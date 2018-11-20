@@ -4,17 +4,17 @@ namespace App\Controllers;
 
 use App\Entity\{
 	Entity,
-	ModelCompartment,
+	ModelUnitToDefinition,
 	ModelReactionItem,
 	ModelSpecie,
 	IdentifiedObject,
 	Repositories\ClassificationRepository,
 	Repositories\EntityRepository,
-	Repositories\SpecieRepository,
+	Repositories\ModelSpecieRepository,
 	Repositories\IEndpointRepository,
 	Repositories\OrganismRepository,
 	Repositories\ModelRepository,
-	Repositories\CompartmentRepository,
+	Repositories\ModelCompartmentRepository,
 	Structure
 };
 use App\Exceptions\
@@ -34,19 +34,19 @@ use Slim\Http\{
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * @property-read SpecieRepository $repository
+ * @property-read ModelSpecieRepository $repository
  * @method Entity getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
-final class SpecieController extends ParentedRepositoryController
+final class ModelSpecieController extends ParentedRepositoryController
 {
 
-	/** @var SpecieRepository */
+	/** @var ModelSpecieRepository */
 	private $specieRepository;
 
 	public function __construct(Container $c)
 	{
 		parent::__construct($c);
-		$this->specieRepository = $c->get(SpecieRepository::class);
+		$this->specieRepository = $c->get(ModelSpecieRepository::class);
 	}
 
 	protected static function getAllowedSort(): array
@@ -135,13 +135,13 @@ final class SpecieController extends ParentedRepositoryController
 
 	protected static function getRepositoryClassName(): string
 	{
-		return SpecieRepository::Class;
+		return ModelSpecieRepository::Class;
 	}
 
 
 	protected static function getParentRepositoryClassName(): string
 	{
-		return CompartmentRepository::class;
+		return ModelCompartmentRepository::class;
 	}
 
 	protected function getParentObjectInfo(): array

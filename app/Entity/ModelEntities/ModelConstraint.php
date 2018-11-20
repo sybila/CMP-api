@@ -10,9 +10,6 @@ use App\Helpers\
 {
 	ChangeCollection, ConsistenceEnum
 };
-use App\Exceptions\EntityException;
-use Consistence\Enum\InvalidEnumValueException;
-use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\Event\PreUpdateEventArgs;
@@ -22,10 +19,10 @@ use Symfony\Component\Translation\Tests\StringClass;
 
 /**
  * @ORM\Entity
- * @ORM\Table(name="model_function")
+ * @ORM\Table(name="model_constraint")
  * @ORM\DiscriminatorColumn(name="hierarchy_type", type="string")
  */
-class ModelFunction implements IdentifiedObject
+class ModelConstraint implements IdentifiedObject
 {
 
 	/**
@@ -37,20 +34,17 @@ class ModelFunction implements IdentifiedObject
 	private $id;
 
 
-
 	/**
-	 * @var int
-	 * @ORM\ManyToOne(targetEntity="ModelReaction", inversedBy="reactionItems")
-	 * @ORM\JoinColumn(name="model_reaction_id", referencedColumnName="id")
+	 * @ORM\ManyToOne(targetEntity="Model", inversedBy="compartments")
+	 * @ORM\JoinColumn(name="model_id", referencedColumnName="id")
 	 */
-	protected $reactionId;
-
+	protected $modelId;
 
 	/**
 	 * @var string
 	 * @ORM\Column(type="string")
 	 */
-	protected $name;
+	protected $message;
 
 
 	/**
@@ -58,6 +52,8 @@ class ModelFunction implements IdentifiedObject
 	 * @ORM\Column(type="string")
 	 */
 	protected $formula;
+
+
 
 
 	/**
@@ -71,48 +67,49 @@ class ModelFunction implements IdentifiedObject
 	}
 
 	/**
-	 * Get name
+	 * Get modelId
 	 *
-	 * @return null|string
+	 * @return integer|null
 	 */
-	public function getName(): ?string
+	public function getModelId()
 	{
-		return $this->name;
+		return $this->modelId;
 	}
 
 	/**
-	 * Get reactionId
+	 * Set modelId
 	 *
-	 * @return integer
+	 * @param integer $modelId
+	 *
+	 * @return ModelConstraint
 	 */
-	public function getReactionId()
+	public function setModelId($modelId): ModelConstraint
 	{
-		return $this->reactionId;
-	}
-
-	/**
-	 * Set reactionId
-	 *
-	 * @param integer $reactionId
-	 *
-	 * @return ModelReactionItem
-	 */
-	public function setReactionId($reactionId): ModelFunction
-	{
-		$this->reactionId = $reactionId;
+		$this->modelId = $modelId;
 		return $this;
 	}
 
 	/**
-	 * Set name
+	 * Get message
 	 *
-	 * @param string $name
-	 *
-	 * @return ModelUnitToDefinition
+	 * @return null|string
 	 */
-	public function setName($name): ModelFunction
+	public function getMessage(): ?string
 	{
-		$this->name = $name;
+		return $this->message;
+	}
+
+
+	/**
+	 * Set message
+	 *
+	 * @param string $message
+	 *
+	 * @return ModelConstraint
+	 */
+	public function setMessage($message): ModelConstraint
+	{
+		$this->message = $message;
 		return $this;
 	}
 
@@ -126,18 +123,18 @@ class ModelFunction implements IdentifiedObject
 		return $this->formula;
 	}
 
+
 	/**
-	 * Set function
+	 * Set formula
 	 *
-	 * @param string $function
+	 * @param string $formula
 	 *
-	 * @return ModelUnitToDefinition
+	 * @return ModelConstraint
 	 */
-	public function setFormula($formula): ModelFunction
+	public function setFormula($formula): ModelConstraint
 	{
 		$this->formula = $formula;
 		return $this;
 	}
-
 
 }

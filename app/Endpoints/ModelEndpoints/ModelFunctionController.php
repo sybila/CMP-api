@@ -4,15 +4,15 @@ namespace App\Controllers;
 
 use App\Entity\{
 	Entity,
-	ModelCompartment,
+	ModelUnitToDefinition,
 	IdentifiedObject,
 	ModelFunction,
 	ModelReaction,
 	Repositories\IEndpointRepository,
 	Repositories\FunctionRepository,
-	Repositories\SpecieRepository,
-	Repositories\ReactionRepository,
-	Repositories\CompartmentRepository,
+	Repositories\ModelSpecieRepository,
+	Repositories\ModelReactionRepository,
+	Repositories\ModelCompartmentRepository,
 	Structure
 };
 use App\Exceptions\
@@ -31,10 +31,10 @@ use Slim\Http\{
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * @property-read ReactionRepository $repository
+ * @property-read ModelReactionRepository $repository
  * @method Entity getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
-final class FunctionController extends ParentedRepositoryController
+final class ModelFunctionController extends ParentedRepositoryController
 {
 
 	/** @var FunctionRepository */
@@ -115,7 +115,7 @@ final class FunctionController extends ParentedRepositoryController
 
 	protected static function getParentRepositoryClassName(): string
 	{
-		return ReactionRepository::class;
+		return ModelReactionRepository::class;
 	}
 
 	protected function getParentObjectInfo(): array

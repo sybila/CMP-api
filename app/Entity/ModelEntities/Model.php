@@ -67,12 +67,6 @@ class Model implements IdentifiedObject
 	 */
 	protected $status;
 
-	/**
-	 * @var string
-	 * @ORM\Column (type="string")
-	 */
-	protected $solver;
-
 
 	/**
 	 * @var ArrayCollection
@@ -210,30 +204,6 @@ class Model implements IdentifiedObject
 	public function setStatus($status): Model
 	{
 		$this->status = $status;
-		return $this;
-	}
-
-	/**
-	 * Get solver
-	 *
-	 * @return string
-	 */
-	public function getSolver(): ?string
-	{
-		return $this->solver;
-	}
-
-
-	/**
-	 * Set solver
-	 *
-	 * @param string $solver
-	 *
-	 * @return Model
-	 */
-	public function setSolver($solver): Model
-	{
-		$this->solver = $solver;
 		return $this;
 	}
 

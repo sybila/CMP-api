@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Entity\Repositories;
+namespace App\Repositories;
 
 use App\Entity\Atomic;
 use App\Entity\AtomicState;
@@ -9,7 +9,7 @@ use App\Entity\Complex;
 use App\Entity\Model;
 use App\Entity\ModelReaction;
 use App\Entity\ModelFunction;
-use App\Entity\ModelCompartment;
+use App\Entity\ModelUnitToDefinition;
 use App\Entity\ModelReactionItem;
 use App\Entity\EntityStatus;
 use App\Entity\IdentifiedObject;
@@ -18,7 +18,7 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 
 
-class ReactionRepository implements IDependentEndpointRepository
+class LocalParameterRepository implements IDependentEndpointRepository
 {
 
 	/** @var EntityManager * */

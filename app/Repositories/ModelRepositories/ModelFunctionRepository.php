@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Entity\Repositories;
+namespace App\Repositories;
 
 use App\Entity\Atomic;
 use App\Entity\AtomicState;
@@ -18,7 +18,7 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 
 
-class FunctionRepository implements IDependentEndpointRepository
+class ModelFunctionRepository implements IDependentEndpointRepository
 {
 
 	/** @var EntityManager * */

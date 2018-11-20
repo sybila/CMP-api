@@ -5,7 +5,7 @@ namespace App\Controllers;
 use App\Entity\
 {
 	Entity,
-	ModelCompartment,
+	ModelUnitToDefinition,
 	IdentifiedObject,
 	ModelReaction,
 	ModelReactionItem,
@@ -13,8 +13,8 @@ use App\Entity\
 	Repositories\IEndpointRepository,
 	Repositories\ModelRepository,
 	Repositories\ModelReactionItemRepository,
-	Repositories\ReactionRepository,
-	Repositories\CompartmentRepository,
+	Repositories\ModelReactionRepository,
+	Repositories\ModelCompartmentRepository,
 	Structure
 };
 use App\Exceptions\
@@ -33,19 +33,19 @@ use Slim\Http\{
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * @property-read ReactionRepository $repository
+ * @property-read ModelReactionRepository $repository
  * @method Entity getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
-final class ReactionController extends ParentedRepositoryController
+final class ModelReactionController extends ParentedRepositoryController
 {
 
-	/** @var ReactionRepository */
+	/** @var ModelReactionRepository */
 	private $reactionRepository;
 
 	public function __construct(Container $c)
 	{
 		parent::__construct($c);
-		$this->reactionRepository = $c->get(ReactionRepository::class);
+		$this->reactionRepository = $c->get(ModelReactionRepository::class);
 	}
 
 	protected static function getAllowedSort(): array
@@ -136,7 +136,7 @@ final class ReactionController extends ParentedRepositoryController
 
 	protected static function getRepositoryClassName(): string
 	{
-		return ReactionRepository::Class;
+		return ModelReactionRepository::Class;
 	}
 
 

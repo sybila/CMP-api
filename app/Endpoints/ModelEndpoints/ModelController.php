@@ -3,22 +3,12 @@
 namespace App\Controllers;
 
 use App\Entity\{
-	AnnotationTerm,
-	Atomic,
-	AtomicState,
-	Compartment,
-	Complex,
 	Entity,
-	EntityAnnotation,
-	EntityStatus,
 	Model,
 	IdentifiedObject,
 	ModelCompartment,
 	ModelReaction,
-	Repositories\ClassificationRepository,
-	Repositories\EntityRepository,
 	Repositories\IEndpointRepository,
-	Repositories\OrganismRepository,
 	Repositories\ModelRepository,
 	Structure
 };
@@ -69,7 +59,6 @@ final class ModelController extends WritableRepositoryController
 			'approvedId' => $model->getApprovedId(),
 			'description' => $model->getDescription(),
 			'status' => (string)$model->getStatus(),
-			'solver' => (string)$model->getSolver(),
 			'compartments' => $model->getCompartments()->map(function(ModelCompartment $compartment)
 			{
 				return ['id' => $compartment->getId(), 'name' => $compartment->getName()];
@@ -94,8 +83,6 @@ final class ModelController extends WritableRepositoryController
 			$model->setDescription($data->getString('description'));
 		if ($data->hasKey('status'))
 			$model->setStatus($data->getString('status'));
-		if ($data->hasKey('solver'))
-			$model->setSolver($data->getString('solver'));
 
 	}
 
@@ -130,7 +117,6 @@ final class ModelController extends WritableRepositoryController
 			'name' => new Assert\Type(['type' => 'string']),
 			'description' => new Assert\Type(['type' => 'string']),
 			'visualisation' => new Assert\Type(['type' => 'string']),
-			'solver' => new Assert\Type(['type' => 'string']),
 			'status' => new Assert\Type(['type' => 'string']),
 		]);
 	}
