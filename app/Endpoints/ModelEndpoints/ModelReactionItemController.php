@@ -95,7 +95,7 @@ abstract class ModelReactionItemController extends ParentedRepositoryController
 
 }
 
-final class ReactionParentedReactionItemController extends ModelLocalParameterController
+final class ReactionParentedReactionItemController extends ModelReactionItemController
 {
 
 	protected static function getParentRepositoryClassName(): string
@@ -151,7 +151,7 @@ final class ReactionParentedReactionItemController extends ModelLocalParameterCo
 }
 
 
-final class SpecieParentedReactionItemController extends ModelLocalParameterController
+final class SpecieParentedReactionItemController extends ModelReactionItemController
 {
 
 	protected static function getParentRepositoryClassName(): string

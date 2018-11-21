@@ -78,6 +78,12 @@ class ModelCompartment implements IdentifiedObject
 	protected $reactions;
 
 
+	/**
+	 * @var ArrayCollection
+	 * @ORM\OneToMany(targetEntity="ModelUnitDefinition", mappedBy="compartmentId")
+	 */
+	protected $units;
+
 
 	/**
 	 * Get id
@@ -219,6 +225,14 @@ class ModelCompartment implements IdentifiedObject
 	public function getReactions(): Collection
 	{
 		return $this->reactions;
+	}
+
+	/**
+	 * @return Collection []
+	 */
+	public function getUnits(): Collection
+	{
+		return $this->units;
 	}
 
 }

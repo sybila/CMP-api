@@ -81,6 +81,12 @@ class Model implements IdentifiedObject
 	protected $reactions;
 
 	/**
+	 * @var ArrayCollection
+	 * @ORM\OneToMany(targetEntity="ModelParameter", mappedBy="modelId")
+	 */
+	protected $parameters;
+
+	/**
 	 * Get id
 	 *
 	 * @return integer

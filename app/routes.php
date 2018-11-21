@@ -132,6 +132,21 @@ return function(App $app)
 	(new RouteHelper)
 		->setRoute(Ctl\ModelEventAssignmentController::class, '/models/{model-id:\\d+}/events/{event-id:\\d+}/eventAssignments')
 		->register();
+	(new RouteHelper)
+		->setRoute(Ctl\ModelUnitDefinitionController::class, '/models/{model-id:\\d+}/unitDefinitions')
+		->register();
+	(new RouteHelper)
+		->setRoute(Ctl\ModelUnitController::class, '/units')
+		->register();
+	(new RouteHelper)
+		->setRoute(Ctl\ModelInitialAssignmentController::class, '/models/{model-id:\\d+}/initialAssignments')
+		->register();
+	(new RouteHelper)
+		->setRoute(Ctl\ModelParentedParameterController::class, '/models/{model-id:\\d+}/parameters')
+		->register();
+	(new RouteHelper)
+		->setRoute(Ctl\ReactionItemParentedParameterController::class, '/models/{model-id:\\d+}/reactions/{reactionItem-id:\\d+}/parameters')
+		->register();
 
 	// entities
 	$app->post('/entities/{id:\\d+}/status', Ctl\EntityController::class . ':editStatus');

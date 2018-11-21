@@ -25,7 +25,7 @@ use Symfony\Component\Translation\Tests\StringClass;
  * @ORM\Table(name="model_rule")
  * @ORM\DiscriminatorColumn(name="hierarchy_type", type="string")
  */
-abstract class ModelRule implements IdentifiedObject
+class ModelRule implements IdentifiedObject
 {
 
 	/**
@@ -100,20 +100,5 @@ abstract class ModelRule implements IdentifiedObject
 		$this->equation = $equation;
 		return $this;
 	}
-
-}
-
-class AlgebraicRule extends ModelRule
-{
-
-}
-
-class AssignmentRule extends ModelRule
-{
-
-}
-
-class RateRule extends ModelRule
-{
 
 }

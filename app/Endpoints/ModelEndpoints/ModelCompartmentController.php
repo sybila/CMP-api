@@ -5,7 +5,7 @@ namespace App\Controllers;
 use App\Entity\{
 	Entity,
 	ModelCompartment,
-	ModelUnitToDefinition,
+	ModelUnitDefinition,
 	ModelSpecie,
 	ModelReaction,
 	IdentifiedObject,
@@ -62,6 +62,9 @@ final class ModelCompartmentController extends ParentedRepositoryController
 			})->toArray(),
 			'reactions' => $compartment->getReactions()->map(function (ModelReaction $reaction) {
 				return ['id' => $reaction->getId(), 'name' => $reaction->getName()];
+			})->toArray(),
+			'units' => $compartment->getUnits()->map(function (ModelUnitDefinition $unit) {
+				return ['id' => $unit->getId(), 'symbol' => $unit->getSymbol()];
 			})->toArray(),
 		];
 	}

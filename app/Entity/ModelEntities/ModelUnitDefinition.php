@@ -51,6 +51,36 @@ class ModelUnitDefinition implements IdentifiedObject
 	protected $units;
 
 	/**
+	 * @var string
+	 * @ORM\Column(type="string")
+	 */
+	private $name;
+
+	/**
+	 * @var string
+	 * @ORM\Column(type="string")
+	 */
+	private $symbol;
+
+	/**
+	 * @ORM\ManyToOne(targetEntity="ModelCompartment", inversedBy="units")
+	 * @ORM\JoinColumn(name="model_compartment_id", referencedColumnName="id")
+	 */
+	protected $compartmentId;
+
+	/**
+	 * @ORM\ManyToOne(targetEntity="ModelCompartment", inversedBy="units")
+	 * @ORM\JoinColumn(name="model_compartment_id", referencedColumnName="id")
+	 */
+	//protected $localParameterId;
+
+	/**
+	 * @ORM\ManyToOne(targetEntity="ModelCompartment", inversedBy="units")
+	 * @ORM\JoinColumn(name="model_compartment_id", referencedColumnName="id")
+	 */
+	//protected $parameterId;
+
+	/**
 	 * Get id
 	 *
 	 * @return integer
@@ -75,13 +105,14 @@ class ModelUnitDefinition implements IdentifiedObject
 	 *
 	 * @param integer $modelId
 	 *
-	 * @return ModelUnitToDefinition
+	 * @return ModelUnitDefinition
 	 */
-	public function setModelId($modelId): ModelUnitToDefinition
+	public function setModelId($modelId): ModelUnitDefinition
 	{
 		$this->modelId = $modelId;
 		return $this;
 	}
+
 
 	/**
 	 * Get name
@@ -99,13 +130,68 @@ class ModelUnitDefinition implements IdentifiedObject
 	 *
 	 * @param string $name
 	 *
-	 * @return ModelUnitToDefinition
+	 * @return ModelUnitDefinition
 	 */
-	public function setName($name): ModelUnitToDefinition
+	public function setName($name): ModelUnitDefinition
 	{
 		$this->name = $name;
 		return $this;
 	}
 
+	/**
+	 * Get symbol
+	 *
+	 * @return null|string
+	 */
+	public function getSymbol(): ?string
+	{
+		return $this->symbol;
+	}
+
+
+	/**
+	 * Set symbol
+	 *
+	 * @param string $symbol
+	 *
+	 * @return ModelUnitDefinition
+	 */
+	public function setSymbol($symbol): ModelUnitDefinition
+	{
+		$this->symbol = $symbol;
+		return $this;
+	}
+
+
+	/**
+	 * Get compartmentId
+	 *
+	 * @return integer|null
+	 */
+	public function getCompartmentId()
+	{
+		return $this->compartmentId;
+	}
+
+	/**
+	 * Set compartmentId
+	 *
+	 * @param integer $compartmentId
+	 *
+	 * @return ModelUnitDefinition
+	 */
+	public function setCompartmentId($compartmentId): ModelUnitDefinition
+	{
+		$this->compartmentId = $compartmentId;
+		return $this;
+	}
+
+	/**
+	 * @return ModelUnit[]|Collection
+	 */
+	public function getUnits(): Collection
+	{
+		return $this->units;
+	}
 
 }

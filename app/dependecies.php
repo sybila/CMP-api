@@ -175,6 +175,22 @@ $c[EntityRepo\ModelEventAssignmentRepository::class] = function (Container $c) {
 	return new EntityRepo\ModelEventAssignmentRepository($c[EntityManager::class]);
 };
 
+$c[EntityRepo\ModelUnitDefinitionRepository::class] = function (Container $c) {
+	return new EntityRepo\ModelUnitDefinitionRepository($c[EntityManager::class]);
+};
+
+$c[EntityRepo\ModelUnitRepository::class] = function (Container $c) {
+	return new EntityRepo\ModelUnitRepository($c[EntityManager::class]);
+};
+
+$c[EntityRepo\ModelInitialAssignmentRepository::class] = function (Container $c) {
+	return new EntityRepo\ModelInitialAssignmentRepository($c[EntityManager::class]);
+};
+
+$c[EntityRepo\ModelParameterRepository::class] = function (Container $c) {
+	return new EntityRepo\ModelParameterRepository($c[EntityManager::class]);
+};
+
 $c[AuthRepo\ClientRepository::class] = function (Container $c) {
 	return new AuthRepo\ClientRepository($c[EntityManager::class]);
 };
