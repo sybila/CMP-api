@@ -2,44 +2,44 @@
 
 namespace App\Entity\Repositories;
 
-use App\Entity\ModelSpecie;
+use App\Entity\Model;
 use App\Entity\ModelCompartment;
 use App\Entity\IdentifiedObject;
-use Doctrine\Common\Collections\ArrayCollection;
+use App\Entity\ModelInitialAssignment;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 
 
-class SpecieRepository implements IDependentEndpointRepository
+class ModelInitialAssignmentRepository implements IDependentEndpointRepository
 {
 
 	/** @var EntityManager * */
 	protected $em;
 
-	/** @var \Doctrine\ORM\SpecieRepository */
+	/** @var \Doctrine\ORM\InitialAssignmentRepository */
 	private $repository;
 
 	public function __construct(EntityManager $em)
 	{
 		$this->em = $em;
-		$this->repository = $em->getRepository(ModelSpecie::class);
+		$this->repository = $em->getRepository(ModelInitialAssignment::class);
 	}
 
 	protected static function getParentClassName(): string
 	{
-		return ModelCompartment::class;
+		return Model::class;
 	}
 
 	public function get(int $id)
 	{
-		return $this->em->find(ModelSpecie::class, $id);
+		return $this->em->find(ModelInitialAssignment::class, $id);
 
 	}
 
 	public function getNumResults(array $filter): int
 	{
 		return ((int)$this->buildListQuery($filter)
-			->select('COUNT(s)')
+			->select('COUNT(i)')
 			->getQuery()
 			->getScalarResult());
 	}
@@ -47,13 +47,12 @@ class SpecieRepository implements IDependentEndpointRepository
 	public function getList(array $filter, array $sort, array $limit): array
 	{
 		$query = $this->buildListQuery($filter)
-			->select('s.id, s.name, s.equationType, s.initialExpression, s.hasOnlySubstanceUnits, s.isConstant, s.boundaryCondition');
-
+			->select('i.id, i.formula');
 
 		return $query->getQuery()->getArrayResult();
 	}
 
-	public function getParent() {
+	public function getParent():IdentifiedObject {
 		return $this->object;
 	}
 
@@ -61,22 +60,16 @@ class SpecieRepository implements IDependentEndpointRepository
 	{
 		$className = static::getParentClassName();
 		if (!($object instanceof $className))
-			throw new \Exception('Parent of specie must be ' . $className);
-
+			throw new \Exception('Parent of initial assignment must be ' . $className);
 		$this->object = $object;
 	}
 
 	private function buildListQuery(array $filter): QueryBuilder
 	{
 		$query = $this->em->createQueryBuilder()
-			->from(ModelSpecie::class, 's')
-			->where('s.compartmentId = :compartmentId')
-			->setParameter('compartmentId', $this->object->getId());
-
-
-		return $query;
-
-
+			->from(ModelInitialAssignment::class, 'i')
+			->where('i.modelId = :modelId')
+			->setParameter('modelId', $this->object->getId());
 		return $query;
 	}
 

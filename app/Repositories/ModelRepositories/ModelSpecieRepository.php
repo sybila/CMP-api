@@ -2,49 +2,41 @@
 
 namespace App\Entity\Repositories;
 
-use App\Entity\Atomic;
-use App\Entity\AtomicState;
-use App\Entity\Compartment;
-use App\Entity\Complex;
-use App\Entity\Model;
+use App\Entity\ModelSpecie;
 use App\Entity\ModelCompartment;
-use App\Entity\EntityStatus;
 use App\Entity\IdentifiedObject;
-use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 
-
-class CompartmentRepository implements IDependentEndpointRepository
+class ModelSpecieRepository implements IDependentEndpointRepository
 {
 
 	/** @var EntityManager * */
 	protected $em;
 
-	/** @var \Doctrine\ORM\CompartmentRepository */
+	/** @var \Doctrine\ORM\SpecieRepository */
 	private $repository;
 
 	public function __construct(EntityManager $em)
 	{
 		$this->em = $em;
-		$this->repository = $em->getRepository(ModelCompartment::class);
+		$this->repository = $em->getRepository(ModelSpecie::class);
 	}
 
 	protected static function getParentClassName(): string
 	{
-		return Model::class;
+		return ModelCompartment::class;
 	}
 
 	public function get(int $id)
 	{
-		return $this->em->find(ModelCompartment::class, $id);
-
+		return $this->em->find(ModelSpecie::class, $id);
 	}
 
 	public function getNumResults(array $filter): int
 	{
 		return ((int)$this->buildListQuery($filter)
-			->select('COUNT(c)')
+			->select('COUNT(s)')
 			->getQuery()
 			->getScalarResult());
 	}
@@ -52,12 +44,12 @@ class CompartmentRepository implements IDependentEndpointRepository
 	public function getList(array $filter, array $sort, array $limit): array
 	{
 		$query = $this->buildListQuery($filter)
-			->select('c.id, c.name, c.spatialDimensions, c.size, c.isConstant');
-
+			->select('s.id, s.name, s.sbmlId, s.equationType, s.initialExpression, s.hasOnlySubstanceUnits, s.isConstant, s.boundaryCondition');
 		return $query->getQuery()->getArrayResult();
 	}
 
-	public function getParent():IdentifiedObject {
+	public function getParent()
+	{
 		return $this->object;
 	}
 
@@ -65,27 +57,28 @@ class CompartmentRepository implements IDependentEndpointRepository
 	{
 		$className = static::getParentClassName();
 		if (!($object instanceof $className))
-			throw new \Exception('Parent of compartment must be ' . $className);
+			throw new \Exception('Parent of specie must be ' . $className);
 		$this->object = $object;
 	}
 
 	private function buildListQuery(array $filter): QueryBuilder
 	{
 		$query = $this->em->createQueryBuilder()
-			->from(ModelCompartment::class, 'c')
-			->where('c.modelId = :modelId')
-			->setParameter('modelId', $this->object->getId());
+			->from(ModelSpecie::class, 's')
+			->where('s.compartmentId = :compartmentId')
+			->setParameters([
+				'compartmentId' => $this->object->getId()
+			]);
 		return $query;
 	}
 
-
 	public function add($object): void
 	{
-		// TODO: Refactor this method since its pointless in onetomany relationship
+		// TODO: Implement add() method.
 	}
 
 	public function remove($object): void
 	{
-		// TODO: Refactor this method since its pointless in onetomany relationship
+		// TODO: Implement remove() method.
 	}
 }

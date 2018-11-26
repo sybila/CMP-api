@@ -2,23 +2,8 @@
 
 namespace App\Entity;
 
-
-use App\Exceptions\EntityClassificationException;
-use App\Exceptions\EntityHierarchyException;
-use App\Exceptions\EntityLocationException;
-use App\Helpers\
-{
-	ChangeCollection, ConsistenceEnum
-};
-use App\Exceptions\EntityException;
-use Consistence\Enum\InvalidEnumValueException;
-use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Doctrine\Common\Collections\Criteria;
-use Doctrine\ORM\Event\PreUpdateEventArgs;
 use Doctrine\ORM\Mapping as ORM;
-use Doctrine\ORM\QueryBuilder;
-use Symfony\Component\Translation\Tests\StringClass;
 
 /**
  * @ORM\Entity
@@ -35,7 +20,6 @@ class ModelReaction implements IdentifiedObject
 	 * @var integer|null
 	 */
 	private $id;
-
 
 	/**
 	 * @ORM\ManyToOne(targetEntity="Model", inversedBy="compartments")
@@ -56,6 +40,11 @@ class ModelReaction implements IdentifiedObject
 	 */
 	protected $name;
 
+	/**
+	 * @var string
+	 * @ORM\Column(type="string", name="sbml_id")
+	 */
+	private $sbmlId;
 
 	/**
 	 * @return string
@@ -63,13 +52,11 @@ class ModelReaction implements IdentifiedObject
 	 */
 	protected $rate;
 
-
 	/**
 	 * @var int
 	 * @ORM\Column(type="integer", name="is_fast")
 	 */
 	protected $isFast;
-
 
 	/**
 	 * @var int
@@ -91,7 +78,6 @@ class ModelReaction implements IdentifiedObject
 
 	/**
 	 * Get id
-	 *
 	 * @return integer
 	 */
 	public function getId(): int
@@ -99,10 +85,8 @@ class ModelReaction implements IdentifiedObject
 		return $this->id;
 	}
 
-
 	/**
 	 * Get modelId
-	 *
 	 * @return integer
 	 */
 	public function getModelId()
@@ -112,9 +96,7 @@ class ModelReaction implements IdentifiedObject
 
 	/**
 	 * Set modelId
-	 *
 	 * @param integer $modelId
-	 *
 	 * @return ModelReaction
 	 */
 	public function setModelId($modelId): ModelReaction
@@ -125,7 +107,6 @@ class ModelReaction implements IdentifiedObject
 
 	/**
 	 * Get compartmentId
-	 *
 	 * @return integer
 	 */
 	public function getCompartmentId()
@@ -135,9 +116,7 @@ class ModelReaction implements IdentifiedObject
 
 	/**
 	 * Set compartmentId
-	 *
 	 * @param integer $compartmentId
-	 *
 	 * @return ModelReaction
 	 */
 	public function setCompartmentId($compartmentId): ModelReaction
@@ -148,7 +127,6 @@ class ModelReaction implements IdentifiedObject
 
 	/**
 	 * Get name
-	 *
 	 * @return string
 	 */
 	public function getName(): ?string
@@ -158,9 +136,7 @@ class ModelReaction implements IdentifiedObject
 
 	/**
 	 * Set name
-	 *
 	 * @param string $name
-	 *
 	 * @return ModelReaction
 	 */
 	public function setName($name): ModelReaction
@@ -170,8 +146,27 @@ class ModelReaction implements IdentifiedObject
 	}
 
 	/**
+	 * Get sbmlId
+	 * @return string
+	 */
+	public function getSbmlId()
+	{
+		return $this->sbmlId;
+	}
+
+	/**
+	 * Set sbmlId
+	 * @param string $sbmlId
+	 * @return Model
+	 */
+	public function setSbmlId($sbmlId): Model
+	{
+		$this->sbmlId = $sbmlId;
+		return $this;
+	}
+
+	/**
 	 * Get isReversible
-	 *
 	 * @return integer
 	 */
 	public function getIsReversible()
@@ -181,9 +176,7 @@ class ModelReaction implements IdentifiedObject
 
 	/**
 	 * Set isReversible
-	 *
 	 * @param integer $isReversible
-	 *
 	 * @return ModelReaction
 	 */
 	public function setIsReversible($isReversible): ModelReaction
@@ -194,7 +187,6 @@ class ModelReaction implements IdentifiedObject
 
 	/**
 	 * Get isFast
-	 *
 	 * @return integer
 	 */
 	public function getIsFast()
@@ -204,9 +196,7 @@ class ModelReaction implements IdentifiedObject
 
 	/**
 	 * Set isFast
-	 *
 	 * @param integer $isFast
-	 *
 	 * @return ModelReaction
 	 */
 	public function setIsFast($isFast): ModelReaction
@@ -215,10 +205,8 @@ class ModelReaction implements IdentifiedObject
 		return $this;
 	}
 
-
 	/**
 	 * Get rate
-	 *
 	 * @return string
 	 */
 	public function getRate(): ?string
@@ -228,9 +216,7 @@ class ModelReaction implements IdentifiedObject
 
 	/**
 	 * Set rate
-	 *
 	 * @param string $rate
-	 *
 	 * @return ModelReaction
 	 */
 	public function setRate($rate): ModelReaction
@@ -240,20 +226,19 @@ class ModelReaction implements IdentifiedObject
 	}
 
 	/**
-	 * @return Collection[] ReactionItem
-	 */
-	public function getReactionItems(): Collection
-	{
-		return $this->reactionItems;
-	}
-
-
-	/**
 	 * @return Collection[] ModelFunction
 	 */
 	public function getFunctions(): Collection
 	{
 		return $this->functions;
+	}
+
+	/**
+	 * @return Collection[] ReactionItem
+	 */
+	public function getReactionItems(): Collection
+	{
+		return $this->reactionItems;
 	}
 
 }

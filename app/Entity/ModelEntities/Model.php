@@ -2,23 +2,9 @@
 
 namespace App\Entity;
 
-
-use App\Exceptions\EntityClassificationException;
-use App\Exceptions\EntityHierarchyException;
-use App\Exceptions\EntityLocationException;
-use App\Helpers\
-{
-	ChangeCollection, ConsistenceEnum
-};
-use App\Exceptions\EntityException;
-use Consistence\Enum\InvalidEnumValueException;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Doctrine\Common\Collections\Criteria;
-use Doctrine\ORM\Event\PreUpdateEventArgs;
 use Doctrine\ORM\Mapping as ORM;
-use Doctrine\ORM\QueryBuilder;
-use Symfony\Component\Translation\Tests\StringClass;
 
 /**
  * @ORM\Entity
@@ -27,8 +13,6 @@ use Symfony\Component\Translation\Tests\StringClass;
  */
 class Model implements IdentifiedObject
 {
-
-
 	/**
 	 * @ORM\Id
 	 * @ORM\Column(type="integer")
@@ -38,57 +22,91 @@ class Model implements IdentifiedObject
 	private $id;
 
 	/**
-	 * @var string
-	 * @ORM\Column(type="string")
-	 */
-	protected $name;
-
-	/**
 	 * @var int
 	 * @ORM\Column(type="integer", name="user_id")
 	 */
-	protected $userId;
+	private $userId;
 
 	/**
 	 * @var int
 	 * @ORM\Column(type="integer", name="approved_id")
 	 */
-	protected $approvedId;
+	private $approvedId;
 
 	/**
 	 * @var string
 	 * @ORM\Column(type="string")
 	 */
-	protected $description;
+	private $name;
+
+	/**
+	 * @var string
+	 * @ORM\Column(type="string", name="sbml_id")
+	 */
+	private $sbmlId;
+
+	/**
+	 * @var string
+	 * @ORM\Column(type="string")
+	 */
+	private $description;
 
 	/**
 	 * @var string
 	 * @ORM\Column (type="string")
 	 */
-	protected $status;
-
-	/**
-	 * @var string
-	 * @ORM\Column (type="string")
-	 */
-	protected $solver;
-
+	private $status;
 
 	/**
 	 * @var ArrayCollection
 	 * @ORM\OneToMany(targetEntity="ModelCompartment", mappedBy="modelId")
 	 */
-	protected $compartments;
+	private $compartments;
+
+	/**
+	 * @var ArrayCollection
+	 * @ORM\OneToMany(targetEntity="ModelConstraint", mappedBy="modelId")
+	 */
+	private $constraints;
+
+	/**
+	 * @var ArrayCollection
+	 * @ORM\OneToMany(targetEntity="ModelEvent", mappedBy="modelId")
+	 */
+	private $events;
+
+	/**
+	 * @var ArrayCollection
+	 * @ORM\OneToMany(targetEntity="ModelInitialAssignment", mappedBy="modelId")
+	 */
+	private $initialAssignments;
+
+	/**
+	 * @var ArrayCollection
+	 * @ORM\OneToMany(targetEntity="ModelParameter", mappedBy="modelId")
+	 */
+	private $parameters;
 
 	/**
 	 * @var ArrayCollection
 	 * @ORM\OneToMany(targetEntity="ModelReaction", mappedBy="modelId")
 	 */
-	protected $reactions;
+	private $reactions;
+
+	/**
+	 * @var ArrayCollection
+	 * @ORM\OneToMany(targetEntity="ModelRule", mappedBy="modelId")
+	 */
+	private $rules;
+
+	/**
+	 * @var ArrayCollection
+	 * @ORM\OneToMany(targetEntity="ModelUnitDefinition", mappedBy="modelId")
+	 */
+	private $unitDefinitions;
 
 	/**
 	 * Get id
-	 *
 	 * @return integer
 	 */
 	public function getId(): ?int
@@ -97,31 +115,7 @@ class Model implements IdentifiedObject
 	}
 
 	/**
-	 * Get name
-	 *
-	 * @return string
-	 */
-	public function getName()
-	{
-		return $this->name;
-	}
-
-	/**
-	 * Set name
-	 *
-	 * @param string $name
-	 *
-	 * @return Model
-	 */
-	public function setName($name): Model
-	{
-		$this->name = $name;
-		return $this;
-	}
-
-	/**
 	 * Get userId
-	 *
 	 * @return integer
 	 */
 	public function getUserId(): ?int
@@ -129,12 +123,9 @@ class Model implements IdentifiedObject
 		return $this->userId;
 	}
 
-
 	/**
 	 * Set userId
-	 *
 	 * @param int $userId
-	 *
 	 * @return Model
 	 */
 	public function setUserId($userId): Model
@@ -145,7 +136,6 @@ class Model implements IdentifiedObject
 
 	/**
 	 * Get approvedId
-	 *
 	 * @return integer
 	 */
 	public function getApprovedId(): ?int
@@ -153,12 +143,9 @@ class Model implements IdentifiedObject
 		return $this->approvedId;
 	}
 
-
 	/**
 	 * Set approvedId
-	 *
 	 * @param int $approvedId
-	 *
 	 * @return Model
 	 */
 	public function setApprovedId($approvedId): Model
@@ -168,8 +155,47 @@ class Model implements IdentifiedObject
 	}
 
 	/**
+	 * Get name
+	 * @return string
+	 */
+	public function getName()
+	{
+		return $this->name;
+	}
+
+	/**
+	 * Set name
+	 * @param string $name
+	 * @return Model
+	 */
+	public function setName($name): Model
+	{
+		$this->name = $name;
+		return $this;
+	}
+
+	/**
+	 * Get sbmlId
+	 * @return string
+	 */
+	public function getSbmlId()
+	{
+		return $this->sbmlId;
+	}
+
+	/**
+	 * Set sbmlId
+	 * @param string $sbmlId
+	 * @return Model
+	 */
+	public function setSbmlId($sbmlId): Model
+	{
+		$this->sbmlId = $sbmlId;
+		return $this;
+	}
+
+	/**
 	 * Get description
-	 *
 	 * @return string
 	 */
 	public function getDescription(): ?string
@@ -179,9 +205,7 @@ class Model implements IdentifiedObject
 
 	/**
 	 * Set description
-	 *
 	 * @param string $description
-	 *
 	 * @return Model
 	 */
 	public function setDescription($description): Model
@@ -192,7 +216,6 @@ class Model implements IdentifiedObject
 
 	/**
 	 * Get status
-	 *
 	 * @return string
 	 */
 	public function getStatus(): ?string
@@ -202,9 +225,7 @@ class Model implements IdentifiedObject
 
 	/**
 	 * Set status
-	 *
 	 * @param string $status
-	 *
 	 * @return Model
 	 */
 	public function setStatus($status): Model
@@ -214,31 +235,7 @@ class Model implements IdentifiedObject
 	}
 
 	/**
-	 * Get solver
-	 *
-	 * @return string
-	 */
-	public function getSolver(): ?string
-	{
-		return $this->solver;
-	}
-
-
-	/**
-	 * Set solver
-	 *
-	 * @param string $solver
-	 *
-	 * @return Model
-	 */
-	public function setSolver($solver): Model
-	{
-		$this->solver = $solver;
-		return $this;
-	}
-
-	/**
-	 * @return Compartment[]|Collection
+	 * @return ModelCompartment[]|Collection
 	 */
 	public function getCompartments(): Collection
 	{
@@ -246,11 +243,59 @@ class Model implements IdentifiedObject
 	}
 
 	/**
-	 * @return Reaction[]|Collection
+	 * @return ModelConstraint[]|Collection
+	 */
+	public function getConstraints(): Collection
+	{
+		return $this->constraints;
+	}
+
+	/**
+	 * @return ModelEvent[]|Collection
+	 */
+	public function getEvents(): Collection
+	{
+		return $this->events;
+	}
+
+	/**
+	 * @return ModelInitialAssignment[]|Collection
+	 */
+	public function getInitialAssignments(): Collection
+	{
+		return $this->initialAssignments;
+	}
+
+	/**
+	 * @return ModelParameter[]|Collection
+	 */
+	public function getParameters(): Collection
+	{
+		return $this->parameters;
+	}
+
+	/**
+	 * @return ModelReaction[]|Collection
 	 */
 	public function getReactions(): Collection
 	{
 		return $this->reactions;
+	}
+
+	/**
+	 * @return ModelRule[]|Collection
+	 */
+	public function getRules(): Collection
+	{
+		return $this->rules;
+	}
+
+	/**
+	 * @return ModelUnitDefinition[]|Collection
+	 */
+	public function getUnitDefinitions(): Collection
+	{
+		return $this->unitDefinitions;
 	}
 
 }

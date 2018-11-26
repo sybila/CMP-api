@@ -2,39 +2,31 @@
 
 namespace App\Entity\Repositories;
 
-use App\Entity\Atomic;
-use App\Entity\AtomicState;
-use App\Entity\Compartment;
-use App\Entity\Complex;
 use App\Entity\Model;
+use App\Entity\ModelParameter;
 use App\Entity\ModelReaction;
-use App\Entity\ModelSpecie;
-use App\Entity\ModelReactionItem;
-use App\Entity\EntityStatus;
 use App\Entity\IdentifiedObject;
-use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 
-
-class ModelReactionItemRepository implements IDependentEndpointRepository
+class ModelParameterRepository implements IDependentEndpointRepository
 {
 
 	/** @var EntityManager * */
 	protected $em;
 
-	/** @var \Doctrine\ORM\ModelReactionItemRepository */
+	/** @var \Doctrine\ORM\ModelParameterRepository */
 	private $repository;
 
 	public function __construct(EntityManager $em)
 	{
 		$this->em = $em;
-		$this->repository = $em->getRepository(ModelReactionItem::class);
+		$this->repository = $em->getRepository(ModelParameter::class);
 	}
 
 	protected static function getParentClassName(): array
 	{
-		return [ModelReaction::class, ModelSpecie::class];
+		return [Model::class, ModelReaction::class];
 	}
 
 	public function getParent()
@@ -44,14 +36,13 @@ class ModelReactionItemRepository implements IDependentEndpointRepository
 
 	public function get(int $id)
 	{
-		return $this->em->find(ModelReactionItem::class, $id);
-
+		return $this->em->find(ModelParameter::class, $id);
 	}
 
 	public function getNumResults(array $filter): int
 	{
 		return ((int)$this->buildListQuery($filter)
-			->select('COUNT(r)')
+			->select('COUNT(p)')
 			->getQuery()
 			->getScalarResult());
 	}
@@ -59,46 +50,49 @@ class ModelReactionItemRepository implements IDependentEndpointRepository
 	public function getList(array $filter, array $sort, array $limit): array
 	{
 		$query = $this->buildListQuery($filter)
-			->select('r.id, (r.reactionId) as reactionId, (r.specieId) as specieId, r.type, r.value, r.stoichiometry, r.isGlobal');
-
+			->select('p.id, p.name, p.sbmlId, p.value, p.isConstant');
 		return $query->getQuery()->getArrayResult();
 	}
-
 
 	public function setParent(IdentifiedObject $object): void
 	{
 		$classNames = static::getParentClassName();
-		foreach($classNames as $className) {
-			if($object instanceof $className) {
+		$errorString = '';
+		$index = 0;
+		foreach ($classNames as $className) {
+			if ($object instanceof $className) {
 				$this->object = $object;
 				return;
 			}
+			$index == 0 ?: $errorString .= ' or ';
+			$index++;
+			$errorString .= $className;
 		}
-		throw new \Exception('Parent of reaction must be ' . $className);
+		throw new \Exception('Parent of parameter must be ' . $errorString);
 	}
 
-	public function getEntityManager() {
+	public function getEntityManager()
+	{
 		return $this->em;
 	}
 
 	private function buildListQuery(array $filter): QueryBuilder
 	{
-		if ($this->object instanceof ModelSpecie) {
+		$query = null;
+		if ($this->object instanceof Model) {
 			$query = $this->em->createQueryBuilder()
-				->from(ModelReactionItem::class, 'r')
-				->where('r.specieId = :specieId')
-				->setParameter('specieId', $this->object->getId());
+				->from(ModelParameter::class, 'p')
+				->where('p.modelId = :modelId AND p.reactionId IS NULL')
+				->setParameter('modelId', $this->object->getId());
 		}
 		if ($this->object instanceof ModelReaction) {
 			$query = $this->em->createQueryBuilder()
-				->from(ModelReactionItem::class, 'r')
-				->where('r.reactionId = :reactionId')
+				->from(ModelParameter::class, 'p')
+				->where('p.reactionId = :reactionId')
 				->setParameter('reactionId', $this->object->getId());
 		}
-
 		return $query;
 	}
-
 
 	public function add($object): void
 	{

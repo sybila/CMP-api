@@ -169,6 +169,9 @@ types:
       code:
         type: string
         description: Database code to be used within API requests/responses
+  SbmlId:
+    type: string
+    descrtiption: String Identifier for SBML document
   ModelStatus:
     type: string
     enum: ["new", "TBA", "active"]
@@ -180,13 +183,11 @@ types:
       name:
         type: string
         description: Name of the model
-      solver:
-        type: string
-        description: Solver of the model
       status: ModelStatus
   Model:
     type: ListModel
     properties:
+      sbmlId: SbmlId
       description: string
       compartments:
         type: IdentifierList
@@ -710,18 +711,18 @@ resourceTypes:
         get:
           is: [IdCollection: {description: Get all products of this rule}]
 
-#Model part follows
+#BCSRepositories part follows
 
 /models:
   get:
      is: [Collection: {type: ListModel}, Sortable: {keys: 'id, name, userId, approvedId, status'}]
   post:
-    is: [Insert: {type: Model}]
+    is: [Insert: {type: BCSRepositories}]
   /{id}:
     get:
-      is: [ObjectList: {type: Model}]
+      is: [ObjectList: {type: BCSRepositories}]
     put:
-      is: [Update: {type: Model}]
+      is: [Update: {type: BCSRepositories}]
     delete:
       is: [Delete]
     /compartments:

@@ -33,14 +33,12 @@ unset($c['logger']);
 //	]);
 //};
 
-$c['persistentData'] = function (Container $c)
-{
+$c['persistentData'] = function (Container $c) {
 	return (object)['needsFlush' => false];
 };
 
 // Doctrine
-$c[EntityManager::class] = function (Container $c)
-{
+$c[EntityManager::class] = function (Container $c) {
 	$settings = $c->settings;
 	$config = \Doctrine\ORM\Tools\Setup::createAnnotationMetadataConfiguration(
 		$settings['doctrine']['meta']['entity_path'],
@@ -55,15 +53,12 @@ $c[EntityManager::class] = function (Container $c)
 	return EntityManager::create($settings['doctrine']['connection'], $config);
 };
 
-$c['foundHandler'] = function (Container $c)
-{
+$c['foundHandler'] = function (Container $c) {
 	return new Helpers\RequestResponseParsedArgs;
 };
 
-$c['notFoundHandler'] = function (Container $c)
-{
-	return function(Request $request, Response $response)
-	{
+$c['notFoundHandler'] = function (Container $c) {
+	return function (Request $request, Response $response) {
 		return $response->withStatus(404)->withJson([
 			'status' => 'error',
 			'message' => 'Page not found',
@@ -72,10 +67,8 @@ $c['notFoundHandler'] = function (Container $c)
 	};
 };
 
-$c['notAllowedHandler'] = function (Container $c)
-{
-	return function (Request $request, Response $response, array $allowedHttpMethods)
-	{
+$c['notAllowedHandler'] = function (Container $c) {
+	return function (Request $request, Response $response, array $allowedHttpMethods) {
 		return $response->withStatus(405)->withJson([
 			'status' => 'error',
 			'code' => 405,
@@ -85,10 +78,8 @@ $c['notAllowedHandler'] = function (Container $c)
 	};
 };
 
-$c['errorHandler'] = function(Container $c)
-{
-	return function(Request $request, Response $response, \Throwable $exception)
-	{
+$c['errorHandler'] = function (Container $c) {
+	return function (Request $request, Response $response, \Throwable $exception) {
 		if ($exception instanceof \App\Exceptions\ApiException)
 			return $response->withStatus($exception->getHttpCode())->withJson([
 					'status' => 'error',
@@ -108,105 +99,119 @@ $c['errorHandler'] = function(Container $c)
 	};
 };
 
-$c[EntityRepo\ClassificationRepository::class] = function(Container $c)
-{
+$c[EntityRepo\ClassificationRepository::class] = function (Container $c) {
 	return new EntityRepo\ClassificationRepositoryImpl($c[EntityManager::class]);
 };
 
-$c[EntityRepo\OrganismRepository::class] = function(Container $c)
-{
+$c[EntityRepo\OrganismRepository::class] = function (Container $c) {
 	return new EntityRepo\OrganismRepositoryImpl($c[EntityManager::class]);
 };
 
-$c[EntityRepo\EntityRepository::class] = function(Container $c)
-{
+$c[EntityRepo\EntityRepository::class] = function (Container $c) {
 	return new EntityRepo\EntityRepositoryImpl($c[EntityManager::class]);
 };
 
-$c[EntityRepo\RuleRepository::class] = function(Container $c)
-{
+$c[EntityRepo\RuleRepository::class] = function (Container $c) {
 	return new EntityRepo\RuleRepositoryImpl($c[EntityManager::class]);
 };
 
-$c[EntityRepo\EntityAnnotationRepositoryImpl::class] = function(Container $c)
-{
+$c[EntityRepo\EntityAnnotationRepositoryImpl::class] = function (Container $c) {
 	return new EntityRepo\EntityAnnotationRepositoryImpl($c[EntityManager::class]);
 };
 
-$c[EntityRepo\RuleAnnotationRepositoryImpl::class] = function(Container $c)
-{
+$c[EntityRepo\RuleAnnotationRepositoryImpl::class] = function (Container $c) {
 	return new EntityRepo\RuleAnnotationRepositoryImpl($c[EntityManager::class]);
 };
 
-$c[EntityRepo\EntityNoteRepository::class] = function(Container $c)
-{
+$c[EntityRepo\EntityNoteRepository::class] = function (Container $c) {
 	return new EntityRepo\EntityNoteRepository($c[EntityManager::class]);
 };
 
-$c[EntityRepo\RuleNoteRepository::class] = function(Container $c)
-{
+$c[EntityRepo\RuleNoteRepository::class] = function (Container $c) {
 	return new EntityRepo\RuleNoteRepository($c[EntityManager::class]);
 };
 
-$c[EntityRepo\ModelRepository::class] = function(Container $c)
-{
+$c[EntityRepo\ModelRepository::class] = function (Container $c) {
 	return new EntityRepo\ModelRepository($c[EntityManager::class]);
 };
 
-$c[EntityRepo\CompartmentRepository::class] = function(Container $c)
-{
-	return new EntityRepo\CompartmentRepository($c[EntityManager::class]);
+$c[EntityRepo\ModelCompartmentRepository::class] = function (Container $c) {
+	return new EntityRepo\ModelCompartmentRepository($c[EntityManager::class]);
 };
 
-$c[EntityRepo\SpecieRepository::class] = function(Container $c)
-{
-	return new EntityRepo\SpecieRepository($c[EntityManager::class]);
+$c[EntityRepo\ModelCompartmentRepository::class] = function (Container $c) {
+	return new EntityRepo\ModelCompartmentRepository($c[EntityManager::class]);
 };
 
-$c[EntityRepo\ModelRuleRepository::class] = function(Container $c)
-{
+$c[EntityRepo\ModelSpecieRepository::class] = function (Container $c) {
+	return new EntityRepo\ModelSpecieRepository($c[EntityManager::class]);
+};
+
+$c[EntityRepo\ModelRuleRepository::class] = function (Container $c) {
 	return new EntityRepo\ModelRuleRepository($c[EntityManager::class]);
 };
 
-$c[EntityRepo\ReactionRepository::class] = function(Container $c) {
-	return new EntityRepo\ReactionRepository($c[EntityManager::class]);
+$c[EntityRepo\ModelReactionRepository::class] = function (Container $c) {
+	return new EntityRepo\ModelReactionRepository($c[EntityManager::class]);
 };
 
-$c[EntityRepo\FunctionRepository::class] = function(Container $c) {
-	return new EntityRepo\FunctionRepository($c[EntityManager::class]);
+$c[EntityRepo\ModelFunctionRepository::class] = function (Container $c) {
+	return new EntityRepo\ModelFunctionRepository($c[EntityManager::class]);
 };
 
-$c[EntityRepo\ModelReactionItemRepository::class] = function(Container $c) {
+$c[EntityRepo\ModelReactionItemRepository::class] = function (Container $c) {
 	return new EntityRepo\ModelReactionItemRepository($c[EntityManager::class]);
 };
 
-$c[AuthRepo\ClientRepository::class] = function(Container $c)
-{
+$c[EntityRepo\ModelConstraintRepository::class] = function (Container $c) {
+	return new EntityRepo\ModelConstraintRepository($c[EntityManager::class]);
+};
+
+$c[EntityRepo\ModelEventRepository::class] = function (Container $c) {
+	return new EntityRepo\ModelEventRepository($c[EntityManager::class]);
+};
+
+$c[EntityRepo\ModelEventAssignmentRepository::class] = function (Container $c) {
+	return new EntityRepo\ModelEventAssignmentRepository($c[EntityManager::class]);
+};
+
+$c[EntityRepo\ModelUnitDefinitionRepository::class] = function (Container $c) {
+	return new EntityRepo\ModelUnitDefinitionRepository($c[EntityManager::class]);
+};
+
+$c[EntityRepo\ModelUnitRepository::class] = function (Container $c) {
+	return new EntityRepo\ModelUnitRepository($c[EntityManager::class]);
+};
+
+$c[EntityRepo\ModelInitialAssignmentRepository::class] = function (Container $c) {
+	return new EntityRepo\ModelInitialAssignmentRepository($c[EntityManager::class]);
+};
+
+$c[EntityRepo\ModelParameterRepository::class] = function (Container $c) {
+	return new EntityRepo\ModelParameterRepository($c[EntityManager::class]);
+};
+
+$c[AuthRepo\ClientRepository::class] = function (Container $c) {
 	return new AuthRepo\ClientRepository($c[EntityManager::class]);
 };
 
-$c[AuthRepo\UserRepository::class] = function(Container $c)
-{
+$c[AuthRepo\UserRepository::class] = function (Container $c) {
 	return new AuthRepo\UserRepository($c[EntityManager::class]);
 };
 
-$c[AuthRepo\ScopeRepository::class] = function(Container $c)
-{
+$c[AuthRepo\ScopeRepository::class] = function (Container $c) {
 	return new AuthRepo\ScopeRepository($c[EntityManager::class]);
 };
 
-$c[AuthRepo\AccessTokenRepository::class] = function(Container $c)
-{
+$c[AuthRepo\AccessTokenRepository::class] = function (Container $c) {
 	return new AuthRepo\AccessTokenRepository($c);
 };
 
-$c[AuthRepo\RefreshTokenRepository::class] = function(Container $c)
-{
+$c[AuthRepo\RefreshTokenRepository::class] = function (Container $c) {
 	return new AuthRepo\RefreshTokenRepository($c);
 };
 
-$c[\League\OAuth2\Server\AuthorizationServer::class] = function(Container $c)
-{
+$c[\League\OAuth2\Server\AuthorizationServer::class] = function (Container $c) {
 	$srv = new \League\OAuth2\Server\AuthorizationServer(
 		$c[AuthRepo\ClientRepository::class],
 		$c[AuthRepo\AccessTokenRepository::class],
@@ -224,8 +229,7 @@ $c[\League\OAuth2\Server\AuthorizationServer::class] = function(Container $c)
 	return $srv;
 };
 
-$c[\League\OAuth2\Server\ResourceServer::class] = function(Container $c)
-{
+$c[\League\OAuth2\Server\ResourceServer::class] = function (Container $c) {
 	return new \League\OAuth2\Server\ResourceServer(
 		$c[\App\Entity\Authentication\Repository\AccessTokenRepository::class],
 		$c->settings['oauth']['publicKey']

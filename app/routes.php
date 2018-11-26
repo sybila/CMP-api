@@ -106,22 +106,49 @@ return function(App $app)
 		->setRoute(Ctl\ModelController::class, '/models')
 		->register();
 	(new RouteHelper)
-		->setRoute(Ctl\CompartmentController::class, '/models/{model-id:\\d+}/compartments')
+		->setRoute(Ctl\ModelCompartmentController::class, '/models/{model-id:\\d+}/compartments')
 		->register();
 	(new RouteHelper)
-		->setRoute(Ctl\SpecieController::class, '/models/{model-id:\\d+}/compartments/{compartment-id:\\d+}/species')
+		->setRoute(Ctl\ModelSpecieController::class, '/models/{model-id:\\d+}/compartments/{compartment-id:\\d+}/species')
 		->register();
 	(new RouteHelper)
-		->setRoute(Ctl\ReactionController::class, '/models/{model-id:\\d+}/reactions')
+		->setRoute(Ctl\ModelReactionController::class, '/models/{model-id:\\d+}/reactions')
 		->register();
 	(new RouteHelper)
-		->setRoute(Ctl\FunctionController::class, '/models/{model-id:\\d+}/reactions/{reaction-id:\\d+}/functions')
+		->setRoute(Ctl\ModelFunctionController::class, '/models/{model-id:\\d+}/reactions/{reaction-id:\\d+}/functions')
 		->register();
 	(new RouteHelper)
 		->setRoute(Ctl\ReactionParentedReactionItemController::class, '/models/{model-id:\\d+}/reactions/{reaction-id:\\d+}/reactionItems')
 		->register();
 	(new RouteHelper)
 		->setRoute(Ctl\SpecieParentedReactionItemController::class, '/models/{model-id:\\d+}/compartments/{compartment-id:\\d+}/species/{specie-id:\\d+}/reactionItems')
+		->register();
+	(new RouteHelper)
+		->setRoute(Ctl\ModelConstraintController::class, '/models/{model-id:\\d+}/constraints')
+		->register();
+	(new RouteHelper)
+		->setRoute(Ctl\ModelEventController::class, '/models/{model-id:\\d+}/events')
+		->register();
+	(new RouteHelper)
+		->setRoute(Ctl\ModelEventAssignmentController::class, '/models/{model-id:\\d+}/events/{event-id:\\d+}/eventAssignments')
+		->register();
+	(new RouteHelper)
+		->setRoute(Ctl\ModelUnitDefinitionController::class, '/models/{model-id:\\d+}/unitDefinitions')
+		->register();
+	(new RouteHelper)
+		->setRoute(Ctl\ModelUnitController::class, '/units')
+		->register();
+	(new RouteHelper)
+		->setRoute(Ctl\ModelInitialAssignmentController::class, '/models/{model-id:\\d+}/initialAssignments')
+		->register();
+	(new RouteHelper)
+		->setRoute(Ctl\ModelParentedParameterController::class, '/models/{model-id:\\d+}/parameters')
+		->register();
+	(new RouteHelper)
+		->setRoute(Ctl\ReactionItemParentedParameterController::class, '/models/{model-id:\\d+}/reactions/{reactionItem-id:\\d+}/parameters')
+		->register();
+	(new RouteHelper)
+		->setRoute(Ctl\ModelParentedRuleController::class, '/models/{model-id:\\d+}/rules')
 		->register();
 
 	// entities

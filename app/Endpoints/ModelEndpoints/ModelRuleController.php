@@ -29,7 +29,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @property-read ModelRuleRepository $repository
  * @method Entity getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
-final class ModelRuleController extends ParentedRepositoryController
+abstract class ModelRuleController extends ParentedRepositoryController
 {
 
 	/** @var ModelRuleRepository */
@@ -56,13 +56,6 @@ final class ModelRuleController extends ParentedRepositoryController
 		];
 	}
 
-	protected function setData(IdentifiedObject $rule, ArgumentParser $data): void
-	{
-		/** @var ModelRule $rule */
-		if ($data->hasKey('name'))
-			$rule->setName($data->getString('name'));
-
-	}
 
 	protected function createObject(ArgumentParser $body): IdentifiedObject
 	{
@@ -73,10 +66,6 @@ final class ModelRuleController extends ParentedRepositoryController
 		return new $cls;
 	}
 
-	protected function checkInsertObject(IdentifiedObject $object): void
-	{
-		//todo
-	}
 
 	public function delete(Request $request, Response $response, ArgumentParser $args): Response
 	{
@@ -106,6 +95,10 @@ final class ModelRuleController extends ParentedRepositoryController
 		return ModelRuleRepository::Class;
 	}
 
+}
+
+final class ModelParentedRuleController extends ModelRuleController {
+
 
 	protected static function getParentRepositoryClassName(): string
 	{
@@ -115,6 +108,22 @@ final class ModelRuleController extends ParentedRepositoryController
 	protected function getParentObjectInfo(): array
 	{
 		return ['model-id', 'model'];
+	}
+
+
+	protected function setData(IdentifiedObject $reactionItem, ArgumentParser $data): void
+	{
+		/** @var ModelParameter $parameter */
+	}
+
+	protected function checkInsertObject(IdentifiedObject $reactionItem): void
+	{
+		/** @var ModelParameter $parameter */
+	}
+
+	protected function createObject(ArgumentParser $body): IdentifiedObject
+	{
+		return new ModelReactionItem;
 	}
 
 }

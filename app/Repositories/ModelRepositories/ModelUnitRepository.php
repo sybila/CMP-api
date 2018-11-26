@@ -2,42 +2,36 @@
 
 namespace App\Entity\Repositories;
 
-use App\Entity\Atomic;
-use App\Entity\AtomicState;
-use App\Entity\Compartment;
-use App\Entity\Complex;
-use App\Entity\Entity;
-use App\Entity\Model;
-use App\Entity\EntityStatus;
-use Doctrine\Common\Collections\ArrayCollection;
+use App\Entity\ModelUnit;
+use App\Entity\ModelUnitDefinition;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 
 
-class ModelRepository implements IEndpointRepository
+class ModelUnitRepository implements IEndpointRepository
 {
 
 	/** @var EntityManager * */
 	protected $em;
 
-	/** @var \Doctrine\ORM\ModelRepository */
+	/** @var \Doctrine\ORM\ModelUnitRepository */
 	private $repository;
 
 	public function __construct(EntityManager $em)
 	{
 		$this->em = $em;
-		$this->repository = $em->getRepository(Model::class);
+		$this->repository = $em->getRepository(ModelUnit::class);
 	}
 
 	public function get(int $id)
 	{
-		return $this->em->find(Model::class, $id);
+		return $this->em->find(ModelUnit::class, $id);
 	}
 
 	public function getNumResults(array $filter): int
 	{
 		return ((int)$this->buildListQuery($filter)
-			->select('COUNT(m)')
+			->select('COUNT(u)')
 			->getQuery()
 			->getScalarResult());
 	}
@@ -45,8 +39,7 @@ class ModelRepository implements IEndpointRepository
 	public function getList(array $filter, array $sort, array $limit): array
 	{
 		$query = $this->buildListQuery($filter)
-			->select('m.id, m.name, m.userId, m.approvedId, m.status, m.solver');
-
+			->select('u.id, (u.baseUnitId) as baseUnitId, u.name, u.symbol, u.exponent, u.multiplier');
 
 		return $query->getQuery()->getArrayResult();
 	}
@@ -54,7 +47,7 @@ class ModelRepository implements IEndpointRepository
 	private function buildListQuery(array $filter): QueryBuilder
 	{
 		$query = $this->em->createQueryBuilder()
-			->from(Model::class, 'm');
+			->from(ModelUnit::class, 'u');
 
 
 		return $query;

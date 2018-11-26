@@ -2,23 +2,8 @@
 
 namespace App\Entity;
 
-
-use App\Exceptions\EntityClassificationException;
-use App\Exceptions\EntityHierarchyException;
-use App\Exceptions\EntityLocationException;
-use App\Helpers\
-{
-	ChangeCollection, ConsistenceEnum
-};
-use App\Exceptions\EntityException;
-use Consistence\Enum\InvalidEnumValueException;
-use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Doctrine\Common\Collections\Criteria;
-use Doctrine\ORM\Event\PreUpdateEventArgs;
 use Doctrine\ORM\Mapping as ORM;
-use Doctrine\ORM\QueryBuilder;
-use Symfony\Component\Translation\Tests\StringClass;
 
 /**
  * @ORM\Entity
@@ -27,8 +12,6 @@ use Symfony\Component\Translation\Tests\StringClass;
  */
 class ModelSpecie implements IdentifiedObject
 {
-
-
 	/**
 	 * @ORM\Id
 	 * @ORM\Column(type="integer")
@@ -55,6 +38,12 @@ class ModelSpecie implements IdentifiedObject
 	 * @ORM\Column(type="string")
 	 */
 	protected $name;
+
+	/**
+	 * @var string
+	 * @ORM\Column(type="string", name="sbml_id")
+	 */
+	private $sbmlId;
 
 	/**
 	 * @var string
@@ -93,8 +82,13 @@ class ModelSpecie implements IdentifiedObject
 	protected $reactionItems;
 
 	/**
+	 * @var Collection
+	 * @ORM\OneToMany(targetEntity="ModelRule", mappedBy="specieId")
+	 */
+	protected $rules;
+
+	/**
 	 * Get id
-	 *
 	 * @return integer
 	 */
 	public function getId(): ?int
@@ -102,10 +96,8 @@ class ModelSpecie implements IdentifiedObject
 		return $this->id;
 	}
 
-
 	/**
 	 * Get modelId
-	 *
 	 * @return integer
 	 */
 	public function getModelId()
@@ -113,12 +105,9 @@ class ModelSpecie implements IdentifiedObject
 		return $this->modelId;
 	}
 
-
 	/**
 	 * Set modelId
-	 *
 	 * @param integer $modelId
-	 *
 	 * @return ModelSpecie
 	 */
 	public function setModelId($modelId): ModelSpecie
@@ -129,7 +118,6 @@ class ModelSpecie implements IdentifiedObject
 
 	/**
 	 * Get compartmentId
-	 *
 	 * @return integer
 	 */
 	public function getCompartmentId()
@@ -139,9 +127,7 @@ class ModelSpecie implements IdentifiedObject
 
 	/**
 	 * Set compartmentId
-	 *
 	 * @param integer $compartmentId
-	 *
 	 * @return ModelSpecie
 	 */
 	public function setCompartmentId($compartmentId): ModelSpecie
@@ -152,7 +138,6 @@ class ModelSpecie implements IdentifiedObject
 
 	/**
 	 * Get name
-	 *
 	 * @return string
 	 */
 	public function getName(): ?string
@@ -162,9 +147,7 @@ class ModelSpecie implements IdentifiedObject
 
 	/**
 	 * Set name
-	 *
 	 * @param string $name
-	 *
 	 * @return ModelSpecie
 	 */
 	public function setName($name)
@@ -173,10 +156,28 @@ class ModelSpecie implements IdentifiedObject
 		return $this;
 	}
 
+	/**
+	 * Get sbmlId
+	 * @return string
+	 */
+	public function getSbmlId()
+	{
+		return $this->sbmlId;
+	}
+
+	/**
+	 * Set sbmlId
+	 * @param string $sbmlId
+	 * @return Model
+	 */
+	public function setSbmlId($sbmlId): Model
+	{
+		$this->sbmlId = $sbmlId;
+		return $this;
+	}
 
 	/**
 	 * Get equationType
-	 *
 	 * @return string
 	 */
 	public function getEquationType(): ?string
@@ -186,9 +187,7 @@ class ModelSpecie implements IdentifiedObject
 
 	/**
 	 * Set equationType
-	 *
 	 * @param string $equationType
-	 *
 	 * @return ModelSpecie
 	 */
 	public function setEquationType($equationType): ModelSpecie
@@ -199,7 +198,6 @@ class ModelSpecie implements IdentifiedObject
 
 	/**
 	 * Get initialExpression
-	 *
 	 * @return string
 	 */
 	public function getInitialExpression(): ?string
@@ -209,9 +207,7 @@ class ModelSpecie implements IdentifiedObject
 
 	/**
 	 * Set initialExpression
-	 *
 	 * @param string $initialExpression
-	 *
 	 * @return Model
 	 */
 	public function setInitialExpression($initialExpression): ModelSpecie
@@ -220,11 +216,8 @@ class ModelSpecie implements IdentifiedObject
 		return $this;
 	}
 
-
-
 	/**
 	 * Get boundaryCondition
-	 *
 	 * @return integer
 	 */
 	public function getBoundaryCondition(): ?int
@@ -234,9 +227,7 @@ class ModelSpecie implements IdentifiedObject
 
 	/**
 	 * Set boundaryCondition
-	 *
 	 * @param integer $boundaryCondition
-	 *
 	 * @return ModelSpecie
 	 */
 	public function setBoundaryCondition($boundaryCondition): ModelSpecie
@@ -247,7 +238,6 @@ class ModelSpecie implements IdentifiedObject
 
 	/**
 	 * Get hasOnlySubstanceUnits
-	 *
 	 * @return integer
 	 */
 	public function getHasOnlySubstanceUnits(): int
@@ -257,9 +247,7 @@ class ModelSpecie implements IdentifiedObject
 
 	/**
 	 * Set hasOnlySubstanceUnits
-	 *
 	 * @param integer $hasOnlySubstanceUnits
-	 *
 	 * @return ModelSpecie
 	 */
 	public function setHasOnlySubstanceUnits($hasOnlySubstanceUnits): ModelSpecie
@@ -268,10 +256,8 @@ class ModelSpecie implements IdentifiedObject
 		return $this;
 	}
 
-
 	/**
 	 * Get isConstant
-	 *
 	 * @return integer
 	 */
 	public function getIsConstant(): int
@@ -281,9 +267,7 @@ class ModelSpecie implements IdentifiedObject
 
 	/**
 	 * Set isConstant
-	 *
 	 * @param integer $isConstant
-	 *
 	 * @return ModelSpecie
 	 */
 	public function setIsConstant($isConstant): ModelSpecie
@@ -293,12 +277,19 @@ class ModelSpecie implements IdentifiedObject
 	}
 
 	/**
-	 * @return Collection []
+	 * @return ModelReactionItem[]|Collection
 	 */
 	public function getReactionItems(): Collection
 	{
 		return $this->reactionItems;
 	}
 
+	/**
+	 * @return ModelRule[]|Collection
+	 */
+	public function getRules(): Collection
+	{
+		return $this->rules;
+	}
 
 }
