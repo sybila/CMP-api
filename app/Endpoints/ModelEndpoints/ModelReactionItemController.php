@@ -3,7 +3,7 @@
 namespace App\Controllers;
 
 use App\Entity\{
-	Entity,
+	ModelParameter,
 	ModelReaction,
 	ModelReactionItem,
 	ModelSpecie,
@@ -11,20 +11,14 @@ use App\Entity\{
 	Repositories\IEndpointRepository,
 	Repositories\ModelReactionItemRepository,
 	Repositories\ModelSpecieRepository,
-	Repositories\ModelReactionRepository,
-	Repositories\ModelCompartmentRepository,
-	Structure
+	Repositories\ModelReactionRepository
 };
 use App\Exceptions\
 {
-	CompartmentLocationException,
-	InvalidArgumentException,
 	MissingRequiredKeyException,
-	NonExistingObjectException,
-	UniqueKeyViolationException
+	NonExistingObjectException
 };
 use App\Helpers\ArgumentParser;
-use App\Helpers\Validators;
 use Doctrine\ORM\EntityManager;
 use Slim\Container;
 use Slim\Http\{
@@ -34,11 +28,10 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @property-read ReactionItemRepository $repository
- * @method Entity getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
+ * @method ModelReactionItem getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
 abstract class ModelReactionItemController extends ParentedRepositoryController
 {
-
 	/** @var ModelReactionItemRepository */
 	private $reactionItemRepository;
 
@@ -53,17 +46,17 @@ abstract class ModelReactionItemController extends ParentedRepositoryController
 
 	protected static function getAllowedSort(): array
 	{
-		return ['id'];
+		return ['id', 'name'];
 	}
 
 	protected function getData(IdentifiedObject $reactionItem): array
 	{
 		/** @var ModelReactionItem $reactionItem */
-
 		return [
 			'id' => $reactionItem->getId(),
-			'specieId' => $reactionItem->getSpecieId()->getId(),
 			'reactionId' => $reactionItem->getReactionId()->getId(),
+			'specieId' => $reactionItem->getSpecieId() ? $reactionItem->getSpecieId()->getId() : null,
+			'parameterId' => $reactionItem->getParameterId() ? $reactionItem->getParameterId()->getId() : null,
 			'type' => $reactionItem->getType(),
 			'name' => $reactionItem->getName(),
 			'stoichiometry' => $reactionItem->getStoichiometry(),
@@ -93,6 +86,16 @@ abstract class ModelReactionItemController extends ParentedRepositoryController
 		return ModelReactionItemRepository::class;
 	}
 
+	protected function setData(IdentifiedObject $reactionItem, ArgumentParser $data): void
+	{
+		!$data->hasKey('name') ? $reactionItem->setName($data->getString('sbmlId')) : $reactionItem->setName($data->getString('name'));
+		!$data->hasKey('sbmlId') ?: $reactionItem->setSbmlId($data->getString('sbmlId'));
+		!$data->hasKey('type') ?: $reactionItem->setType($data->getString('type'));
+		!$data->hasKey('value') ?: $reactionItem->setValue($data->getInt('value'));
+		!$data->hasKey('stoichiometry') ?: $reactionItem->setStochiometry($data->getInt('stoichiometry'));
+		!$data->hasKey('isGlobal') ?: $reactionItem->setIsGlobal($data->getInt('isGlobal'));
+	}
+
 }
 
 final class ReactionParentedReactionItemController extends ModelReactionItemController
@@ -108,48 +111,48 @@ final class ReactionParentedReactionItemController extends ModelReactionItemCont
 		return ['reaction-id', 'reaction'];
 	}
 
-
 	protected function setData(IdentifiedObject $reactionItem, ArgumentParser $data): void
 	{
 		/** @var ModelReactionItem $reactionItem */
-		if (!$reactionItem->getReactionId())
-			$reactionItem->setReactionId($this->repository->getParent());
+		$reactionItem->getReactionId() ?: $reactionItem->setReactionId($this->repository->getParent());
 		if ($data->hasKey('specieId')) {
+			if ($data->hasKey('parameterId')) {
+				throw new Exception('reaction item cannot refer to specie and parameter at the same time');
+			}
 			$specie = $this->repository->getEntityManager()->find(ModelSpecie::class, $data->getInt('specieId'));
-			if($specie === null) {
+			if ($specie === null) {
 				throw new NonExistingObjectException($data->getInt('specieId'), 'specie');
 			}
+			$reactionItem->setParameterId(null);
 			$reactionItem->setSpecieId($specie);
+		} else {
+			$parameter = $this->repository->getEntityManager()->find(ModelParameter::class, $data->getInt('parameterId'));
+
+			if ($parameter === null) {
+				throw new NonExistingObjectException($data->getInt('parameterId'), 'parameter');
+			}
+			$reactionItem->setSpecieId(null);
+			$reactionItem->setParameterId($parameter);
 		}
-		if ($data->hasKey('name'))
-			$reactionItem->setName($data->getString('name'));
-		if ($data->hasKey('type'))
-			$reactionItem->setType($data->getString('type'));
-		if ($data->hasKey('value'))
-			$reactionItem->setValue($data->getInt('value'));
-		if ($data->hasKey('stoichiometry'))
-			$reactionItem->setStochiometry($data->getInt('stoichiometry'));
-		if ($data->hasKey('isGlobal'))
-			$reactionItem->setIsGlobal($data->getInt('isGlobal'));
+		parent::setData($reactionItem, $data);
 	}
 
 	protected function checkInsertObject(IdentifiedObject $reactionItem): void
 	{
 		/** @var ModelReactionItem $reactionItem */
-		if ($reactionItem->getReactionId() == NULL)
+		if ($reactionItem->getReactionId() == null)
 			throw new MissingRequiredKeyException('reactionId');
-		if ($reactionItem->getSpecieId() == NULL)
-			throw new MissingRequiredKeyException('specieId');
+		if ($reactionItem->getSpecieId() == null && $reactionItem->getParameterId() === null)
+			throw new MissingRequiredKeyException('specieId or parameterId');
 	}
 
 	protected function createObject(ArgumentParser $body): IdentifiedObject
 	{
-		if (!$body->hasKey('specieId'))
-			throw new MissingRequiredKeyException('specieId');
+		if (!$body->hasKey('specieId') && !$body->hasKey('parameterId'))
+			throw new MissingRequiredKeyException('specieId or parameterId');
 		return new ModelReactionItem;
 	}
 }
-
 
 final class SpecieParentedReactionItemController extends ModelReactionItemController
 {
@@ -167,31 +170,23 @@ final class SpecieParentedReactionItemController extends ModelReactionItemContro
 	protected function setData(IdentifiedObject $reactionItem, ArgumentParser $data): void
 	{
 		/** @var ModelReactionItem $reactionItem */
-		if (!$reactionItem->getSpecieId())
-			$reactionItem->setSpecieId($this->repository->getParent());
+		$reactionItem->getSpecieId() ?: $reactionItem->setSpecieId($this->repository->getParent());
 		if ($data->hasKey('reactionId')) {
 			$reaction = $this->repository->getEntityManager()->find(ModelReaction::class, $data->getInt('reactionId'));
-			if($reaction === null) {
+			if ($reaction === null) {
 				throw new NonExistingObjectException($data->getInt('reactionId'), 'reaction');
 			}
 			$reactionItem->setReactionId($reaction);
 		}
-		if ($data->hasKey('name'))
-			$reactionItem->setName($data->getString('name'));
-		if ($data->hasKey('value'))
-			$reactionItem->setValue($data->getInt('value'));
-		if ($data->hasKey('stoichiometry'))
-			$reactionItem->setStochiometry($data->getInt('stoichiometry'));
-		if ($data->hasKey('isGlobal'))
-			$reactionItem->setIsGlobal($data->getInt('isGlobal'));
+		parent::setData($reactionItem, $data);
 	}
 
 	protected function checkInsertObject(IdentifiedObject $reactionItem): void
 	{
 		/** @var ModelReactionItem $reactionItem */
-		if ($reactionItem->getReactionId() == NULL)
+		if ($reactionItem->getReactionId() == null)
 			throw new MissingRequiredKeyException('reactionId');
-		if ($reactionItem->getSpecieId() == NULL)
+		if ($reactionItem->getSpecieId() == null)
 			throw new MissingRequiredKeyException('specieId');
 	}
 
@@ -199,6 +194,8 @@ final class SpecieParentedReactionItemController extends ModelReactionItemContro
 	{
 		if (!$body->hasKey('reactionId'))
 			throw new MissingRequiredKeyException('reactionId');
+		if ($body->hasKey('parameterId'))
+			throw new Exception('reaction item cannot refer to specie and parameter at the same time');
 		return new ModelReactionItem;
 	}
 }

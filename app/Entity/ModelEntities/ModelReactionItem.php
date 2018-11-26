@@ -2,22 +2,7 @@
 
 namespace App\Entity;
 
-use App\Exceptions\EntityClassificationException;
-use App\Exceptions\EntityHierarchyException;
-use App\Exceptions\EntityLocationException;
-use App\Helpers\
-{
-	ChangeCollection, ConsistenceEnum
-};
-use App\Exceptions\EntityException;
-use Consistence\Enum\InvalidEnumValueException;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
-use Doctrine\Common\Collections\Criteria;
-use Doctrine\ORM\Event\PreUpdateEventArgs;
 use Doctrine\ORM\Mapping as ORM;
-use Doctrine\ORM\QueryBuilder;
-use Symfony\Component\Translation\Tests\StringClass;
 
 /**
  * @ORM\Entity
@@ -26,7 +11,6 @@ use Symfony\Component\Translation\Tests\StringClass;
  */
 class ModelReactionItem implements IdentifiedObject
 {
-
 	/**
 	 * @ORM\Id
 	 * @ORM\Column(type="integer")
@@ -37,11 +21,17 @@ class ModelReactionItem implements IdentifiedObject
 
 	/**
 	 * @var int
+	 * @ORM\ManyToOne(targetEntity="ModelParameter", inversedBy="reactionItems")
+	 * @ORM\JoinColumn(name="model_parameter_id", referencedColumnName="id")
+	 */
+	protected $parameterId;
+
+	/**
+	 * @var int
 	 * @ORM\ManyToOne(targetEntity="ModelReaction", inversedBy="reactionItems")
 	 * @ORM\JoinColumn(name="model_reaction_id", referencedColumnName="id")
 	 */
 	protected $reactionId;
-
 
 	/**
 	 * @var int
@@ -63,6 +53,12 @@ class ModelReactionItem implements IdentifiedObject
 	protected $name;
 
 	/**
+	 * @var string
+	 * @ORM\Column(type="string", name="sbml_id")
+	 */
+	private $sbmlId;
+
+	/**
 	 * @var int
 	 * @ORM\Column(type="integer", name="is_global")
 	 */
@@ -80,12 +76,8 @@ class ModelReactionItem implements IdentifiedObject
 	 */
 	protected $stoichiometry;
 
-	protected $localParameters;
-
-
 	/**
 	 * Get id
-	 *
 	 * @return integer
 	 */
 	public function getId(): ?int
@@ -93,10 +85,28 @@ class ModelReactionItem implements IdentifiedObject
 		return $this->id;
 	}
 
+	/**
+	 * Get parameterId
+	 * @return integer
+	 */
+	public function getParameterId()
+	{
+		return $this->parameterId;
+	}
+
+	/**
+	 * Set parameterId
+	 * @param integer $parameterId
+	 * @return ModelReactionItem
+	 */
+	public function setParameterId($parameterId): ModelReactionItem
+	{
+		$this->parameterId = $parameterId;
+		return $this;
+	}
 
 	/**
 	 * Get reactionId
-	 *
 	 * @return integer
 	 */
 	public function getReactionId()
@@ -106,9 +116,7 @@ class ModelReactionItem implements IdentifiedObject
 
 	/**
 	 * Set reactionId
-	 *
 	 * @param integer $reactionId
-	 *
 	 * @return ModelReactionItem
 	 */
 	public function setReactionId($reactionId): ModelReactionItem
@@ -117,10 +125,8 @@ class ModelReactionItem implements IdentifiedObject
 		return $this;
 	}
 
-
 	/**
 	 * Get specieId
-	 *
 	 * @return integer
 	 */
 	public function getSpecieId()
@@ -130,9 +136,7 @@ class ModelReactionItem implements IdentifiedObject
 
 	/**
 	 * Set specieId
-	 *
 	 * @param integer $specieId
-	 *
 	 * @return ModelReactionItem
 	 */
 	public function setSpecieId($specieId): ModelReactionItem
@@ -143,7 +147,6 @@ class ModelReactionItem implements IdentifiedObject
 
 	/**
 	 * Get name
-	 *
 	 * @return null|string
 	 */
 	public function getName(): ?string
@@ -151,12 +154,9 @@ class ModelReactionItem implements IdentifiedObject
 		return $this->name;
 	}
 
-
 	/**
 	 * Set name
-	 *
 	 * @param string $name
-	 *
 	 * @return ModelUnitToDefinition
 	 */
 	public function setName($name): ModelReactionItem
@@ -166,8 +166,27 @@ class ModelReactionItem implements IdentifiedObject
 	}
 
 	/**
+	 * Get sbmlId
+	 * @return string
+	 */
+	public function getSbmlId()
+	{
+		return $this->sbmlId;
+	}
+
+	/**
+	 * Set sbmlId
+	 * @param string $sbmlId
+	 * @return Model
+	 */
+	public function setSbmlId($sbmlId): ModelReactionItem
+	{
+		$this->sbmlId = $sbmlId;
+		return $this;
+	}
+
+	/**
 	 * Get type
-	 *
 	 * @return null|string
 	 */
 	public function getType(): ?string
@@ -175,12 +194,9 @@ class ModelReactionItem implements IdentifiedObject
 		return $this->type;
 	}
 
-
 	/**
 	 * Set type
-	 *
 	 * @param string $type
-	 *
 	 * @return ModelUnitToDefinition
 	 */
 	public function setType($type): ModelReactionItem
@@ -191,7 +207,6 @@ class ModelReactionItem implements IdentifiedObject
 
 	/**
 	 * Get isGlobal
-	 *
 	 * @return integer
 	 */
 	public function getIsGlobal(): ?int
@@ -201,9 +216,7 @@ class ModelReactionItem implements IdentifiedObject
 
 	/**
 	 * Set isGlobal
-	 *
 	 * @param integer $isGlobal
-	 *
 	 * @return ModelReactionItem
 	 */
 	public function setIsGlobal($isGlobal): ModelReactionItem
@@ -214,7 +227,6 @@ class ModelReactionItem implements IdentifiedObject
 
 	/**
 	 * Get value
-	 *
 	 * @return integer
 	 */
 	public function getValue(): ?int
@@ -224,9 +236,7 @@ class ModelReactionItem implements IdentifiedObject
 
 	/**
 	 * Set value
-	 *
 	 * @param integer $value
-	 *
 	 * @return ModelReactionItem
 	 */
 	public function setValue($value): ModelReactionItem
@@ -235,10 +245,8 @@ class ModelReactionItem implements IdentifiedObject
 		return $this;
 	}
 
-
 	/**
 	 * Get stoichiometry
-	 *
 	 * @return integer
 	 */
 	public function getStoichiometry(): ?int
@@ -248,9 +256,7 @@ class ModelReactionItem implements IdentifiedObject
 
 	/**
 	 * Set stoichiometry
-	 *
 	 * @param integer $stoichiometry
-	 *
 	 * @return ModelReactionItem
 	 */
 	public function setStochiometry($stoichiometry): ModelReactionItem
@@ -258,6 +264,5 @@ class ModelReactionItem implements IdentifiedObject
 		$this->stoichiometry = $stoichiometry;
 		return $this;
 	}
-
 
 }

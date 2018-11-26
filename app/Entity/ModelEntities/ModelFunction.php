@@ -2,23 +2,7 @@
 
 namespace App\Entity;
 
-
-use App\Exceptions\EntityClassificationException;
-use App\Exceptions\EntityHierarchyException;
-use App\Exceptions\EntityLocationException;
-use App\Helpers\
-{
-	ChangeCollection, ConsistenceEnum
-};
-use App\Exceptions\EntityException;
-use Consistence\Enum\InvalidEnumValueException;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
-use Doctrine\Common\Collections\Criteria;
-use Doctrine\ORM\Event\PreUpdateEventArgs;
 use Doctrine\ORM\Mapping as ORM;
-use Doctrine\ORM\QueryBuilder;
-use Symfony\Component\Translation\Tests\StringClass;
 
 /**
  * @ORM\Entity
@@ -27,7 +11,6 @@ use Symfony\Component\Translation\Tests\StringClass;
  */
 class ModelFunction implements IdentifiedObject
 {
-
 	/**
 	 * @ORM\Id
 	 * @ORM\Column(type="integer")
@@ -36,8 +19,6 @@ class ModelFunction implements IdentifiedObject
 	 */
 	private $id;
 
-
-
 	/**
 	 * @var int
 	 * @ORM\ManyToOne(targetEntity="ModelReaction", inversedBy="reactionItems")
@@ -45,13 +26,17 @@ class ModelFunction implements IdentifiedObject
 	 */
 	protected $reactionId;
 
-
 	/**
 	 * @var string
 	 * @ORM\Column(type="string")
 	 */
 	protected $name;
 
+	/**
+	 * @var string
+	 * @ORM\Column(type="string", name="sbml_id")
+	 */
+	private $sbmlId;
 
 	/**
 	 * @var string
@@ -59,10 +44,8 @@ class ModelFunction implements IdentifiedObject
 	 */
 	protected $formula;
 
-
 	/**
 	 * Get id
-	 *
 	 * @return integer
 	 */
 	public function getId(): ?int
@@ -72,7 +55,6 @@ class ModelFunction implements IdentifiedObject
 
 	/**
 	 * Get name
-	 *
 	 * @return null|string
 	 */
 	public function getName(): ?string
@@ -81,33 +63,8 @@ class ModelFunction implements IdentifiedObject
 	}
 
 	/**
-	 * Get reactionId
-	 *
-	 * @return integer
-	 */
-	public function getReactionId()
-	{
-		return $this->reactionId;
-	}
-
-	/**
-	 * Set reactionId
-	 *
-	 * @param integer $reactionId
-	 *
-	 * @return ModelReactionItem
-	 */
-	public function setReactionId($reactionId): ModelFunction
-	{
-		$this->reactionId = $reactionId;
-		return $this;
-	}
-
-	/**
 	 * Set name
-	 *
 	 * @param string $name
-	 *
 	 * @return ModelUnitToDefinition
 	 */
 	public function setName($name): ModelFunction
@@ -117,8 +74,47 @@ class ModelFunction implements IdentifiedObject
 	}
 
 	/**
+	 * Get sbmlId
+	 * @return string
+	 */
+	public function getSbmlId()
+	{
+		return $this->sbmlId;
+	}
+
+	/**
+	 * Set sbmlId
+	 * @param string $sbmlId
+	 * @return Model
+	 */
+	public function setSbmlId($sbmlId): Model
+	{
+		$this->sbmlId = $sbmlId;
+		return $this;
+	}
+
+	/**
+	 * Get reactionId
+	 * @return integer
+	 */
+	public function getReactionId()
+	{
+		return $this->reactionId;
+	}
+
+	/**
+	 * Set reactionId
+	 * @param integer $reactionId
+	 * @return ModelReactionItem
+	 */
+	public function setReactionId($reactionId): ModelFunction
+	{
+		$this->reactionId = $reactionId;
+		return $this;
+	}
+
+	/**
 	 * Get formula
-	 *
 	 * @return null|string
 	 */
 	public function getFormula(): ?string
@@ -128,9 +124,7 @@ class ModelFunction implements IdentifiedObject
 
 	/**
 	 * Set function
-	 *
 	 * @param string $function
-	 *
 	 * @return ModelUnitToDefinition
 	 */
 	public function setFormula($formula): ModelFunction
@@ -138,6 +132,5 @@ class ModelFunction implements IdentifiedObject
 		$this->formula = $formula;
 		return $this;
 	}
-
 
 }

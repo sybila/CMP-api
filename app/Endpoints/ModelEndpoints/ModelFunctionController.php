@@ -3,27 +3,13 @@
 namespace App\Controllers;
 
 use App\Entity\{
-	Entity,
-	ModelUnitToDefinition,
 	IdentifiedObject,
 	ModelFunction,
-	ModelReaction,
 	Repositories\IEndpointRepository,
-	Repositories\FunctionRepository,
-	Repositories\ModelSpecieRepository,
-	Repositories\ModelReactionRepository,
-	Repositories\ModelCompartmentRepository,
-	Structure
-};
-use App\Exceptions\
-{
-	CompartmentLocationException,
-	InvalidArgumentException,
-	MissingRequiredKeyException,
-	UniqueKeyViolationException
+	Repositories\ModelFunctionRepository,
+	Repositories\ModelReactionRepository
 };
 use App\Helpers\ArgumentParser;
-use App\Helpers\Validators;
 use Slim\Container;
 use Slim\Http\{
 	Request, Response
@@ -32,34 +18,31 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @property-read ModelReactionRepository $repository
- * @method Entity getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
+ * @method ModelFunction getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
 final class ModelFunctionController extends ParentedRepositoryController
 {
-
 	/** @var FunctionRepository */
 	private $functionRepository;
 
 	public function __construct(Container $c)
-
 	{
 		parent::__construct($c);
-		$this->functionRepository = $c->get(FunctionRepository::class);
+		$this->functionRepository = $c->get(ModelFunctionRepository::class);
 	}
 
 	protected static function getAllowedSort(): array
 	{
-
-		return ['id'];
+		return ['id', 'name'];
 	}
 
 	protected function getData(IdentifiedObject $function): array
 	{
-		/** @var ModelReactionItem $function */
-
+		/** @var ModelFunction $function */
 		return [
 			'id' => $function->getId(),
 			'name' => $function->getName(),
+			'sbmlId' => $function->getSbmlId(),
 			'formula' => $function->getFormula()
 		];
 	}
@@ -67,12 +50,10 @@ final class ModelFunctionController extends ParentedRepositoryController
 	protected function setData(IdentifiedObject $function, ArgumentParser $data): void
 	{
 		/** @var ModelFunction $function */
-		if(!$function->getReactionId())
-			$function->setReactionId($this->repository->getParent());
-		if ($data->hasKey('name'))
-			$function->setName($data->getString('name'));
-		if ($data->hasKey('formula'))
-			$function->setFormula($data->getString('formula'));
+		$function->getReactionId() ?: $function->setReactionId($this->repository->getParent());
+		!$data->hasKey('name') ? $function->setName($data->getString('sbmlId')) : $function->setName($data->getString('name'));
+		!$data->hasKey('sbmlId') ?: $function->setSbmlId($data->getString('sbmlId'));
+		!$data->hasKey('formula') ?: $function->setFormula($data->getString('formula'));
 	}
 
 	protected function createObject(ArgumentParser $body): IdentifiedObject
@@ -82,24 +63,29 @@ final class ModelFunctionController extends ParentedRepositoryController
 
 	protected function checkInsertObject(IdentifiedObject $object): void
 	{
-		//todo
+		/** @var ModelFunction $function */
+		if ($function->getReactionId() == null)
+			throw new MissingRequiredKeyException('reactionId');
+		if ($function->getName() == null)
+			throw new MissingRequiredKeyException('name');
+		if ($function->getName() == null)
+			throw new MissingRequiredKeyException('sbmlId');
+		if ($function->getFormula() == null)
+			throw new MissingRequiredKeyException('formula');
 	}
 
 	public function delete(Request $request, Response $response, ArgumentParser $args): Response
 	{
-		try {
-			$a = parent::delete($request, $response, $args);
-		} catch (\Exception $e) {
-			throw new InvalidArgumentException('annotation', $args->getString('annotation'), 'must be in format term:id');
-		}
-		return $a;
-
+		return parent::delete($request, $response, $args);
 	}
 
 	protected function getValidator(): Assert\Collection
 	{
 		return new Assert\Collection([
+			'reactionId' => new Assert\Type(['type' => 'integer']),
 			'name' => new Assert\Type(['type' => 'string']),
+			'formula' => new Assert\Type(['type' => 'string']),
+			'sbmlId' => new Assert\Type(['type' => 'string'])
 		]);
 	}
 
@@ -110,7 +96,7 @@ final class ModelFunctionController extends ParentedRepositoryController
 
 	protected static function getRepositoryClassName(): string
 	{
-		return FunctionRepository::class;
+		return ModelFunctionRepository::class;
 	}
 
 	protected static function getParentRepositoryClassName(): string

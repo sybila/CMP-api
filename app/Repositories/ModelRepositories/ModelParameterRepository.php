@@ -2,20 +2,12 @@
 
 namespace App\Entity\Repositories;
 
-use App\Entity\Atomic;
-use App\Entity\AtomicState;
-use App\Entity\Compartment;
-use App\Entity\Complex;
 use App\Entity\Model;
 use App\Entity\ModelParameter;
-use App\Entity\ModelSpecie;
 use App\Entity\ModelReaction;
-use App\Entity\EntityStatus;
 use App\Entity\IdentifiedObject;
-use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
-
 
 class ModelParameterRepository implements IDependentEndpointRepository
 {
@@ -23,7 +15,7 @@ class ModelParameterRepository implements IDependentEndpointRepository
 	/** @var EntityManager * */
 	protected $em;
 
-	/** @var \Doctrine\ORM\ModelParameterRepository  */
+	/** @var \Doctrine\ORM\ModelParameterRepository */
 	private $repository;
 
 	public function __construct(EntityManager $em)
@@ -45,7 +37,6 @@ class ModelParameterRepository implements IDependentEndpointRepository
 	public function get(int $id)
 	{
 		return $this->em->find(ModelParameter::class, $id);
-
 	}
 
 	public function getNumResults(array $filter): int
@@ -59,35 +50,35 @@ class ModelParameterRepository implements IDependentEndpointRepository
 	public function getList(array $filter, array $sort, array $limit): array
 	{
 		$query = $this->buildListQuery($filter)
-			->select('p.id');
-
+			->select('p.id, p.name, p.sbmlId, p.value, p.isConstant');
 		return $query->getQuery()->getArrayResult();
 	}
-
 
 	public function setParent(IdentifiedObject $object): void
 	{
 		$classNames = static::getParentClassName();
 		$errorString = '';
 		$index = 0;
-		foreach($classNames as $className) {
-			if($object instanceof $className) {
+		foreach ($classNames as $className) {
+			if ($object instanceof $className) {
 				$this->object = $object;
 				return;
 			}
 			$index == 0 ?: $errorString .= ' or ';
-			$index ++;
+			$index++;
 			$errorString .= $className;
 		}
 		throw new \Exception('Parent of parameter must be ' . $errorString);
 	}
 
-	public function getEntityManager() {
+	public function getEntityManager()
+	{
 		return $this->em;
 	}
 
 	private function buildListQuery(array $filter): QueryBuilder
 	{
+		$query = null;
 		if ($this->object instanceof Model) {
 			$query = $this->em->createQueryBuilder()
 				->from(ModelParameter::class, 'p')
@@ -100,10 +91,8 @@ class ModelParameterRepository implements IDependentEndpointRepository
 				->where('p.reactionId = :reactionId')
 				->setParameter('reactionId', $this->object->getId());
 		}
-
 		return $query;
 	}
-
 
 	public function add($object): void
 	{

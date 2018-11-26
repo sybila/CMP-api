@@ -2,20 +2,8 @@
 
 namespace App\Entity;
 
-
-use App\Exceptions\EntityClassificationException;
-use App\Exceptions\EntityHierarchyException;
-use App\Exceptions\EntityLocationException;
-use App\Helpers\
-{
-	ChangeCollection, ConsistenceEnum
-};
 use Doctrine\Common\Collections\Collection;
-use Doctrine\Common\Collections\Criteria;
-use Doctrine\ORM\Event\PreUpdateEventArgs;
 use Doctrine\ORM\Mapping as ORM;
-use Doctrine\ORM\QueryBuilder;
-use Symfony\Component\Translation\Tests\StringClass;
 
 /**
  * @ORM\Entity
@@ -24,7 +12,6 @@ use Symfony\Component\Translation\Tests\StringClass;
  */
 class ModelCompartment implements IdentifiedObject
 {
-
 	/**
 	 * @ORM\Id
 	 * @ORM\Column(type="integer")
@@ -32,7 +19,6 @@ class ModelCompartment implements IdentifiedObject
 	 * @var integer|null
 	 */
 	private $id;
-
 
 	/**
 	 * @ORM\ManyToOne(targetEntity="Model", inversedBy="compartments")
@@ -45,6 +31,12 @@ class ModelCompartment implements IdentifiedObject
 	 * @ORM\Column(type="string")
 	 */
 	protected $name;
+
+	/**
+	 * @var string
+	 * @ORM\Column(type="string", name="sbml_id")
+	 */
+	private $sbmlId;
 
 	/**
 	 * @var int
@@ -70,24 +62,26 @@ class ModelCompartment implements IdentifiedObject
 	 */
 	protected $species;
 
-
 	/**
 	 * @var Collection
 	 * @ORM\OneToMany(targetEntity="ModelReaction", mappedBy="compartmentId")
 	 */
 	protected $reactions;
 
+	/**
+	 * @var Collection
+	 * @ORM\OneToMany(targetEntity="ModelRule", mappedBy="compartmentId")
+	 */
+	protected $rules;
 
 	/**
 	 * @var ArrayCollection
 	 * @ORM\OneToMany(targetEntity="ModelUnitDefinition", mappedBy="compartmentId")
 	 */
-	protected $units;
-
+	protected $unitDefinitions;
 
 	/**
 	 * Get id
-	 *
 	 * @return integer
 	 */
 	public function getId(): ?int
@@ -97,7 +91,6 @@ class ModelCompartment implements IdentifiedObject
 
 	/**
 	 * Get modelId
-	 *
 	 * @return integer|null
 	 */
 	public function getModelId()
@@ -107,9 +100,7 @@ class ModelCompartment implements IdentifiedObject
 
 	/**
 	 * Set modelId
-	 *
 	 * @param integer $modelId
-	 *
 	 * @return ModelCompartment
 	 */
 	public function setModelId($modelId): ModelCompartment
@@ -120,7 +111,6 @@ class ModelCompartment implements IdentifiedObject
 
 	/**
 	 * Get name
-	 *
 	 * @return null|string
 	 */
 	public function getName(): ?string
@@ -128,12 +118,9 @@ class ModelCompartment implements IdentifiedObject
 		return $this->name;
 	}
 
-
 	/**
 	 * Set name
-	 *
 	 * @param string $name
-	 *
 	 * @return ModelCompartment
 	 */
 	public function setName($name): ModelCompartment
@@ -143,8 +130,27 @@ class ModelCompartment implements IdentifiedObject
 	}
 
 	/**
+	 * Get sbmlId
+	 * @return string
+	 */
+	public function getSbmlId()
+	{
+		return $this->sbmlId;
+	}
+
+	/**
+	 * Set sbmlId
+	 * @param string $sbmlId
+	 * @return Model
+	 */
+	public function setSbmlId($sbmlId): ModelCompartment
+	{
+		$this->sbmlId = $sbmlId;
+		return $this;
+	}
+
+	/**
 	 * Get spatialDimensions
-	 *
 	 * @return int|null
 	 */
 	public function getSpatialDimensions(): ?int
@@ -154,9 +160,7 @@ class ModelCompartment implements IdentifiedObject
 
 	/**
 	 * Set spatialDimensions
-	 *
 	 * @param integer $spatialDimensions
-	 *
 	 * @return ModelCompartment
 	 */
 	public function setSpatialDimensions($spatialDimensions): ModelCompartment
@@ -167,7 +171,6 @@ class ModelCompartment implements IdentifiedObject
 
 	/**
 	 * Get size
-	 *
 	 * @return int|null
 	 */
 	public function getSize(): ?int
@@ -177,9 +180,7 @@ class ModelCompartment implements IdentifiedObject
 
 	/**
 	 * Set size
-	 *
 	 * @param integer $size
-	 *
 	 * @return ModelCompartment
 	 */
 	public function setSize($size): ModelCompartment
@@ -190,7 +191,6 @@ class ModelCompartment implements IdentifiedObject
 
 	/**
 	 * Get isConstant
-	 *
 	 * @return integer
 	 */
 	public function getIsConstant(): int
@@ -200,9 +200,7 @@ class ModelCompartment implements IdentifiedObject
 
 	/**
 	 * Set isConstant
-	 *
 	 * @param integer $isConstant
-	 *
 	 * @return ModelCompartment
 	 */
 	public function setIsConstant($isConstant): ModelCompartment
@@ -212,7 +210,7 @@ class ModelCompartment implements IdentifiedObject
 	}
 
 	/**
-	 * @return Collection []
+	 * @return ModelSpecie[]|Collection
 	 */
 	public function getSpecies(): Collection
 	{
@@ -220,7 +218,7 @@ class ModelCompartment implements IdentifiedObject
 	}
 
 	/**
-	 * @return Collection []
+	 * @return ModelReaction[]|Collection
 	 */
 	public function getReactions(): Collection
 	{
@@ -228,11 +226,19 @@ class ModelCompartment implements IdentifiedObject
 	}
 
 	/**
-	 * @return Collection []
+	 * @return ModelRule[]|Collection
 	 */
-	public function getUnits(): Collection
+	public function getRules(): Collection
 	{
-		return $this->units;
+		return $this->rules;
+	}
+
+	/**
+	 * @return ModelUnitDefinition[]|Collection
+	 */
+	public function getUnitDefinitions(): Collection
+	{
+		return $this->unitDefinitions;
 	}
 
 }

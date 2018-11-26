@@ -2,17 +2,9 @@
 
 namespace App\Entity\Repositories;
 
-use App\Entity\Atomic;
-use App\Entity\AtomicState;
-use App\Entity\Compartment;
-use App\Entity\Complex;
-use App\Entity\Entity;
 use App\Entity\Model;
-use App\Entity\EntityStatus;
-use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
-
 
 class ModelRepository implements IEndpointRepository
 {
@@ -47,7 +39,6 @@ class ModelRepository implements IEndpointRepository
 		$query = $this->buildListQuery($filter)
 			->select('m.id, m.name, m.userId, m.approvedId, m.status');
 
-
 		return $query->getQuery()->getArrayResult();
 	}
 
@@ -56,9 +47,7 @@ class ModelRepository implements IEndpointRepository
 		$query = $this->em->createQueryBuilder()
 			->from(Model::class, 'm');
 
-
 		return $query;
 	}
-
 
 }

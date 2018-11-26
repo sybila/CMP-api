@@ -8,7 +8,6 @@ use App\Entity\IdentifiedObject;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 
-
 class ModelCompartmentRepository implements IDependentEndpointRepository
 {
 
@@ -32,7 +31,6 @@ class ModelCompartmentRepository implements IDependentEndpointRepository
 	public function get(int $id)
 	{
 		return $this->em->find(ModelCompartment::class, $id);
-
 	}
 
 	public function getNumResults(array $filter): int
@@ -46,12 +44,12 @@ class ModelCompartmentRepository implements IDependentEndpointRepository
 	public function getList(array $filter, array $sort, array $limit): array
 	{
 		$query = $this->buildListQuery($filter)
-			->select('c.id, c.name, c.spatialDimensions, c.size, c.isConstant');
-
+			->select('c.id, c.name, c.sbmlId, c.spatialDimensions, c.size, c.isConstant');
 		return $query->getQuery()->getArrayResult();
 	}
 
-	public function getParent():IdentifiedObject {
+	public function getParent(): IdentifiedObject
+	{
 		return $this->object;
 	}
 
@@ -72,14 +70,13 @@ class ModelCompartmentRepository implements IDependentEndpointRepository
 		return $query;
 	}
 
-
 	public function add($object): void
 	{
-		// TODO: Refactor this method since its pointless in onetomany relationship
+		// TODO: Implement add() method.
 	}
 
 	public function remove($object): void
 	{
-		// TODO: Refactor this method since its pointless in onetomany relationship
+		// TODO: Implement remove() method.
 	}
 }

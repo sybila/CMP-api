@@ -2,22 +2,8 @@
 
 namespace App\Entity;
 
-use App\Exceptions\EntityClassificationException;
-use App\Exceptions\EntityHierarchyException;
-use App\Exceptions\EntityLocationException;
-use App\Helpers\
-{
-	ChangeCollection, ConsistenceEnum
-};
-use App\Exceptions\EntityException;
-use Consistence\Enum\InvalidEnumValueException;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
-use Doctrine\Common\Collections\Criteria;
-use Doctrine\ORM\Event\PreUpdateEventArgs;
 use Doctrine\ORM\Mapping as ORM;
-use Doctrine\ORM\QueryBuilder;
-use Symfony\Component\Translation\Tests\StringClass;
+use Doctrine\Common\Collections\Collection;
 
 /**
  * @ORM\Entity
@@ -41,7 +27,6 @@ class ModelParameter implements IdentifiedObject
 	 */
 	protected $modelId;
 
-
 	/**
 	 * @ORM\ManyToOne(targetEntity="ModelReaction", inversedBy="parameters")
 	 * @ORM\JoinColumn(name="model_reaction_id", referencedColumnName="id")
@@ -54,6 +39,11 @@ class ModelParameter implements IdentifiedObject
 	 */
 	protected $name;
 
+	/**
+	 * @var string
+	 * @ORM\Column(type="string", name="sbml_id")
+	 */
+	private $sbmlId;
 
 	/**
 	 * @var int
@@ -67,10 +57,20 @@ class ModelParameter implements IdentifiedObject
 	 */
 	protected $isConstant;
 
+	/**
+	 * @var Collection
+	 * @ORM\OneToMany(targetEntity="ModelReactionItem", mappedBy="parameterId")
+	 */
+	protected $reactionItems;
+
+	/**
+	 * @var Collection
+	 * @ORM\OneToMany(targetEntity="ModelRule", mappedBy="parameterId")
+	 */
+	protected $rules;
 
 	/**
 	 * Get id
-	 *
 	 * @return integer
 	 */
 	public function getId(): ?int
@@ -78,10 +78,8 @@ class ModelParameter implements IdentifiedObject
 		return $this->id;
 	}
 
-
 	/**
 	 * Get modelId
-	 *
 	 * @return integer|null
 	 */
 	public function getModelId()
@@ -91,9 +89,7 @@ class ModelParameter implements IdentifiedObject
 
 	/**
 	 * Set modelId
-	 *
 	 * @param integer $modelId
-	 *
 	 * @return ModelUnitDefinition
 	 */
 	public function setModelId($modelId): ModelParameter
@@ -102,10 +98,8 @@ class ModelParameter implements IdentifiedObject
 		return $this;
 	}
 
-
 	/**
 	 * Get reactionItemId
-	 *
 	 * @return integer|null
 	 */
 	public function getReactionItemId()
@@ -115,9 +109,7 @@ class ModelParameter implements IdentifiedObject
 
 	/**
 	 * Set reactionItemId
-	 *
 	 * @param integer $reactionItemId
-	 *
 	 * @return ModelParameter
 	 */
 	public function setReactionItemId($reactionItemId): ModelParameter
@@ -128,7 +120,6 @@ class ModelParameter implements IdentifiedObject
 
 	/**
 	 * Get name
-	 *
 	 * @return null|string
 	 */
 	public function getName(): ?string
@@ -136,12 +127,9 @@ class ModelParameter implements IdentifiedObject
 		return $this->name;
 	}
 
-
 	/**
 	 * Set name
-	 *
 	 * @param string $name
-	 *
 	 * @return ModelUnitToDefinition
 	 */
 	public function setName($name): ModelParameter
@@ -151,8 +139,27 @@ class ModelParameter implements IdentifiedObject
 	}
 
 	/**
+	 * Get sbmlId
+	 * @return string
+	 */
+	public function getSbmlId()
+	{
+		return $this->sbmlId;
+	}
+
+	/**
+	 * Set sbmlId
+	 * @param string $sbmlId
+	 * @return Model
+	 */
+	public function setSbmlId($sbmlId): ModelParameter
+	{
+		$this->sbmlId = $sbmlId;
+		return $this;
+	}
+
+	/**
 	 * Get value
-	 *
 	 * @return integer
 	 */
 	public function getValue(): ?int
@@ -162,9 +169,7 @@ class ModelParameter implements IdentifiedObject
 
 	/**
 	 * Set value
-	 *
 	 * @param integer $value
-	 *
 	 * @return ModelReactionItem
 	 */
 	public function setValue($value): ModelParameter
@@ -175,7 +180,6 @@ class ModelParameter implements IdentifiedObject
 
 	/**
 	 * Get isConstant
-	 *
 	 * @return integer
 	 */
 	public function getIsConstant(): int
@@ -185,9 +189,7 @@ class ModelParameter implements IdentifiedObject
 
 	/**
 	 * Set isConstant
-	 *
 	 * @param integer $isConstant
-	 *
 	 * @return ModelCompartment
 	 */
 	public function setIsConstant($isConstant): ModelParameter
@@ -196,5 +198,20 @@ class ModelParameter implements IdentifiedObject
 		return $this;
 	}
 
+	/**
+	 * @return ModelReactionItem[]|Collection
+	 */
+	public function getReactionsItems(): Collection
+	{
+		return $this->reactionItems;
+	}
+
+	/**
+	 * @return ModelRule[]|Collection
+	 */
+	public function getRules(): Collection
+	{
+		return $this->rules;
+	}
 
 }

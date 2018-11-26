@@ -147,6 +147,9 @@ return function(App $app)
 	(new RouteHelper)
 		->setRoute(Ctl\ReactionItemParentedParameterController::class, '/models/{model-id:\\d+}/reactions/{reactionItem-id:\\d+}/parameters')
 		->register();
+	(new RouteHelper)
+		->setRoute(Ctl\ModelParentedRuleController::class, '/models/{model-id:\\d+}/rules')
+		->register();
 
 	// entities
 	$app->post('/entities/{id:\\d+}/status', Ctl\EntityController::class . ':editStatus');

@@ -3,17 +3,14 @@
 namespace App\Controllers;
 
 use App\Entity\{
-	Entity,
-	ModelReaction,
+	ModelRule,
 	ModelReactionItem,
 	ModelParameter,
 	IdentifiedObject,
 	Repositories\ModelRepository,
 	Repositories\IEndpointRepository,
 	Repositories\ModelParameterRepository,
-	Repositories\ModelReactionRepository,
-	Repositories\ModelCompartmentRepository,
-	Structure
+	Repositories\ModelReactionRepository
 };
 use App\Exceptions\
 {
@@ -24,7 +21,6 @@ use App\Exceptions\
 	UniqueKeyViolationException
 };
 use App\Helpers\ArgumentParser;
-use App\Helpers\Validators;
 use Doctrine\ORM\EntityManager;
 use Slim\Container;
 use Slim\Http\{
@@ -34,7 +30,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @property-read ParameterRepository $repository
- * @method Entity getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
+ * @method ModelParameter getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
 abstract class ModelParameterController extends ParentedRepositoryController
 {
@@ -53,17 +49,34 @@ abstract class ModelParameterController extends ParentedRepositoryController
 
 	protected static function getAllowedSort(): array
 	{
-		return ['id'];
+		return ['id, name'];
 	}
 
 	protected function getData(IdentifiedObject $parameter): array
 	{
-		/** @var ModelReactionItem $reactionItem */
-
+		/** @var ModelParameter $parameter */
 		return [
 			'id' => $parameter->getId(),
 			'name' => $parameter->getName(),
+			'sbmlId' => $parameter->getSbmlId(),
+			'value' => $parameter->getValue(),
+			'isConstant' => $parameter->getValue(),
+			'reactionItems' => $parameter->getReactionsItems()->map(function (ModelReactionItem $reactionItem) {
+				return ['id' => $reactionItem->getId(), 'name' => $reactionItem->getName()];
+			})->toArray(),
+			'rules' => $parameter->getRules()->map(function (ModelRule $rule) {
+				return ['id' => $rule->getId(), 'equation' => $rule->getEquation()];
+			})->toArray()
 		];
+	}
+
+	protected function setData(IdentifiedObject $reactionItem, ArgumentParser $data): void
+	{
+		/** @var ModelParameter $parameter */
+		!$data->hasKey('name') ? $parameter->Name($data->getString('sbmlId')) : $parameter->setName($data->getString('name'));
+		!$data->hasKey('sbmlId') ?: $parameter->setSbmlId($data->getString('sbmlId'));
+		!$data->hasKey('value') ?: $parameter->setValue($data->getString('value'));
+		!$data->hasKey('isConstant') ?: $parameter->setIsConstant($data->getString('isConstant'));
 	}
 
 	public function delete(Request $request, Response $response, ArgumentParser $args): Response
@@ -103,23 +116,38 @@ final class ModelParentedParameterController extends ModelParameterController
 		return ['model-id', 'model'];
 	}
 
-
 	protected function setData(IdentifiedObject $reactionItem, ArgumentParser $data): void
 	{
 		/** @var ModelParameter $parameter */
+		$parameter->getModelId() ?: $parameter->setModelId($this->repository->getParent());
+		if ($data->hasKey('reactionId')) {
+			$reaction = $this->repository->getEntityManager()->find(ModelReaction::class, $data->getInt('reactionId'));
+			if ($reaction === null) {
+				throw new NonExistingObjectException($data->getInt('reactionId'), 'reaction');
+			}
+			$reactionItem->setReactionId($reaction);
+		}
+		parent::setData($reactionItem, $data);
 	}
 
 	protected function checkInsertObject(IdentifiedObject $reactionItem): void
 	{
 		/** @var ModelParameter $parameter */
+		if ($parameter->getSbmlId() == null)
+			throw new MissingRequiredKeyException('sbmlId');
+		if ($parameter->getIsConstant() == null)
+			throw new MissingRequiredKeyException('isConstant');
 	}
 
 	protected function createObject(ArgumentParser $body): IdentifiedObject
 	{
+		if (!$body->hasKey('userId'))
+			throw new MissingRequiredKeyException('isConstant');
+		if (!$body->hasKey('sbmlId'))
+			throw new MissingRequiredKeyException('sbmlId');
 		return new ModelReactionItem;
 	}
 }
-
 
 final class ReactionItemParentedParameterController extends ModelParameterController
 {

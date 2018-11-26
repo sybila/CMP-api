@@ -5,10 +5,8 @@ namespace App\Entity\Repositories;
 use App\Entity\ModelSpecie;
 use App\Entity\ModelCompartment;
 use App\Entity\IdentifiedObject;
-use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
-
 
 class ModelSpecieRepository implements IDependentEndpointRepository
 {
@@ -33,7 +31,6 @@ class ModelSpecieRepository implements IDependentEndpointRepository
 	public function get(int $id)
 	{
 		return $this->em->find(ModelSpecie::class, $id);
-
 	}
 
 	public function getNumResults(array $filter): int
@@ -47,13 +44,12 @@ class ModelSpecieRepository implements IDependentEndpointRepository
 	public function getList(array $filter, array $sort, array $limit): array
 	{
 		$query = $this->buildListQuery($filter)
-			->select('s.id, s.name, s.equationType, s.initialExpression, s.hasOnlySubstanceUnits, s.isConstant, s.boundaryCondition');
-
-
+			->select('s.id, s.name, s.sbmlId, s.equationType, s.initialExpression, s.hasOnlySubstanceUnits, s.isConstant, s.boundaryCondition');
 		return $query->getQuery()->getArrayResult();
 	}
 
-	public function getParent() {
+	public function getParent()
+	{
 		return $this->object;
 	}
 
@@ -62,7 +58,6 @@ class ModelSpecieRepository implements IDependentEndpointRepository
 		$className = static::getParentClassName();
 		if (!($object instanceof $className))
 			throw new \Exception('Parent of specie must be ' . $className);
-
 		$this->object = $object;
 	}
 
@@ -71,23 +66,19 @@ class ModelSpecieRepository implements IDependentEndpointRepository
 		$query = $this->em->createQueryBuilder()
 			->from(ModelSpecie::class, 's')
 			->where('s.compartmentId = :compartmentId')
-			->setParameter('compartmentId', $this->object->getId());
-
-
-		return $query;
-
-
+			->setParameters([
+				'compartmentId' => $this->object->getId()
+			]);
 		return $query;
 	}
 
-
 	public function add($object): void
 	{
-		// TODO: Refactor this method since its pointless in onetomany relationship
+		// TODO: Implement add() method.
 	}
 
 	public function remove($object): void
 	{
-		// TODO: Refactor this method since its pointless in onetomany relationship
+		// TODO: Implement remove() method.
 	}
 }
