@@ -70,7 +70,7 @@ abstract class ModelParameterController extends ParentedRepositoryController
 		];
 	}
 
-	protected function setData(IdentifiedObject $reactionItem, ArgumentParser $data): void
+	protected function setData(IdentifiedObject $parameter, ArgumentParser $data): void
 	{
 		/** @var ModelParameter $parameter */
 		!$data->hasKey('name') ? $parameter->Name($data->getString('sbmlId')) : $parameter->setName($data->getString('name'));
@@ -116,7 +116,7 @@ final class ModelParentedParameterController extends ModelParameterController
 		return ['model-id', 'model'];
 	}
 
-	protected function setData(IdentifiedObject $reactionItem, ArgumentParser $data): void
+	protected function setData(IdentifiedObject $parameter, ArgumentParser $data): void
 	{
 		/** @var ModelParameter $parameter */
 		$parameter->getModelId() ?: $parameter->setModelId($this->repository->getParent());
@@ -125,27 +125,27 @@ final class ModelParentedParameterController extends ModelParameterController
 			if ($reaction === null) {
 				throw new NonExistingObjectException($data->getInt('reactionId'), 'reaction');
 			}
-			$reactionItem->setReactionId($reaction);
+			$parameter->setReactionId($reaction);
 		}
-		parent::setData($reactionItem, $data);
+		parent::setData($parameter, $data);
 	}
 
-	protected function checkInsertObject(IdentifiedObject $reactionItem): void
+	protected function checkInsertObject(IdentifiedObject $parameter): void
 	{
 		/** @var ModelParameter $parameter */
-		if ($parameter->getSbmlId() == null)
+		if ($parameter->getSbmlId() === null)
 			throw new MissingRequiredKeyException('sbmlId');
-		if ($parameter->getIsConstant() == null)
+		if ($parameter->getIsConstant() === null)
 			throw new MissingRequiredKeyException('isConstant');
 	}
 
 	protected function createObject(ArgumentParser $body): IdentifiedObject
 	{
-		if (!$body->hasKey('userId'))
+		if (!$body->hasKey('isConstant'))
 			throw new MissingRequiredKeyException('isConstant');
 		if (!$body->hasKey('sbmlId'))
 			throw new MissingRequiredKeyException('sbmlId');
-		return new ModelReactionItem;
+		return new ModelParameter;
 	}
 }
 
@@ -162,12 +162,12 @@ final class ReactionItemParentedParameterController extends ModelParameterContro
 		return ['reactionItem-id', 'reactionItem'];
 	}
 
-	protected function setData(IdentifiedObject $reactionItem, ArgumentParser $data): void
+	protected function setData(IdentifiedObject $parameter, ArgumentParser $data): void
 	{
 		/** @var ModelParameter $parameter */
 	}
 
-	protected function checkInsertObject(IdentifiedObject $reactionItem): void
+	protected function checkInsertObject(IdentifiedObject $parameter): void
 	{
 		/** @var ModelParameter $parameter */
 	}

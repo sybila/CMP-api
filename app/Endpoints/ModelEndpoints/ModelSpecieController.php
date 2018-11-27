@@ -43,6 +43,7 @@ final class ModelSpecieController extends ParentedRepositoryController
 	/** @var ModelSpecieRepository */
 	private $specieRepository;
 
+
 	public function __construct(Container $c)
 	{
 		parent::__construct($c);
@@ -52,6 +53,15 @@ final class ModelSpecieController extends ParentedRepositoryController
 	protected static function getAllowedSort(): array
 	{
 		return ['id', 'name'];
+	}
+
+	public function readSbmlId(Request $request, Response $response, ArgumentParser $args)
+	{
+		$specie = $this->repository->getBySbmlId($args->getString('sbmlId'));
+		return self::formatOk(
+			$response,
+			$specie ? $this->getData($specie) : null
+		);
 	}
 
 	protected function getData(IdentifiedObject $specie): array
@@ -69,7 +79,7 @@ final class ModelSpecieController extends ParentedRepositoryController
 			'reactionItems' => $specie->getReactionItems()->map(function (ModelReactionItem $reactionItem) {
 				return ['id' => $reactionItem->getId(), 'name' => $reactionItem->getName()];
 			})->toArray(),
-			'rules' => $specie->getReactionItems()->map(function (ModelRule $rule) {
+			'rules' => $specie->getRules()->map(function (ModelRule $rule) {
 				return ['id' => $rule->getId(), 'equation' => $rule->getEquation()];
 			})->toArray()
 		];
@@ -85,7 +95,7 @@ final class ModelSpecieController extends ParentedRepositoryController
 		!$data->hasKey('equationType') ?: $specie->setEquationType($data->getString('equationType'));
 		!$data->hasKey('initialExpression') ?: $specie->setInitialExpression($data->getString('initialExpression'));
 		!$data->hasKey('boundaryCondition') ?: $specie->setBoundaryCondition($data->getString('boundaryCondition'));
-		!$data->hasKey('hasOnlySubstanceUnits') ?: $specie->setHasOnlySubstanceUnits($data->getString('hasOnlySubstanceUnits'));
+		!$data->hasKey('hasOnlySubstanceUnits') ?: $specie->setHasOnlySubstanceUnits($data->getInt('hasOnlySubstanceUnits'));
 		!$data->hasKey('isConstant') ?: $specie->setIsConstant($data->getInt('isConstant'));
 	}
 
@@ -101,13 +111,13 @@ final class ModelSpecieController extends ParentedRepositoryController
 	protected function checkInsertObject(IdentifiedObject $specie): void
 	{
 		/** @var ModelSpecie $specie */
-		if ($specie->getModelId() == null)
+		if ($specie->getModelId() === null)
 			throw new MissingRequiredKeyException('modelId');
-		if ($specie->getCompartmentId() == null)
+		if ($specie->getCompartmentId() === null)
 			throw new MissingRequiredKeyException('compartmentId');
-		if ($specie->getHasOnlySubstanceUnits() == null)
+		if ($specie->getHasOnlySubstanceUnits() === null)
 			throw new MissingRequiredKeyException('hasOnlySubstanceUnits');
-		if ($specie->getIsConstant() == null)
+		if ($specie->getIsConstant() === null)
 			throw new MissingRequiredKeyException('isConstant');
 	}
 

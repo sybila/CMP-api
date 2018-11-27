@@ -93,11 +93,11 @@ final class ModelCompartmentController extends ParentedRepositoryController
 	protected function checkInsertObject(IdentifiedObject $compartment): void
 	{
 		/** @var ModelCompartment $compartment */
-		if ($compartment->getModelId() == null)
+		if ($compartment->getModelId() === null)
 			throw new MissingRequiredKeyException('modelId');
-		if ($compartment->getSbmlId() == null)
+		if ($compartment->getSbmlId() === null)
 			throw new MissingRequiredKeyException('sbmlId');
-		if ($compartment->getIsConstant() == null)
+		if ($compartment->getIsConstant() === null)
 			throw new MissingRequiredKeyException('isConstant');
 	}
 
@@ -123,8 +123,8 @@ final class ModelCompartmentController extends ParentedRepositoryController
 			'isConstant' => new Assert\Type(['type' => 'integer']),
 			'name' => new Assert\Type(['type' => 'string']),
 			'sbmlId' => new Assert\Type(['type' => 'string']),
-			'spatialDimensions' => new Assert\Type(['type' => 'integer']),
-			'size' => new Assert\Type(['type' => 'integer']),
+			'spatialDimensions' => new Assert\Type(['type' => 'double']),
+			'size' => new Assert\Type(['type' => 'double']),
 			'isConstant' => new Assert\Type(['type' => 'integer']),
 		]);
 	}

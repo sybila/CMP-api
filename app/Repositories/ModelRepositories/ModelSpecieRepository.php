@@ -23,6 +23,11 @@ class ModelSpecieRepository implements IDependentEndpointRepository
 		$this->repository = $em->getRepository(ModelSpecie::class);
 	}
 
+	public function getBySbmlId(string $sbmlId): ?ModelSpecie
+	{
+		return $this->repository->findOneBy(['sbmlId' => $sbmlId]);
+	}
+
 	protected static function getParentClassName(): string
 	{
 		return ModelCompartment::class;
