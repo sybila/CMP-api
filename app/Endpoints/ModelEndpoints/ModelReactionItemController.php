@@ -92,7 +92,7 @@ abstract class ModelReactionItemController extends ParentedRepositoryController
 		!$data->hasKey('sbmlId') ?: $reactionItem->setSbmlId($data->getString('sbmlId'));
 		!$data->hasKey('type') ?: $reactionItem->setType($data->getString('type'));
 		!$data->hasKey('value') ?: $reactionItem->setValue($data->getInt('value'));
-		!$data->hasKey('stoichiometry') ?: $reactionItem->setStochiometry($data->getInt('stoichiometry'));
+		!$data->hasKey('stoichiometry') ?: $reactionItem->setStochiometry($data->getFloat('stoichiometry'));
 		!$data->hasKey('isGlobal') ?: $reactionItem->setIsGlobal($data->getInt('isGlobal'));
 	}
 
