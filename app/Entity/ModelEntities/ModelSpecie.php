@@ -150,7 +150,7 @@ class ModelSpecie implements IdentifiedObject
 	 * @param string $name
 	 * @return ModelSpecie
 	 */
-	public function setName($name)
+	public function setName($name): ModelSpecie
 	{
 		$this->name = $name;
 		return $this;
@@ -170,7 +170,7 @@ class ModelSpecie implements IdentifiedObject
 	 * @param string $sbmlId
 	 * @return Model
 	 */
-	public function setSbmlId($sbmlId): Model
+	public function setSbmlId($sbmlId): ModelSpecie
 	{
 		$this->sbmlId = $sbmlId;
 		return $this;

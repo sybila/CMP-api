@@ -130,7 +130,7 @@ class ModelParameter implements IdentifiedObject
 	/**
 	 * Set name
 	 * @param string $name
-	 * @return ModelUnitToDefinition
+	 * @return  ModelParameter
 	 */
 	public function setName($name): ModelParameter
 	{
@@ -150,7 +150,7 @@ class ModelParameter implements IdentifiedObject
 	/**
 	 * Set sbmlId
 	 * @param string $sbmlId
-	 * @return Model
+	 * @return  ModelParameter
 	 */
 	public function setSbmlId($sbmlId): ModelParameter
 	{
@@ -170,7 +170,7 @@ class ModelParameter implements IdentifiedObject
 	/**
 	 * Set value
 	 * @param integer $value
-	 * @return ModelReactionItem
+	 * @return  ModelParameter
 	 */
 	public function setValue($value): ModelParameter
 	{
@@ -190,7 +190,7 @@ class ModelParameter implements IdentifiedObject
 	/**
 	 * Set isConstant
 	 * @param integer $isConstant
-	 * @return ModelCompartment
+	 * @return  ModelParameter
 	 */
 	public function setIsConstant($isConstant): ModelParameter
 	{

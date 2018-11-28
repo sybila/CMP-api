@@ -68,9 +68,10 @@ final class ModelReactionController extends ParentedRepositoryController
 	protected function setData(IdentifiedObject $reaction, ArgumentParser $data): void
 	{
 		/** @var Reaction $reaction */
-		$reaction->getModelId() ?: $reaction->setModelId($this->repository->getParent()->getId());
+		$reaction->getModelId() ?: $reaction->setModelId($this->repository->getParent());
 		!$data->hasKey('compartmentId') ?: $reaction->setCompartmentId($data->getString('compartmentId'));
-		!$data->hasKey('name') ?: $reaction->setName($data->getString('name'));
+		!$data->hasKey('name') ? $reaction->setName($data->getString('sbmlId')) : $reaction->setName($data->getString('name'));
+		!$data->hasKey('sbmlId') ?: $reaction->setSbmlId($data->getString('sbmlId'));
 		!$data->hasKey('isReversible') ?: $reaction->setIsReversible($data->getInt('isReversible'));
 		!$data->hasKey('isFast') ?: $reaction->setIsFast($data->getInt('isFast'));
 		!$data->hasKey('rate') ?: $reaction->setRate($data->getString('rate'));
@@ -88,11 +89,11 @@ final class ModelReactionController extends ParentedRepositoryController
 	protected function checkInsertObject(IdentifiedObject $reaction): void
 	{
 		/** @var ModelReaction $reaction */
-		if ($reaction->getModelId() == null)
+		if ($reaction->getModelId() === null)
 			throw new MissingRequiredKeyException('modelId');
-		if ($reaction->isReversible() == null)
+		if ($reaction->getIsReversible() === null)
 			throw new MissingRequiredKeyException('isReversible');
-		if ($reaction->isFast() == null)
+		if ($reaction->getIsFast() === null)
 			throw new MissingRequiredKeyException('isFast');
 	}
 

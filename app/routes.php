@@ -151,6 +151,10 @@ return function(App $app)
 		->setRoute(Ctl\ModelParentedRuleController::class, '/models/{model-id:\\d+}/rules')
 		->register();
 
+	// model species
+	$app->get('/models/{model-id:\\d+}/species/{sbmlId}', Ctl\ModelSpecieController::class . ':readSbmlId');
+	$app->get('/models/{model-id:\\d+}/parameters/{sbmlId}', Ctl\ModelParentedParameterController::class . ':readSbmlId');
+
 	// entities
 	$app->post('/entities/{id:\\d+}/status', Ctl\EntityController::class . ':editStatus');
 	$app->get('/entities/{code}', Ctl\EntityController::class . ':readCode');

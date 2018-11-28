@@ -108,7 +108,7 @@ final class ModelController extends WritableRepositoryController
 	protected function checkInsertObject(IdentifiedObject $model): void
 	{
 		/** @var Model $model */
-		if ($model->getUserId() == null)
+		if ($model->getUserId() === null)
 			throw new MissingRequiredKeyException('userId');
 	}
 

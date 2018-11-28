@@ -159,7 +159,7 @@ class ModelReaction implements IdentifiedObject
 	 * @param string $sbmlId
 	 * @return Model
 	 */
-	public function setSbmlId($sbmlId): Model
+	public function setSbmlId($sbmlId): ModelReaction
 	{
 		$this->sbmlId = $sbmlId;
 		return $this;

@@ -39,14 +39,14 @@ class ModelCompartment implements IdentifiedObject
 	private $sbmlId;
 
 	/**
-	 * @var int
-	 * @ORM\Column(name="spatial_dimensions",type="integer",nullable=true)
+	 * @var float
+	 * @ORM\Column(name="spatial_dimensions",type="float",nullable=true)
 	 */
 	protected $spatialDimensions;
 
 	/**
-	 * @var int
-	 * @ORM\Column(name="size",type="integer",nullable=true)
+	 * @var float
+	 * @ORM\Column(name="size",type="float",nullable=true)
 	 */
 	protected $size;
 
