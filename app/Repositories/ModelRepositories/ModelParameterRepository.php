@@ -24,6 +24,11 @@ class ModelParameterRepository implements IDependentEndpointRepository
 		$this->repository = $em->getRepository(ModelParameter::class);
 	}
 
+	public function getBySbmlId(string $sbmlId): ?ModelParameter
+	{
+		return $this->repository->findOneBy(['sbmlId' => $sbmlId]);
+	}
+
 	protected static function getParentClassName(): array
 	{
 		return [Model::class, ModelReaction::class];

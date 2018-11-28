@@ -153,6 +153,7 @@ return function(App $app)
 
 	// model species
 	$app->get('/models/{model-id:\\d+}/species/{sbmlId}', Ctl\ModelSpecieController::class . ':readSbmlId');
+	$app->get('/models/{model-id:\\d+}/parameters/{sbmlId}', Ctl\ModelParentedParameterController::class . ':readSbmlId');
 
 	// entities
 	$app->post('/entities/{id:\\d+}/status', Ctl\EntityController::class . ':editStatus');

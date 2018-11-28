@@ -29,7 +29,7 @@ use Slim\Http\{
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * @property-read ParameterRepository $repository
+ * @property-read ModelParameterRepository $repository
  * @method ModelParameter getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
 abstract class ModelParameterController extends ParentedRepositoryController
@@ -50,6 +50,15 @@ abstract class ModelParameterController extends ParentedRepositoryController
 	protected static function getAllowedSort(): array
 	{
 		return ['id, name'];
+	}
+
+	public function readSbmlId(Request $request, Response $response, ArgumentParser $args)
+	{
+		$parameter = $this->repository->getBySbmlId($args->getString('sbmlId'));
+		return self::formatOk(
+			$response,
+			$parameter ? $this->getData($parameter) : null
+		);
 	}
 
 	protected function getData(IdentifiedObject $parameter): array
