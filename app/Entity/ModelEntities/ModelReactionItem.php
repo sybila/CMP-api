@@ -249,7 +249,7 @@ class ModelReactionItem implements IdentifiedObject
 	 * Get stoichiometry
 	 * @return double
 	 */
-	public function getStoichiometry(): ?double
+	public function getStoichiometry(): ?float
 	{
 		return $this->stoichiometry;
 	}

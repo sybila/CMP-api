@@ -151,9 +151,9 @@ class ModelCompartment implements IdentifiedObject
 
 	/**
 	 * Get spatialDimensions
-	 * @return int|null
+	 * @return float|null
 	 */
-	public function getSpatialDimensions(): ?int
+	public function getSpatialDimensions(): ?float
 	{
 		return $this->spatialDimensions;
 	}
@@ -171,9 +171,9 @@ class ModelCompartment implements IdentifiedObject
 
 	/**
 	 * Get size
-	 * @return int|null
+	 * @return float|null
 	 */
-	public function getSize(): ?int
+	public function getSize(): ?float
 	{
 		return $this->size;
 	}
