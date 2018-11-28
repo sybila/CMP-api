@@ -247,16 +247,16 @@ class ModelReactionItem implements IdentifiedObject
 
 	/**
 	 * Get stoichiometry
-	 * @return integer
+	 * @return double
 	 */
-	public function getStoichiometry(): ?int
+	public function getStoichiometry(): ?double
 	{
 		return $this->stoichiometry;
 	}
 
 	/**
 	 * Set stoichiometry
-	 * @param integer $stoichiometry
+	 * @param double $stoichiometry
 	 * @return ModelReactionItem
 	 */
 	public function setStochiometry($stoichiometry): ModelReactionItem
