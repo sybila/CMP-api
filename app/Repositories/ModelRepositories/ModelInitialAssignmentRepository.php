@@ -16,7 +16,7 @@ class ModelInitialAssignmentRepository implements IDependentEndpointRepository
 	/** @var EntityManager * */
 	protected $em;
 
-	/** @var \Doctrine\ORM\InitialAssignmentRepository */
+	/** @var \Doctrine\ORM\ModelInitialAssignmentRepository */
 	private $repository;
 
 	public function __construct(EntityManager $em)
@@ -47,8 +47,7 @@ class ModelInitialAssignmentRepository implements IDependentEndpointRepository
 	public function getList(array $filter, array $sort, array $limit): array
 	{
 		$query = $this->buildListQuery($filter)
-			->select('i.id, i.formula');
-
+			->select('i.id, i.sbmlId, i.formula');
 		return $query->getQuery()->getArrayResult();
 	}
 

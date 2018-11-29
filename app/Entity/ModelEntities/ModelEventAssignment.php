@@ -2,20 +2,7 @@
 
 namespace App\Entity;
 
-
-use App\Exceptions\EntityClassificationException;
-use App\Exceptions\EntityHierarchyException;
-use App\Exceptions\EntityLocationException;
-use App\Helpers\
-{
-	ChangeCollection, ConsistenceEnum
-};
-use Doctrine\Common\Collections\Collection;
-use Doctrine\Common\Collections\Criteria;
-use Doctrine\ORM\Event\PreUpdateEventArgs;
 use Doctrine\ORM\Mapping as ORM;
-use Doctrine\ORM\QueryBuilder;
-use Symfony\Component\Translation\Tests\StringClass;
 
 /**
  * @ORM\Entity
@@ -24,7 +11,6 @@ use Symfony\Component\Translation\Tests\StringClass;
  */
 class ModelEventAssignment implements IdentifiedObject
 {
-
 	/**
 	 * @ORM\Id
 	 * @ORM\Column(type="integer")
@@ -33,13 +19,11 @@ class ModelEventAssignment implements IdentifiedObject
 	 */
 	private $id;
 
-
 	/**
 	 * @ORM\ManyToOne(targetEntity="ModelEvent", inversedBy="eventAssignments")
 	 * @ORM\JoinColumn(name="event_id", referencedColumnName="id")
 	 */
 	protected $eventId;
-
 
 	/**
 	 * @var string
@@ -47,10 +31,8 @@ class ModelEventAssignment implements IdentifiedObject
 	 */
 	protected $formula;
 
-
 	/**
 	 * Get id
-	 *
 	 * @return integer
 	 */
 	public function getId(): ?int
@@ -60,7 +42,6 @@ class ModelEventAssignment implements IdentifiedObject
 
 	/**
 	 * Get eventId
-	 *
 	 * @return integer|null
 	 */
 	public function getEventId()
@@ -70,9 +51,7 @@ class ModelEventAssignment implements IdentifiedObject
 
 	/**
 	 * Set eventId
-	 *
 	 * @param integer $eventId
-	 *
 	 * @return ModelEventAssignment
 	 */
 	public function setEventId($eventId): ModelEventAssignment
@@ -83,7 +62,6 @@ class ModelEventAssignment implements IdentifiedObject
 
 	/**
 	 * Get formula
-	 *
 	 * @return null|string
 	 */
 	public function getFormula(): ?string
@@ -91,12 +69,9 @@ class ModelEventAssignment implements IdentifiedObject
 		return $this->formula;
 	}
 
-
 	/**
 	 * Set formula
-	 *
 	 * @param string $formula
-	 *
 	 * @return ModelEventAssignment
 	 */
 	public function setFormula($formula): ModelEventAssignment
