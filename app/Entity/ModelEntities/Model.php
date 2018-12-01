@@ -13,13 +13,7 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Model implements IdentifiedObject
 {
-	/**
-	 * @ORM\Id
-	 * @ORM\Column(type="integer")
-	 * @ORM\GeneratedValue
-	 * @var integer|null
-	 */
-	private $id;
+	use SBase;
 
 	/**
 	 * @var int
@@ -32,18 +26,6 @@ class Model implements IdentifiedObject
 	 * @ORM\Column(type="integer", name="approved_id")
 	 */
 	private $approvedId;
-
-	/**
-	 * @var string
-	 * @ORM\Column(type="string")
-	 */
-	private $name;
-
-	/**
-	 * @var string
-	 * @ORM\Column(type="string", name="sbml_id")
-	 */
-	private $sbmlId;
 
 	/**
 	 * @var string
@@ -106,15 +88,6 @@ class Model implements IdentifiedObject
 	private $unitDefinitions;
 
 	/**
-	 * Get id
-	 * @return integer
-	 */
-	public function getId(): ?int
-	{
-		return $this->id;
-	}
-
-	/**
 	 * Get userId
 	 * @return integer
 	 */
@@ -151,46 +124,6 @@ class Model implements IdentifiedObject
 	public function setApprovedId($approvedId): Model
 	{
 		$this->approvedId = $approvedId;
-		return $this;
-	}
-
-	/**
-	 * Get name
-	 * @return string
-	 */
-	public function getName()
-	{
-		return $this->name;
-	}
-
-	/**
-	 * Set name
-	 * @param string $name
-	 * @return Model
-	 */
-	public function setName($name): Model
-	{
-		$this->name = $name;
-		return $this;
-	}
-
-	/**
-	 * Get sbmlId
-	 * @return string
-	 */
-	public function getSbmlId()
-	{
-		return $this->sbmlId;
-	}
-
-	/**
-	 * Set sbmlId
-	 * @param string $sbmlId
-	 * @return Model
-	 */
-	public function setSbmlId($sbmlId): Model
-	{
-		$this->sbmlId = $sbmlId;
 		return $this;
 	}
 
