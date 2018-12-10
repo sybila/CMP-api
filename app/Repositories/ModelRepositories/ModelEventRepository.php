@@ -4,15 +4,12 @@ namespace App\Entity\Repositories;
 
 use App\Entity\Model;
 use App\Entity\ModelEvent;
-use App\Entity\ModelEventAssignment;
 use App\Entity\IdentifiedObject;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 
-
-class ModelEventRepository implements IDependentEndpointRepository
+class ModelEventRepository implements IDependentSBaseRepository
 {
-
 	/** @var EntityManager * */
 	protected $em;
 
@@ -33,7 +30,6 @@ class ModelEventRepository implements IDependentEndpointRepository
 	public function get(int $id)
 	{
 		return $this->em->find(ModelEvent::class, $id);
-
 	}
 
 	public function getNumResults(array $filter): int
@@ -47,12 +43,13 @@ class ModelEventRepository implements IDependentEndpointRepository
 	public function getList(array $filter, array $sort, array $limit): array
 	{
 		$query = $this->buildListQuery($filter)
-			->select('e.id, e.name, e.delay, e.trigger, e.priority');
+			->select('e.id, e.name, e.sbmlId, e.sboTerm, e.notes, e.annotation, e.delay, e.trigger, e.priority');
 
 		return $query->getQuery()->getArrayResult();
 	}
 
-	public function getParent():IdentifiedObject {
+	public function getParent(): IdentifiedObject
+	{
 		return $this->object;
 	}
 
@@ -73,14 +70,4 @@ class ModelEventRepository implements IDependentEndpointRepository
 		return $query;
 	}
 
-
-	public function add($object): void
-	{
-		// TODO: Refactor this method since its pointless in onetomany relationship
-	}
-
-	public function remove($object): void
-	{
-		// TODO: Refactor this method since its pointless in onetomany relationship
-	}
 }

@@ -3,16 +3,13 @@
 namespace App\Entity\Repositories;
 
 use App\Entity\Model;
-use App\Entity\ModelUnit;
 use App\Entity\ModelUnitDefinition;
 use App\Entity\IdentifiedObject;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 
-
-class ModelUnitDefinitionRepository implements IDependentEndpointRepository
+class ModelUnitDefinitionRepository implements IDependentSBaseRepository
 {
-
 	/** @var EntityManager * */
 	protected $em;
 
@@ -33,7 +30,6 @@ class ModelUnitDefinitionRepository implements IDependentEndpointRepository
 	public function get(int $id)
 	{
 		return $this->em->find(ModelUnitDefinition::class, $id);
-
 	}
 
 	public function getNumResults(array $filter): int
@@ -47,12 +43,13 @@ class ModelUnitDefinitionRepository implements IDependentEndpointRepository
 	public function getList(array $filter, array $sort, array $limit): array
 	{
 		$query = $this->buildListQuery($filter)
-			->select('u.id, u.name, u.symbol, (u.compartmentId) as compartmentId' /*(u.localParameterId) as localParameterId,(u.parameterId) as parameterId'*/);
+			->select('u.id, u.name, u.sbmlId, u.sboTerm, u.notes, u.annotation, u.symbol, (u.compartmentId) as compartmentId' /*(u.localParameterId) as localParameterId,(u.parameterId) as parameterId'*/);
 
 		return $query->getQuery()->getArrayResult();
 	}
 
-	public function getParent():IdentifiedObject {
+	public function getParent(): IdentifiedObject
+	{
 		return $this->object;
 	}
 
@@ -72,7 +69,6 @@ class ModelUnitDefinitionRepository implements IDependentEndpointRepository
 			->setParameter('modelId', $this->object->getId());
 		return $query;
 	}
-
 
 	public function add($object): void
 	{

@@ -3,30 +3,20 @@
 namespace App\Controllers;
 
 use App\Entity\{
-	Entity,
 	ModelUnitToDefinition,
 	ModelReactionItem,
 	ModelSpecie,
 	IdentifiedObject,
-	Repositories\ClassificationRepository,
-	Repositories\EntityRepository,
 	Repositories\ModelSpecieRepository,
 	Repositories\IEndpointRepository,
-	Repositories\OrganismRepository,
-	Repositories\ModelRepository,
-	Repositories\ModelCompartmentRepository,
-	Structure
+	Repositories\ModelCompartmentRepository
 };
 use App\Exceptions\
 {
-	CompartmentLocationException,
-	InvalidArgumentException,
 	MissingRequiredKeyException,
-	DependentResourcesBoundException,
-	UniqueKeyViolationException
+	DependentResourcesBoundException
 };
 use App\Helpers\ArgumentParser;
-use App\Helpers\Validators;
 use Slim\Container;
 use Slim\Http\{
 	Request, Response
@@ -37,12 +27,11 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @property-read ModelSpecieRepository $repository
  * @method ModelSpecie getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
-final class ModelSpecieController extends ParentedRepositoryController
+final class ModelSpecieController extends ParentedSBaseController
 {
 
 	/** @var ModelSpecieRepository */
 	private $specieRepository;
-
 
 	public function __construct(Container $c)
 	{
@@ -67,10 +56,8 @@ final class ModelSpecieController extends ParentedRepositoryController
 	protected function getData(IdentifiedObject $specie): array
 	{
 		/** @var ModelSpecie $specie */
-		return [
-			'id' => $specie->getId(),
-			'name' => $specie->getName(),
-			'sbmlId' => $specie->getSbmlId(),
+		$sBaseData = parent::getData($specie);
+		return array_merge($sBaseData, [
 			'equationType' => $specie->getEquationType(),
 			'initialExpression' => $specie->getInitialExpression(),
 			'hasOnlySubstanceUnits' => $specie->getHasOnlySubstanceUnits(),
@@ -82,19 +69,18 @@ final class ModelSpecieController extends ParentedRepositoryController
 			'rules' => $specie->getRules()->map(function (ModelRule $rule) {
 				return ['id' => $rule->getId(), 'equation' => $rule->getEquation()];
 			})->toArray()
-		];
+		]);
 	}
 
 	protected function setData(IdentifiedObject $specie, ArgumentParser $data): void
 	{
 		/** @var ModelSpecie $specie */
+		parent::setData($specie, $data);
 		$specie->setModelId($this->repository->getParent()->getModelId()->getId());
 		$specie->getCompartmentId() ?: $specie->setCompartmentId($this->repository->getParent());
-		!$data->hasKey('name') ? $specie->setSbmlId($data->getString('sbmlId')) : $specie->setName($data->getString('name'));
-		!$data->hasKey('sbmlId') ?: $specie->setSbmlId($data->getString('sbmlId'));
 		!$data->hasKey('equationType') ?: $specie->setEquationType($data->getString('equationType'));
 		!$data->hasKey('initialExpression') ?: $specie->setInitialExpression($data->getString('initialExpression'));
-		!$data->hasKey('boundaryCondition') ?: $specie->setBoundaryCondition($data->getString('boundaryCondition'));
+		!$data->hasKey('boundaryCondition') ?: $specie->setBoundaryCondition($data->getInt('boundaryCondition'));
 		!$data->hasKey('hasOnlySubstanceUnits') ?: $specie->setHasOnlySubstanceUnits($data->getInt('hasOnlySubstanceUnits'));
 		!$data->hasKey('isConstant') ?: $specie->setIsConstant($data->getInt('isConstant'));
 	}
@@ -133,9 +119,14 @@ final class ModelSpecieController extends ParentedRepositoryController
 
 	protected function getValidator(): Assert\Collection
 	{
-		return new Assert\Collection([
-			'name' => new Assert\Type(['type' => 'string']),
-		]);
+		$validatorArray = parent::getValidatorArray();
+		return new Assert\Collection(array_merge($validatorArray, [
+			'equationType' => new Assert\Type(['type' => 'string']),
+			'initialExpression' => new Assert\Type(['type' => 'string']),
+			'boundaryCondition' => new Assert\Type(['type' => 'integer']),
+			'hasOnlySubstanceUnits' => new Assert\Type(['type' => 'integer']),
+			'isConstant' => new Assert\Type(['type' => 'integer']),
+		]));
 	}
 
 	protected static function getObjectName(): string

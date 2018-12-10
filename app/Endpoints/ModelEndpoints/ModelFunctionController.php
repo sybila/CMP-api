@@ -42,7 +42,6 @@ final class ModelFunctionController extends ParentedRepositoryController
 		return [
 			'id' => $function->getId(),
 			'name' => $function->getName(),
-			'sbmlId' => $function->getSbmlId(),
 			'formula' => $function->getFormula()
 		];
 	}
@@ -52,7 +51,6 @@ final class ModelFunctionController extends ParentedRepositoryController
 		/** @var ModelFunction $function */
 		$function->getReactionId() ?: $function->setReactionId($this->repository->getParent());
 		!$data->hasKey('name') ? $function->setName($data->getString('sbmlId')) : $function->setName($data->getString('name'));
-		!$data->hasKey('sbmlId') ?: $function->setSbmlId($data->getString('sbmlId'));
 		!$data->hasKey('formula') ?: $function->setFormula($data->getString('formula'));
 	}
 
@@ -84,8 +82,7 @@ final class ModelFunctionController extends ParentedRepositoryController
 		return new Assert\Collection([
 			'reactionId' => new Assert\Type(['type' => 'integer']),
 			'name' => new Assert\Type(['type' => 'string']),
-			'formula' => new Assert\Type(['type' => 'string']),
-			'sbmlId' => new Assert\Type(['type' => 'string'])
+			'formula' => new Assert\Type(['type' => 'string'])
 		]);
 	}
 

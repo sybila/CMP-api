@@ -29,14 +29,12 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @property-read ModelUnitRepository $repository
- * @method Entity getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
+ * @method ModelUnit getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
-final class ModelUnitController extends WritableRepositoryController
+final class ModelUnitController extends SBaseController
 {
-
 	/** @var ModelUnitRepository */
 	private $modelUnitRepository;
-
 
 	public function __construct(Container $c)
 	{
@@ -52,38 +50,37 @@ final class ModelUnitController extends WritableRepositoryController
 	protected function getData(IdentifiedObject $modelUnit): array
 	{
 		/** @var ModelUnit $modelUnit */
-		return [
-			'id' => $modelUnit->getId(),
+		$sBaseData = parent::getData($modelUnit);
+		return array_merge($sBaseData, [
 			'baseUnitId' => $modelUnit->getBaseUnitId(),
-			'name' => $modelUnit->getName(),
 			'symbol' => $modelUnit->getSymbol(),
 			'exponent' => $modelUnit->getExponent(),
 			'multiplier' => $modelUnit->getExponent()
-			];
+		]);
 	}
 
 	protected function setData(IdentifiedObject $modelUnit, ArgumentParser $data): void
 	{
 		/** @var ModelUnit $modelUnit */
-		if ($data->hasKey('name'))
-			$modelUnit->setName($data->getString('name'));
-
+		parent::setData($modelUnit, $data);
+		!$data->hasKey('baseUnitId') ?: $modelUnit->setSymbol($data->getInt('baseUnitId'));
+		!$data->hasKey('symbol') ?: $modelUnit->setSymbol($data->getString('symbol'));
+		!$data->hasKey('exponent') ?: $modelUnit->setExponent($data->getExponent('exponent'));
+		!$data->hasKey('multiplier') ?: $modelUnit->setMultiplier($data->getString('multiplier'));
 	}
 
 	protected function createObject(ArgumentParser $body): IdentifiedObject
 	{
-
 		return new ModelUnit;
 	}
 
 	protected function checkInsertObject(IdentifiedObject $modelUnit): void
 	{
 		/** @var ModelUnit $modelUnit */
-		if ($modelUnit->getMultiplier() == NULL)
+		if ($modelUnit->getMultiplier() == null)
 			throw new MissingRequiredKeyException('multiplier');
-		if ($modelUnit->getExponent() == NULL)
+		if ($modelUnit->getExponent() == null)
 			throw new MissingRequiredKeyException('exponent');
-
 	}
 
 	public function delete(Request $request, Response $response, ArgumentParser $args): Response
@@ -96,15 +93,14 @@ final class ModelUnitController extends WritableRepositoryController
 
 	protected function getValidator(): Assert\Collection
 	{
-		return new Assert\Collection([
+		$validatorArray = parent::getValidatorArray();
+		return new Assert\Collection(array_merge($validatorArray, [
 			'baseUnitId' => new Assert\Type(['type' => 'integer']),
-			'name' => new Assert\Type(['type' => 'string']),
 			'symbol' => new Assert\Type(['type' => 'string']),
 			'exponent' => new Assert\Type(['type' => 'float']),
 			'multiplier' => new Assert\Type(['type' => 'float']),
-		]);
+		]));
 	}
-
 
 	protected static function getObjectName(): string
 	{
@@ -116,9 +112,8 @@ final class ModelUnitController extends WritableRepositoryController
 		return ModelUnitRepository::Class;
 	}
 
-	protected function getSub($entity) {
+	protected function getSub($entity)
+	{
 		echo $entity;
 	}
-
-
 }

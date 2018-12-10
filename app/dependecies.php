@@ -159,6 +159,10 @@ $c[EntityRepo\ModelFunctionRepository::class] = function (Container $c) {
 	return new EntityRepo\ModelFunctionRepository($c[EntityManager::class]);
 };
 
+$c[EntityRepo\ModelFunctionDefinitionRepository::class] = function (Container $c) {
+	return new EntityRepo\ModelFunctionDefinitionRepository($c[EntityManager::class]);
+};
+
 $c[EntityRepo\ModelReactionItemRepository::class] = function (Container $c) {
 	return new EntityRepo\ModelReactionItemRepository($c[EntityManager::class]);
 };

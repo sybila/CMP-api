@@ -3,21 +3,14 @@
 namespace App\Controllers;
 
 use App\Entity\{
-	Entity,
 	ModelConstraint,
-	ModelUnitToDefinition,
-	ModelSpecie,
-	ModelReaction,
 	IdentifiedObject,
 	Repositories\IEndpointRepository,
 	Repositories\ModelRepository,
-	Repositories\ModelConstraintRepository,
-	Repositories\ModelReactionRepository,
-	Structure
+	Repositories\ModelConstraintRepository
 };
 use App\Exceptions\
 {
-	DependentResourcesBoundException,
 	MissingRequiredKeyException
 };
 use App\Helpers\ArgumentParser;
@@ -29,11 +22,10 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @property-read ModelConstraintRepository $repository
- * @method Entity getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
+ * @method Constraint getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
-final class ModelConstraintController extends ParentedRepositoryController
+final class ModelConstraintController extends ParentedSBaseController
 {
-
 	/** @varModelConstraintRepository */
 	private $constraintRepository;
 
@@ -51,16 +43,17 @@ final class ModelConstraintController extends ParentedRepositoryController
 	protected function getData(IdentifiedObject $constraint): array
 	{
 		/** @var ModelConstraint $constraint */
-		return [
-			'id' => $constraint->getId(),
+		$sBaseData = parent::getData($constraint);
+		return array_merge($sBaseData, [
 			'message' => $constraint->getMessage(),
 			'formula' => $constraint->getFormula(),
-		];
+		]);
 	}
 
 	protected function setData(IdentifiedObject $constraint, ArgumentParser $data): void
 	{
 		/** @var ModelConstraint $constraint */
+		parent::setData($constraint, $data);
 		$constraint->getModelId() ?: $constraint->setModelId($this->repository->getParent());
 		!$data->hasKey('message') ?: $constraint->setMessage($data->getString('message'));
 		!$data->hasKey('formula') ?: $constraint->setFormula($data->getString('formula'));
@@ -74,9 +67,9 @@ final class ModelConstraintController extends ParentedRepositoryController
 	protected function checkInsertObject(IdentifiedObject $constraint): void
 	{
 		/** @var ModelConstraint $constraint */
-		if ($constraint->getModelId() == NULL)
+		if ($constraint->getModelId() == null)
 			throw new MissingRequiredKeyException('modelId');
-		if ($constraint->getFormula() == NULL)
+		if ($constraint->getFormula() == null)
 			throw new MissingRequiredKeyException('formula');
 	}
 
@@ -87,11 +80,12 @@ final class ModelConstraintController extends ParentedRepositoryController
 
 	protected function getValidator(): Assert\Collection
 	{
-		return new Assert\Collection([
+		$validatorArray = parent::getValidatorArray();
+		return new Assert\Collection(array_merge($validatorArray, [
 			'modelId' => new Assert\Type(['type' => 'integer']),
 			'message' => new Assert\Type(['type' => 'string']),
 			'formula' => new Assert\Type(['type' => 'string'])
-		]);
+		]));
 	}
 
 	protected static function getObjectName(): string
@@ -103,7 +97,6 @@ final class ModelConstraintController extends ParentedRepositoryController
 	{
 		return ModelConstraintRepository::Class;
 	}
-
 
 	protected static function getParentRepositoryClassName(): string
 	{

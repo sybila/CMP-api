@@ -29,7 +29,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @property-read ModelCompartmentRepository $repository
  * @method ModelCompartment getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
-final class ModelCompartmentController extends ParentedRepositoryController
+final class ModelCompartmentController extends ParentedSBaseController
 {
 	/** @var ModelCompartmentRepository */
 	private $compartmentRepository;
@@ -48,10 +48,8 @@ final class ModelCompartmentController extends ParentedRepositoryController
 	protected function getData(IdentifiedObject $compartment): array
 	{
 		/** @var ModelCompartment $compartment */
-		return [
-			'id' => $compartment->getId(),
-			'name' => $compartment->getSbmlId(),
-			'sbmlId' => $compartment->getName(),
+		$sBaseData = parent::getData($compartment);
+		return array_merge ($sBaseData, [
 			'spatialDimensions' => $compartment->getSpatialDimensions(),
 			'size' => $compartment->getSize(),
 			'isConstant' => $compartment->getIsConstant(),
@@ -67,15 +65,14 @@ final class ModelCompartmentController extends ParentedRepositoryController
 			'unitDefinitions' => $compartment->getUnitDefinitions()->map(function (ModelUnitDefinition $unit) {
 				return ['id' => $unit->getId(), 'symbol' => $unit->getSymbol()];
 			})->toArray(),
-		];
+		]);
 	}
 
 	protected function setData(IdentifiedObject $compartment, ArgumentParser $data): void
 	{
 		/** @var ModelCompartment $compartment */
+		parent::setData($compartment, $data);
 		$compartment->getModelId() ?: $compartment->setModelId($this->repository->getParent());
-		!$data->hasKey('name') ? $compartment->setName($data->getString('sbmlId')) : $compartment->setName($data->getString('name'));
-		!$data->hasKey('sbmlId') ?: $compartment->setSbmlId($data->getString('sbmlId'));
 		!$data->hasKey('spatialDimensions') ?: $compartment->setSpatialDimensions($data->getString('spatialDimensions'));
 		!$data->hasKey('size') ?: $compartment->setSize($data->getString('size'));
 		!$data->hasKey('isConstant') ?: $compartment->setIsConstant($data->getInt('isConstant'));
@@ -118,15 +115,13 @@ final class ModelCompartmentController extends ParentedRepositoryController
 
 	protected function getValidator(): Assert\Collection
 	{
-		return new Assert\Collection([
+		$validatorArray = parent::getValidatorArray();
+		return new Assert\Collection(array_merge($validatorArray, [
 			'modelId' => new Assert\Type(['type' => 'integer']),
 			'isConstant' => new Assert\Type(['type' => 'integer']),
-			'name' => new Assert\Type(['type' => 'string']),
-			'sbmlId' => new Assert\Type(['type' => 'string']),
 			'spatialDimensions' => new Assert\Type(['type' => 'double']),
 			'size' => new Assert\Type(['type' => 'double']),
-			'isConstant' => new Assert\Type(['type' => 'integer']),
-		]);
+		]));
 	}
 
 	protected static function getObjectName(): string

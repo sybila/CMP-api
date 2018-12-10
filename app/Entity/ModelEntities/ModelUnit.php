@@ -12,13 +12,7 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class ModelUnit implements IdentifiedObject
 {
-	/**
-	 * @ORM\Id
-	 * @ORM\Column(type="integer")
-	 * @ORM\GeneratedValue
-	 * @var integer|null
-	 */
-	private $id;
+	use SBase;
 
 	/**
 	 * @ORM\ManyToOne(targetEntity="ModelUnit", inversedBy="referencedBy")
@@ -31,12 +25,6 @@ class ModelUnit implements IdentifiedObject
 	 * @ORM\OneToMany(targetEntity="ModelUnit", mappedBy="baseUnitId")
 	 */
 	private $referencedBy;
-
-	/**
-	 * @var string
-	 * @ORM\Column(type="string")
-	 */
-	private $name;
 
 	/**
 	 * @var string
@@ -65,35 +53,6 @@ class ModelUnit implements IdentifiedObject
 	 * @var ArrayCollection
 	 */
 	protected $definitions;
-
-	/**
-	 * Get id
-	 * @return integer
-	 */
-	public function getId(): ?int
-	{
-		return $this->id;
-	}
-
-	/**
-	 * Get name
-	 * @return null|string
-	 */
-	public function getName(): ?string
-	{
-		return $this->name;
-	}
-
-	/**
-	 * Set name
-	 * @param string $name
-	 * @return ModelUnit
-	 */
-	public function setName($name): ModelUnit
-	{
-		$this->name = $name;
-		return $this;
-	}
 
 	/**
 	 * Get symbol

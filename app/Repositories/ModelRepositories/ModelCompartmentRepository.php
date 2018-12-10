@@ -8,14 +8,16 @@ use App\Entity\IdentifiedObject;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 
-class ModelCompartmentRepository implements IDependentEndpointRepository
+class ModelCompartmentRepository implements IDependentSBaseRepository
 {
-
 	/** @var EntityManager * */
 	protected $em;
 
 	/** @var \Doctrine\ORM\CompartmentRepository */
 	private $repository;
+
+	/** @var Model */
+	private $model;
 
 	public function __construct(EntityManager $em)
 	{
@@ -44,13 +46,13 @@ class ModelCompartmentRepository implements IDependentEndpointRepository
 	public function getList(array $filter, array $sort, array $limit): array
 	{
 		$query = $this->buildListQuery($filter)
-			->select('c.id, c.name, c.sbmlId, c.spatialDimensions, c.size, c.isConstant');
+			->select('c.id, c.name, c.sbmlId, c.sboTerm, c.notes, c.annotation, c.spatialDimensions, c.size, c.isConstant');
 		return $query->getQuery()->getArrayResult();
 	}
 
 	public function getParent(): IdentifiedObject
 	{
-		return $this->object;
+		return $this->model;
 	}
 
 	public function setParent(IdentifiedObject $object): void
@@ -58,7 +60,7 @@ class ModelCompartmentRepository implements IDependentEndpointRepository
 		$className = static::getParentClassName();
 		if (!($object instanceof $className))
 			throw new \Exception('Parent of compartment must be ' . $className);
-		$this->object = $object;
+		$this->model = $object;
 	}
 
 	private function buildListQuery(array $filter): QueryBuilder
@@ -66,17 +68,7 @@ class ModelCompartmentRepository implements IDependentEndpointRepository
 		$query = $this->em->createQueryBuilder()
 			->from(ModelCompartment::class, 'c')
 			->where('c.modelId = :modelId')
-			->setParameter('modelId', $this->object->getId());
+			->setParameter('modelId', $this->model->getId());
 		return $query;
-	}
-
-	public function add($object): void
-	{
-		// TODO: Implement add() method.
-	}
-
-	public function remove($object): void
-	{
-		// TODO: Implement remove() method.
 	}
 }

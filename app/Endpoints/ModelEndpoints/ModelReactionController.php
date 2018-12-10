@@ -4,8 +4,8 @@ namespace App\Controllers;
 
 use App\Entity\
 {
-	ModelUnitToDefinition,
 	IdentifiedObject,
+	ModelParameter,
 	ModelReaction,
 	ModelReactionItem,
 	ModelFunction,
@@ -28,7 +28,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @property-read ModelReactionRepository $repository
  * @method ModelReaction getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
-final class ModelReactionController extends ParentedRepositoryController
+final class ModelReactionController extends ParentedSBaseController
 {
 	/** @var ModelReactionRepository */
 	private $reactionRepository;
@@ -47,14 +47,11 @@ final class ModelReactionController extends ParentedRepositoryController
 	protected function getData(IdentifiedObject $reaction): array
 	{
 		/** @var ModelReaction $reaction */
-		return [
-			'id' => $reaction->getId(),
+		$sBaseData = parent::getData($reaction);
+		return array_merge($sBaseData, [
 			'modelId' => $reaction->getModelId()->getId(),
 			'compartmentId' => $reaction->getCompartmentId() ? $reaction->getCompartmentId()->getId() : null,
-			'name' => $reaction->getName(),
-			'sbmlId' => $reaction->getSbmlId(),
 			'isReversible' => $reaction->getIsReversible(),
-			'isFast' => $reaction->getIsFast(),
 			'rate' => $reaction->getRate(),
 			'reactionItems' => $reaction->getReactionItems()->map(function (ModelReactionItem $reactionItem) {
 				return ['id' => $reactionItem->getId(), 'name' => $reactionItem->getName()];
@@ -62,18 +59,19 @@ final class ModelReactionController extends ParentedRepositoryController
 			'functions' => $reaction->getFunctions()->map(function (ModelFunction $function) {
 				return ['id' => $function->getId(), 'name' => $function->getName()];
 			})->toArray(),
-		];
+			'parameters' => $reaction->getParameters()->map(function (ModelParameter $parameter) {
+				return ['id' => $parameter->getId(), 'name' => $parameter->getName()];
+			})->toArray()
+		]);
 	}
 
 	protected function setData(IdentifiedObject $reaction, ArgumentParser $data): void
 	{
 		/** @var Reaction $reaction */
+		parent::setData($reaction, $data);
 		$reaction->getModelId() ?: $reaction->setModelId($this->repository->getParent());
 		!$data->hasKey('compartmentId') ?: $reaction->setCompartmentId($data->getString('compartmentId'));
-		!$data->hasKey('name') ? $reaction->setName($data->getString('sbmlId')) : $reaction->setName($data->getString('name'));
-		!$data->hasKey('sbmlId') ?: $reaction->setSbmlId($data->getString('sbmlId'));
 		!$data->hasKey('isReversible') ?: $reaction->setIsReversible($data->getInt('isReversible'));
-		!$data->hasKey('isFast') ?: $reaction->setIsFast($data->getInt('isFast'));
 		!$data->hasKey('rate') ?: $reaction->setRate($data->getString('rate'));
 	}
 
@@ -81,8 +79,6 @@ final class ModelReactionController extends ParentedRepositoryController
 	{
 		if (!$body->hasKey('isReversible'))
 			throw new MissingRequiredKeyException('isReversible');
-		if (!$body->hasKey('isFast'))
-			throw new MissingRequiredKeyException('isFast');
 		return new ModelReaction;
 	}
 
@@ -93,8 +89,6 @@ final class ModelReactionController extends ParentedRepositoryController
 			throw new MissingRequiredKeyException('modelId');
 		if ($reaction->getIsReversible() === null)
 			throw new MissingRequiredKeyException('isReversible');
-		if ($reaction->getIsFast() === null)
-			throw new MissingRequiredKeyException('isFast');
 	}
 
 	public function delete(Request $request, Response $response, ArgumentParser $args): Response
@@ -109,12 +103,11 @@ final class ModelReactionController extends ParentedRepositoryController
 
 	protected function getValidator(): Assert\Collection
 	{
-		return new Assert\Collection([
-			'name' => new Assert\Type(['type' => 'string']),
-			'isFast' => new Assert\Type(['type' => 'integer']),
+		$validatorArray = parent::getValidatorArray();
+		return new Assert\Collection(array_merge($validatorArray, [
 			'isReversible' => new Assert\Type(['type' => 'integer']),
 			'rate' => new Assert\Type(['type' => 'string']),
-		]);
+		]));
 	}
 
 	protected static function getObjectName(): string

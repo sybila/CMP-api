@@ -24,7 +24,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @property-read ModelInitialAssignmentRepository $repository
  * @method ModelInitialAssignment getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
-final class ModelInitialAssignmentController extends ParentedRepositoryController
+final class ModelInitialAssignmentController extends ParentedSBaseController
 {
 	/** @var ModelInitialAssignmentRepository */
 	private $initialAssignmentRepository;
@@ -43,19 +43,19 @@ final class ModelInitialAssignmentController extends ParentedRepositoryControlle
 	protected function getData(IdentifiedObject $initialAssignment): array
 	{
 		/** @var ModelInitialAssignment $initialAssignment */
-		return [
+		$sBaseData = parent::getData($initialAssignment);
+		return array_merge($sBaseData, [
 			'id' => $initialAssignment->getId(),
-			'sbmlId' => $initialAssignment->getSbmlId(),
 			'formula' => $initialAssignment->getFormula(),
-		];
+		]);
 	}
 
 	protected function setData(IdentifiedObject $initialAssignment, ArgumentParser $data): void
 	{
 		/** @var ModelInitialAssignment $initialAssignment */
+		parent::setData($initialAssignment, $data);
 		$initialAssignment->getModelId() ?: $initialAssignment->setModelId($this->repository->getParent());
 		!$data->hasKey('formula') ?: $initialAssignment->setFormula($data->getString('formula'));
-		!$data->hasKey('sbmlId') ?: $initialAssignment->setSbmlId($data->getString('sbmlId'));
 	}
 
 	protected function createObject(ArgumentParser $body): IdentifiedObject
@@ -79,10 +79,11 @@ final class ModelInitialAssignmentController extends ParentedRepositoryControlle
 
 	protected function getValidator(): Assert\Collection
 	{
-		return new Assert\Collection([
+		$validatorArray = parent::getValidatorArray();
+		return new Assert\Collection(array_merge($validatorArray, [
 			'modelId' => new Assert\Type(['type' => 'integer']),
 			'formula' => new Assert\Type(['type' => 'string'])
-		]);
+		]));
 	}
 
 	protected static function getObjectName(): string

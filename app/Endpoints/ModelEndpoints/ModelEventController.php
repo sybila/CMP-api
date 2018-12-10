@@ -3,19 +3,13 @@
 namespace App\Controllers;
 
 use App\Entity\{
-	Entity,
-	ModelCompartment,
 	ModelEvent,
 	ModelEventAssignment,
-	ModelSpecie,
-	ModelReaction,
 	IdentifiedObject,
 	Repositories\IEndpointRepository,
 	Repositories\ModelRepository,
 	Repositories\ModelCompartmentRepository,
-	Repositories\ModelEventRepository,
-	Repositories\ModelEventAssignmentRepository,
-	Structure
+	Repositories\ModelEventRepository
 };
 use App\Exceptions\
 {
@@ -31,9 +25,9 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @property-read ModelEventRepository $repository
- * @method Entity getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
+ * @method Event getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
-final class ModelEventController extends ParentedRepositoryController
+final class ModelEventController extends ParentedSBaseController
 {
 
 	/** @var ModelEventRepository */
@@ -53,9 +47,8 @@ final class ModelEventController extends ParentedRepositoryController
 	protected function getData(IdentifiedObject $event): array
 	{
 		/** @var ModelEvent $event */
-		return [
-			'id' => $event->getId(),
-			'name' => $event->getName(),
+		$sBaseData = parent::getData($event);
+		return array_merge($sBaseData, [
 			'delay' => $event->getDelay(),
 			'trigger' => $event->getTrigger(),
 			'priority' => $event->getPriority(),
@@ -63,14 +56,14 @@ final class ModelEventController extends ParentedRepositoryController
 			'eventAssignments' => $event->getEventAssignments()->map(function (ModelEventAssignment $eventAssignment) {
 				return ['id' => $eventAssignment->getId(), 'formula' => $eventAssignment->getFormula()];
 			})->toArray(),
-		];
+		]);
 	}
 
 	protected function setData(IdentifiedObject $event, ArgumentParser $data): void
 	{
 		/** @var ModelEvent $event */
+		parent::setData($event, $data);
 		$event->getModelId() ?: $event->setModelId($this->repository->getParent());
-		!$data->hasKey('name') ?: $event->setName($data->getString('name'));
 		!$data->hasKey('delay') ?: $event->setDelay($data->getString('delay'));
 		!$data->hasKey('trigger') ?: $event->setTrigger($data->getString('trigger'));
 		!$data->hasKey('priority') ?: $event->setPriority($data->getString('priority'));
@@ -79,18 +72,17 @@ final class ModelEventController extends ParentedRepositoryController
 
 	protected function createObject(ArgumentParser $body): IdentifiedObject
 	{
-
 		return new ModelEvent;
 	}
 
 	protected function checkInsertObject(IdentifiedObject $event): void
 	{
 		/** @var ModelEvent $event */
-		if ($event->getModelId() == NULL)
+		if ($event->getModelId() == null)
 			throw new MissingRequiredKeyException('modelId');
-		if ($event->getTrigger() == NULL)
+		if ($event->getTrigger() == null)
 			throw new MissingRequiredKeyException('trigger');
-		if ($event->getEvaluateOnTrigger() == NULL)
+		if ($event->getEvaluateOnTrigger() == null)
 			throw new MissingRequiredKeyException('evaluateOnTrigger');
 	}
 
@@ -104,14 +96,14 @@ final class ModelEventController extends ParentedRepositoryController
 
 	protected function getValidator(): Assert\Collection
 	{
-		return new Assert\Collection([
+		$validatorArray = parent::getValidatorArray();
+		return new Assert\Collection(array_merge($validatorArray, [
 			'modelId' => new Assert\Type(['type' => 'integer']),
 			'evaluateOnTrigger' => new Assert\Type(['type' => 'integer']),
-			'name' => new Assert\Type(['type' => 'string']),
 			'trigger' => new Assert\Type(['type' => 'string']),
 			'delay' => new Assert\Type(['type' => 'string']),
 			'priority' => new Assert\Type(['type' => 'string']),
-		]);
+		]));
 	}
 
 	protected static function getObjectName(): string
@@ -123,7 +115,6 @@ final class ModelEventController extends ParentedRepositoryController
 	{
 		return ModelEventRepository::Class;
 	}
-
 
 	protected static function getParentRepositoryClassName(): string
 	{

@@ -4,12 +4,11 @@ namespace App\Entity\Repositories;
 
 use App\Entity\Model;
 use App\Entity\ModelReaction;
-use App\Entity\ModelUnitToDefinition;
 use App\Entity\IdentifiedObject;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 
-class ModelReactionRepository implements IDependentEndpointRepository
+class ModelReactionRepository implements IDependentSBaseRepository
 {
 
 	/** @var EntityManager * */
@@ -17,6 +16,9 @@ class ModelReactionRepository implements IDependentEndpointRepository
 
 	/** @var \Doctrine\ORM\ReactionRepository */
 	private $repository;
+
+	/** @var Model */
+	private $model;
 
 	public function __construct(EntityManager $em)
 	{
@@ -34,9 +36,9 @@ class ModelReactionRepository implements IDependentEndpointRepository
 		return $this->em->find(ModelReaction::class, $id);
 	}
 
-	public function getParent()
+	public function getParent(): IdentifiedObject
 	{
-		return $this->object;
+		return $this->model;
 	}
 
 	public function getNumResults(array $filter): int
@@ -50,7 +52,7 @@ class ModelReactionRepository implements IDependentEndpointRepository
 	public function getList(array $filter, array $sort, array $limit): array
 	{
 		$query = $this->buildListQuery($filter)
-			->select('r.id, r.name, r.sbmlId, r.isReversible, r.isFast, r.rate');
+			->select('r.id, r.name, r.sbmlId, r.sboTerm, r.notes, r.annotation, r.isReversible, r.rate');
 		return $query->getQuery()->getArrayResult();
 	}
 
@@ -59,7 +61,7 @@ class ModelReactionRepository implements IDependentEndpointRepository
 		$className = static::getParentClassName();
 		if (!($object instanceof $className))
 			throw new \Exception('Parent of reaction must be ' . $className);
-		$this->object = $object;
+		$this->model = $object;
 	}
 
 	private function buildListQuery(array $filter): QueryBuilder
@@ -67,17 +69,7 @@ class ModelReactionRepository implements IDependentEndpointRepository
 		$query = $this->em->createQueryBuilder()
 			->from(ModelReaction::class, 'r')
 			->where('r.modelId = :modelId')
-			->setParameter('modelId', $this->object->getId());
+			->setParameter('modelId', $this->model->getId());
 		return $query;
-	}
-
-	public function add($object): void
-	{
-		// TODO: Implement add() method.
-	}
-
-	public function remove($object): void
-	{
-		// TODO: Implement remove() method.
 	}
 }

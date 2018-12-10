@@ -12,13 +12,7 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class ModelEvent implements IdentifiedObject
 {
-	/**
-	 * @ORM\Id
-	 * @ORM\Column(type="integer")
-	 * @ORM\GeneratedValue
-	 * @var integer|null
-	 */
-	private $id;
+	use SBase;
 
 	/**
 	 * @ORM\ManyToOne(targetEntity="Model", inversedBy="compartments")
@@ -31,12 +25,6 @@ class ModelEvent implements IdentifiedObject
 	 * @ORM\OneToMany(targetEntity="ModelEventAssignment", mappedBy="eventId")
 	 */
 	protected $eventAssignments;
-
-	/**
-	 * @var string
-	 * @ORM\Column(type="string")
-	 */
-	protected $name;
 
 	/**
 	 * @var string
@@ -86,26 +74,6 @@ class ModelEvent implements IdentifiedObject
 	public function setModelId($modelId): ModelEvent
 	{
 		$this->modelId = $modelId;
-		return $this;
-	}
-
-	/**
-	 * Get name
-	 * @return null|string
-	 */
-	public function getName(): ?string
-	{
-		return $this->name;
-	}
-
-	/**
-	 * Set name
-	 * @param string $name
-	 * @return ModelEvent
-	 */
-	public function setName($name): ModelEvent
-	{
-		$this->name = $name;
 		return $this;
 	}
 

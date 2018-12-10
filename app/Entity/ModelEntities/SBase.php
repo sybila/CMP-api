@@ -165,7 +165,7 @@ trait SBase
 	 */
 	public function getNotes()
 	{
-		return $this->annotation;
+		return $this->notes;
 	}
 
 	/**

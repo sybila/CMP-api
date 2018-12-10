@@ -11,13 +11,7 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class ModelEventAssignment implements IdentifiedObject
 {
-	/**
-	 * @ORM\Id
-	 * @ORM\Column(type="integer")
-	 * @ORM\GeneratedValue
-	 * @var integer|null
-	 */
-	private $id;
+	use SBase;
 
 	/**
 	 * @ORM\ManyToOne(targetEntity="ModelEvent", inversedBy="eventAssignments")

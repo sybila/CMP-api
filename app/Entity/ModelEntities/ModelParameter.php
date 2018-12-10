@@ -13,13 +13,7 @@ use Doctrine\Common\Collections\Collection;
 class ModelParameter implements IdentifiedObject
 {
 
-	/**
-	 * @ORM\Id
-	 * @ORM\Column(type="integer")
-	 * @ORM\GeneratedValue
-	 * @var integer|null
-	 */
-	private $id;
+	use SBase;
 
 	/**
 	 * @ORM\ManyToOne(targetEntity="Model", inversedBy="parameters")
@@ -32,18 +26,6 @@ class ModelParameter implements IdentifiedObject
 	 * @ORM\JoinColumn(name="model_reaction_id", referencedColumnName="id")
 	 */
 	protected $reactionId;
-
-	/**
-	 * @var string
-	 * @ORM\Column(type="string")
-	 */
-	protected $name;
-
-	/**
-	 * @var string
-	 * @ORM\Column(type="string", name="sbml_id")
-	 */
-	private $sbmlId;
 
 	/**
 	 * @var int
@@ -68,16 +50,6 @@ class ModelParameter implements IdentifiedObject
 	 * @ORM\OneToMany(targetEntity="ModelRule", mappedBy="parameterId")
 	 */
 	protected $rules;
-
-	/**
-	 * Get id
-	 * @return integer
-	 */
-	public function getId(): ?int
-	{
-		return $this->id;
-	}
-
 	/**
 	 * Get modelId
 	 * @return integer|null
@@ -99,62 +71,22 @@ class ModelParameter implements IdentifiedObject
 	}
 
 	/**
-	 * Get reactionItemId
+	 * Get reactionId
 	 * @return integer|null
 	 */
-	public function getReactionItemId()
+	public function getReactionId()
 	{
-		return $this->reactionItemId;
+		return $this->reactionId;
 	}
 
 	/**
-	 * Set reactionItemId
-	 * @param integer $reactionItemId
+	 * Set reactionId
+	 * @param integer $reactionId
 	 * @return ModelParameter
 	 */
-	public function setReactionItemId($reactionItemId): ModelParameter
+	public function setReactionId($reactionId): ModelParameter
 	{
-		$this->reactionItemId = $reactionItemId;
-		return $this;
-	}
-
-	/**
-	 * Get name
-	 * @return null|string
-	 */
-	public function getName(): ?string
-	{
-		return $this->name;
-	}
-
-	/**
-	 * Set name
-	 * @param string $name
-	 * @return  ModelParameter
-	 */
-	public function setName($name): ModelParameter
-	{
-		$this->name = $name;
-		return $this;
-	}
-
-	/**
-	 * Get sbmlId
-	 * @return string
-	 */
-	public function getSbmlId()
-	{
-		return $this->sbmlId;
-	}
-
-	/**
-	 * Set sbmlId
-	 * @param string $sbmlId
-	 * @return  ModelParameter
-	 */
-	public function setSbmlId($sbmlId): ModelParameter
-	{
-		$this->sbmlId = $sbmlId;
+		$this->reactionId = $reactionId;
 		return $this;
 	}
 

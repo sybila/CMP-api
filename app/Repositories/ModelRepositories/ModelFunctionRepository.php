@@ -48,7 +48,7 @@ class ModelFunctionRepository implements IDependentEndpointRepository
 	public function getList(array $filter, array $sort, array $limit): array
 	{
 		$query = $this->buildListQuery($filter)
-			->select('f.id, f.name, f.sbmlId, f.formula');
+			->select('f.id, f.name, f.formula');
 		return $query->getQuery()->getArrayResult();
 	}
 

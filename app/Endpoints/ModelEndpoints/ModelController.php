@@ -8,6 +8,7 @@ use App\Entity\{
 	ModelCompartment,
 	ModelConstraint,
 	ModelEvent,
+	ModelFunctionDefinition,
 	ModelInitialAssignment,
 	ModelParameter,
 	ModelReaction,
@@ -31,7 +32,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @property-read ModelRepository $repository
  * @method Model getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
-final class ModelController extends WritableRepositoryController
+final class ModelController extends SBaseController
 {
 	/** @var ModelRepository */
 	private $modelRepository;
@@ -50,10 +51,8 @@ final class ModelController extends WritableRepositoryController
 	protected function getData(IdentifiedObject $model): array
 	{
 		/** @var Model $model */
-		return [
-			'id' => $model->getId(),
-			'name' => $model->getName(),
-			'sbmlId' => $model->getSbmlId(),
+		$sBaseData = parent::getData($model);
+		return array_merge($sBaseData, [
 			'userId' => $model->getUserId(),
 			'approvedId' => $model->getApprovedId(),
 			'description' => $model->getDescription(),
@@ -67,11 +66,14 @@ final class ModelController extends WritableRepositoryController
 			'events' => $model->getEvents()->map(function (ModelEvent $event) {
 				return ['id' => $event->getId(), 'name' => $event->getName()];
 			})->toArray(),
+			'functionDefinitions' => $model->getFunctionDefinitions()->map(function (ModelFunctionDefinition $functionDefinition) {
+				return ['id' => $functionDefinition->getId(), 'name' => $functionDefinition->getName()];
+			})->toArray(),
 			'initialAssignments' => $model->getInitialAssignments()->map(function (ModelInitialAssignment $initialAssignment) {
 				return ['id' => $initialAssignment->getId(), 'formula' => $initialAssignment->getFormula()];
 			})->toArray(),
 			'parameters' => $model->getParameters()->map(function (ModelParameter $parameter) {
-				return ['id' => $parameter  ->getId(), 'name' => $parameter->getName()];
+				return ['id' => $parameter->getId(), 'name' => $parameter->getName()];
 			})->toArray(),
 			'reactions' => $model->getReactions()->map(function (ModelReaction $reaction) {
 				return ['id' => $reaction->getId(), 'name' => $reaction->getName()];
@@ -81,15 +83,14 @@ final class ModelController extends WritableRepositoryController
 			})->toArray(),
 			'unitDefinitions' => $model->getUnitDefinitions()->map(function (ModelUnitDefinition $unitDefinition) {
 				return ['id' => $unitDefinition->getId(), 'name' => $unitDefinition->getName()];
-			})->toArray(),
-		];
+			})->toArray()
+		]);
 	}
 
 	protected function setData(IdentifiedObject $model, ArgumentParser $data): void
 	{
 		/** @var Model $model */
-		!$data->hasKey('name') ? $model->setName($data->getString('sbmlId')) : $model->setName($data->getString('name'));
-		!$data->hasKey('sbmlId') ?: $model->setSbmlId($data->getString('sbmlId'));
+		parent::setData($model, $data);
 		!$data->hasKey('userId') ?: $model->setUserId($data->getString('userId'));
 		!$data->hasKey('approvedId') ?: $model->setApprovedId($data->getString('approvedId'));
 		!$data->hasKey('description') ?: $model->setDescription($data->getString('description'));
@@ -122,6 +123,8 @@ final class ModelController extends WritableRepositoryController
 			throw new DependentResourcesBoundException('constraints');
 		if (!$model->getEvents()->isEmpty())
 			throw new DependentResourcesBoundException('events');
+		if (!$model->getFunctionDefinitions()->isEmpty())
+			throw new DependentResourcesBoundException('functionDefinitions');
 		if (!$model->getInitialAssignments()->isEmpty())
 			throw new DependentResourcesBoundException('initialAssignments');
 		if (!$model->getParameters()->isEmpty())
@@ -137,14 +140,13 @@ final class ModelController extends WritableRepositoryController
 
 	protected function getValidator(): Assert\Collection
 	{
-		return new Assert\Collection([
+		$validatorArray = parent::getValidatorArray();
+		return new Assert\Collection(array_merge($validatorArray, [
 			'userId' => new Assert\Type(['type' => 'integer']),
-			'name' => new Assert\Type(['type' => 'string']),
-			'sbmlId' => new Assert\Type(['type' => 'string']),
 			'description' => new Assert\Type(['type' => 'string']),
 			'visualisation' => new Assert\Type(['type' => 'string']),
 			'status' => new Assert\Type(['type' => 'string']),
-		]);
+		]));
 	}
 
 	protected static function getObjectName(): string

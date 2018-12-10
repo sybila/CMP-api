@@ -3,10 +3,8 @@
 namespace App\Entity\Repositories;
 
 use App\Entity\ModelUnit;
-use App\Entity\ModelUnitDefinition;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
-
 
 class ModelUnitRepository implements IEndpointRepository
 {
@@ -39,7 +37,7 @@ class ModelUnitRepository implements IEndpointRepository
 	public function getList(array $filter, array $sort, array $limit): array
 	{
 		$query = $this->buildListQuery($filter)
-			->select('u.id, (u.baseUnitId) as baseUnitId, u.name, u.symbol, u.exponent, u.multiplier');
+			->select('u.id, (u.baseUnitId) as baseUnitId, u.name, u.sbmlId, u.sboTerm, u.notes, u.annotation, u.symbol, u.exponent, u.multiplier');
 
 		return $query->getQuery()->getArrayResult();
 	}
@@ -49,9 +47,7 @@ class ModelUnitRepository implements IEndpointRepository
 		$query = $this->em->createQueryBuilder()
 			->from(ModelUnit::class, 'u');
 
-
 		return $query;
 	}
-
 
 }

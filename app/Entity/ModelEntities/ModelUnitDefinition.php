@@ -2,20 +2,7 @@
 
 namespace App\Entity;
 
-
-use App\Exceptions\EntityClassificationException;
-use App\Exceptions\EntityHierarchyException;
-use App\Exceptions\EntityLocationException;
-use App\Helpers\
-{
-	ChangeCollection, ConsistenceEnum
-};
-use Doctrine\Common\Collections\Collection;
-use Doctrine\Common\Collections\Criteria;
-use Doctrine\ORM\Event\PreUpdateEventArgs;
 use Doctrine\ORM\Mapping as ORM;
-use Doctrine\ORM\QueryBuilder;
-use Symfony\Component\Translation\Tests\StringClass;
 
 /**
  * @ORM\Entity
@@ -24,15 +11,7 @@ use Symfony\Component\Translation\Tests\StringClass;
  */
 class ModelUnitDefinition implements IdentifiedObject
 {
-
-	/**
-	 * @ORM\Id
-	 * @ORM\Column(type="integer")
-	 * @ORM\GeneratedValue
-	 * @var integer|null
-	 */
-	private $id;
-
+	use SBase;
 
 	/**
 	 * @ORM\ManyToOne(targetEntity="Model", inversedBy="compartments")
@@ -54,12 +33,6 @@ class ModelUnitDefinition implements IdentifiedObject
 	 * @var string
 	 * @ORM\Column(type="string")
 	 */
-	private $name;
-
-	/**
-	 * @var string
-	 * @ORM\Column(type="string")
-	 */
 	private $symbol;
 
 	/**
@@ -72,17 +45,16 @@ class ModelUnitDefinition implements IdentifiedObject
 	 * @ORM\ManyToOne(targetEntity="ModelCompartment", inversedBy="units")
 	 * @ORM\JoinColumn(name="model_compartment_id", referencedColumnName="id")
 	 */
-	//protected $localParameterId;
+	protected $localParameterId;
 
 	/**
 	 * @ORM\ManyToOne(targetEntity="ModelCompartment", inversedBy="units")
 	 * @ORM\JoinColumn(name="model_compartment_id", referencedColumnName="id")
 	 */
-	//protected $parameterId;
+	protected $parameterId;
 
 	/**
 	 * Get id
-	 *
 	 * @return integer
 	 */
 	public function getId(): ?int
@@ -92,7 +64,6 @@ class ModelUnitDefinition implements IdentifiedObject
 
 	/**
 	 * Get modelId
-	 *
 	 * @return integer|null
 	 */
 	public function getModelId()
@@ -102,9 +73,7 @@ class ModelUnitDefinition implements IdentifiedObject
 
 	/**
 	 * Set modelId
-	 *
 	 * @param integer $modelId
-	 *
 	 * @return ModelUnitDefinition
 	 */
 	public function setModelId($modelId): ModelUnitDefinition
@@ -113,34 +82,8 @@ class ModelUnitDefinition implements IdentifiedObject
 		return $this;
 	}
 
-
-	/**
-	 * Get name
-	 *
-	 * @return null|string
-	 */
-	public function getName(): ?string
-	{
-		return $this->name;
-	}
-
-
-	/**
-	 * Set name
-	 *
-	 * @param string $name
-	 *
-	 * @return ModelUnitDefinition
-	 */
-	public function setName($name): ModelUnitDefinition
-	{
-		$this->name = $name;
-		return $this;
-	}
-
 	/**
 	 * Get symbol
-	 *
 	 * @return null|string
 	 */
 	public function getSymbol(): ?string
@@ -148,12 +91,9 @@ class ModelUnitDefinition implements IdentifiedObject
 		return $this->symbol;
 	}
 
-
 	/**
 	 * Set symbol
-	 *
 	 * @param string $symbol
-	 *
 	 * @return ModelUnitDefinition
 	 */
 	public function setSymbol($symbol): ModelUnitDefinition
@@ -162,10 +102,8 @@ class ModelUnitDefinition implements IdentifiedObject
 		return $this;
 	}
 
-
 	/**
 	 * Get compartmentId
-	 *
 	 * @return integer|null
 	 */
 	public function getCompartmentId()
@@ -175,14 +113,52 @@ class ModelUnitDefinition implements IdentifiedObject
 
 	/**
 	 * Set compartmentId
-	 *
 	 * @param integer $compartmentId
-	 *
 	 * @return ModelUnitDefinition
 	 */
 	public function setCompartmentId($compartmentId): ModelUnitDefinition
 	{
 		$this->compartmentId = $compartmentId;
+		return $this;
+	}
+
+	/**
+	 * Get parameterId
+	 * @return integer|null
+	 */
+	public function getParameterId()
+	{
+		return $this->parameter;
+	}
+
+	/**
+	 * Set parameter
+	 * @param integer $parameter
+	 * @return ModelUnitDefinition
+	 */
+	public function setParameter($parameterId): ModelUnitDefinition
+	{
+		$this->parameterId = $parameterId;
+		return $this;
+	}
+
+	/**
+	 * Get localParameterId
+	 * @return integer|null
+	 */
+	public function getLocalParameterId()
+	{
+		return $this->localParameter;
+	}
+
+	/**
+	 * Set localParameter
+	 * @param integer $localParameter
+	 * @return ModelUnitDefinition
+	 */
+	public function setLocalParameter($localParameterId): ModelUnitDefinition
+	{
+		$this->localParameterId = $localParameterId;
 		return $this;
 	}
 

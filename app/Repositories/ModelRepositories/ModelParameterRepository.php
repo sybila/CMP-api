@@ -9,7 +9,7 @@ use App\Entity\IdentifiedObject;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 
-class ModelParameterRepository implements IDependentEndpointRepository
+class ModelParameterRepository implements IDependentSBaseRepository
 {
 
 	/** @var EntityManager * */
@@ -17,6 +17,9 @@ class ModelParameterRepository implements IDependentEndpointRepository
 
 	/** @var \Doctrine\ORM\ModelParameterRepository */
 	private $repository;
+
+	/** @var Model */
+	private $parent;
 
 	public function __construct(EntityManager $em)
 	{
@@ -34,9 +37,9 @@ class ModelParameterRepository implements IDependentEndpointRepository
 		return [Model::class, ModelReaction::class];
 	}
 
-	public function getParent()
+	public function getParent(): IdentifiedObject
 	{
-		return $this->object;
+		return $this->parent;
 	}
 
 	public function get(int $id)
@@ -55,7 +58,7 @@ class ModelParameterRepository implements IDependentEndpointRepository
 	public function getList(array $filter, array $sort, array $limit): array
 	{
 		$query = $this->buildListQuery($filter)
-			->select('p.id, p.name, p.sbmlId, p.value, p.isConstant');
+			->select('p.id, p.name, p.sbmlId, p.sboTerm, p.notes, p.annotation, p.value, p.isConstant');
 		return $query->getQuery()->getArrayResult();
 	}
 
@@ -66,7 +69,7 @@ class ModelParameterRepository implements IDependentEndpointRepository
 		$index = 0;
 		foreach ($classNames as $className) {
 			if ($object instanceof $className) {
-				$this->object = $object;
+				$this->parent = $object;
 				return;
 			}
 			$index == 0 ?: $errorString .= ' or ';
@@ -84,28 +87,18 @@ class ModelParameterRepository implements IDependentEndpointRepository
 	private function buildListQuery(array $filter): QueryBuilder
 	{
 		$query = null;
-		if ($this->object instanceof Model) {
+		if ($this->parent instanceof Model) {
 			$query = $this->em->createQueryBuilder()
 				->from(ModelParameter::class, 'p')
 				->where('p.modelId = :modelId AND p.reactionId IS NULL')
-				->setParameter('modelId', $this->object->getId());
+				->setParameter('modelId', $this->parent->getId());
 		}
-		if ($this->object instanceof ModelReaction) {
+		if ($this->parent instanceof ModelReaction) {
 			$query = $this->em->createQueryBuilder()
 				->from(ModelParameter::class, 'p')
 				->where('p.reactionId = :reactionId')
-				->setParameter('reactionId', $this->object->getId());
+				->setParameter('reactionId', $this->parent->getId());
 		}
 		return $query;
-	}
-
-	public function add($object): void
-	{
-		// TODO: Refactor
-	}
-
-	public function remove($object): void
-	{
-		// TODO: Refactor
 	}
 }

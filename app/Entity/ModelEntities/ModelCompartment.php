@@ -12,31 +12,13 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class ModelCompartment implements IdentifiedObject
 {
-	/**
-	 * @ORM\Id
-	 * @ORM\Column(type="integer")
-	 * @ORM\GeneratedValue
-	 * @var integer|null
-	 */
-	private $id;
+	use SBase;
 
 	/**
 	 * @ORM\ManyToOne(targetEntity="Model", inversedBy="compartments")
 	 * @ORM\JoinColumn(name="model_id", referencedColumnName="id")
 	 */
 	protected $modelId;
-
-	/**
-	 * @var string
-	 * @ORM\Column(type="string")
-	 */
-	protected $name;
-
-	/**
-	 * @var string
-	 * @ORM\Column(type="string", name="sbml_id")
-	 */
-	private $sbmlId;
 
 	/**
 	 * @var float
@@ -81,15 +63,6 @@ class ModelCompartment implements IdentifiedObject
 	protected $unitDefinitions;
 
 	/**
-	 * Get id
-	 * @return integer
-	 */
-	public function getId(): ?int
-	{
-		return $this->id;
-	}
-
-	/**
 	 * Get modelId
 	 * @return integer|null
 	 */
@@ -106,46 +79,6 @@ class ModelCompartment implements IdentifiedObject
 	public function setModelId($modelId): ModelCompartment
 	{
 		$this->modelId = $modelId;
-		return $this;
-	}
-
-	/**
-	 * Get name
-	 * @return null|string
-	 */
-	public function getName(): ?string
-	{
-		return $this->name;
-	}
-
-	/**
-	 * Set name
-	 * @param string $name
-	 * @return ModelCompartment
-	 */
-	public function setName($name): ModelCompartment
-	{
-		$this->name = $name;
-		return $this;
-	}
-
-	/**
-	 * Get sbmlId
-	 * @return string
-	 */
-	public function getSbmlId()
-	{
-		return $this->sbmlId;
-	}
-
-	/**
-	 * Set sbmlId
-	 * @param string $sbmlId
-	 * @return Model
-	 */
-	public function setSbmlId($sbmlId): ModelCompartment
-	{
-		$this->sbmlId = $sbmlId;
 		return $this;
 	}
 

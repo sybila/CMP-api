@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -56,6 +57,12 @@ class Model implements IdentifiedObject
 	 * @ORM\OneToMany(targetEntity="ModelEvent", mappedBy="modelId")
 	 */
 	private $events;
+
+	/**
+	 * @var ArrayCollection
+	 * @ORM\OneToMany(targetEntity="ModelFunctionDefinition", mappedBy="modelId")
+	 */
+	private $functionDefinitions;
 
 	/**
 	 * @var ArrayCollection
@@ -192,6 +199,14 @@ class Model implements IdentifiedObject
 	}
 
 	/**
+	 * @return ModelFunctinoDefinition[]|Collection
+	 */
+	public function getFunctionDefinitions(): Collection
+	{
+		return $this->functionDefinitions;
+	}
+
+	/**
 	 * @return ModelInitialAssignment[]|Collection
 	 */
 	public function getInitialAssignments(): Collection
@@ -204,7 +219,9 @@ class Model implements IdentifiedObject
 	 */
 	public function getParameters(): Collection
 	{
-		return $this->parameters;
+		$criteria = Criteria::create();
+		$criteria->where(Criteria::expr()->eq('reactionId', null));
+		return $this->parameters->matching($criteria);
 	}
 
 	/**
