@@ -20,7 +20,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @property-read ModelReactionRepository $repository
  * @method ModelFunction getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
-final class ModelFunctionController extends ParentedRepositoryController
+final class ModelFunctionController extends ParentedSBaseController
 {
 	/** @var FunctionRepository */
 	private $functionRepository;

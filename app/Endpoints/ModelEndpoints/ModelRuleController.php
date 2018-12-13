@@ -29,7 +29,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @property-read ModelRuleRepository $repository
  * @method Entity getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
-abstract class ModelRuleController extends ParentedRepositoryController
+abstract class ModelRuleController extends ParentedSBaseController
 {
 
 	/** @var ModelRuleRepository */
