@@ -12,13 +12,8 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class ModelSpecie implements IdentifiedObject
 {
-	/**
-	 * @ORM\Id
-	 * @ORM\Column(type="integer")
-	 * @ORM\GeneratedValue
-	 * @var integer|null
-	 */
-	private $id;
+
+	use SBase;
 
 	/**
 	 * @var int
@@ -32,24 +27,6 @@ class ModelSpecie implements IdentifiedObject
 	 * @ORM\JoinColumn(name="model_compartment_id", referencedColumnName="id")
 	 */
 	protected $compartmentId;
-
-	/**
-	 * @var string
-	 * @ORM\Column(type="string")
-	 */
-	protected $name;
-
-	/**
-	 * @var string
-	 * @ORM\Column(type="string", name="sbml_id")
-	 */
-	private $sbmlId;
-
-	/**
-	 * @var string
-	 * @ORM\Column(type="string", name="equation_type")
-	 */
-	protected $equationType;
 
 	/**
 	 * @var string
@@ -88,15 +65,6 @@ class ModelSpecie implements IdentifiedObject
 	protected $rules;
 
 	/**
-	 * Get id
-	 * @return integer
-	 */
-	public function getId(): ?int
-	{
-		return $this->id;
-	}
-
-	/**
 	 * Get modelId
 	 * @return integer
 	 */
@@ -133,66 +101,6 @@ class ModelSpecie implements IdentifiedObject
 	public function setCompartmentId($compartmentId): ModelSpecie
 	{
 		$this->compartmentId = $compartmentId;
-		return $this;
-	}
-
-	/**
-	 * Get name
-	 * @return string
-	 */
-	public function getName(): ?string
-	{
-		return $this->name;
-	}
-
-	/**
-	 * Set name
-	 * @param string $name
-	 * @return ModelSpecie
-	 */
-	public function setName($name): ModelSpecie
-	{
-		$this->name = $name;
-		return $this;
-	}
-
-	/**
-	 * Get sbmlId
-	 * @return string
-	 */
-	public function getSbmlId()
-	{
-		return $this->sbmlId;
-	}
-
-	/**
-	 * Set sbmlId
-	 * @param string $sbmlId
-	 * @return Model
-	 */
-	public function setSbmlId($sbmlId): ModelSpecie
-	{
-		$this->sbmlId = $sbmlId;
-		return $this;
-	}
-
-	/**
-	 * Get equationType
-	 * @return string
-	 */
-	public function getEquationType(): ?string
-	{
-		return $this->equationType;
-	}
-
-	/**
-	 * Set equationType
-	 * @param string $equationType
-	 * @return ModelSpecie
-	 */
-	public function setEquationType($equationType): ModelSpecie
-	{
-		$this->equationType = $equationType;
 		return $this;
 	}
 

@@ -30,7 +30,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @property-read ReactionItemRepository $repository
  * @method ModelReactionItem getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
-abstract class ModelReactionItemController extends ParentedRepositoryController
+abstract class ModelReactionItemController extends ParentedSBaseController
 {
 	/** @var ModelReactionItemRepository */
 	private $reactionItemRepository;
@@ -52,16 +52,14 @@ abstract class ModelReactionItemController extends ParentedRepositoryController
 	protected function getData(IdentifiedObject $reactionItem): array
 	{
 		/** @var ModelReactionItem $reactionItem */
-		return [
-			'id' => $reactionItem->getId(),
+		$sBaseData = parent::getData($reactionItem);
+		return array_merge($sBaseData, [
 			'reactionId' => $reactionItem->getReactionId()->getId(),
 			'specieId' => $reactionItem->getSpecieId() ? $reactionItem->getSpecieId()->getId() : null,
 			'parameterId' => $reactionItem->getParameterId() ? $reactionItem->getParameterId()->getId() : null,
 			'type' => $reactionItem->getType(),
-			'name' => $reactionItem->getName(),
-			'stoichiometry' => $reactionItem->getStoichiometry(),
-			'isGlobal' => $reactionItem->getIsGlobal(),
-		];
+			'stoichiometry' => $reactionItem->getStoichiometry()
+		]);
 	}
 
 	public function delete(Request $request, Response $response, ArgumentParser $args): Response
@@ -71,9 +69,10 @@ abstract class ModelReactionItemController extends ParentedRepositoryController
 
 	protected function getValidator(): Assert\Collection
 	{
-		return new Assert\Collection([
+		$validatorArray = parent::getValidatorArray();
+		return new Assert\Collection(array_merge($validatorArray, [
 			'name' => new Assert\Type(['type' => 'string']),
-		]);
+		]));
 	}
 
 	protected static function getObjectName(): string
@@ -88,12 +87,11 @@ abstract class ModelReactionItemController extends ParentedRepositoryController
 
 	protected function setData(IdentifiedObject $reactionItem, ArgumentParser $data): void
 	{
-		!$data->hasKey('name') ? $reactionItem->setName($data->getString('sbmlId')) : $reactionItem->setName($data->getString('name'));
-		!$data->hasKey('sbmlId') ?: $reactionItem->setSbmlId($data->getString('sbmlId'));
+		/** @var ModelReactionItem reactionItem */
+		parent::setData($reactionItem, $data);
 		!$data->hasKey('type') ?: $reactionItem->setType($data->getString('type'));
 		!$data->hasKey('value') ?: $reactionItem->setValue($data->getInt('value'));
 		!$data->hasKey('stoichiometry') ?: $reactionItem->setStochiometry($data->getFloat('stoichiometry'));
-		!$data->hasKey('isGlobal') ?: $reactionItem->setIsGlobal($data->getInt('isGlobal'));
 	}
 
 }

@@ -6,10 +6,10 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity
- * @ORM\Table(name="model_constraint")
+ * @ORM\Table(name="model_function_definition")
  * @ORM\DiscriminatorColumn(name="hierarchy_type", type="string")
  */
-class ModelConstraint implements IdentifiedObject
+class ModelFunctionDefinition implements IdentifiedObject
 {
 	use SBase;
 
@@ -18,12 +18,6 @@ class ModelConstraint implements IdentifiedObject
 	 * @ORM\JoinColumn(name="model_id", referencedColumnName="id")
 	 */
 	protected $modelId;
-
-	/**
-	 * @var string
-	 * @ORM\Column(type="string")
-	 */
-	protected $message;
 
 	/**
 	 * @var string
@@ -43,33 +37,14 @@ class ModelConstraint implements IdentifiedObject
 	/**
 	 * Set modelId
 	 * @param integer $modelId
-	 * @return ModelConstraint
+	 * @return ModelCompartment
 	 */
-	public function setModelId($modelId): ModelConstraint
+	public function setModelId($modelId): ModelCompartment
 	{
 		$this->modelId = $modelId;
 		return $this;
 	}
 
-	/**
-	 * Get message
-	 * @return null|string
-	 */
-	public function getMessage(): ?string
-	{
-		return $this->message;
-	}
-
-	/**
-	 * Set message
-	 * @param string $message
-	 * @return ModelConstraint
-	 */
-	public function setMessage($message): ModelConstraint
-	{
-		$this->message = $message;
-		return $this;
-	}
 
 	/**
 	 * Get formula
@@ -83,9 +58,9 @@ class ModelConstraint implements IdentifiedObject
 	/**
 	 * Set formula
 	 * @param string $formula
-	 * @return ModelConstraint
+	 * @return ModelEventAssignment
 	 */
-	public function setFormula($formula): ModelConstraint
+	public function setFormula($formula): ModelEventAssignment
 	{
 		$this->formula = $formula;
 		return $this;

@@ -3,22 +3,14 @@
 namespace App\Controllers;
 
 use App\Entity\{
-	Entity,
-	ModelConstraint,
 	ModelInitialAssignment,
-	ModelUnitToDefinition,
-	ModelSpecie,
-	ModelReaction,
 	IdentifiedObject,
 	Repositories\IEndpointRepository,
 	Repositories\ModelRepository,
-	Repositories\ModelInitialAssignmentRepository,
-	Repositories\ModelReactionRepository,
-	Structure
+	Repositories\ModelInitialAssignmentRepository
 };
 use App\Exceptions\
 {
-	DependentResourcesBoundException,
 	MissingRequiredKeyException
 };
 use App\Helpers\ArgumentParser;
@@ -30,12 +22,11 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @property-read ModelInitialAssignmentRepository $repository
- * @method Entity getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
+ * @method ModelInitialAssignment getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
-final class ModelInitialAssignmentController extends ParentedRepositoryController
+final class ModelInitialAssignmentController extends ParentedSBaseController
 {
-
-	/** @varModelConstraintRepository */
+	/** @var ModelInitialAssignmentRepository */
 	private $initialAssignmentRepository;
 
 	public function __construct(Container $c)
@@ -52,30 +43,32 @@ final class ModelInitialAssignmentController extends ParentedRepositoryControlle
 	protected function getData(IdentifiedObject $initialAssignment): array
 	{
 		/** @var ModelInitialAssignment $initialAssignment */
-		return [
+		$sBaseData = parent::getData($initialAssignment);
+		return array_merge($sBaseData, [
 			'id' => $initialAssignment->getId(),
 			'formula' => $initialAssignment->getFormula(),
-		];
+		]);
 	}
 
 	protected function setData(IdentifiedObject $initialAssignment, ArgumentParser $data): void
 	{
 		/** @var ModelInitialAssignment $initialAssignment */
+		parent::setData($initialAssignment, $data);
 		$initialAssignment->getModelId() ?: $initialAssignment->setModelId($this->repository->getParent());
 		!$data->hasKey('formula') ?: $initialAssignment->setFormula($data->getString('formula'));
 	}
 
 	protected function createObject(ArgumentParser $body): IdentifiedObject
 	{
-		return new ModelConstraint;
+		return new ModelInitialAssignment();
 	}
 
 	protected function checkInsertObject(IdentifiedObject $initialAssignment): void
 	{
 		/** @var ModelInitialAssignment $initialAssignment */
-		if ($initialAssignment->getModelId() == NULL)
+		if ($initialAssignment->getModelId() == null)
 			throw new MissingRequiredKeyException('modelId');
-		if ($initialAssignment->getFormula() == NULL)
+		if ($initialAssignment->getFormula() == null)
 			throw new MissingRequiredKeyException('formula');
 	}
 
@@ -86,10 +79,11 @@ final class ModelInitialAssignmentController extends ParentedRepositoryControlle
 
 	protected function getValidator(): Assert\Collection
 	{
-		return new Assert\Collection([
+		$validatorArray = parent::getValidatorArray();
+		return new Assert\Collection(array_merge($validatorArray, [
 			'modelId' => new Assert\Type(['type' => 'integer']),
 			'formula' => new Assert\Type(['type' => 'string'])
-		]);
+		]));
 	}
 
 	protected static function getObjectName(): string
@@ -101,7 +95,6 @@ final class ModelInitialAssignmentController extends ParentedRepositoryControlle
 	{
 		return ModelInitialAssignmentRepository::Class;
 	}
-
 
 	protected static function getParentRepositoryClassName(): string
 	{

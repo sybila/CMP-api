@@ -118,6 +118,9 @@ return function(App $app)
 		->setRoute(Ctl\ModelFunctionController::class, '/models/{model-id:\\d+}/reactions/{reaction-id:\\d+}/functions')
 		->register();
 	(new RouteHelper)
+		->setRoute(Ctl\ModelFunctionDefinitionController::class, '/models/{model-id:\\d+}/functionDefinitions')
+		->register();
+	(new RouteHelper)
 		->setRoute(Ctl\ReactionParentedReactionItemController::class, '/models/{model-id:\\d+}/reactions/{reaction-id:\\d+}/reactionItems')
 		->register();
 	(new RouteHelper)

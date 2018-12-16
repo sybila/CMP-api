@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -13,13 +14,7 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Model implements IdentifiedObject
 {
-	/**
-	 * @ORM\Id
-	 * @ORM\Column(type="integer")
-	 * @ORM\GeneratedValue
-	 * @var integer|null
-	 */
-	private $id;
+	use SBase;
 
 	/**
 	 * @var int
@@ -32,18 +27,6 @@ class Model implements IdentifiedObject
 	 * @ORM\Column(type="integer", name="approved_id")
 	 */
 	private $approvedId;
-
-	/**
-	 * @var string
-	 * @ORM\Column(type="string")
-	 */
-	private $name;
-
-	/**
-	 * @var string
-	 * @ORM\Column(type="string", name="sbml_id")
-	 */
-	private $sbmlId;
 
 	/**
 	 * @var string
@@ -77,6 +60,12 @@ class Model implements IdentifiedObject
 
 	/**
 	 * @var ArrayCollection
+	 * @ORM\OneToMany(targetEntity="ModelFunctionDefinition", mappedBy="modelId")
+	 */
+	private $functionDefinitions;
+
+	/**
+	 * @var ArrayCollection
 	 * @ORM\OneToMany(targetEntity="ModelInitialAssignment", mappedBy="modelId")
 	 */
 	private $initialAssignments;
@@ -104,15 +93,6 @@ class Model implements IdentifiedObject
 	 * @ORM\OneToMany(targetEntity="ModelUnitDefinition", mappedBy="modelId")
 	 */
 	private $unitDefinitions;
-
-	/**
-	 * Get id
-	 * @return integer
-	 */
-	public function getId(): ?int
-	{
-		return $this->id;
-	}
 
 	/**
 	 * Get userId
@@ -151,46 +131,6 @@ class Model implements IdentifiedObject
 	public function setApprovedId($approvedId): Model
 	{
 		$this->approvedId = $approvedId;
-		return $this;
-	}
-
-	/**
-	 * Get name
-	 * @return string
-	 */
-	public function getName()
-	{
-		return $this->name;
-	}
-
-	/**
-	 * Set name
-	 * @param string $name
-	 * @return Model
-	 */
-	public function setName($name): Model
-	{
-		$this->name = $name;
-		return $this;
-	}
-
-	/**
-	 * Get sbmlId
-	 * @return string
-	 */
-	public function getSbmlId()
-	{
-		return $this->sbmlId;
-	}
-
-	/**
-	 * Set sbmlId
-	 * @param string $sbmlId
-	 * @return Model
-	 */
-	public function setSbmlId($sbmlId): Model
-	{
-		$this->sbmlId = $sbmlId;
 		return $this;
 	}
 
@@ -259,6 +199,14 @@ class Model implements IdentifiedObject
 	}
 
 	/**
+	 * @return ModelFunctinoDefinition[]|Collection
+	 */
+	public function getFunctionDefinitions(): Collection
+	{
+		return $this->functionDefinitions;
+	}
+
+	/**
 	 * @return ModelInitialAssignment[]|Collection
 	 */
 	public function getInitialAssignments(): Collection
@@ -271,7 +219,9 @@ class Model implements IdentifiedObject
 	 */
 	public function getParameters(): Collection
 	{
-		return $this->parameters;
+		$criteria = Criteria::create();
+		$criteria->where(Criteria::expr()->eq('reactionId', null));
+		return $this->parameters->matching($criteria);
 	}
 
 	/**

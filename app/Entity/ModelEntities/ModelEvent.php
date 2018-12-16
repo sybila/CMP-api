@@ -2,20 +2,8 @@
 
 namespace App\Entity;
 
-
-use App\Exceptions\EntityClassificationException;
-use App\Exceptions\EntityHierarchyException;
-use App\Exceptions\EntityLocationException;
-use App\Helpers\
-{
-	ChangeCollection, ConsistenceEnum
-};
 use Doctrine\Common\Collections\Collection;
-use Doctrine\Common\Collections\Criteria;
-use Doctrine\ORM\Event\PreUpdateEventArgs;
 use Doctrine\ORM\Mapping as ORM;
-use Doctrine\ORM\QueryBuilder;
-use Symfony\Component\Translation\Tests\StringClass;
 
 /**
  * @ORM\Entity
@@ -24,15 +12,7 @@ use Symfony\Component\Translation\Tests\StringClass;
  */
 class ModelEvent implements IdentifiedObject
 {
-
-	/**
-	 * @ORM\Id
-	 * @ORM\Column(type="integer")
-	 * @ORM\GeneratedValue
-	 * @var integer|null
-	 */
-	private $id;
-
+	use SBase;
 
 	/**
 	 * @ORM\ManyToOne(targetEntity="Model", inversedBy="compartments")
@@ -45,12 +25,6 @@ class ModelEvent implements IdentifiedObject
 	 * @ORM\OneToMany(targetEntity="ModelEventAssignment", mappedBy="eventId")
 	 */
 	protected $eventAssignments;
-
-	/**
-	 * @var string
-	 * @ORM\Column(type="string")
-	 */
-	protected $name;
 
 	/**
 	 * @var string
@@ -76,7 +50,6 @@ class ModelEvent implements IdentifiedObject
 
 	/**
 	 * Get id
-	 *
 	 * @return integer
 	 */
 	public function getId(): ?int
@@ -86,7 +59,6 @@ class ModelEvent implements IdentifiedObject
 
 	/**
 	 * Get modelId
-	 *
 	 * @return integer|null
 	 */
 	public function getModelId()
@@ -96,9 +68,7 @@ class ModelEvent implements IdentifiedObject
 
 	/**
 	 * Set modelId
-	 *
 	 * @param integer $modelId
-	 *
 	 * @return ModelEvent
 	 */
 	public function setModelId($modelId): ModelEvent
@@ -108,31 +78,7 @@ class ModelEvent implements IdentifiedObject
 	}
 
 	/**
-	 * Get name
-	 *
-	 * @return null|string
-	 */
-	public function getName(): ?string
-	{
-		return $this->name;
-	}
-
-	/**
-	 * Set name
-	 *
-	 * @param string $name
-	 *
-	 * @return ModelEvent
-	 */
-	public function setName($name): ModelEvent
-	{
-		$this->name = $name;
-		return $this;
-	}
-
-	/**
 	 * Get trigger
-	 *
 	 * @return null|string
 	 */
 	public function getTrigger(): ?string
@@ -142,9 +88,7 @@ class ModelEvent implements IdentifiedObject
 
 	/**
 	 * Set trigger
-	 *
 	 * @param string $trigger
-	 *
 	 * @return ModelEvent
 	 */
 	public function setTrigger($trigger): ModelEvent
@@ -155,7 +99,6 @@ class ModelEvent implements IdentifiedObject
 
 	/**
 	 * Get delay
-	 *
 	 * @return null|string
 	 */
 	public function getDelay(): ?string
@@ -165,9 +108,7 @@ class ModelEvent implements IdentifiedObject
 
 	/**
 	 * Set delay
-	 *
 	 * @param string $delay
-	 *
 	 * @return ModelEvent
 	 */
 	public function setDelay($delay): ModelEvent
@@ -178,7 +119,6 @@ class ModelEvent implements IdentifiedObject
 
 	/**
 	 * Get priority
-	 *
 	 * @return null|string
 	 */
 	public function getPriority(): ?string
@@ -188,9 +128,7 @@ class ModelEvent implements IdentifiedObject
 
 	/**
 	 * Set priority
-	 *
 	 * @param string $priority
-	 *
 	 * @return ModelEvent
 	 */
 	public function setPriority($priority): ModelEvent
@@ -201,7 +139,6 @@ class ModelEvent implements IdentifiedObject
 
 	/**
 	 * Get evaluateOnTrigger
-	 *
 	 * @return integer|null
 	 */
 	public function getEvaluateOnTrigger()
@@ -211,9 +148,7 @@ class ModelEvent implements IdentifiedObject
 
 	/**
 	 * Set evaluateOnTrigger
-	 *
 	 * @param integer $evaluateOnTrigger
-	 *
 	 * @return ModelEvent
 	 */
 	public function setEvaluateOnTrigger($evaluateOnTrigger): ModelEvent

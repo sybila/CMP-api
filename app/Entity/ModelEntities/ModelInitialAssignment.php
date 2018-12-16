@@ -2,20 +2,7 @@
 
 namespace App\Entity;
 
-
-use App\Exceptions\EntityClassificationException;
-use App\Exceptions\EntityHierarchyException;
-use App\Exceptions\EntityLocationException;
-use App\Helpers\
-{
-	ChangeCollection, ConsistenceEnum
-};
-use Doctrine\Common\Collections\Collection;
-use Doctrine\Common\Collections\Criteria;
-use Doctrine\ORM\Event\PreUpdateEventArgs;
 use Doctrine\ORM\Mapping as ORM;
-use Doctrine\ORM\QueryBuilder;
-use Symfony\Component\Translation\Tests\StringClass;
 
 /**
  * @ORM\Entity
@@ -24,15 +11,7 @@ use Symfony\Component\Translation\Tests\StringClass;
  */
 class ModelInitialAssignment implements IdentifiedObject
 {
-
-	/**
-	 * @ORM\Id
-	 * @ORM\Column(type="integer")
-	 * @ORM\GeneratedValue
-	 * @var integer|null
-	 */
-	private $id;
-
+	use SBase;
 
 	/**
 	 * @ORM\ManyToOne(targetEntity="Model", inversedBy="compartments")
@@ -46,10 +25,8 @@ class ModelInitialAssignment implements IdentifiedObject
 	 */
 	protected $formula;
 
-
 	/**
 	 * Get id
-	 *
 	 * @return integer
 	 */
 	public function getId(): ?int
@@ -58,31 +35,7 @@ class ModelInitialAssignment implements IdentifiedObject
 	}
 
 	/**
-	 * Get modelId
-	 *
-	 * @return integer|null
-	 */
-	public function getModelId()
-	{
-		return $this->modelId;
-	}
-
-	/**
-	 * Set modelId
-	 *
-	 * @param integer $modelId
-	 *
-	 * @return ModelCompartment
-	 */
-	public function setModelId($modelId): ModelCompartment
-	{
-		$this->modelId = $modelId;
-		return $this;
-	}
-
-	/**
 	 * Get formula
-	 *
 	 * @return null|string
 	 */
 	public function getFormula(): ?string
@@ -92,12 +45,10 @@ class ModelInitialAssignment implements IdentifiedObject
 
 	/**
 	 * Set function
-	 *
-	 * @param string $function
-	 *
-	 * @return ModelUnitToDefinition
+	 * @param string $formula
+	 * @return ModelInitialAssignment
 	 */
-	public function setFormula($formula): ModelFunction
+	public function setFormula($formula): ModelInitialAssignment
 	{
 		$this->formula = $formula;
 		return $this;

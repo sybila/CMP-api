@@ -12,14 +12,7 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class ModelReaction implements IdentifiedObject
 {
-
-	/**
-	 * @ORM\Id
-	 * @ORM\Column(type="integer")
-	 * @ORM\GeneratedValue
-	 * @var integer|null
-	 */
-	private $id;
+	use SBase;
 
 	/**
 	 * @ORM\ManyToOne(targetEntity="Model", inversedBy="compartments")
@@ -35,18 +28,6 @@ class ModelReaction implements IdentifiedObject
 	protected $compartmentId;
 
 	/**
-	 * @var string
-	 * @ORM\Column(type="string")
-	 */
-	protected $name;
-
-	/**
-	 * @var string
-	 * @ORM\Column(type="string", name="sbml_id")
-	 */
-	private $sbmlId;
-
-	/**
 	 * @return string
 	 * @ORM\Column(type="string")
 	 */
@@ -54,15 +35,15 @@ class ModelReaction implements IdentifiedObject
 
 	/**
 	 * @var int
-	 * @ORM\Column(type="integer", name="is_fast")
-	 */
-	protected $isFast;
-
-	/**
-	 * @var int
 	 * @ORM\Column(type="integer", name="is_reversible")
 	 */
 	protected $isReversible;
+
+	/**
+	 * @var Collection
+	 * @ORM\OneToMany(targetEntity="ModelParameter", mappedBy="reactionId", cascade={"persist"})
+	 */
+	protected $parameters;
 
 	/**
 	 * @var Collection
@@ -75,15 +56,6 @@ class ModelReaction implements IdentifiedObject
 	 * @ORM\OneToMany(targetEntity="ModelFunction", mappedBy="reactionId", cascade={"persist"})
 	 */
 	protected $functions;
-
-	/**
-	 * Get id
-	 * @return integer
-	 */
-	public function getId(): int
-	{
-		return $this->id;
-	}
 
 	/**
 	 * Get modelId
@@ -126,46 +98,6 @@ class ModelReaction implements IdentifiedObject
 	}
 
 	/**
-	 * Get name
-	 * @return string
-	 */
-	public function getName(): ?string
-	{
-		return $this->name;
-	}
-
-	/**
-	 * Set name
-	 * @param string $name
-	 * @return ModelReaction
-	 */
-	public function setName($name): ModelReaction
-	{
-		$this->name = $name;
-		return $this;
-	}
-
-	/**
-	 * Get sbmlId
-	 * @return string
-	 */
-	public function getSbmlId()
-	{
-		return $this->sbmlId;
-	}
-
-	/**
-	 * Set sbmlId
-	 * @param string $sbmlId
-	 * @return Model
-	 */
-	public function setSbmlId($sbmlId): ModelReaction
-	{
-		$this->sbmlId = $sbmlId;
-		return $this;
-	}
-
-	/**
 	 * Get isReversible
 	 * @return integer
 	 */
@@ -182,26 +114,6 @@ class ModelReaction implements IdentifiedObject
 	public function setIsReversible($isReversible): ModelReaction
 	{
 		$this->isReversible = $isReversible;
-		return $this;
-	}
-
-	/**
-	 * Get isFast
-	 * @return integer
-	 */
-	public function getIsFast()
-	{
-		return $this->isFast;
-	}
-
-	/**
-	 * Set isFast
-	 * @param integer $isFast
-	 * @return ModelReaction
-	 */
-	public function setIsFast($isFast): ModelReaction
-	{
-		$this->isFast = $isFast;
 		return $this;
 	}
 
@@ -239,6 +151,14 @@ class ModelReaction implements IdentifiedObject
 	public function getReactionItems(): Collection
 	{
 		return $this->reactionItems;
+	}
+
+	/**
+	 * @return Collection[] Parameter
+	 */
+	public function getParameters(): Collection
+	{
+		return $this->parameters;
 	}
 
 }

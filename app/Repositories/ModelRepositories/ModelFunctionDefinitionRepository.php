@@ -3,41 +3,42 @@
 namespace App\Entity\Repositories;
 
 use App\Entity\Model;
-use App\Entity\ModelEvent;
-use App\Entity\ModelEventAssignment;
+use App\Entity\ModelFunctionDefinition;
 use App\Entity\IdentifiedObject;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 
-class ModelEventAssignmentRepository implements IDependentSBaseRepository
+class ModelFunctionDefinitionRepository implements IDependentSBaseRepository
 {
-
 	/** @var EntityManager * */
 	protected $em;
 
-	/** @var \Doctrine\ORM\EventAssignmentRepository */
+	/** @var \Doctrine\ORM\ModelFunctionDefinitionRepository */
 	private $repository;
+
+	/** @var Model */
+	private $model;
 
 	public function __construct(EntityManager $em)
 	{
 		$this->em = $em;
-		$this->repository = $em->getRepository(ModelEventAssignment::class);
+		$this->repository = $em->getRepository(ModelFunctionDefinition::class);
 	}
 
 	protected static function getParentClassName(): string
 	{
-		return ModelEvent::class;
+		return Model::class;
 	}
 
 	public function get(int $id)
 	{
-		return $this->em->find(ModelEventAssignment::class, $id);
+		return $this->em->find(ModelFunctionDefinition::class, $id);
 	}
 
 	public function getNumResults(array $filter): int
 	{
 		return ((int)$this->buildListQuery($filter)
-			->select('COUNT(e)')
+			->select('COUNT(f)')
 			->getQuery()
 			->getScalarResult());
 	}
@@ -45,30 +46,29 @@ class ModelEventAssignmentRepository implements IDependentSBaseRepository
 	public function getList(array $filter, array $sort, array $limit): array
 	{
 		$query = $this->buildListQuery($filter)
-			->select('e.id, e.name, e.sbmlId, e.sboTerm, e.notes, e.annotation, e.formula');
-
+			->select('f.id, f.name, f.sbmlId, f.sboTerm, f.notes, f.annotation, f.formula');
 		return $query->getQuery()->getArrayResult();
 	}
 
 	public function getParent(): IdentifiedObject
 	{
-		return $this->object;
+		return $this->model;
 	}
 
 	public function setParent(IdentifiedObject $object): void
 	{
 		$className = static::getParentClassName();
 		if (!($object instanceof $className))
-			throw new \Exception('Parent of event assignment must be ' . $className);
-		$this->object = $object;
+			throw new \Exception('Parent of initial assignment must be ' . $className);
+		$this->model = $object;
 	}
 
 	private function buildListQuery(array $filter): QueryBuilder
 	{
 		$query = $this->em->createQueryBuilder()
-			->from(ModelEventAssignment::class, 'e')
-			->where('e.eventId = :eventId')
-			->setParameter('eventId', $this->object->getId());
+			->from(ModelFunctionDefinition::class, 'f')
+			->where('f.modelId = :modelId')
+			->setParameter('modelId', $this->model->getId());
 		return $query;
 	}
 

@@ -3,20 +3,17 @@
 namespace App\Entity\Repositories;
 
 use App\Entity\Model;
-use App\Entity\ModelCompartment;
 use App\Entity\IdentifiedObject;
 use App\Entity\ModelInitialAssignment;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 
-
-class ModelInitialAssignmentRepository implements IDependentEndpointRepository
+class ModelInitialAssignmentRepository implements IDependentSBaseRepository
 {
-
 	/** @var EntityManager * */
 	protected $em;
 
-	/** @var \Doctrine\ORM\InitialAssignmentRepository */
+	/** @var \Doctrine\ORM\ModelInitialAssignmentRepository */
 	private $repository;
 
 	public function __construct(EntityManager $em)
@@ -33,7 +30,6 @@ class ModelInitialAssignmentRepository implements IDependentEndpointRepository
 	public function get(int $id)
 	{
 		return $this->em->find(ModelInitialAssignment::class, $id);
-
 	}
 
 	public function getNumResults(array $filter): int
@@ -47,12 +43,12 @@ class ModelInitialAssignmentRepository implements IDependentEndpointRepository
 	public function getList(array $filter, array $sort, array $limit): array
 	{
 		$query = $this->buildListQuery($filter)
-			->select('i.id, i.formula');
-
+			->select('i.id, i.name, i.sbmlId, i.sboTerm, i.notes, i.annotation, i.formula');
 		return $query->getQuery()->getArrayResult();
 	}
 
-	public function getParent():IdentifiedObject {
+	public function getParent(): IdentifiedObject
+	{
 		return $this->object;
 	}
 
@@ -71,16 +67,5 @@ class ModelInitialAssignmentRepository implements IDependentEndpointRepository
 			->where('i.modelId = :modelId')
 			->setParameter('modelId', $this->object->getId());
 		return $query;
-	}
-
-
-	public function add($object): void
-	{
-		// TODO: Refactor this method since its pointless in onetomany relationship
-	}
-
-	public function remove($object): void
-	{
-		// TODO: Refactor this method since its pointless in onetomany relationship
 	}
 }

@@ -2,20 +2,8 @@
 
 namespace App\Entity;
 
-
-use App\Exceptions\EntityClassificationException;
-use App\Exceptions\EntityHierarchyException;
-use App\Exceptions\EntityLocationException;
-use App\Helpers\
-{
-	ChangeCollection, ConsistenceEnum
-};
 use Doctrine\Common\Collections\Collection;
-use Doctrine\Common\Collections\Criteria;
-use Doctrine\ORM\Event\PreUpdateEventArgs;
 use Doctrine\ORM\Mapping as ORM;
-use Doctrine\ORM\QueryBuilder;
-use Symfony\Component\Translation\Tests\StringClass;
 
 /**
  * @ORM\Entity
@@ -24,14 +12,7 @@ use Symfony\Component\Translation\Tests\StringClass;
  */
 class ModelUnit implements IdentifiedObject
 {
-
-	/**
-	 * @ORM\Id
-	 * @ORM\Column(type="integer")
-	 * @ORM\GeneratedValue
-	 * @var integer|null
-	 */
-	private $id;
+	use SBase;
 
 	/**
 	 * @ORM\ManyToOne(targetEntity="ModelUnit", inversedBy="referencedBy")
@@ -44,12 +25,6 @@ class ModelUnit implements IdentifiedObject
 	 * @ORM\OneToMany(targetEntity="ModelUnit", mappedBy="baseUnitId")
 	 */
 	private $referencedBy;
-
-	/**
-	 * @var string
-	 * @ORM\Column(type="string")
-	 */
-	private $name;
 
 	/**
 	 * @var string
@@ -69,7 +44,6 @@ class ModelUnit implements IdentifiedObject
 	 */
 	private $multiplier;
 
-
 	/**
 	 * @ORM\ManyToMany(targetEntity="ModelUnitDefinition")
 	 * @ORM\JoinTable(name="model_unit_to_definition",
@@ -81,43 +55,7 @@ class ModelUnit implements IdentifiedObject
 	protected $definitions;
 
 	/**
-	 * Get id
-	 *
-	 * @return integer
-	 */
-	public function getId(): ?int
-	{
-		return $this->id;
-	}
-
-
-	/**
-	 * Get name
-	 *
-	 * @return null|string
-	 */
-	public function getName(): ?string
-	{
-		return $this->name;
-	}
-
-
-	/**
-	 * Set name
-	 *
-	 * @param string $name
-	 *
-	 * @return ModelUnit
-	 */
-	public function setName($name): ModelUnit
-	{
-		$this->name = $name;
-		return $this;
-	}
-
-	/**
 	 * Get symbol
-	 *
 	 * @return null|string
 	 */
 	public function getSymbol(): ?string
@@ -125,12 +63,9 @@ class ModelUnit implements IdentifiedObject
 		return $this->symbol;
 	}
 
-
 	/**
 	 * Set symbol
-	 *
 	 * @param string $symbol
-	 *
 	 * @return ModelUnit
 	 */
 	public function setSymbol($symbol): ModelUnit
@@ -141,7 +76,6 @@ class ModelUnit implements IdentifiedObject
 
 	/**
 	 * Get baseUnitId
-	 *
 	 * @return integer
 	 */
 	public function getBaseUnitId(): ?int
@@ -151,9 +85,7 @@ class ModelUnit implements IdentifiedObject
 
 	/**
 	 * Set baseUnitId
-	 *
 	 * @param int $baseUnitId
-	 *
 	 * @return ModelUnit
 	 */
 	public function setApprovedId($baseUnitId): ModelUnit
@@ -164,7 +96,6 @@ class ModelUnit implements IdentifiedObject
 
 	/**
 	 * Get exponent
-	 *
 	 * @return float
 	 */
 	public function getExponent(): ?float
@@ -172,12 +103,9 @@ class ModelUnit implements IdentifiedObject
 		return $this->exponent;
 	}
 
-
 	/**
 	 * Set exponent
-	 *
 	 * @param float $exponent
-	 *
 	 * @return ModelUnit
 	 */
 	public function setExponent($exponent): ModelUnit
@@ -188,7 +116,6 @@ class ModelUnit implements IdentifiedObject
 
 	/**
 	 * Get multiplier
-	 *
 	 * @return float
 	 */
 	public function getMultiplier(): ?float
@@ -198,9 +125,7 @@ class ModelUnit implements IdentifiedObject
 
 	/**
 	 * Set multiplier
-	 *
 	 * @param float $multiplier
-	 *
 	 * @return ModelUnit
 	 */
 	public function setMultiplier($multiplier): ModelUnit

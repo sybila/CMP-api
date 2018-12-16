@@ -3,23 +3,14 @@
 namespace App\Controllers;
 
 use App\Entity\{
-	Entity,
-	ModelCompartment,
-	ModelEvent,
 	ModelEventAssignment,
-	ModelSpecie,
-	ModelReaction,
 	IdentifiedObject,
 	Repositories\IEndpointRepository,
-	Repositories\ModelRepository,
-	Repositories\ModelCompartmentRepository,
 	Repositories\ModelEventRepository,
-	Repositories\ModelEventAssignmentRepository,
-	Structure
+	Repositories\ModelEventAssignmentRepository
 };
 use App\Exceptions\
 {
-	DependentResourcesBoundException,
 	MissingRequiredKeyException
 };
 use App\Helpers\ArgumentParser;
@@ -31,9 +22,9 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @property-read ModelEventAssignmentRepository $repository
- * @method Entity getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
+ * @method EventAssignment getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
-final class ModelEventAssignmentController extends ParentedRepositoryController
+final class ModelEventAssignmentController extends ParentedSBaseController
 {
 
 	/** @var ModelEventAssignmentRepository */
@@ -53,31 +44,31 @@ final class ModelEventAssignmentController extends ParentedRepositoryController
 	protected function getData(IdentifiedObject $eventAssignment): array
 	{
 		/** @var ModelEventAssignment $eventAssignment */
-		return [
-			'id' => $eventAssignment->getId(),
+		$sBaseData = parent::getData($eventAssignment);
+		return array_merge($sBaseData, [
 			'formula' => $eventAssignment->getFormula()
-		];
+		]);
 	}
 
 	protected function setData(IdentifiedObject $eventAssignment, ArgumentParser $data): void
 	{
 		/** @var ModelEventAssignment $eventAssignment */
+		parent::setData($eventAssignment, $data);
 		$eventAssignment->getEventId() ?: $eventAssignment->setEventId($this->repository->getParent());
 		!$data->hasKey('formula') ?: $eventAssignment->setFormula($data->getString('formula'));
 	}
 
 	protected function createObject(ArgumentParser $body): IdentifiedObject
 	{
-
 		return new ModelEventAssignment;
 	}
 
 	protected function checkInsertObject(IdentifiedObject $eventAssignment): void
 	{
 		/** @var ModelEventAssignment $eventAssignment */
-		if ($eventAssignment->getEventId() == NULL)
+		if ($eventAssignment->getEventId() == null)
 			throw new MissingRequiredKeyException('eventId');
-		if ($eventAssignment->getFormula() == NULL)
+		if ($eventAssignment->getFormula() == null)
 			throw new MissingRequiredKeyException('formula');
 	}
 
@@ -88,10 +79,11 @@ final class ModelEventAssignmentController extends ParentedRepositoryController
 
 	protected function getValidator(): Assert\Collection
 	{
-		return new Assert\Collection([
+		$validatorArray = parent::getValidatorArray();
+		return new Assert\Collection(array_merge($validatorArray, [
 			'eventId' => new Assert\Type(['type' => 'integer']),
 			'formula' => new Assert\Type(['type' => 'string']),
-		]);
+		]));
 	}
 
 	protected static function getObjectName(): string
@@ -103,7 +95,6 @@ final class ModelEventAssignmentController extends ParentedRepositoryController
 	{
 		return ModelEventAssignmentRepository::Class;
 	}
-
 
 	protected static function getParentRepositoryClassName(): string
 	{

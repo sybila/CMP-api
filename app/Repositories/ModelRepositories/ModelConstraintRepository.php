@@ -8,10 +8,8 @@ use App\Entity\IdentifiedObject;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 
-
-class ModelConstraintRepository implements IDependentEndpointRepository
+class ModelConstraintRepository implements IDependentSBaseRepository
 {
-
 	/** @var EntityManager * */
 	protected $em;
 
@@ -32,7 +30,6 @@ class ModelConstraintRepository implements IDependentEndpointRepository
 	public function get(int $id)
 	{
 		return $this->em->find(ModelConstraint::class, $id);
-
 	}
 
 	public function getNumResults(array $filter): int
@@ -46,12 +43,13 @@ class ModelConstraintRepository implements IDependentEndpointRepository
 	public function getList(array $filter, array $sort, array $limit): array
 	{
 		$query = $this->buildListQuery($filter)
-			->select('c.id, c.message, c.formula');
+			->select('c.id, c.name, c.sbmlId, c.sboTerm, c.notes, c.annotation, c.message, c.formula');
 
 		return $query->getQuery()->getArrayResult();
 	}
 
-	public function getParent():IdentifiedObject {
+	public function getParent(): IdentifiedObject
+	{
 		return $this->object;
 	}
 
@@ -70,16 +68,5 @@ class ModelConstraintRepository implements IDependentEndpointRepository
 			->where('c.modelId = :modelId')
 			->setParameter('modelId', $this->object->getId());
 		return $query;
-	}
-
-
-	public function add($object): void
-	{
-		// TODO: Refactor this method since its pointless in onetomany relationship
-	}
-
-	public function remove($object): void
-	{
-		// TODO: Refactor this method since its pointless in onetomany relationship
 	}
 }

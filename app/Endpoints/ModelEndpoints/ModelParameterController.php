@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Entity\{
 	ModelRule,
+	ModelReaction,
 	ModelReactionItem,
 	ModelParameter,
 	IdentifiedObject,
@@ -32,9 +33,8 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @property-read ModelParameterRepository $repository
  * @method ModelParameter getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
-abstract class ModelParameterController extends ParentedRepositoryController
+abstract class ModelParameterController extends ParentedSBaseController
 {
-
 	/** @var ModelParameterRepository */
 	private $parameterRepository;
 
@@ -64,10 +64,8 @@ abstract class ModelParameterController extends ParentedRepositoryController
 	protected function getData(IdentifiedObject $parameter): array
 	{
 		/** @var ModelParameter $parameter */
-		return [
-			'id' => $parameter->getId(),
-			'name' => $parameter->getName(),
-			'sbmlId' => $parameter->getSbmlId(),
+		$sBaseData = parent::getData($parameter);
+		return array_merge($sBaseData, [
 			'value' => $parameter->getValue(),
 			'isConstant' => $parameter->getValue(),
 			'reactionItems' => $parameter->getReactionsItems()->map(function (ModelReactionItem $reactionItem) {
@@ -76,14 +74,13 @@ abstract class ModelParameterController extends ParentedRepositoryController
 			'rules' => $parameter->getRules()->map(function (ModelRule $rule) {
 				return ['id' => $rule->getId(), 'equation' => $rule->getEquation()];
 			})->toArray()
-		];
+		]);
 	}
 
 	protected function setData(IdentifiedObject $parameter, ArgumentParser $data): void
 	{
 		/** @var ModelParameter $parameter */
-		!$data->hasKey('name') ? $parameter->Name($data->getString('sbmlId')) : $parameter->setName($data->getString('name'));
-		!$data->hasKey('sbmlId') ?: $parameter->setSbmlId($data->getString('sbmlId'));
+		parent::setData($parameter, $data);
 		!$data->hasKey('value') ?: $parameter->setValue($data->getString('value'));
 		!$data->hasKey('isConstant') ?: $parameter->setIsConstant($data->getString('isConstant'));
 	}
@@ -95,9 +92,11 @@ abstract class ModelParameterController extends ParentedRepositoryController
 
 	protected function getValidator(): Assert\Collection
 	{
-		return new Assert\Collection([
-			'name' => new Assert\Type(['type' => 'string']),
-		]);
+		$validatorArray = parent::getValidatorArray();
+		return new Assert\Collection(array_merge($validatorArray, [
+			'value' => new Assert\Type(['type' => 'float']),
+			'isConstant' => new Assert\Type(['type' => 'integer']),
+		]));
 	}
 
 	protected static function getObjectName(): string
@@ -171,18 +170,17 @@ final class ReactionItemParentedParameterController extends ModelParameterContro
 		return ['reactionItem-id', 'reactionItem'];
 	}
 
-	protected function setData(IdentifiedObject $parameter, ArgumentParser $data): void
-	{
-		/** @var ModelParameter $parameter */
-	}
-
 	protected function checkInsertObject(IdentifiedObject $parameter): void
 	{
 		/** @var ModelParameter $parameter */
+		if ($parameter->getSbmlId() === null)
+			throw new MissingRequiredKeyException('sbmlId');
 	}
 
 	protected function createObject(ArgumentParser $body): IdentifiedObject
 	{
-		return new ModelReactionItem;
+		if (!$body->hasKey('sbmlId'))
+			throw new MissingRequiredKeyException('sbmlId');
+		return new ModelParameter;
 	}
 }

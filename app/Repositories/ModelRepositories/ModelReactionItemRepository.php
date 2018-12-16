@@ -9,13 +9,16 @@ use App\Entity\IdentifiedObject;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 
-class ModelReactionItemRepository implements IDependentEndpointRepository
+class ModelReactionItemRepository implements IDependentSBaseRepository
 {
 	/** @var EntityManager * */
 	protected $em;
 
 	/** @var \Doctrine\ORM\ModelReactionItemRepository */
 	private $repository;
+
+	/** @var IdentifiedObject */
+	private $parent;
 
 	public function __construct(EntityManager $em)
 	{
@@ -28,9 +31,9 @@ class ModelReactionItemRepository implements IDependentEndpointRepository
 		return [ModelReaction::class, ModelSpecie::class];
 	}
 
-	public function getParent()
+	public function getParent(): IdentifiedObject
 	{
-		return $this->object;
+		return $this->parent;
 	}
 
 	public function get(int $id)
@@ -49,7 +52,7 @@ class ModelReactionItemRepository implements IDependentEndpointRepository
 	public function getList(array $filter, array $sort, array $limit): array
 	{
 		$query = $this->buildListQuery($filter)
-			->select('r.id, r.sbmlId, r.name, r.type, r.value, r.stoichiometry, r.isGlobal');
+			->select('r.id, r.name, r.sbmlId, r.sboTerm, r.notes, r.annotation, r.type, r.value, r.stoichiometry');
 
 		return $query->getQuery()->getArrayResult();
 	}
@@ -61,7 +64,7 @@ class ModelReactionItemRepository implements IDependentEndpointRepository
 		$index = 0;
 		foreach ($classNames as $className) {
 			if ($object instanceof $className) {
-				$this->object = $object;
+				$this->parent = $object;
 				return;
 			}
 			$index == 0 ?: $errorString .= ' or ';
@@ -79,28 +82,19 @@ class ModelReactionItemRepository implements IDependentEndpointRepository
 	private function buildListQuery(array $filter): QueryBuilder
 	{
 		$query = null;
-		if ($this->object instanceof ModelSpecie) {
+		if ($this->parent instanceof ModelSpecie) {
 			$query = $this->em->createQueryBuilder()
 				->from(ModelReactionItem::class, 'r')
 				->where('r.specieId = :specieId')
-				->setParameter('specieId', $this->object->getId());
+				->setParameter('specieId', $this->parent->getId());
 		}
-		if ($this->object instanceof ModelReaction) {
+		if ($this->parent instanceof ModelReaction) {
 			$query = $this->em->createQueryBuilder()
 				->from(ModelReactionItem::class, 'r')
 				->where('r.reactionId = :reactionId')
-				->setParameter('reactionId', $this->object->getId());
+				->setParameter('reactionId', $this->parent->getId());
 		}
 		return $query;
 	}
 
-	public function add($object): void
-	{
-		// TODO: Implement add() method.
-	}
-
-	public function remove($object): void
-	{
-		// TODO: Implement remove() method.
-	}
 }

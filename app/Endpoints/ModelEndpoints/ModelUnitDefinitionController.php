@@ -3,22 +3,16 @@
 namespace App\Controllers;
 
 use App\Entity\{
-	Entity,
 	ModelCompartment,
 	ModelUnit,
 	ModelUnitDefinition,
-	ModelUnitToDefinition,
-	ModelSpecie,
-	ModelReaction,
 	IdentifiedObject,
 	Repositories\IEndpointRepository,
 	Repositories\ModelRepository,
-	Repositories\ModelUnitDefinitionRepository,
-	Structure
+	Repositories\ModelUnitDefinitionRepository
 };
 use App\Exceptions\
 {
-	DependentResourcesBoundException,
 	MissingRequiredKeyException
 };
 use App\Helpers\ArgumentParser;
@@ -30,9 +24,9 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @property-read ModelUnitDefinitionRepository $repository
- * @method Entity getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
+ * @method ModelUnitDefinition getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
-final class ModelUnitDefinitionController extends ParentedRepositoryController
+final class ModelUnitDefinitionController extends ParentedSBaseController
 {
 
 	/** @var ModelUnitDefinitionRepository */
@@ -52,33 +46,33 @@ final class ModelUnitDefinitionController extends ParentedRepositoryController
 	protected function getData(IdentifiedObject $unitDefinition): array
 	{
 		/** @var ModelUnitDefinition $unitDefinition */
-		return [
-			'id' => $unitDefinition->getId(),
-			'name' => $unitDefinition->getName(),
+		$sBaseData = parent::getData($unitDefinition);
+		return array_merge($sBaseData, [
 			'symbol' => $unitDefinition->getSymbol(),
-			'compartmentId' => $unitDefinition->getCompartmentId()->getId(),
+			'compartmentId' => $unitDefinition->getCompartmentId() ? $unitDefinition->getCompartmentId()->getId() : null,
 			'units' => $unitDefinition->getUnits()->map(function (ModelUnit $units) {
 				return ['id' => $units->getId(), 'name' => $units->getName()];
 			})->toArray(),
-		];
+		]);
 	}
 
 	protected function setData(IdentifiedObject $unitDefinition, ArgumentParser $data): void
 	{
 		/** @var ModelUnitDefinition $unitDefinition */
+		parent::setData($unitDefinition, $data);
 		$unitDefinition->getModelId() ?: $unitDefinition->setModelId($this->repository->getParent());
 		!$data->hasKey('name') ?: $unitDefinition->setName($data->getString('name'));
 	}
 
 	protected function createObject(ArgumentParser $body): IdentifiedObject
 	{
-		return new ModelCompartment;
+		return new ModelUnitDefinition;
 	}
 
 	protected function checkInsertObject(IdentifiedObject $unitDefinition): void
 	{
 		/** @var ModelUnitDefinition $unitDefinition */
-		if ($unitDefinition->getModelId() == NULL)
+		if ($unitDefinition->getModelId() == null)
 			throw new MissingRequiredKeyException('modelId');
 	}
 
@@ -89,10 +83,10 @@ final class ModelUnitDefinitionController extends ParentedRepositoryController
 
 	protected function getValidator(): Assert\Collection
 	{
-		return new Assert\Collection([
+		$validatorArray = parent::getValidatorArray();
+		return new Assert\Collection(array_merge($validatorArray, [
 			'modelId' => new Assert\Type(['type' => 'integer']),
-			'name' => new Assert\Type(['type' => 'string']),
-		]);
+		]));
 	}
 
 	protected static function getObjectName(): string
@@ -104,7 +98,6 @@ final class ModelUnitDefinitionController extends ParentedRepositoryController
 	{
 		return ModelUnitDefinitionRepository::Class;
 	}
-
 
 	protected static function getParentRepositoryClassName(): string
 	{

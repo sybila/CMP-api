@@ -26,14 +26,7 @@ use Symfony\Component\Translation\Tests\StringClass;
  */
 class ModelRule implements IdentifiedObject
 {
-
-	/**
-	 * @ORM\Id
-	 * @ORM\Column(type="integer")
-	 * @ORM\GeneratedValue
-	 * @var integer|null
-	 */
-	private $id;
+	use SBase;
 
 	/**
 	 * @var integer
@@ -90,6 +83,17 @@ class ModelRule implements IdentifiedObject
 	}
 
 	/**
+	 * Set modelId
+	 * @param integer $modelId
+	 * @return ModelRule
+	 */
+	public function setModelId($modelId): ModelRule
+	{
+		$this->modelId = $modelId;
+		return $this;
+	}
+
+	/**
 	 * Get parameterId
 	 * @return integer
 	 */
@@ -101,9 +105,9 @@ class ModelRule implements IdentifiedObject
 	/**
 	 * Set parameterId
 	 * @param integer $parameterId
-	 * @return ModelReactionItem
+	 * @return ModelRule
 	 */
-	public function setParameterId($parameterId): ModelReactionItem
+	public function setParameterId($parameterId): ModelRule
 	{
 		$this->parameterId = $parameterId;
 		return $this;
@@ -125,6 +129,15 @@ class ModelRule implements IdentifiedObject
 	public function getSpecieId(): ?int
 	{
 		return $this->specieId;
+	}
+
+	/**
+	 * Get type
+	 * @return string
+	 */
+	public function getType()
+	{
+		return $this->type;
 	}
 
 	/**

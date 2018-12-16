@@ -11,13 +11,7 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class ModelReactionItem implements IdentifiedObject
 {
-	/**
-	 * @ORM\Id
-	 * @ORM\Column(type="integer")
-	 * @ORM\GeneratedValue
-	 * @var integer|null
-	 */
-	private $id;
+	use SBase;
 
 	/**
 	 * @var int
@@ -47,24 +41,6 @@ class ModelReactionItem implements IdentifiedObject
 	protected $type;
 
 	/**
-	 * @var string
-	 * @ORM\Column(type="string")
-	 */
-	protected $name;
-
-	/**
-	 * @var string
-	 * @ORM\Column(type="string", name="sbml_id")
-	 */
-	private $sbmlId;
-
-	/**
-	 * @var int
-	 * @ORM\Column(type="integer", name="is_global")
-	 */
-	protected $isGlobal;
-
-	/**
 	 * @var int
 	 * @ORM\Column(type="integer")
 	 */
@@ -75,15 +51,6 @@ class ModelReactionItem implements IdentifiedObject
 	 * @ORM\Column(type="string")
 	 */
 	protected $stoichiometry;
-
-	/**
-	 * Get id
-	 * @return integer
-	 */
-	public function getId(): ?int
-	{
-		return $this->id;
-	}
 
 	/**
 	 * Get parameterId
@@ -146,46 +113,6 @@ class ModelReactionItem implements IdentifiedObject
 	}
 
 	/**
-	 * Get name
-	 * @return null|string
-	 */
-	public function getName(): ?string
-	{
-		return $this->name;
-	}
-
-	/**
-	 * Set name
-	 * @param string $name
-	 * @return ModelUnitToDefinition
-	 */
-	public function setName($name): ModelReactionItem
-	{
-		$this->name = $name;
-		return $this;
-	}
-
-	/**
-	 * Get sbmlId
-	 * @return string
-	 */
-	public function getSbmlId()
-	{
-		return $this->sbmlId;
-	}
-
-	/**
-	 * Set sbmlId
-	 * @param string $sbmlId
-	 * @return Model
-	 */
-	public function setSbmlId($sbmlId): ModelReactionItem
-	{
-		$this->sbmlId = $sbmlId;
-		return $this;
-	}
-
-	/**
 	 * Get type
 	 * @return null|string
 	 */
@@ -202,26 +129,6 @@ class ModelReactionItem implements IdentifiedObject
 	public function setType($type): ModelReactionItem
 	{
 		$this->type = $type;
-		return $this;
-	}
-
-	/**
-	 * Get isGlobal
-	 * @return integer
-	 */
-	public function getIsGlobal(): ?int
-	{
-		return $this->isGlobal;
-	}
-
-	/**
-	 * Set isGlobal
-	 * @param integer $isGlobal
-	 * @return ModelReactionItem
-	 */
-	public function setIsGlobal($isGlobal): ModelReactionItem
-	{
-		$this->isGlobal = $isGlobal;
 		return $this;
 	}
 

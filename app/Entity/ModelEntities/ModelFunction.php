@@ -34,12 +34,6 @@ class ModelFunction implements IdentifiedObject
 
 	/**
 	 * @var string
-	 * @ORM\Column(type="string", name="sbml_id")
-	 */
-	private $sbmlId;
-
-	/**
-	 * @var string
 	 * @ORM\Column(type="string")
 	 */
 	protected $formula;
@@ -70,26 +64,6 @@ class ModelFunction implements IdentifiedObject
 	public function setName($name): ModelFunction
 	{
 		$this->name = $name;
-		return $this;
-	}
-
-	/**
-	 * Get sbmlId
-	 * @return string
-	 */
-	public function getSbmlId()
-	{
-		return $this->sbmlId;
-	}
-
-	/**
-	 * Set sbmlId
-	 * @param string $sbmlId
-	 * @return Model
-	 */
-	public function setSbmlId($sbmlId): Model
-	{
-		$this->sbmlId = $sbmlId;
 		return $this;
 	}
 
