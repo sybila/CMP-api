@@ -43,7 +43,6 @@ abstract class RepositoryController extends AbstractController
 
 	protected function getReadIds(ArgumentParser $args): array
 	{
-		// id parameter format should be checked in route
 		return array_map(function($item)
 		{
 			return (int)$item;
@@ -86,7 +85,6 @@ abstract class RepositoryController extends AbstractController
 	}
 
 	/**
-	 * TODO: Refactor!
 	 * @param int                      $id
 	 * @param IEndpointRepository|null $repository
 	 * @param string|null              $objectName

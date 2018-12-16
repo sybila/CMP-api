@@ -33,6 +33,25 @@ class ModelInitialAssignment implements IdentifiedObject
 	{
 		return $this->id;
 	}
+	/**
+	 * Get modelId
+	 * @return integer|null
+	 */
+	public function getModelId()
+	{
+		return $this->modelId;
+	}
+
+	/**
+	 * Set modelId
+	 * @param integer $modelId
+	 * @return ModelInitialAssignment
+	 */
+	public function setModelId($modelId): ModelInitialAssignment
+	{
+		$this->modelId = $modelId;
+		return $this;
+	}
 
 	/**
 	 * Get formula
