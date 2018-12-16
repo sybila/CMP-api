@@ -30,12 +30,6 @@ class ModelSpecie implements IdentifiedObject
 
 	/**
 	 * @var string
-	 * @ORM\Column(type="string", name="equation_type")
-	 */
-	protected $equationType;
-
-	/**
-	 * @var string
 	 * @ORM\Column(type="string", name="initial_expression")
 	 */
 	protected $initialExpression;
@@ -107,26 +101,6 @@ class ModelSpecie implements IdentifiedObject
 	public function setCompartmentId($compartmentId): ModelSpecie
 	{
 		$this->compartmentId = $compartmentId;
-		return $this;
-	}
-
-	/**
-	 * Get equationType
-	 * @return string
-	 */
-	public function getEquationType(): ?string
-	{
-		return $this->equationType;
-	}
-
-	/**
-	 * Set equationType
-	 * @param string $equationType
-	 * @return ModelSpecie
-	 */
-	public function setEquationType($equationType): ModelSpecie
-	{
-		$this->equationType = $equationType;
 		return $this;
 	}
 

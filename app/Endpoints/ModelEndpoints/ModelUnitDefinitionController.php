@@ -49,7 +49,7 @@ final class ModelUnitDefinitionController extends ParentedSBaseController
 		$sBaseData = parent::getData($unitDefinition);
 		return array_merge($sBaseData, [
 			'symbol' => $unitDefinition->getSymbol(),
-			'compartmentId' => $unitDefinition->getCompartmentId()->getId(),
+			'compartmentId' => $unitDefinition->getCompartmentId() ? $unitDefinition->getCompartmentId()->getId() : null,
 			'units' => $unitDefinition->getUnits()->map(function (ModelUnit $units) {
 				return ['id' => $units->getId(), 'name' => $units->getName()];
 			})->toArray(),
@@ -66,7 +66,7 @@ final class ModelUnitDefinitionController extends ParentedSBaseController
 
 	protected function createObject(ArgumentParser $body): IdentifiedObject
 	{
-		return new ModelCompartment;
+		return new ModelUnitDefinition;
 	}
 
 	protected function checkInsertObject(IdentifiedObject $unitDefinition): void

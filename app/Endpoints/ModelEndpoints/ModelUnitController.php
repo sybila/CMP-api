@@ -55,7 +55,7 @@ final class ModelUnitController extends SBaseController
 			'baseUnitId' => $modelUnit->getBaseUnitId(),
 			'symbol' => $modelUnit->getSymbol(),
 			'exponent' => $modelUnit->getExponent(),
-			'multiplier' => $modelUnit->getExponent()
+			'multiplier' => $modelUnit->getMultiplier()
 		]);
 	}
 
@@ -65,8 +65,8 @@ final class ModelUnitController extends SBaseController
 		parent::setData($modelUnit, $data);
 		!$data->hasKey('baseUnitId') ?: $modelUnit->setSymbol($data->getInt('baseUnitId'));
 		!$data->hasKey('symbol') ?: $modelUnit->setSymbol($data->getString('symbol'));
-		!$data->hasKey('exponent') ?: $modelUnit->setExponent($data->getExponent('exponent'));
-		!$data->hasKey('multiplier') ?: $modelUnit->setMultiplier($data->getString('multiplier'));
+		!$data->hasKey('exponent') ?: $modelUnit->setExponent($data->getFloat('exponent'));
+		!$data->hasKey('multiplier') ?: $modelUnit->setMultiplier($data->getFloat('multiplier'));
 	}
 
 	protected function createObject(ArgumentParser $body): IdentifiedObject

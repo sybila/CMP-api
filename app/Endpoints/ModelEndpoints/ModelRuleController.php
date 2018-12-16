@@ -6,19 +6,17 @@ use App\Entity\
 {
 	Entity,
 	IdentifiedObject,
+	ModelRule,
 	Repositories\IEndpointRepository,
 	Repositories\ModelRepository,
 	Repositories\ModelRuleRepository
 };
 use App\Exceptions\
 {
-	CompartmentLocationException,
 	InvalidArgumentException,
-	MissingRequiredKeyException,
-	UniqueKeyViolationException
+	MissingRequiredKeyException
 };
 use App\Helpers\ArgumentParser;
-use App\Helpers\Validators;
 use Slim\Container;
 use Slim\Http\{
 	Request, Response
@@ -39,7 +37,6 @@ abstract class ModelRuleController extends ParentedSBaseController
 	{
 		parent::__construct($c);
 		$this->modelRuleRepository = $c->get(ModelRuleRepository::class);
-
 	}
 
 	protected static function getAllowedSort(): array
@@ -50,12 +47,11 @@ abstract class ModelRuleController extends ParentedSBaseController
 	protected function getData(IdentifiedObject $rule): array
 	{
 		/** @var ModelRule $rule */
-		return [
-			'id' => $rule->getId(),
+		$sBaseData = parent::getData($rule);
+		return array_merge($sBaseData, [
 			'modelId' => $rule->getModelId(),
-		];
+		]);
 	}
-
 
 	protected function createObject(ArgumentParser $body): IdentifiedObject
 	{
@@ -66,7 +62,6 @@ abstract class ModelRuleController extends ParentedSBaseController
 		return new $cls;
 	}
 
-
 	public function delete(Request $request, Response $response, ArgumentParser $args): Response
 	{
 		try {
@@ -75,7 +70,6 @@ abstract class ModelRuleController extends ParentedSBaseController
 			throw new InvalidArgumentException('annotation', $args->getString('annotation'), 'must be in format term:id');
 		}
 		return $a;
-
 	}
 
 	protected function getValidator(): Assert\Collection
@@ -97,8 +91,8 @@ abstract class ModelRuleController extends ParentedSBaseController
 
 }
 
-final class ModelParentedRuleController extends ModelRuleController {
-
+final class ModelParentedRuleController extends ModelRuleController
+{
 
 	protected static function getParentRepositoryClassName(): string
 	{
@@ -110,20 +104,24 @@ final class ModelParentedRuleController extends ModelRuleController {
 		return ['model-id', 'model'];
 	}
 
-
-	protected function setData(IdentifiedObject $reactionItem, ArgumentParser $data): void
+	protected function setData(IdentifiedObject $rule, ArgumentParser $data): void
 	{
-		/** @var ModelParameter $parameter */
+		/** @var Rule $rule */
+		parent::setData($rule, $data);
+		$rule->setModelId($this->repository->getParent()->getId());
+		!$data->hasKey('equation') ?: $rule->setEquation($data->getString('equation'));
+		!$data->hasKey('type') ?: $rule->setType($data->getString('type'));
 	}
 
-	protected function checkInsertObject(IdentifiedObject $reactionItem): void
+	protected function checkInsertObject(IdentifiedObject $rule): void
 	{
 		/** @var ModelParameter $parameter */
+		if ($rule->getType() === null)
+			throw new MissingRequiredKeyException('modelId');
 	}
 
 	protected function createObject(ArgumentParser $body): IdentifiedObject
 	{
-		return new ModelReactionItem;
+		return new ModelRule;
 	}
-
 }

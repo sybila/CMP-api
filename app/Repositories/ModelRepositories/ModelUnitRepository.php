@@ -6,9 +6,8 @@ use App\Entity\ModelUnit;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 
-class ModelUnitRepository implements IEndpointRepository
+class ModelUnitRepository implements ISBaseRepository
 {
-
 	/** @var EntityManager * */
 	protected $em;
 

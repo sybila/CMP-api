@@ -3,9 +3,9 @@
 namespace App\Controllers;
 
 use App\Entity\{
-	ModelUnitToDefinition,
 	ModelReactionItem,
 	ModelSpecie,
+	ModelRule,
 	IdentifiedObject,
 	Repositories\ModelSpecieRepository,
 	Repositories\IEndpointRepository,
@@ -58,7 +58,6 @@ final class ModelSpecieController extends ParentedSBaseController
 		/** @var ModelSpecie $specie */
 		$sBaseData = parent::getData($specie);
 		return array_merge($sBaseData, [
-			'equationType' => $specie->getEquationType(),
 			'initialExpression' => $specie->getInitialExpression(),
 			'hasOnlySubstanceUnits' => $specie->getHasOnlySubstanceUnits(),
 			'isConstant' => $specie->getIsConstant(),
@@ -78,7 +77,6 @@ final class ModelSpecieController extends ParentedSBaseController
 		parent::setData($specie, $data);
 		$specie->setModelId($this->repository->getParent()->getModelId()->getId());
 		$specie->getCompartmentId() ?: $specie->setCompartmentId($this->repository->getParent());
-		!$data->hasKey('equationType') ?: $specie->setEquationType($data->getString('equationType'));
 		!$data->hasKey('initialExpression') ?: $specie->setInitialExpression($data->getString('initialExpression'));
 		!$data->hasKey('boundaryCondition') ?: $specie->setBoundaryCondition($data->getInt('boundaryCondition'));
 		!$data->hasKey('hasOnlySubstanceUnits') ?: $specie->setHasOnlySubstanceUnits($data->getInt('hasOnlySubstanceUnits'));

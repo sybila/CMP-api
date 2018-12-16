@@ -69,14 +69,4 @@ class ModelUnitDefinitionRepository implements IDependentSBaseRepository
 			->setParameter('modelId', $this->object->getId());
 		return $query;
 	}
-
-	public function add($object): void
-	{
-		// TODO: Refactor this method since its pointless in onetomany relationship
-	}
-
-	public function remove($object): void
-	{
-		// TODO: Refactor this method since its pointless in onetomany relationship
-	}
 }

@@ -2,27 +2,22 @@
 
 namespace App\Entity\Repositories;
 
-use App\Entity\Atomic;
-use App\Entity\AtomicState;
 use App\Entity\ModelRule;
-use App\Entity\Complex;
 use App\Entity\Model;
-use App\Entity\ModelUnitToDefinition;
-use App\Entity\EntityStatus;
 use App\Entity\IdentifiedObject;
-use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 
-
-class ModelRuleRepository implements IDependentEndpointRepository
+class ModelRuleRepository implements IDependentSBaseRepository
 {
-
 	/** @var EntityManager * */
 	protected $em;
 
 	/** @var \Doctrine\ORM\ModelRuleRepository */
 	private $repository;
+
+	/** @var IdentifiedObject */
+	private $object;
 
 	public function __construct(EntityManager $em)
 	{
@@ -38,7 +33,6 @@ class ModelRuleRepository implements IDependentEndpointRepository
 	public function get(int $id)
 	{
 		return $this->em->find(ModelRule::class, $id);
-
 	}
 
 	public function getNumResults(array $filter): int
@@ -73,19 +67,11 @@ class ModelRuleRepository implements IDependentEndpointRepository
 			->from(ModelRule::class, 'r')
 			->where('r.modelId = :modelId')
 			->setParameter('modelId', $this->object->getId());
-
-
 		return $query;
 	}
 
-
-	public function add($object): void
+	public function getParent(): IdentifiedObject
 	{
-		// TODO: Implement add() method.
-	}
-
-	public function remove($object): void
-	{
-		// TODO: Implement remove() method.
+		return $this->object;
 	}
 }

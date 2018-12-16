@@ -51,7 +51,7 @@ class ModelSpecieRepository implements IDependentSBaseRepository
 	public function getList(array $filter, array $sort, array $limit): array
 	{
 		$query = $this->buildListQuery($filter)
-			->select('s.id, s.name, s.sbmlId, s.sboTerm, s.notes, s.annotation, s.equationType, s.initialExpression, s.hasOnlySubstanceUnits, s.isConstant, s.boundaryCondition');
+			->select('s.id, s.name, s.sbmlId, s.sboTerm, s.notes, s.annotation, s.initialExpression, s.hasOnlySubstanceUnits, s.isConstant, s.boundaryCondition');
 		return $query->getQuery()->getArrayResult();
 	}
 
