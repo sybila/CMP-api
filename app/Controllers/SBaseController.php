@@ -52,9 +52,26 @@ abstract class ParentedSBaseController extends SBaseController
 	/** @var IEndpointRepository */
 	protected $parentRepository;
 
+	/**
+	 * Get parent repository class name
+	 * @return string
+	 */
 	abstract protected static function getParentRepositoryClassName(): string;
+
+	/**
+	 * Get array defining format of parent object information
+	 * @return array
+	 */
 	abstract protected function getParentObjectInfo(): array;
 
+	/**
+	 * Fetch correctly instantiated parent object
+	 * @param ArgumentParser $args
+	 * @return IdentifiedObject
+	 * @throws MissingRequiredKeyException
+	 * @throws NonExistingObjectException
+	 * @throws \App\Exceptions\InvalidTypeException
+	 */
 	protected function getParentObject(ArgumentParser $args): IdentifiedObject
 	{
 		$info = static::getParentObjectInfo();
