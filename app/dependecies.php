@@ -2,9 +2,16 @@
 
 use App\Helpers\DateTimeJsonType;
 use App\Entity\Repositories as EntityRepo;
+use App\Repositories\Authorization as AuthRepo;
 use App\Helpers;
+use Defuse\Crypto\Key;
 use Doctrine\ORM\EntityManager;
 use Doctrine\DBAL\Types\Type;
+use League\OAuth2\Server\AuthorizationServer;
+use League\OAuth2\Server\Grant\ClientCredentialsGrant;
+use League\OAuth2\Server\Grant\PasswordGrant;
+use League\OAuth2\Server\Grant\RefreshTokenGrant;
+use League\OAuth2\Server\ResourceServer;
 use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;
@@ -193,6 +200,57 @@ $c[EntityRepo\ModelInitialAssignmentRepository::class] = function (Container $c)
 
 $c[EntityRepo\ModelParameterRepository::class] = function (Container $c) {
 	return new EntityRepo\ModelParameterRepository($c[EntityManager::class]);
+};
+
+$c[AuthRepo\ClientRepository::class] = function (Container $c) {
+	return new AuthRepo\ClientRepository($c[EntityManager::class]);
+};
+
+$c[AuthRepo\UserRepository::class] = function (Container $c) {
+	return new AuthRepo\UserRepository($c[EntityManager::class]);
+};
+
+$c[AuthRepo\ScopeRepository::class] = function (Container $c) {
+	return new AuthRepo\ScopeRepository;
+};
+
+$c[AuthRepo\AccessTokenRepository::class] = function (Container $c) {
+	return new AuthRepo\AccessTokenRepository($c[EntityManager::class]);
+};
+
+$c[AuthRepo\RefreshTokenRepository::class] = function(Container $c)
+{
+	return new AuthRepo\RefreshTokenRepository($c[EntityManager::class]);
+};
+
+$c[AuthorizationServer::class] = function (Container $c) {
+	$srv = new AuthorizationServer(
+		$c[AuthRepo\ClientRepository::class],
+		$c[AuthRepo\AccessTokenRepository::class],
+		$c[AuthRepo\ScopeRepository::class],
+		$c->settings['oauth']['privateKey'],
+		Key::loadFromAsciiSafeString($c->settings['oauth']['encryptionKey'])
+	);
+
+	$srv->enableGrantType(new RefreshTokenGrant(
+		$c[AuthRepo\RefreshTokenRepository::class]
+	));
+
+	$srv->enableGrantType(new PasswordGrant(
+		$c[AuthRepo\UserRepository::class],
+		$c[AuthRepo\RefreshTokenRepository::class]
+	));
+
+	$srv->enableGrantType(new ClientCredentialsGrant);
+
+	return $srv;
+};
+
+$c[ResourceServer::class] = function (Container $c) {
+	return new ResourceServer(
+		$c[AuthRepo\AccessTokenRepository::class],
+		$c->settings['oauth']['publicKey']
+	);
 };
 
 return $c;
