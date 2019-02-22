@@ -2,7 +2,6 @@
 
 use App\Helpers\DateTimeJsonType;
 use App\Entity\Repositories as EntityRepo;
-use App\Entity\Authentication\Repository as AuthRepo;
 use App\Helpers;
 use Doctrine\ORM\EntityManager;
 use Doctrine\DBAL\Types\Type;
@@ -193,51 +192,6 @@ $c[EntityRepo\ModelInitialAssignmentRepository::class] = function (Container $c)
 
 $c[EntityRepo\ModelParameterRepository::class] = function (Container $c) {
 	return new EntityRepo\ModelParameterRepository($c[EntityManager::class]);
-};
-
-$c[AuthRepo\ClientRepository::class] = function (Container $c) {
-	return new AuthRepo\ClientRepository($c[EntityManager::class]);
-};
-
-$c[AuthRepo\UserRepository::class] = function (Container $c) {
-	return new AuthRepo\UserRepository($c[EntityManager::class]);
-};
-
-$c[AuthRepo\ScopeRepository::class] = function (Container $c) {
-	return new AuthRepo\ScopeRepository($c[EntityManager::class]);
-};
-
-$c[AuthRepo\AccessTokenRepository::class] = function (Container $c) {
-	return new AuthRepo\AccessTokenRepository($c);
-};
-
-$c[AuthRepo\RefreshTokenRepository::class] = function (Container $c) {
-	return new AuthRepo\RefreshTokenRepository($c);
-};
-
-$c[\League\OAuth2\Server\AuthorizationServer::class] = function (Container $c) {
-	$srv = new \League\OAuth2\Server\AuthorizationServer(
-		$c[AuthRepo\ClientRepository::class],
-		$c[AuthRepo\AccessTokenRepository::class],
-		$c[AuthRepo\ScopeRepository::class],
-		$c->settings['oauth']['privateKey'],
-		$c->settings['oauth']['encryptionKey']
-	);
-
-	$srv->enableGrantType(new \League\OAuth2\Server\Grant\RefreshTokenGrant(
-		$c[AuthRepo\RefreshTokenRepository::class]
-	));
-
-//	$srv->enableGrantType();
-
-	return $srv;
-};
-
-$c[\League\OAuth2\Server\ResourceServer::class] = function (Container $c) {
-	return new \League\OAuth2\Server\ResourceServer(
-		$c[\App\Entity\Authentication\Repository\AccessTokenRepository::class],
-		$c->settings['oauth']['publicKey']
-	);
 };
 
 return $c;
