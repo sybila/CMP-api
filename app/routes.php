@@ -2,6 +2,8 @@
 
 use App\Controllers as Ctl;
 use App\Helpers;
+use League\OAuth2\Server\Middleware\ResourceServerMiddleware;
+use League\OAuth2\Server\ResourceServer;
 use Slim\App;
 use Slim\Http\Request;
 use Slim\Http\Response;
@@ -19,6 +21,9 @@ class RouteHelper
 	/** @var App */
 	public static $app;
 
+	/** @var League\OAuth2\Server\Middleware\ */
+	public static $authMiddleware;
+
 	/** @var string */
 	private $path;
 
@@ -27,6 +32,9 @@ class RouteHelper
 
 	/** @var int */
 	private $mask = self::ALL;
+
+	/** @var int */
+	private $authMask = 0;
 
 	public function setRoute(string $className, string $path): RouteHelper
 	{
@@ -41,28 +49,57 @@ class RouteHelper
 		return $this;
 	}
 
+	public function setAuthMask(int $mask): RouteHelper
+	{
+		$this->authMask = $mask;
+		return $this;
+	}
+
 	public function register(string $idName = 'id')
 	{
+		$routes = [];
+
 		if ($this->mask & self::LIST)
-			self::$app->get($this->path, $this->className . ':read');
+		{
+			$routes[] = $route = self::$app->get($this->path, $this->className . ':read');
+			if ($this->authMask & self::LIST)
+				$route->add(self::$authMiddleware);
+		}
 
 		if ($this->mask & self::DETAIL)
-			self::$app->get($this->path . '/{' . $idName . ':(?:\\d,?)+}', $this->className . ':readIdentified');
+		{
+			$routes[] = $route = self::$app->get($this->path . '/{' . $idName . ':(?:\\d,?)+}', $this->className . ':readIdentified');
+			if ($this->authMask & self::LIST)
+				$route->add(self::$authMiddleware);
+		}
 
 		if ($this->mask & self::ADD)
-			self::$app->post($this->path, $this->className . ':add');
+		{
+			$routes[] = $route = self::$app->post($this->path, $this->className . ':add');
+			if ($this->authMask & self::LIST)
+				$route->add(self::$authMiddleware);
+		}
 
 		if ($this->mask & self::EDIT)
-			self::$app->put($this->path . '/{' . $idName . ':\\d+}', $this->className . ':edit');
+		{
+			$routes[] = $route = self::$app->put($this->path . '/{' . $idName . ':\\d+}', $this->className . ':edit');
+			if ($this->authMask & self::LIST)
+				$route->add(self::$authMiddleware);
+		}
 
 		if ($this->mask & self::DELETE)
-			self::$app->delete($this->path . '/{' . $idName . ':\\d+}', $this->className . ':delete');
+		{
+			$routes[] = $route = self::$app->delete($this->path . '/{' . $idName . ':\\d+}', $this->className . ':delete');
+			if ($this->authMask & self::LIST)
+				$route->add(self::$authMiddleware);
+		}
 	}
 }
 
 return function(App $app)
 {
 	RouteHelper::$app = $app;
+	RouteHelper::$authMiddleware = new ResourceServerMiddleware($app->getContainer()[ResourceServer::class]);
 
 	// main
 	$app->get('/', function (Request $request, Response $response, Helpers\ArgumentParser $args)
@@ -72,6 +109,7 @@ return function(App $app)
 
 	// version
 	$app->get('/version', Ctl\VersionController::class);
+	$app->post('/authorize', Ctl\AuthorizeController::class);
 
 	// annotations
 	$app->get('/annotations/types', Ctl\AnnotationController::class . ':readTypes');
