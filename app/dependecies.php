@@ -12,6 +12,7 @@ use Slim\Http\Response;
 $config = require __DIR__ . '/../app/settings.php';
 
 Type::overrideType('datetime', DateTimeJsonType::class);
+Type::overrideType('datetime_immutable', DateTimeJsonType::class);
 Type::overrideType('datetimetz', DateTimeJsonType::class);
 
 $c = new Container($config);

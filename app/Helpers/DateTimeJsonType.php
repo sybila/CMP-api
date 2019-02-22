@@ -2,12 +2,13 @@
 
 namespace App\Helpers;
 
+use DateTimeImmutable;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Types\ConversionException;
 use Doctrine\DBAL\Types\DateTimeImmutableType;
 use JsonSerializable;
 
-class DateTimeJson extends \DateTimeImmutable implements JsonSerializable
+class DateTimeJson extends DateTimeImmutable implements JsonSerializable
 {
 	public function jsonSerialize()
 	{
@@ -17,7 +18,7 @@ class DateTimeJson extends \DateTimeImmutable implements JsonSerializable
 	public static function createFromFormat($format, $time, $timezone = null)
 	{
 		return new static(
-			\DateTimeImmutable::createFromFormat($format, $time, $timezone)->format(\DateTime::ATOM)
+			DateTimeImmutable::createFromFormat($format, $time, $timezone)->format(\DateTime::ATOM)
 		);
 	}
 
@@ -36,6 +37,26 @@ class DateTimeJson extends \DateTimeImmutable implements JsonSerializable
 
 class DateTimeJsonType extends DateTimeImmutableType
 {
+	public function convertToDatabaseValue($value, AbstractPlatform $platform)
+	{
+		if (null === $value) {
+			return $value;
+		}
+
+		if ($value instanceof DateTimeImmutable || $value instanceof DateTimeJson) {
+			return $value->format($platform->getDateTimeFormatString());
+		}
+		elseif ($value instanceof \DateTimeInterface) {
+			return $this->convertToDatabaseValue(DateTimeJson::createFromDateTime($value), $platform);
+		}
+
+		throw ConversionException::conversionFailedInvalidType(
+			$value,
+			$this->getName(),
+			['null', DateTimeImmutable::class]
+		);
+	}
+
 	public function convertToPHPValue($value, AbstractPlatform $platform)
 	{
 		if ($value === null || $value instanceof DateTimeJson) {
