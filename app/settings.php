@@ -48,6 +48,11 @@ return array_replace_recursive([
 					PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES "utf8"',
 				]
 			]
-		]
-	]
+		],
+		'oauth' => [
+			'publicKey' => null,
+			'privateKey' => null,
+			'encryptionKey' => null,
+		],
+	],
 ], require __DIR__ . '/settings.local.php');
