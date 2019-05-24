@@ -202,6 +202,14 @@ $c[EntityRepo\ModelParameterRepository::class] = function (Container $c) {
 	return new EntityRepo\ModelParameterRepository($c[EntityManager::class]);
 };
 
+$c[EntityRepo\AnalysisToolRepository::class] = function (Container $c) {
+    return new EntityRepo\AnalysisToolRepository($c[EntityManager::class]);
+};
+
+$c[EntityRepo\AnalysisToolSettingRepository::class] = function (Container $c) {
+    return new EntityRepo\AnalysisToolSettingRepository($c[EntityManager::class]);
+};
+
 $c[AuthRepo\ClientRepository::class] = function (Container $c) {
 	return new AuthRepo\ClientRepository($c[EntityManager::class]);
 };
