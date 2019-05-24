@@ -40,7 +40,7 @@ class AnalysisTool implements IdentifiedObject
      * @var Collection
      * @ORM\OneToMany(targetEntity="AnalysisToolSetting", mappedBy="procId", cascade={"persist"})
      */
-    protected $analysisToolSettings;
+    //protected $analysisToolSettings;
 
     /**
      * @var string
