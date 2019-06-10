@@ -1,31 +1,31 @@
 <?php
 
-use App\Entity\{Model,
+namespace App\Controllers;
+
+use App\Entity\{AnalysisToolSetting,
+    Model,
     IdentifiedObject,
-    ModelCompartment,
-    ModelConstraint,
-    ModelEvent,
-    ModelFunctionDefinition,
-    ModelInitialAssignment,
-    ModelParameter,
-    ModelReaction,
-    ModelRule,
-    ModelUnitDefinition,
+    ModelTask,
     Repositories\IEndpointRepository,
-    Repositories\ModelRepository,
     Repositories\ModelTaskRepository};
 use App\Exceptions\{
     DependentResourcesBoundException,
     MissingRequiredKeyException
 };
 use App\Helpers\ArgumentParser;
+use App\Entity\ModelChange;
 use Slim\Container;
 use Slim\Http\{
     Request, Response
 };
 use Symfony\Component\Validator\Constraints as Assert;
 
-final class ModelTaskController extends \App\Controllers\SBaseController
+
+/**
+ * @property-read ModelTaskRepository $repository
+ * @method ModelTask getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
+ */
+final class ModelTaskController extends WritableRepositoryController
 {
 
     /** @var ModelTaskRepository */
@@ -43,42 +43,61 @@ final class ModelTaskController extends \App\Controllers\SBaseController
         return ['id, name, userId, modelId, analysisToolId, isPostponed'];
     }
 
-    protected function getData(IdentifiedObject $analysisTool): array
+    protected function getData(IdentifiedObject $modelTask): array
     {
         /** @var ModelTask $modelTask */
-        $sBaseData = parent::getData($modelTask);
-        return array_merge($sBaseData, [
+        return [
             'name' => $modelTask->getName(),
             'userId' => $modelTask->getUserId(),
-            'description' => $modelTask->getDescription(),
-            'vizId' => $modelTask->getVizId(),
-            'location' => $modelTask->getLocation(),
+            'modelId' => $modelTask->getModelId(),
+            'analysisToolId' => $modelTask->getAnalysisToolId(),
+            'isPostponed' => $modelTask->getIsPostponed(),
+            'isPublic' => $modelTask->getIsPublic(),
+            'outputPath' => $modelTask->getOutputPath(),
             'settings' => $modelTask->getAnalysisToolSettings()->map(function (AnalysisToolSetting $analSet) {
-                return ['id' => $analSet->getId(), 'name' => $analSet->getName()];
-            })->toArray(),
+                return ['id' => $analSet->getId(), 'name' => $analSet->getName(), 'value' => $analSet->getValue()];
+                })->toArray(),
             'modelChanges' => $modelTask->getModelChanges()->map(function (ModelChange $modelChange) {
-        return ['id' => $modelChange->getId(), 'name' => $modelChange->getName()];
-            })->toArray()
-        ]);
+                return ['type' => $modelChange->getType(), 'origin' => $modelChange->getOriginId(), 'value' => $modelChange->getValue()];
+                })->toArray()
+        ];
     }
 
-    /**
-     * Create object to be inserted, can be as simple as `return new SomeObject;`
-     * @param \App\Helpers\ArgumentParser $body request body
-     * @return \App\Entity\IdentifiedObject
-     */
+    protected function setData(IdentifiedObject $modelTask, ArgumentParser $data): void
+    {
+        /** @var ModelTask $modelTask */
+        parent::setData($modelTask, $data);
+        !$data->hasKey('userId') ?: $modelTask->setUserId($data->getString('userId'));
+        !$data->hasKey('modelId') ?: $modelTask->setModelId($data->getString('modelId'));
+        //!$data->hasKey('description') ?: $modelTask->setDescription($data->getString('description'));
+    }
+
     protected function createObject(\App\Helpers\ArgumentParser $body): \App\Entity\IdentifiedObject
     {
-        // TODO: Implement createObject() method.
+        if (!$body->hasKey('modelId'))
+            throw new MissingRequiredKeyException('modelId');
+        if (!$body->hasKey('analysisToolId'))
+            throw new MissingRequiredKeyException('analysisToolId');
+        return new Model;
     }
 
-    /**
-     * Check object to be inserted if it contains all required fields
-     * @param \App\Entity\IdentifiedObject $object
-     */
+
     protected function checkInsertObject(\App\Entity\IdentifiedObject $object): void
     {
-        // TODO: Implement checkInsertObject() method.
+        /** @var ModelTask $modelTask */
+        if ($modelTask->getUserId() === null)
+            throw new MissingRequiredKeyException('userId');
+    }
+
+    public function delete(Request $request, Response $response, ArgumentParser $args): Response
+    {
+        /** @var ModelTask $modelTask */
+        $model = $this->getObject($args->getInt('id'));
+        if (!$model->getModelChanges()->isEmpty())
+            throw new DependentResourcesBoundException('modelChanges');
+        if (!$model->getAnalysisToolSettings()->isEmpty())
+            throw new DependentResourcesBoundException('analysisToolSettings');
+        return parent::delete($request, $response, $args);
     }
 
     protected function getValidator(): Assert\Collection
@@ -91,14 +110,14 @@ final class ModelTaskController extends \App\Controllers\SBaseController
         ]));
     }
 
-    protected static function getRepositoryClassName(): string
-    {
-        return ModelTaskRepository::Class;
-    }
-
     protected static function getObjectName(): string
     {
         return 'modelTask';
+    }
+
+    protected static function getRepositoryClassName(): string
+    {
+        return ModelTaskRepository::Class;
     }
 
     protected function getSub($entity)

@@ -1013,6 +1013,18 @@ resourceTypes:
           is: [Update: {type: ModelUnitDefinition}]
         delete:
           is: [Delete]
+    /modelTasks:
+      get:
+        is: [Collection: {type: ListModelTask}, Sortable: {keys: 'id, modelId'}]
+      post:
+        is: [Insert: {type: ModelUnitDefinition}]
+      /{id}:
+        get:
+          is: [ObjectList: {type: ModelUnitDefinition}]
+        put:
+          is: [Update: {type: ModelUnitDefinition}]
+        delete:
+          is: [Delete]
 /units:
   get:
     is: [Collection: {type: ListModelUnit}, Sortable: {keys: 'id'}]
@@ -1023,5 +1035,17 @@ resourceTypes:
       is: [ObjectList: {type: ModelUnit}]
     put:
       is: [Update: {type: ModelUnit}]
+    delete:
+      is: [Delete]
+/analysisTools:
+  get:
+    is: [Collection: {type: ListAnalysisTool}, Sortable: {keys: 'id'}]
+  post:
+    is: [Insert: {type: AnalysisTool}]
+  /{id}:
+    get:
+      is: [ObjectList: {type: AnalysisTool}]
+    put:
+      is: [Update: {type: AnalysisTool}]
     delete:
       is: [Delete]

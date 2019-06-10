@@ -8,7 +8,7 @@ use App\Entity\AnalysisTool;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 
-class AnalysisToolRepository implements IEndpointRepository
+class AnalysisToolRepository implements IEndpointRepository //ISBaseRepository
 {
     /** @var EntityManager * */
     protected $em;
