@@ -4,10 +4,8 @@ namespace App\Entity\Repositories;
 
 use App\Entity\AnalysisTool;
 use App\Entity\AnalysisToolSetting;
-use App\Entity\ModelReaction;
-use App\Entity\ModelSpecie;
-use App\Entity\ModelReactionItem;
 use App\Entity\IdentifiedObject;
+use App\Entity\ModelTask;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 
@@ -25,12 +23,12 @@ class AnalysisToolSettingRepository implements IDependentSBaseRepository
     public function __construct(EntityManager $em)
     {
         $this->em = $em;
-        $this->repository = $em->getRepository(ModelReactionItem::class);
+        $this->repository = $em->getRepository(AnalysisToolSetting::class);
     }
 
     protected static function getParentClassName(): array
     {
-        return [AnalysisTool::class];
+        return [AnalysisTool::class, ModelTaskRepository::class];
     }
 
     public function getParent(): IdentifiedObject
@@ -54,7 +52,7 @@ class AnalysisToolSettingRepository implements IDependentSBaseRepository
     public function getList(array $filter, array $sort, array $limit): array
     {
         $query = $this->buildListQuery($filter)
-            ->select('s.id, s.name, s.sbmlId, s.sboTerm, s.notes, s.annotation, s.type, s.value, s.stoichiometry');
+            ->select('s.id, s.name, s.taskId, s.analysisToolId, s.value, s.notes, s.annotation');
 
         return $query->getQuery()->getArrayResult();
     }
@@ -73,8 +71,9 @@ class AnalysisToolSettingRepository implements IDependentSBaseRepository
             $index++;
             $errorString .= $className;
         }
-        throw new \Exception('Parent of analysis task must be ' . $errorString);
+        throw new \Exception('Parent of reaction item must be ' . $errorString);
     }
+
 
     public function getEntityManager()
     {
@@ -84,11 +83,17 @@ class AnalysisToolSettingRepository implements IDependentSBaseRepository
     private function buildListQuery(array $filter): QueryBuilder
     {
         $query = null;
-        if ($this->parent instanceof ModelSpecie) {
+        if ($this->parent instanceof AnalysisTool) {
             $query = $this->em->createQueryBuilder()
                 ->from(AnalysisToolSetting::class, 's')
-                ->where('s.taskId = :taskId')
+                ->where('t.taskId = :taskId')
                 ->setParameter('taskId', $this->parent->getId());
+        }
+        if ($this->parent instanceof ModelTask) {
+            $query = $this->em->createQueryBuilder()
+                ->from(AnalysisToolSetting::class, 'r')
+                ->where('t.toolId = :toolId')
+                ->setParameter('toolId', $this->parent->getId());
         }
         return $query;
     }

@@ -4,8 +4,12 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-
-class AnalysisToolSetting
+/**
+ * @ORM\Entity
+ * @ORM\Table(name="analysis_tool_setting")
+ * @ORM\DiscriminatorColumn(name="hierarchy_type", type="string")
+ */
+class AnalysisToolSetting implements IdentifiedObject
 {
     /**
      * @ORM\Id
@@ -24,10 +28,18 @@ class AnalysisToolSetting
 
     /**
      * @var int
-     * @ORM\ManyToOne(targetEntity="AnalysisTool", inversedBy="analysisToolSettings")
+     * @ORM\ManyToOne(targetEntity="ModelTask", inversedBy="analysisToolSettings")
      * @ORM\JoinColumn(name="task_id", referencedColumnName="id")
      */
     protected $taskId;
+
+    /**
+     * @var int
+     * @ORM\ManyToOne(targetEntity="AnalysisTool", inversedBy="analysisToolSettings")
+     * @ORM\JoinColumn(name="analysis_tool_id", referencedColumnName="id")
+     */
+    protected $analysisToolId;
+
 
     /**
      * @var string
@@ -56,6 +68,14 @@ class AnalysisToolSetting
         return $this->id;
     }
 
+    /**
+     * Get modelId
+     * @return integer
+     */
+    public function getModelId()
+    {
+        return $this->analysisToolId;
+    }
 
     /**
      * Get name
@@ -156,6 +176,24 @@ class AnalysisToolSetting
     {
         $this->taskId = $taskId;
         return $this;
+    }
+
+    /**
+     * @param int $analysisToolId
+     * @return AnalysisToolSetting
+     */
+    public function setAnalysisToolId(int $analysisToolId): AnalysisToolSetting
+    {
+        $this->analysisToolId = $analysisToolId;
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getAnalysisToolId(): int
+    {
+        return $this->analysisToolId;
     }
 
 

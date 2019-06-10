@@ -1,5 +1,6 @@
 <?php
 
+namespace App\Entity;
 
 use App\Entity\AnalysisToolSetting;
 use App\Entity\IdentifiedObject;
@@ -11,19 +12,19 @@ use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Task
+ * @ORM\Entity
  * @ORM\Table(name="model_task")
  * @ORM\DiscriminatorColumn(name="hierarchy_type", type="string")
  */
 class ModelTask implements IdentifiedObject
 {
-    use SBase;
-
     /**
-     * @var string
-     * @ORM\Column(type="string")
+     * @ORM\Id
+     * @ORM\Column(type="integer")
+     * @ORM\GeneratedValue
+     * @var integer|null
      */
-    private $description;
+    private $id;
 
     /**
      * @var int
@@ -31,30 +32,44 @@ class ModelTask implements IdentifiedObject
      */
     private $userId;
 
+
     /**
-     * @ORM\ManyToOne(targetEntity="Model", inversedBy="compartments")
-     * @ORM\JoinColumn(name="model_id", referencedColumnName="id")
+     * @var string
+     * @ORM\Column(type="string")
+     */
+    private $name;
+
+
+    /**
+     * @var int
+     * @ORM\Column(type="integer", name="model_id")
      */
     protected $modelId;
 
     /**
      * @var ArrayCollection
-     * @ORM\OneToMany(targetEntity="modelChange", mappedBy="modelId")
+     * @ORM\OneToMany(targetEntity="ModelChange", mappedBy="taskId")
      */
     private $modelChanges;
 
     /**
-     * @ORM\OneToOne(targetEntity="AnalysisTool")
-     * @ORM\JoinColumn(name="procedure_id", referencedColumnName="id")
+     * @var int
+     * @ORM\Column(type="integer", name="analysis_tool_id")
      */
-    protected $analysisToolId;
+    private $analysisToolId;
+
 
     /**
      * @var ArrayCollection
-     * @ORM\OneToMany(targetEntity="taskConfig", mappedBy="modelId")
+     * @ORM\OneToMany(targetEntity="AnalysisToolSetting", mappedBy="taskId")
      */
-    private $taskConfigs;
+    private $analysisToolSettings;
 
+    /**
+     * @var int
+     * @ORM\Column(type="integer", name="is_public")
+     */
+    protected  $isPublic;
 
     /**
      * @var int
@@ -65,9 +80,50 @@ class ModelTask implements IdentifiedObject
 
     /**
      * @var string
-     * @ORM\Column(type="string")
+     * @ORM\Column(type="string", name="output_path")
      */
     private $outputPath;
+
+    /**
+     * @var string
+     * @ORM\Column(type="string")
+     */
+    private $annotation;
+
+    /**
+     * @var string
+     * @ORM\Column(type="string")
+     */
+    private $notes;
+
+    /**
+     * Get id
+     * @return integer
+     */
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
+
+    /**
+     * Get name
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    /**
+     * Set name
+     * @param string $name
+     * @return ModelTask
+     */
+    public function setName($name)
+    {
+        $this->name = $name;
+        return $this;
+    }
 
     /**
      * Get modelId
@@ -109,37 +165,8 @@ class ModelTask implements IdentifiedObject
     }
 
     /**
-     * Get description
-     * @return string
-     */
-    public function getDescription(): ?string
-    {
-        return $this->description;
-    }
-
-    /**
-     * Set description
-     * @param string $description
-     * @return ModelTask
-     */
-    public function setDescription($description): ModelTask
-    {
-        $this->description = $description;
-        return $this;
-    }
-
-    /**
-     * Get isReversible
-     * @return integer
-     */
-    public function getIsReversible()
-    {
-        return $this->isPostponed;
-    }
-
-    /**
      * Set isPostponed
-     * @param integer $isReversible
+     * @param integer $isPostponed
      * @return ModelTask
      */
     public function setIsPostponed($isPostponed): ModelTask
@@ -176,7 +203,7 @@ class ModelTask implements IdentifiedObject
     }
 
     /**
-     * @return AnalysisToolSetting[]|Collection
+     * @return modelChanges[]|Collection
      */
     public function getModelChanges()
     {
@@ -185,7 +212,85 @@ class ModelTask implements IdentifiedObject
 
 
     /**
-     * @return AnalysisToolSetting[]|Collection
+     * @param mixed $analysisToolId
+     * @return ModelTask
+     */
+    public function setAnalysisToolId($analysisToolId)
+    {
+        $this->analysisToolId = $analysisToolId;
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getAnalysisToolId()
+    {
+        return $this->analysisToolId;
+    }
+
+
+    /**
+     * Get annotation
+     * @return string
+     */
+    public function getAnnotation()
+    {
+        return $this->annotation;
+    }
+
+    /**
+     * Set annotation
+     * @param string $annotation
+     * @return ModelTask
+     */
+    public function setAnnotation($annotation)
+    {
+        $this->annotation = $annotation;
+        return $this;
+    }
+
+    /**
+     * Get notes
+     * @return string
+     */
+    public function getNotes()
+    {
+        return $this->notes;
+    }
+
+    /**
+     * Set notes
+     * @param string $notes
+     * @return ModelTask
+     */
+    public function setNotes($notes)
+    {
+        $this->notes = $notes;
+        return $this;
+    }
+
+    /**
+     * @param int $isPublic
+     * @return ModelTask
+     */
+    public function setIsPublic(int $isPublic): ModelTask
+    {
+        $this->isPublic = $isPublic;
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getIsPublic(): int
+    {
+        return $this->isPublic;
+    }
+
+
+    /**
+     * @return ArrayCollection
      */
     public function getAnalysisToolSettings(): Collection
     {

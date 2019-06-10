@@ -48,7 +48,9 @@ final class AnalysisToolController extends WritableRepositoryController
             'cmd' => $analysisTool->getCmd(),
             'vizId' => $analysisTool->getVizId(),
             'location' => $analysisTool->getLocation(),
-
+            'settings' => $analysisTool->getAnalysisToolSettings()->map(function (AnalysisToolSetting $analSet) {
+                return ['id' => $analSet->getId(), 'name' => $analSet->getName(), 'default_value' =>$analSet->getValue()];
+            })->toArray(),
         ];
     }
 

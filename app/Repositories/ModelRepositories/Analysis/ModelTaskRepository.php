@@ -4,9 +4,9 @@ namespace App\Entity\Repositories;
 use App\Entity\Model;
 use App\Entity\ModelCompartment;
 use App\Entity\IdentifiedObject;
+use App\Entity\ModelTask;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
-use ModelTask;
 
 class ModelTaskRepository implements IEndpointRepository
 {
@@ -19,7 +19,7 @@ class ModelTaskRepository implements IEndpointRepository
     public function __construct(EntityManager $em)
     {
         $this->em = $em;
-        $this->repository = $em->getRepository(\ModelTask::class);
+        $this->repository = $em->getRepository(ModelTask::class);
     }
 
     public function get(int $id)
@@ -38,7 +38,7 @@ class ModelTaskRepository implements IEndpointRepository
     public function getList(array $filter, array $sort, array $limit): array
     {
         $query = $this->buildListQuery($filter)
-            ->select('t.id, t.name, t.notes, t.annotation, t.userId, t.analysisToolId, t.modelId, t.isPostponed, t.outputPath');
+            ->select('t.id, t.name, t.notes, t.annotation, t.userId, t.modelId, t.analysisToolId, t.outputPath');
         return $query->getQuery()->getArrayResult();
     }
 

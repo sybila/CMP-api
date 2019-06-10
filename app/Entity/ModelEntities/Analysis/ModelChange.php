@@ -1,71 +1,134 @@
 <?php
 
+namespace App\Entity;
 
-use App\Entity\IdentifiedObject;
-use App\Entity\ModelInitialAssignment;
-use App\Entity\ModelParameter;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\Criteria;
+use Doctrine\ORM\Mapping as ORM;
 
+/**
+ * @ORM\Entity
+ * @ORM\Table(name="model_task_change")
+ * @ORM\DiscriminatorColumn(name="hierarchy_type", type="string")
+ */
 class ModelChange implements IdentifiedObject
 {
-    use \App\Entity\SBase;
+    /**
+     * @ORM\Id
+     * @ORM\Column(type="integer")
+     * @ORM\GeneratedValue
+     * @var integer|null
+     */
+    private $id;
 
     /**
      * @var int
-     * @ORM\Column(type="integer", name="user_id")
+     * @ORM\ManyToOne(targetEntity="ModelTask", inversedBy="modelChanges")
+     * @ORM\JoinColumn(name="task_id", referencedColumnName="id")
      */
-    private $userId;
+    private $taskId;
 
     /**
-     * @var ArrayCollection
-     * @ORM\OneToMany(targetEntity="ModelInitialAssignment", mappedBy="modelId")
+     * @var string
+     * @ORM\Column(type="string")
      */
-    private $initialAssignments;
-
-	/**
-     * @var ArrayCollection
-     * @ORM\OneToMany(targetEntity="ModelParameter", mappedBy="modelId")
-     */
-	private $parameters;
+    private $type;
 
     /**
-     * Get userId
+     * @var int
+     * @ORM\Column(type="integer")
+     */
+    private $origin_id;
+
+
+    /**
+     * @var float
+     * @ORM\Column(type="float")
+     */
+    private $value;
+
+
+    /**
+     * Get id
      * @return integer
      */
-    public function getUserId(): ?int
+    public function getId(): ?int
     {
-        return $this->userId;
+        return $this->id;
     }
 
+
     /**
-     * Set userId
-     * @param int $userId
+     * @param int $taskId
      * @return ModelChange
      */
-    public function setUserId($userId): ModelChange
+    public function setTaskId(int $taskId): ModelChange
     {
-        $this->userId = $userId;
+        $this->taskId = $taskId;
         return $this;
     }
 
     /**
-     * @return ModelInitialAssignment[]|Collection
+     * @return int
      */
-    public function getInitialAssignments(): Collection
+    public function getTaskId(): int
     {
-        return $this->initialAssignments;
+        return $this->taskId;
     }
 
     /**
-     * @return ModelParameter[]|Collection
+     * @param string $type
+     * @return ModelChange
      */
-    public function getParameters(): Collection
+    public function setType(string $type): ModelChange
     {
-        $criteria = Criteria::create();
-        $criteria->where(Criteria::expr()->eq('reactionId', null));
-        return $this->parameters->matching($criteria);
+        $this->type = $type;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getType(): string
+    {
+        return $this->type;
+    }
+
+    /**
+     * @param int $origin_id
+     * @return ModelChange
+     */
+    public function setOriginId(int $origin_id): ModelChange
+    {
+        $this->origin_id = $origin_id;
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getOriginId(): int
+    {
+        return $this->origin_id;
+    }
+
+    /**
+     * @param int $value
+     * @return ModelChange
+     */
+    public function setValue(int $value): ModelChange
+    {
+        $this->value = $value;
+        return $this;
+    }
+
+    /**
+     * @return float
+     */
+    public function getValue(): float
+    {
+        return $this->value;
     }
 
 }

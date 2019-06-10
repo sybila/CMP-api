@@ -5,15 +5,10 @@ namespace App\Controllers;
 use App\Entity\{AnalysisTool,
     AnalysisToolSetting,
     ModelParameter,
-    ModelReaction,
     ModelReactionItem,
-    ModelSpecie,
     IdentifiedObject,
     Repositories\AnalysisToolSettingRepository,
-    Repositories\IEndpointRepository,
-    Repositories\ModelReactionItemRepository,
-    Repositories\ModelSpecieRepository,
-    Repositories\ModelReactionRepository};
+    Repositories\IEndpointRepository};
 use App\Exceptions\
 {
     MissingRequiredKeyException,
@@ -29,15 +24,16 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @property-read AnalysisToolSettingRepository $repository
- * @method ModelReactionItem getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
+ * @method AnalysisToolSetting getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
-abstract class AnalysisToolSettingController extends WritableRepositoryController
+abstract class AnalysisToolSettingController extends ParentedRepositoryController
 {
     /** @var AnalysisToolSettingRepository */
     private $analysisToolSettingRepository;
 
     /** @var EntityManager * */
     protected $em;
+
 
     public function __construct(Container $c)
     {
@@ -56,6 +52,7 @@ abstract class AnalysisToolSettingController extends WritableRepositoryControlle
         return [
             'taskId' => $analysisToolSetting->getTaskId()->getId(),
             'name' => $analysisToolSetting->getName(),
+            'value' => $analysisToolSetting->getValue(),
         ];
     }
 
@@ -72,6 +69,21 @@ abstract class AnalysisToolSettingController extends WritableRepositoryControlle
         ]));
     }
 
+    protected function createObject(ArgumentParser $body): IdentifiedObject
+    {
+        if (!$body->hasKey('value'))
+            throw new MissingRequiredKeyException('value');
+        return new AnalysisToolSetting;
+    }
+
+    protected function checkInsertObject(IdentifiedObject $constraint): void
+    {
+        /** @var ModelConstraint $constraint */
+        if ($constraint->getModelId() == null)
+            throw new MissingRequiredKeyException('taskId');
+    }
+
+
     protected static function getObjectName(): string
     {
         return 'analysisToolSetting';
@@ -82,11 +94,12 @@ abstract class AnalysisToolSettingController extends WritableRepositoryControlle
         return AnalysisToolSettingRepository::class;
     }
 
-    protected function setData(IdentifiedObject $analysisToolSetting, ArgumentParser $data): void
+    protected function setData(IdentifiedObject $reactionItem, ArgumentParser $data): void
     {
-        /** @var AnalysisToolSetting $analysisToolSetting */
-        parent::setData($analysisToolSetting, $data);
-        !$data->hasKey('value') ?: $analysisToolSetting->setValue($data->getInt('value'));
+        /** @var ModelReactionItem reactionItem */
+        parent::setData($reactionItem, $data);
+        !$data->hasKey('type') ?: $reactionItem->setType($data->getString('type'));
+        !$data->hasKey('value') ?: $reactionItem->setValue($data->getInt('value'));
     }
 
 }
@@ -105,15 +118,20 @@ final class AnalysisToolsParentedSettingController extends AnalysisToolSettingCo
     }
 
 
-    protected function checkInsertObject(IdentifiedObject $rule): void
+
+    protected function checkInsertObject(IdentifiedObject $setting): void
     {
-        /** @var ModelParameter $parameter */
-        if ($rule->getType() === null)
-            throw new MissingRequiredKeyException('modelId');
+        /** @var ModelReactionItem $reactionItem */
+        if ($setting->getReactionId() == null)
+            throw new MissingRequiredKeyException('reactionId');
+        if ($setting->getSpecieId() == null && $setting->getParameterId() === null)
+            throw new MissingRequiredKeyException('specieId or parameterId');
     }
 
     protected function createObject(ArgumentParser $body): IdentifiedObject
     {
-        return new AnalysisToolSetting;
+        if (!$body->hasKey('modelTaskId') && !$body->hasKey('analysisTool'))
+            throw new MissingRequiredKeyException('specieId or parameterId');
+        return new ModelReactionItem;
     }
 }

@@ -37,10 +37,10 @@ class AnalysisTool implements IdentifiedObject
     private $description;
 
     /**
-     * @var Collection
-     * @ORM\OneToMany(targetEntity="AnalysisToolSetting", mappedBy="procId", cascade={"persist"})
+     * @var ArrayCollection
+     * @ORM\OneToMany(targetEntity="AnalysisToolSetting", mappedBy="analysisToolId")
      */
-    //protected $analysisToolSettings;
+    private $analysisToolSettings;
 
     /**
      * @var string
@@ -171,6 +171,14 @@ class AnalysisTool implements IdentifiedObject
     public function getLocation(): string
     {
         return $this->location;
+    }
+
+    /**
+     * @return ArrayCollection
+     */
+    public function getAnalysisToolSettings(): Collection
+    {
+        return $this->analysisToolSettings;
     }
 
 }
