@@ -115,12 +115,13 @@ final class TaskParentedChangeController extends ModelChangeController
         return new ModelChange;
     }
 
-    /**
-     * Check object to be inserted if it contains all required fields
-     * @param IdentifiedObject $object
-     */
-    protected function checkInsertObject(IdentifiedObject $object): void
+
+    protected function checkInsertObject(IdentifiedObject $change): void
     {
-        // TODO: Implement checkInsertObject() method.
+        /** @var ModelChange $change */
+        if ($change->getType() === null)
+            throw new MissingRequiredKeyException('sbmlId');
+        if ($change->getTaskId() === null)
+            throw new MissingRequiredKeyException('isConstant');
     }
 }

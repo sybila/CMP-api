@@ -120,10 +120,4 @@ final class ModelTaskController extends WritableRepositoryController
         return ModelTaskRepository::Class;
     }
 
-    protected function getSub($entity)
-    {
-        echo $entity;
-    }
-
-
 }

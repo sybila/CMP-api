@@ -106,9 +106,4 @@ final class AnalysisToolController extends WritableRepositoryController
         return AnalysisToolRepository::Class;
     }
 
-    protected function getSub($entity)
-    {
-        echo $entity;
-    }
-
 }
