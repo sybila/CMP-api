@@ -58,7 +58,6 @@ abstract class RepositoryController extends AbstractController
 	{
 		parent::__construct($c);
 		$this->repository = $c->get(static::getRepositoryClassName());
-
 	}
 
 	public function read(Request $request, Response $response, ArgumentParser $args)
@@ -106,7 +105,7 @@ abstract class RepositoryController extends AbstractController
 				throw new NonExistingObjectException($id, $objectName);
 		}
 		catch (ORMException $e) {
-			//throw new InternalErrorException('Failed getting ' . $objectName . ' ID ' . $id, $e);
+			throw new InternalErrorException('Failed getting ' . $objectName . ' ID ' . $id, $e);
 		}
 
 		return $ent;
