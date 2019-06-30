@@ -24,6 +24,12 @@ class Organism implements IdentifiedObject
 	 */
 	protected $code;
 
+	/**
+	 * @var ArrayCollection
+	 * @ORM\OneToMany(targetEntity="Experiment", mappedBy="organismId")
+	 */
+	//private $experiments;
+
 	public function getCode(): ?string
 	{
 		return $this->code;
