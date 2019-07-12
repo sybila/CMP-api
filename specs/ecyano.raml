@@ -33,6 +33,34 @@ types:
     minimum: 1
     required: false
     description: Same as HTTP code or custom (700+, listed in /version/errors docs) when HTTP code is 400
+  AuthorizationCodeRequest:
+    properties:
+      grant_type:
+        description: Type of requested access token
+        type: string
+        enum: ["client_credentials", "authorization_code", "refresh_token"]
+        required: true
+      client_id:
+        type: string
+        required: true
+      client_secret:
+        type: string
+        required: true
+  RefreshCodeRequest:
+    type: AuthorizationCodeRequest
+    properties:
+      refresh_token:
+        type: string
+        required: true
+  PasswordCodeRequest:
+    type: AuthorizationCodeRequest
+    properties:
+      username:
+        type: string
+        required: true
+      password:
+        type: string
+        required: true
   Classification:
     properties:
       id: Identifier
@@ -720,6 +748,13 @@ resourceTypes:
       710 - Invalid entity specified as location (must be Compartment), error details: {given: given type}
       711 - Invalid entity specified as parent, error details: {parent: parent type, child: child type}
 
+#Authorization
+/authorize:
+  description: Authorization endpoint
+  post:
+    is: [Insert: {type: AuthorizationCodeRequest}]
+
+#BCS
 /annotations:
   /types:
     description: List of valid annotation term types - databases
@@ -855,7 +890,7 @@ resourceTypes:
         get:
           is: [IdCollection: {description: Get all products of this rule}]
 
-#BCSRepositories part follows
+# Models
 
 /models:
   get:
