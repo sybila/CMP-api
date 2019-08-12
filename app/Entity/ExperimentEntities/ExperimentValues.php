@@ -2,25 +2,32 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity
- * @ORM\Table(name="experiment_values")
+ * @ORM\Table(name="experiment_variable_value")
  * @ORM\DiscriminatorColumn(name="hierarchy_type", type="string")
  */
 class ExperimentValues implements IdentifiedObject
 {
 	use EBase;
 
+    /**
+     * @var int
+     * @ORM\Column(type="integer", name="exp_id")
+     */
+    //protected $experimentId;
+
 	/**
-	 * @ORM\ManyToOne(targetEntity="ExperimentVariable", inversedBy="variable")
+	 * @ORM\ManyToOne(targetEntity="ExperimentVariable", inversedBy="values")
 	 * @ORM\JoinColumn(name="experimentVariableId", referencedColumnName="id")
 	 */
 	protected $variableId;
 
-		/**
+	/**
 	 * @var float
 	 * @ORM\Column(type="float", name="time")
 	 */
@@ -41,6 +48,26 @@ class ExperimentValues implements IdentifiedObject
 		return $this->id;
 	}
 
+    /**
+     * Get experimentId
+     * @return integer
+     */
+    public function getExperimentId()
+    {
+        return $this->experimentId;
+    }
+
+    /**
+     * Set experimentId
+     * @param integer $experimentId
+     * @return ExperimentValues
+     */
+    public function setExperimentId($experimentId): ExperimentValues
+    {
+        $this->experimentId = $experimentId;
+        return $this;
+    }
+
 	/**
 	 * Get variableId
 	 * @return integer|null
@@ -53,9 +80,9 @@ class ExperimentValues implements IdentifiedObject
 	/**
 	 * Set variableId
 	 * @param integer $variableId
-	 * @return ExperimentValue
+	 * @return ExperimentValues
 	 */
-	public function setVariableId($variableId): ExperimentValue
+	public function setVariableId($variableId): ExperimentValues
 	{
 		$this->variableId = $variableId;
 		return $this;
@@ -63,9 +90,9 @@ class ExperimentValues implements IdentifiedObject
 
 	/**
 	 * Get time
-	 * @return null|float
+	 * @return float
 	 */
-	public function getTime(): ?float
+	public function getTime(): float
 	{
 		return $this->time;
 	}
@@ -73,9 +100,9 @@ class ExperimentValues implements IdentifiedObject
 	/**
 	 * Set time
 	 * @param float $time
-	 * @return ExperimentValue
+	 * @return ExperimentValues
 	 */
-	public function setTime($time): ExperimentValue
+	public function setTime($time): ExperimentValues
 	{
 		$this->time = $time;
 		return $this;
@@ -83,9 +110,9 @@ class ExperimentValues implements IdentifiedObject
 
 	/**
 	 * Get value
-	 * @return null|float
+	 * @return float
 	 */
-	public function getValue(): ?float
+	public function getValue(): float
 	{
 		return $this->value;
 	}
@@ -93,9 +120,9 @@ class ExperimentValues implements IdentifiedObject
 	/**
 	 * Set value
 	 * @param float $value
-	 * @return ExperimentValue
+	 * @return ExperimentValues
 	 */
-	public function setValue($value): ExperimentValue
+	public function setValue($value): ExperimentValues
 	{
 		$this->value = $value;
 		return $this;

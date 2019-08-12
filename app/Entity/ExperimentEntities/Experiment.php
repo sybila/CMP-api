@@ -6,6 +6,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\Mapping as ORM;
+use App\Helpers\DateTimeJson;
 
 /**
  * @ORM\Entity
@@ -14,7 +15,17 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Experiment implements IdentifiedObject
 {
+
+    const STATUS_PUBLIC = 'public';
+    const STATUS_PRIVATE = 'private';
+
 	use EBase;
+    /**
+     * @ORM\Id
+     * @ORM\Column(type="integer", name="id")
+     * @ORM\GeneratedValue(strategy="AUTO")
+     */
+    private $id;
 
 	/**
 	 * @var string
@@ -29,7 +40,7 @@ class Experiment implements IdentifiedObject
 	private $description;
 
 	/**
-	 * @ORM\ManyToOne(targetEntity="Organism", inversedBy="experiments")
+	 * @ORM\ManyToOne(targetEntity="App\Entity\Organism", inversedBy="experiments", fetch="EAGER")
 	 * @ORM\JoinColumn(name="organism_id", referencedColumnName="id")
 	 */
 	private $organismId;
@@ -41,13 +52,13 @@ class Experiment implements IdentifiedObject
 	private $protocol;
 
 	/**
-	 * @var datetime
+	 * @var DateTimeJson
 	 * @ORM\Column(type="datetime", name="started")
 	 */
 	private $started;
 
 	/**
-	 * @var datetime
+	 * @var DateTimeJson
 	 * @ORM\Column(type="datetime", name="inserted")
 	 */
 	private $inserted;
@@ -56,11 +67,11 @@ class Experiment implements IdentifiedObject
 	 * @ORM\ManyToOne(targetEntity="...", inversedBy="...")
 	 * @ORM\JoinColumn(name="user_id", referencedColumnName="id")
 	 */
-	private $userId;
+	//private $userId;
 
 	/**
 	 * @var string
-	 * @ORM\Column (type="string, name="status")
+     * @ORM\Column(type="string", columnDefinition="ENUM('private', 'public')")
 	 */
 	private $status;
 
@@ -75,6 +86,19 @@ class Experiment implements IdentifiedObject
 	 * @ORM\OneToMany(targetEntity="ExperimentNote", mappedBy="experimentId")
 	 */
 	private $notes;
+
+
+    /**
+     * @var ArrayCollection
+     * @ORM\OneToMany(targetEntity="ExperimentRelation", mappedBy="firstExperimentId", fetch="EAGER")
+     */
+    private $experimentRelation;
+
+    /**
+     * @var ArrayCollection
+     * @ORM\OneToMany(targetEntity="ExperimentModels", mappedBy="ExperimentId", fetch="EAGER")
+     */
+    private $experimentModels;
 
 	/**
 	 * @var ArrayCollection
@@ -103,7 +127,7 @@ class Experiment implements IdentifiedObject
 		return $this;
 	}
 
-		/**
+	/**
 	 * Get description
 	 * @return string
 	 */
@@ -114,7 +138,7 @@ class Experiment implements IdentifiedObject
 
 	/**
 	 * Set description
-	 * @param string $description
+	 * @param integer $description
 	 * @return Experiment
 	 */
 	public function setDescription($description): Experiment
@@ -124,8 +148,27 @@ class Experiment implements IdentifiedObject
 	}
 
 	/**
+	 * Set organismId
+	 * @param integer $organismId
+	 * @return Experiment
+	 */
+	public function setOrganismId($organismId): Experiment
+	{
+		$this->organismId = $organismId;
+		return $this;
+	}
+
+	/**
+	 * Get organismId
+	 * @return Organism
+	 */
+	public function getOrganismId(): ?Organism
+	{
+		return $this->organismId;
+	}
+	/**
 	 * Get protocol
-	 * @return string
+	 * @return string|null
 	 */
 	public function getProtocol(): ?string
 	{
@@ -145,16 +188,16 @@ class Experiment implements IdentifiedObject
 
 	/**
 	 * Get started
-	 * @return datetime
+	 * @return DateTimeJson|null
 	 */
-	public function getStarted(): ?datetime
+	public function getStarted(): ?DateTimeJson
 	{
 		return $this->started;
 	}
 
 	/**
 	 * Set started
-	 * @param datetime $started
+	 * @param DateTimeJson $started
 	 * @return Experiment
 	 */
 	public function setStarted($started): Experiment
@@ -165,16 +208,16 @@ class Experiment implements IdentifiedObject
 
 	/**
 	 * Get inserted
-	 * @return datetime
+	 * @return DateTimeJson|null
 	 */
-	public function getInserted(): ?datetime
+	public function getInserted(): ?DateTimeJson
 	{
 		return $this->inserted;
 	}
 
 	/**
 	 * Set inserted
-	 * @param datetime $inserted
+	 * @param DateTimeJson $inserted
 	 * @return Experiment
 	 */
 	public function setInserted($inserted): Experiment
@@ -207,7 +250,7 @@ class Experiment implements IdentifiedObject
 	 * Get status
 	 * @return string
 	 */
-	public function getStatus(): ?string
+	public function getStatus(): string
 	{
 		return $this->status;
 	}
@@ -219,8 +262,11 @@ class Experiment implements IdentifiedObject
 	 */
 	public function setStatus($status): Experiment
 	{
-		$this->status = $status;
-		return $this;
+        if (!in_array($status, array(self::STATUS_PUBLIC, self::STATUS_PRIVATE))) {
+            throw new \InvalidArgumentException("Invalid status");
+        }
+        $this->status = $status;
+        return $this;
 	}
 
 	/**
@@ -239,5 +285,27 @@ class Experiment implements IdentifiedObject
 		return $this->notes;
 	}
 
-	//ExperimentRelation
+    /**
+     * @return ExperimentRelation[]|Collection
+     */
+    public function getExperimentRelation(): Collection
+    {
+        return $this->experimentRelation;
+    }
+
+    /**
+     * @return ExperimentDevice[]|Collection
+     */
+    public function getExperimentDevices(): Collection
+    {
+        return $this->devices;
+    }
+
+    /**
+     * @return ExperimentRelation[]|Collection
+     */
+    public function getExperimentModels(): Collection
+    {
+        return $this->experimentModels;
+    }
 }

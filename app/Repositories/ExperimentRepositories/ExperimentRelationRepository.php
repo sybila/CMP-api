@@ -2,18 +2,19 @@
 
 namespace App\Entity\Repositories;
 
+use App\Controllers\ExperimentController;
 use App\Entity\Experiment;
-use App\Entity\ExperimentVariable;
+use App\Entity\ExperimentRelation;
 use App\Entity\IdentifiedObject;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 
-class ExperimentVariableRepository implements IDependentSBaseRepository
+class ExperimentRelationRepository implements IDependentSBaseRepository
 {
 	/** @var EntityManager * */
 	protected $em;
 
-	/** @var \Doctrine\ORM\VariableRepository */
+	/** @var \Doctrine\ORM\RelationRepository */
 	private $repository;
 
 	/** @var Experiment */
@@ -22,7 +23,7 @@ class ExperimentVariableRepository implements IDependentSBaseRepository
 	public function __construct(EntityManager $em)
 	{
 		$this->em = $em;
-		$this->repository = $em->getRepository(ExperimentVariable::class);
+		$this->repository = $em->getRepository(ExperimentRelation::class);
 	}
 
 	protected static function getParentClassName(): string
@@ -32,7 +33,7 @@ class ExperimentVariableRepository implements IDependentSBaseRepository
 
 	public function get(int $id)
 	{
-		return $this->em->find(ExperimentVariable::class, $id);
+		return $this->em->find(ExperimentRelation::class, $id);
 	}
 
 	public function getNumResults(array $filter): int
@@ -46,7 +47,9 @@ class ExperimentVariableRepository implements IDependentSBaseRepository
 	public function getList(array $filter, array $sort, array $limit): array
 	{
 		$query = $this->buildListQuery($filter)
-			->select('c.id, c.name, c.code, c.type');
+			->select('IDENTITY(er.secondExperimentId)', 'e.id', 'e.name', 'e.description', 'e.protocol', 'e.started', 'e.inserted', 'e.status')
+            ->from('App\Entity\Experiment', 'e')
+            ->innerJoin('App\Entity\ExperimentRelation', 'er', \Doctrine\ORM\Query\Expr\Join::WITH, 'er.secondExperimentId = e.id');
 		return $query->getQuery()->getArrayResult();
 	}
 
@@ -59,16 +62,16 @@ class ExperimentVariableRepository implements IDependentSBaseRepository
 	{
 		$className = static::getParentClassName();
 		if (!($object instanceof $className))
-			throw new \Exception('Parent of variable must be ' . $className);
+			throw new \Exception('Parent of relation must be ' . $className);
 		$this->experiment = $object;
 	}
 
 	private function buildListQuery(array $filter): QueryBuilder
 	{
 		$query = $this->em->createQueryBuilder()
-			->from(ExperimentVariable::class, 'c')
-			->where('c.experimentId = :experimentId')
-			->setParameter('experimentId', $this->experiment->getId());
+			->from(ExperimentRelation::class, 'c')
+			->where('c.secondExperimentId = :secondExperimentId')
+			->setParameter('secondExperimentId', $this->experiment->getId());
 		return $query;
 	}
 }

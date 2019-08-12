@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -10,9 +11,10 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Table(name="experiment_device")
  * @ORM\DiscriminatorColumn(name="hierarchy_type", type="string")
  */
-class Device implements IdentifiedObject
+class ExperimentDevice implements IdentifiedObject
 {
 	use EBase;
+
 
 	/**
 	 * @ORM\ManyToMany(targetEntity="Experiment", inversedBy="devices")
@@ -26,6 +28,12 @@ class Device implements IdentifiedObject
 	 */
 	protected $deviceId;
 
+    /**
+     * @var ArrayCollection
+     * @ORM\ManyToMany(targetEntity="Experiment", mappedBy="experimentId")
+     */
+    private $experiments;
+
 	/**
 	 * Get experimentId
 	 * @return int
@@ -38,9 +46,9 @@ class Device implements IdentifiedObject
 	/**
 	 * Set experimentId
 	 * @param int $experimentId
-	 * @return ExperimentDevices
+	 * @return ExperimentDevice
 	 */
-	public function setExperimentId($experimentId): ExperimentDevices
+	public function setExperimentId($experimentId): ExperimentDevice
 	{
 		$this->experimentId = $experimentId;
 		return $this;
@@ -58,12 +66,20 @@ class Device implements IdentifiedObject
 	/**
 	 * Set deviceId
 	 * @param int $deviceId
-	 * @return ExperimentDevices
+	 * @return ExperimentDevice
 	 */
-	public function setDeviceId($deviceId): ExperimentDevices
+	public function setDeviceId($deviceId): ExperimentDevice
 	{
 		$this->deviceId = $deviceId;
 		return $this;
 	}
+
+    /**
+     * @return Experiment[]|Collection
+     */
+    public function getExperiments(): Collection
+    {
+        return $this->experiments;
+    }
 
 }

@@ -23,6 +23,7 @@ class ModelRepository implements IEndpointRepository
 
 	public function get(int $id)
 	{
+		//dump($this->em->find(Model::class, $id));exit;
 		return $this->em->find(Model::class, $id);
 	}
 

@@ -198,8 +198,20 @@ return function(App $app)
 		->setRoute(Ctl\ExperimentVariableController::class, '/experiments/{experiment-id:\\d+}/variables')
 		->register();
 	(new RouteHelper)
-		->setRoute(Ctl\ExperimentValuesController::class, '/experiments/{experiment-id:\\d+}/variables/{variable-id:\\d+}/values')
+		->setRoute(Ctl\ExperimentValueController::class, '/experiments/{experiment-id:\\d+}/variables/{variable-id:\\d+}/values')
 		->register();
+	(new RouteHelper)
+		->setRoute(Ctl\ExperimentNoteController::class, '/experiments/{experiment-id:\\d+}/notes')
+		->register();
+    (new RouteHelper)
+        ->setRoute(Ctl\ExperimentDeviceController::class, '/experiments/{experiment-id:\\d+}/devices')
+        ->register();
+    (new RouteHelper)
+        ->setRoute(Ctl\ExperimentRelationController::class, '/experiments/{experiment-id:\\d+}/relations')
+        ->register();
+    (new RouteHelper)
+        ->setRoute(Ctl\ExperimentModelsController::class, '/experiments/{experiment-id:\\d+}/models')
+        ->register();
 
 	// model species
 	$app->get('/models/{model-id:\\d+}/species/{sbmlId}', Ctl\ModelSpecieController::class . ':readSbmlId');

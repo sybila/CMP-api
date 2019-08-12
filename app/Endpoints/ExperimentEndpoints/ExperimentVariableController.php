@@ -27,15 +27,15 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @property-read ExperimentVariableRepository $repository
  * @method ExperimentVariable getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
-final class ExperimentVariableController extends ParentedSBaseController
+final class ExperimentVariableController extends ParentedEBaseController
 {
 	/** @var ExperimentVariableRepository */
 	private $variableRepository;
 
-	public function __construct(Container $c)
+	public function __construct(Container $v)
 	{
-		parent::__construct($c);
-		$this->variableRepository = $c->get(ExperimentVariableRepository::class);
+		parent::__construct($v);
+		$this->variableRepository = $v->get(ExperimentVariableRepository::class);
 	}
 
 	protected static function getAllowedSort(): array
@@ -46,13 +46,13 @@ final class ExperimentVariableController extends ParentedSBaseController
 	protected function getData(IdentifiedObject $variable): array
 	{
 		/** @var ExperimentVariable $variable */
-		$sBaseData = parent::getData($variable);
-		return array_merge ($sBaseData, [
+		$eBaseData = parent::getData($variable);
+		return array_merge ($eBaseData, [
 			'name' => $variable->getName(),
 			'code' => $variable->getCode(),
 			'type' => $variable->getType(),
-			'values' => $variable->getValues()->map(function (ExperimentValues $values) {
-				return ['id' => $values->getId(), 'time' => $values->getTime(), 'value' => $values->getValue()];
+			'values' => $variable->getValues()->map(function (ExperimentValues $val) {
+				return ['id' => $val->getId(), 'time' => $val->getTime(), 'value' => $val->getValue()];
 			})->toArray(),
 		]);
 	}
@@ -71,8 +71,8 @@ final class ExperimentVariableController extends ParentedSBaseController
 	{
 		if (!$body->hasKey('name'))
 			throw new MissingRequiredKeyException('name');
-		if (!$body->hasKey('code'))
-			throw new MissingRequiredKeyException('code');
+		/*if (!$body->hasKey('code'))
+			throw new MissingRequiredKeyException('code');*/
 		return new ExperimentVariable;
 	}
 
@@ -83,8 +83,8 @@ final class ExperimentVariableController extends ParentedSBaseController
 			throw new MissingRequiredKeyException('experimentId');
 		if ($variable->getName() === null)
 			throw new MissingRequiredKeyException('name');
-		if ($variable->getCode() === null)
-			throw new MissingRequiredKeyException('code');
+		/*if ($variable->getCode() === null)
+			throw new MissingRequiredKeyException('code');*/
 	}
 
 	public function delete(Request $request, Response $response, ArgumentParser $args): Response
@@ -93,8 +93,8 @@ final class ExperimentVariableController extends ParentedSBaseController
 		$variable = $this->getObject($args->getInt('id'));
 		if (!$variable->getValues()->isEmpty())
 			throw new DependentResourcesBoundException('values');
-		if (!$variable->getNote()->isEmpty())
-			throw new DependentResourcesBoundException('note');
+		/*if (!$variable->getNote()->isEmpty())
+			throw new DependentResourcesBoundException('note');*/
 		return parent::delete($request, $response, $args);
 	}
 

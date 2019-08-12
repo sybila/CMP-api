@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -47,13 +48,13 @@ class ExperimentVariable implements IdentifiedObject
 
 	/**
 	 * @var string
-	 * @ORM\Column(type="string", name="type")
+     * @ORM\Column(type="string", columnDefinition="ENUM('measured','computed','adjusted','aggregate')")
 	 */
 	private $type;
 
 	/**
 	 * @var ArrayCollection
-	 * @ORM\OneToMany(targetEntity="ExperimentValue", mappedBy="experimentVariableId")
+	 * @ORM\OneToMany(targetEntity="ExperimentValues", mappedBy="variableId")
 	 */
 	protected $values;
 
@@ -61,19 +62,19 @@ class ExperimentVariable implements IdentifiedObject
 	 * @var ArrayCollection
 	 * @ORM\OneToMany(targetEntity="BioquantityVariable", mappedBy="experimentVariableId")
 	 */
-	protected $bioquantityVariables;
+	//protected $bioquantityVariables;
 
 	/**
 	 * @var ArrayCollection
 	 * @ORM\OneToMany(targetEntity="ExperimentNote", mappedBy="experimentVariableId")
 	 */
-	private $notes;
+	//private $notes;
 
 	/**
 	 * Get id
 	 * @return integer
 	 */
-	public function getId(): ?int
+	public function getId(): int
 	{
 		return $this->id;
 	}
@@ -103,7 +104,7 @@ class ExperimentVariable implements IdentifiedObject
 	 * Get name
 	 * @return string
 	 */
-	public function getName(): ?string
+	public function getName(): string
 	{
 		return $this->name;
 	}
@@ -133,7 +134,7 @@ class ExperimentVariable implements IdentifiedObject
 	 * @param string $code
 	 * @return ExperimentVariable
 	 */
-	public function setCode($name): ExperimentVariable
+	public function setCode($code): ExperimentVariable
 	{
 		$this->code = $code;
 		return $this;
@@ -155,8 +156,11 @@ class ExperimentVariable implements IdentifiedObject
 	 */
 	public function setType($type): ExperimentVariable
 	{
-		$this->type = $type;
-		return $this;
+        if (!in_array($type, array('measured','computed','adjusted','aggregate'))) {
+            throw new \InvalidArgumentException("Invalid type");
+        }
+        $this->type = $type;
+        return $this;
 	}
 
 	/**
@@ -170,8 +174,8 @@ class ExperimentVariable implements IdentifiedObject
 	/**
 	 * @return ExperimentNote[]|Collection
 	 */
-	public function getNote(): Collection
+	/*public function getNote(): Collection
 	{
 		return $this->notes;
-	}
+	}*/
 }

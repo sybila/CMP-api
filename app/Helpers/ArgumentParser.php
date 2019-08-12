@@ -77,6 +77,7 @@ class ArgumentParser implements \ArrayAccess, \IteratorAggregate
 			throw new InvalidTypeException($key, 'float');
 	}
 
+
 	public function getBool(string $key): bool
 	{
 		$value = $this->get($key);

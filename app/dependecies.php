@@ -20,7 +20,7 @@ $config = require __DIR__ . '/../app/settings.php';
 
 Type::overrideType('datetime', DateTimeJsonType::class);
 Type::overrideType('datetime_immutable', DateTimeJsonType::class);
-Type::overrideType('datetimetz', DateTimeJsonType::class);
+Type::overrideType('datetime', DateTimeJsonType::class);
 
 $c = new Container($config);
 unset($c['errorHandler']);
@@ -221,6 +221,34 @@ $c[AuthRepo\AccessTokenRepository::class] = function (Container $c) {
 $c[AuthRepo\RefreshTokenRepository::class] = function(Container $c)
 {
 	return new AuthRepo\RefreshTokenRepository($c[EntityManager::class]);
+};
+
+$c[EntityRepo\ExperimentRepository::class] = function (Container $c) {
+	return new EntityRepo\ExperimentRepository($c[EntityManager::class]);
+};
+
+$c[EntityRepo\ExperimentVariableRepository::class] = function (Container $c) {
+	return new EntityRepo\ExperimentVariableRepository($c[EntityManager::class]);
+};
+
+$c[EntityRepo\ExperimentValueRepository::class] = function (Container $c) {
+	return new EntityRepo\ExperimentValueRepository($c[EntityManager::class]);
+};
+
+$c[EntityRepo\ExperimentNoteRepository::class] = function (Container $c) {
+	return new EntityRepo\ExperimentNoteRepository($c[EntityManager::class]);
+};
+
+$c[EntityRepo\ExperimentRelationRepository::class] = function (Container $c) {
+    return new EntityRepo\ExperimentRelationRepository($c[EntityManager::class]);
+};
+
+$c[EntityRepo\ExperimentDeviceRepository::class] = function (Container $c) {
+    return new EntityRepo\ExperimentDeviceRepository($c[EntityManager::class]);
+};
+
+$c[EntityRepo\ExperimentModelsRepository::class] = function (Container $c) {
+    return new EntityRepo\ExperimentModelsRepository($c[EntityManager::class]);
 };
 
 $c[AuthorizationServer::class] = function (Container $c) {

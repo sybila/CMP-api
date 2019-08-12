@@ -18,40 +18,39 @@ abstract class EBaseController extends WritableRepositoryController
 	{
 		return [
 			'id' => $object->getId(),
-			'name' => $object->getName(),
+			/*'name' => $object->getName(),
 			'protocol' => $object->getProtocol(),
 			'description' => $object->getDescription(),
 			'started' => $object->getStarted(),
-			'status' => $object->getStatus()
+			'status' => $object->getStatus()*/
 		];
 	}
 
 	protected function setData(IdentifiedObject $object, ArgumentParser $body): void
 	{
-		!$body->hasKey('name') ? $object->setName($body->getString('name')) : $object->setName($body->getString('name'));
-		!$body->hasKey('protocol') ?: $object->setProtocol($body->getString('protocol'));
+		//!$body->hasKey('name') ? $object->setName($body->getString('name')) : $object->setName($body->getString('name'));
+		/*!$body->hasKey('protocol') ?: $object->setProtocol($body->getString('protocol'));
 		!$body->hasKey('description') ?: $object->setDescription($body->getString('description'));
 		!$body->hasKey('started') ?: $object->setStarted($body->getString('started'));
-		!$body->hasKey('status') ?: $object->setStatus($body->getString(('status')));
+		!$body->hasKey('status') ?: $object->setStatus($body->getString(('status')));*/
 	}
 
 	protected function getValidatorArray(): array
 	{
 		return [
-			'name' => new Assert\Type(['type' => 'string']),
-			'protocol' => new Assert\Type(['type' => 'string']),
+			'id' => new Assert\Type(['type' => 'integer']),
+			/*'protocol' => new Assert\Type(['type' => 'string']),
 			'description' => new Assert\Type(['type' => 'string']),
 			'started' => new Assert\Type(['type' => 'string']),
-			'status' => new Assert\Type(['type' => 'string']),
+			'status' => new Assert\Type(['type' => 'string']),*/
 		];
 	}
 }
 
-abstract class ParentedSBaseController extends SBaseController
+abstract class ParentedEBaseController extends EBaseController
 {
 	/** @var IEndpointRepository */
 	protected $parentRepository;
-
 	/**
 	 * Get parent repository class name
 	 * @return string

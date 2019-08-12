@@ -15,24 +15,31 @@ use Doctrine\ORM\Mapping as ORM;
 class ExperimentRelation implements IdentifiedObject
 {
 	use EBase;
-	
-	/**
-	 * @ORM\ManyToOne(targetEntity="ExperimentRelation", inversedBy="firstExperimentId")
-	 * @ORM\JoinColumn(name="1exp_id", referencedColumnName="id")
-	 */
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Experiment", inversedBy="experimentRelation", fetch="EAGER")
+     * @ORM\JoinColumn(name="1exp_id", referencedColumnName="id")
+     */
 	protected $firstExperimentId;
 
 	/**
-	 * @ORM\ManyToOne(targetEntity="ExperimentRelation", inversedBy="secondExperimentId")
+	 * @ORM\ManyToOne(targetEntity="Experiment", inversedBy="experimentRelation", fetch="EAGER")
 	 * @ORM\JoinColumn(name="2exp_id", referencedColumnName="id")
 	 */
 	protected $secondExperimentId;
 
+
+    /**
+     * @var ArrayCollection
+     * @ORM\OneToMany(targetEntity="Experiment", mappedBy="firstExperimentId")
+     */
+    protected $relatedExperiments;
+
 	/**
 	 * Get firstExperimentId
-	 * @return int
+	 * @return Experiment|null
 	 */
-	public function getFirstExperimentId(): ?int
+	public function getFirstExperimentId(): ?Experiment
 	{
 		return $this->firstExperimentId;
 	}
@@ -40,7 +47,7 @@ class ExperimentRelation implements IdentifiedObject
 	/**
 	 * Set firstExperimentId
 	 * @param int $firstExperimentId
-	 * @return ExperimentRelation
+	 * @return ExperimentRelation|null
 	 */
 	public function setFirstExperimentId($firstExperimentId): ExperimentRelation
 	{
@@ -50,9 +57,9 @@ class ExperimentRelation implements IdentifiedObject
 
 	/**
 	 * Get secondExperimentId
-	 * @return int
+	 * @return Experiment|null
 	 */
-	public function getSecondExperimentId(): ?int
+	public function getSecondExperimentId(): ?Experiment
 	{
 		return $this->secondExperimentId;
 	}
@@ -72,16 +79,8 @@ class ExperimentRelation implements IdentifiedObject
 	/**
 	 * @return Experiment[]|Collection
 	 */
-	public function getExpertFirst(): Collection
+	public function getRelatedExperiment(): Experiment
 	{
-		return $this->firstExperiment;
-	}
-
-	/**
-	 * @return Experiment[]|Collection
-	 */
-	public function getExpertSecond(): Collection
-	{
-		return $this->secondExperiment;
+		return $this->relatedExperiments;
 	}
 }

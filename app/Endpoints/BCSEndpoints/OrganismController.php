@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use App\Entity\Experiment;
 use App\Entity\IdentifiedObject;
 use App\Entity\Organism;
 use App\Entity\Repositories\OrganismRepository;
@@ -20,14 +21,18 @@ final class OrganismController extends WritableRepositoryController
 		return ['id', 'name', 'code'];
 	}
 
+
 	protected function getData(IdentifiedObject $object): array
 	{
-		/** @var Organism $object */
-		return [
-			'id' => $object->getId(),
-			'name' => $object->getName(),
-			'code' => $object->getCode(),
-		];
+        /** @var Organism $object */
+            return [
+                'id' => $object->getId(),
+                'name' => $object->getName(),
+                'code' => $object->getCode(),
+                'experiments' => $object->getExperiment()->map(function (Experiment $experiment) {
+                    return ['id' => $experiment->getId(), 'name' => $experiment->getName()];
+                })->toArray(),
+            ];
 	}
 
 	protected static function getRepositoryClassName(): string

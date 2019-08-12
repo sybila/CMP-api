@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -12,7 +13,7 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Device implements IdentifiedObject
 {
-	use SBase;
+	use EBase;
 
 	/**
 	 * @var string
@@ -92,7 +93,7 @@ class Device implements IdentifiedObject
 	 * @param int $address
 	 * @return Device
 	 */
-	public function setAddress($adress): Device
+	public function setAddress($address): Device
 	{
 		$this->address = $address;
 		return $this;

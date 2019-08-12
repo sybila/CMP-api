@@ -3,16 +3,20 @@
 namespace App\Controllers;
 
 use App\Entity\{
-	ExperimentValues,
-	IdentifiedObject,
-	Repositories\IEndpointRepository,
-	Repositories\ExperimentRepository,
-	Repositories\ExperimentVariableRepository
+    ExperimentValues,
+    ExperimentVariable,
+    Experiment,
+    IdentifiedObject,
+    Repositories\IEndpointRepository,
+    Repositories\ExperimentRepository,
+    Repositories\ExperimentVariableRepository,
+    Repositories\ExperimentValueRepository
 };
+
 use App\Exceptions\
 {
-	DependentResourcesBoundException,
-	MissingRequiredKeyException
+	MissingRequiredKeyException,
+	DependentResourcesBoundException
 };
 use App\Helpers\ArgumentParser;
 use Slim\Container;
@@ -23,29 +27,31 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @property-read ExperimentValueRepository $repository
- * @method ExperimentValue getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
+ * @method ExperimentValues getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
-final class ExperimentValueController extends ParentedSBaseController
+final class ExperimentValueController extends ParentedEBaseController
 {
+
 	/** @var ExperimentValueRepository */
 	private $valueRepository;
 
 	public function __construct(Container $c)
 	{
 		parent::__construct($c);
-		$this->variableRepository = $c->get(ExperimentValueRepository::class);
+		$this->valueRepository = $c->get(ExperimentValueRepository::class);
 	}
 
 	protected static function getAllowedSort(): array
 	{
-		return ['id', 'time'];
+		return ['id', 'time', 'value'];
 	}
+
 
 	protected function getData(IdentifiedObject $value): array
 	{
-		/** @var ExperimentVariable $value */
-		$sBaseData = parent::getData($value);
-		return array_merge ($sBaseData, [
+		/** @var ExperimentValues $value */
+		$eBaseData = parent::getData($value);
+		return array_merge($eBaseData, [
 			'time' => $value->getTime(),
 			'value' => $value->getValue(),
 		]);
@@ -53,11 +59,12 @@ final class ExperimentValueController extends ParentedSBaseController
 
 	protected function setData(IdentifiedObject $value, ArgumentParser $data): void
 	{
-		/** @var ExperimentValue $value */
+		/** @var ExperimentValues $value */
 		parent::setData($value, $data);
+		$value->setExperimentId($this->repository->getParent()->getExperimentId()->getId());
 		$value->getVariableId() ?: $value->setVariableId($this->repository->getParent());
-		!$data->hasKey('time') ?: $value->setTime($data->getData('time'));
-		!$data->hasKey('value') ?: $value->setValue($data->getData('value'));
+		!$data->hasKey('time') ?: $value->setTime($data->getFloat('time'));
+		!$data->hasKey('value') ?: $value->setValue($data->getFloat('value'));
 	}
 
 	protected function createObject(ArgumentParser $body): IdentifiedObject
@@ -66,24 +73,25 @@ final class ExperimentValueController extends ParentedSBaseController
 			throw new MissingRequiredKeyException('time');
 		if (!$body->hasKey('value'))
 			throw new MissingRequiredKeyException('value');
-		return new ExperimentValue;
+		return new ExperimentValues;
 	}
 
-	protected function checkInsertObject(IdentifiedObject $variable): void
+	protected function checkInsertObject(IdentifiedObject $value): void
 	{
-		/** @var ExperimentValue $value */
+		/** @var ExperimentValues $value */
+		if ($value->getExperimentId() === null)
+			throw new MissingRequiredKeyException('experimentId');
 		if ($value->getVariableId() === null)
 			throw new MissingRequiredKeyException('variableId');
-		if ($value->getValue() === null)
-			throw new MissingRequiredKeyException('value');
 		if ($value->getTime() === null)
 			throw new MissingRequiredKeyException('time');
+		if ($value->getValue() === null)
+			throw new MissingRequiredKeyException('value');
 	}
 
 	public function delete(Request $request, Response $response, ArgumentParser $args): Response
 	{
-		/** @var ExperimentVariable $variable */
-		$variable = $this->getObject($args->getInt('id'));
+		$value = $this->getObject($args->getInt('id'));
 		return parent::delete($request, $response, $args);
 	}
 
@@ -91,13 +99,14 @@ final class ExperimentValueController extends ParentedSBaseController
 	{
 		$validatorArray = parent::getValidatorArray();
 		return new Assert\Collection(array_merge($validatorArray, [
-			'variableId' => new Assert\Type(['type' => 'integer']),
+			/*'value' => new Assert\Type(['type' => 'float']),
+			'time' => new Assert\Type(['type' => 'float']),*/
 		]));
 	}
 
 	protected static function getObjectName(): string
 	{
-		return 'experimentValue';
+		return 'value';
 	}
 
 	protected static function getRepositoryClassName(): string
