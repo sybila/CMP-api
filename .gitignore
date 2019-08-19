@@ -7,4 +7,4 @@ settings.local.php
 /composer.lock
 /www/docs
 /config/*.priv
-/config/*.pub 
+/config/*.pub
