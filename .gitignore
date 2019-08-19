@@ -8,17 +8,3 @@ settings.local.php
 /www/docs
 /config/*.priv
 /config/*.pub
-userfiles/*
-*.db
-cache/*
-logs/*
-*.sublime*
-components/config.host_specific.php
-test.php
-.htaccess
-.project
-deploy.php
-vendor
-temp/*
-admin/loader-cache/*
-config.local.neon
