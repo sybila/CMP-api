@@ -191,6 +191,22 @@ return function(App $app)
 	(new RouteHelper)
 		->setRoute(Ctl\ModelParentedRuleController::class, '/models/{model-id:\\d+}/rules')
 		->register();
+    (new RouteHelper)
+        ->setRoute(Ctl\ModelTaskController::class, '/modelTasks')
+        ->register();
+    (new RouteHelper)
+        ->setRoute(Ctl\TaskParentedChangeController::class, '/modelTasks/{task-id:\\d+}/settings\'')
+        ->register();
+    (new RouteHelper)
+        ->setRoute(Ctl\TaskParentedChangeController::class, '/modelTasks/{task-id:\\d+}/changes')
+        ->register();
+    (new RouteHelper)
+        ->setRoute(Ctl\AnalysisToolController::class, '/analysisTools')
+        ->register();
+    (new RouteHelper)
+        ->setRoute(Ctl\AnalysisToolsParentedSettingController::class, '/analysisTools/{analysisTool-id:\\d+}/settings')
+        ->register();
+
 
 	// model species
 	$app->get('/models/{model-id:\\d+}/species/{sbmlId}', Ctl\ModelSpecieController::class . ':readSbmlId');
