@@ -191,6 +191,12 @@ return function(App $app)
 	(new RouteHelper)
 		->setRoute(Ctl\ModelParentedRuleController::class, '/models/{model-id:\\d+}/rules')
 		->register();
+	(new RouteHelper)
+		->setRoute(Ctl\UserController::class, '/users')
+		->register();
+	(new RouteHelper)
+		->setRoute(Ctl\UserGroupController::class, '/userGroups')
+		->register();
 
 	// model species
 	$app->get('/models/{model-id:\\d+}/species/{sbmlId}', Ctl\ModelSpecieController::class . ':readSbmlId');

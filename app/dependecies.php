@@ -210,6 +210,10 @@ $c[AuthRepo\UserRepository::class] = function (Container $c) {
 	return new AuthRepo\UserRepository($c[EntityManager::class]);
 };
 
+$c[AuthRepo\UserGroupRepository::class] = function (Container $c) {
+	return new AuthRepo\UserGroupRepository($c[EntityManager::class]);
+};
+
 $c[AuthRepo\ScopeRepository::class] = function (Container $c) {
 	return new AuthRepo\ScopeRepository;
 };
