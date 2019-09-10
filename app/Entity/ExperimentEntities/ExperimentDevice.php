@@ -17,13 +17,13 @@ class ExperimentDevice implements IdentifiedObject
 
 
 	/**
-	 * @ORM\ManyToMany(targetEntity="Experiment", inversedBy="devices")
+	 * @ORM\ManyToMany(targetEntity="Experiment", inversedBy="devices", fetch="EAGER")
 	 * @ORM\JoinColumn(name="exp_id", referencedColumnName="id")
 	 */
 	protected $experimentId;
 
 	/**
-	 * @ORM\ManyToMany(targetEntity="Device", inversedBy="experiments")
+	 * @ORM\ManyToMany(targetEntity="Device", inversedBy="experiments", fetch="EAGER")
 	 * @ORM\JoinColumn(name="dev_id", referencedColumnName="id")
 	 */
 	protected $deviceId;
@@ -36,9 +36,9 @@ class ExperimentDevice implements IdentifiedObject
 
 	/**
 	 * Get experimentId
-	 * @return int
+	 * @return Experiment
 	 */
-	public function getExperimentId(): ?int
+	public function getExperimentId(): ?Experiment
 	{
 		return $this->experimentId;
 	}
@@ -56,9 +56,9 @@ class ExperimentDevice implements IdentifiedObject
 
 	/**
 	 * Get deviceId
-	 * @return int
+	 * @return Device
 	 */
-	public function getDeviceId(): ?int
+	public function getDeviceId(): ?Device
 	{
 		return $this->deviceId;
 	}

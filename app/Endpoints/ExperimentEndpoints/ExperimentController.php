@@ -64,10 +64,10 @@ final class ExperimentController extends EBaseController
                     return ['id' => $note->getId(), 'note' => $note->getNote()];
                 })->toArray(),
                 'experimentRelation' => $experiment->getExperimentRelation()->map(function (ExperimentRelation $experimentRelation) {
-                return [ $experimentRelation->getSecondExperimentId() != null? $this->getData($experimentRelation->getSecondExperimentId()):null];
+                    return [ 'id' => $experimentRelation->getSecondExperimentId()->getId(), 'name' => $experimentRelation->getSecondExperimentId()->getName()];
                 })->toArray(),
                 'experimentModels' => $experiment->getExperimentModels()->map(function (ExperimentModels $experimentModels) {
-                    return [ $experimentModels->getModelRelationExperimentId() != null? ModelController::getData($experimentModels->getModelRelationExperimentId()):null];
+                    return [ 'id' => $experimentModels->getModelRelationExperimentId()->getId(), 'name' => $experimentModels->getModelRelationExperimentId()->getName()];
                 })->toArray(),
                 /*'devices' => $experiment->getExperimentDevices()->map(function (ExperimentDevice $devices) {
                 return ['experimentId' => $devices->getExperimentId(), 'deviceId' => $devices->getDeviceId()()];
@@ -92,6 +92,7 @@ final class ExperimentController extends EBaseController
 
 	protected function createObject(ArgumentParser $body): IdentifiedObject
 	{
+	    //Zatim neni userId
 		/*if (!$body->hasKey('userId'))
 			throw new MissingRequiredKeyException('userId');*/
 		return new Experiment;
@@ -135,10 +136,4 @@ final class ExperimentController extends EBaseController
 	{
 		return ExperimentRepository::Class;
 	}
-
-	protected function getSub($entity)
-	{
-		echo $entity;
-	}
-
 }

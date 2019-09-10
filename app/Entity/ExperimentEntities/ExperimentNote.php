@@ -24,7 +24,7 @@ class ExperimentNote implements IdentifiedObject
 	 * @ORM\ManyToOne(targetEntity="ExperimentVariable", inversedBy="note")
 	 * @ORM\JoinColumn(name="var_id", referencedColumnName="id")
 	 */
-	//protected $variableId;
+	protected $variableId;
 
 	/**
 	 * @var float

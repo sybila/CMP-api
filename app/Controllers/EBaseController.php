@@ -18,17 +18,12 @@ abstract class EBaseController extends WritableRepositoryController
 	{
 		return [
 			'id' => $object->getId(),
-			/*'name' => $object->getName(),
-			'protocol' => $object->getProtocol(),
-			'description' => $object->getDescription(),
-			'started' => $object->getStarted(),
-			'status' => $object->getStatus()*/
 		];
 	}
 
 	protected function setData(IdentifiedObject $object, ArgumentParser $body): void
 	{
-		//!$body->hasKey('name') ? $object->setName($body->getString('name')) : $object->setName($body->getString('name'));
+		!$body->hasKey('name') ? $object->setName($body->getString('name')) : $object->setName($body->getString('name'));
 		/*!$body->hasKey('protocol') ?: $object->setProtocol($body->getString('protocol'));
 		!$body->hasKey('description') ?: $object->setDescription($body->getString('description'));
 		!$body->hasKey('started') ?: $object->setStarted($body->getString('started'));

@@ -251,6 +251,18 @@ $c[EntityRepo\ExperimentModelsRepository::class] = function (Container $c) {
     return new EntityRepo\ExperimentModelsRepository($c[EntityManager::class]);
 };
 
+$c[EntityRepo\BioquantityRepository::class] = function (Container $c) {
+    return new EntityRepo\BioquantityRepository($c[EntityManager::class]);
+};
+
+$c[EntityRepo\BioquantityMethodRepository::class] = function (Container $c) {
+    return new EntityRepo\BioquantityMethodRepository($c[EntityManager::class]);
+};
+
+$c[EntityRepo\BioquantityVariableRepository::class] = function (Container $c) {
+    return new EntityRepo\BioquantityVariableRepository($c[EntityManager::class]);
+};
+
 $c[AuthorizationServer::class] = function (Container $c) {
 	$srv = new AuthorizationServer(
 		$c[AuthRepo\ClientRepository::class],

@@ -15,12 +15,6 @@ class ExperimentValues implements IdentifiedObject
 {
 	use EBase;
 
-    /**
-     * @var int
-     * @ORM\Column(type="integer", name="exp_id")
-     */
-    //protected $experimentId;
-
 	/**
 	 * @ORM\ManyToOne(targetEntity="ExperimentVariable", inversedBy="values")
 	 * @ORM\JoinColumn(name="experimentVariableId", referencedColumnName="id")

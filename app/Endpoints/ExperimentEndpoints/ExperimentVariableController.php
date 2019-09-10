@@ -2,15 +2,14 @@
 
 namespace App\Controllers;
 
-use App\Entity\{
-	ExperimentVariable,
-	ExperimentValues,
-	ExperimentNote,
-	IdentifiedObject,
-	Repositories\IEndpointRepository,
-	Repositories\ExperimentRepository,
-	Repositories\ExperimentVariableRepository
-};
+use App\Entity\{BioquantityVariable,
+    ExperimentVariable,
+    ExperimentValues,
+    ExperimentNote,
+    IdentifiedObject,
+    Repositories\IEndpointRepository,
+    Repositories\ExperimentRepository,
+    Repositories\ExperimentVariableRepository};
 use App\Exceptions\
 {
 	DependentResourcesBoundException,
@@ -51,9 +50,15 @@ final class ExperimentVariableController extends ParentedEBaseController
 			'name' => $variable->getName(),
 			'code' => $variable->getCode(),
 			'type' => $variable->getType(),
+            'notes' => $variable->getNote()->map(function (ExperimentNote $note) {
+                return ['id' => $note->getId(), 'note' => $note->getNote(), 'time' =>  $note->getTime()];
+            })->toArray(),
 			'values' => $variable->getValues()->map(function (ExperimentValues $val) {
 				return ['id' => $val->getId(), 'time' => $val->getTime(), 'value' => $val->getValue()];
 			})->toArray(),
+            'bioquantityVariables' => $variable->getBioquantities()->map(function(BioquantityVariable $bio){
+                return['varName'=> $bio->getName(), 'timeFrom' => $bio->getTimeFrom(), 'timeTo' => $bio->getTimeTo()];
+            })
 		]);
 	}
 
@@ -93,8 +98,8 @@ final class ExperimentVariableController extends ParentedEBaseController
 		$variable = $this->getObject($args->getInt('id'));
 		if (!$variable->getValues()->isEmpty())
 			throw new DependentResourcesBoundException('values');
-		/*if (!$variable->getNote()->isEmpty())
-			throw new DependentResourcesBoundException('note');*/
+		if (!$variable->getNote()->isEmpty())
+			throw new DependentResourcesBoundException('note');
 		return parent::delete($request, $response, $args);
 	}
 

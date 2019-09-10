@@ -62,13 +62,13 @@ class ExperimentVariable implements IdentifiedObject
 	 * @var ArrayCollection
 	 * @ORM\OneToMany(targetEntity="BioquantityVariable", mappedBy="experimentVariableId")
 	 */
-	//protected $bioquantityVariables;
+	protected $bioquantityVariables;
 
 	/**
 	 * @var ArrayCollection
-	 * @ORM\OneToMany(targetEntity="ExperimentNote", mappedBy="experimentVariableId")
+	 * @ORM\OneToMany(targetEntity="ExperimentNote", mappedBy="variableId")
 	 */
-	//private $notes;
+	private $notes;
 
 	/**
 	 * Get id
@@ -174,8 +174,16 @@ class ExperimentVariable implements IdentifiedObject
 	/**
 	 * @return ExperimentNote[]|Collection
 	 */
-	/*public function getNote(): Collection
+	public function getNote(): Collection
 	{
 		return $this->notes;
-	}*/
+	}
+
+    /**
+     * @return BioquantityVariable[]|Collection
+     */
+    public function getBioquantities(): Collection
+    {
+        return $this->bioquantityVariables;
+    }
 }

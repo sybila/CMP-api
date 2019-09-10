@@ -79,7 +79,7 @@ class ExperimentRelation implements IdentifiedObject
 	/**
 	 * @return Experiment[]|Collection
 	 */
-	public function getRelatedExperiment(): Experiment
+	public function getRelatedExperiment(): Collection
 	{
 		return $this->relatedExperiments;
 	}
