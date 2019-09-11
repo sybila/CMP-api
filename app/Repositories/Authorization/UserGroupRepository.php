@@ -35,7 +35,6 @@ class UserGroupRepository implements IEndpointRepository
 	}
 
 
-
 	public function get(int $id)
 	{
 		return $this->em->find(UserGroup::class, $id);
@@ -57,6 +56,7 @@ class UserGroupRepository implements IEndpointRepository
 				->getQuery()
 				->getScalarResult());
 	}
+
 
 	private function buildListQuery(array $filter): QueryBuilder
 	{

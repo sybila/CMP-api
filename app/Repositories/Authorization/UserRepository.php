@@ -75,6 +75,7 @@ class UserRepository implements UserRepositoryInterface, IEndpointRepository
 				->getScalarResult());
 	}
 
+
 	private function buildListQuery(array $filter): QueryBuilder
 	{
 		$query = $this->em->createQueryBuilder()

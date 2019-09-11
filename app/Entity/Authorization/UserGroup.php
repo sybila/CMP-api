@@ -24,6 +24,11 @@ class UserGroup implements IdentifiedObject
 	 */
 	private $name;
 
+	/**
+	 * @ORM\OneToMany(targetEntity="UserGroupToUser", mappedBy="userGroupId")
+	 */
+	private $users;
+
 
 	public function getIdentifier()
 	{
@@ -31,12 +36,21 @@ class UserGroup implements IdentifiedObject
 	}
 
 
+	public function getName()
+	{
+		return $this->name;
+	}
+
+
+	public function getUsers()
+	{
+		return $this->users;
+	}
+
+
 	public function setIdentifier($identifier)
 	{
 		$this->id = (int) $identifier;
 	}
-
-
-
 
 }

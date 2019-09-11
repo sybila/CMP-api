@@ -69,9 +69,7 @@ class User implements UserEntityInterface, IdentifiedObject
 	private $phone;
 
 	/**
-	 *
-	 * @var type
-	 * @ORM\Linktable('')
+	 * @ORM\OneToMany(targetEntity="UserGroupToUser", mappedBy="userId")
 	 */
 	private $groups;
 
@@ -130,6 +128,12 @@ class User implements UserEntityInterface, IdentifiedObject
 	{
 
 		return $this->phone;
+	}
+
+
+	public function getGroups()
+	{
+		return $this->groups;
 	}
 
 
