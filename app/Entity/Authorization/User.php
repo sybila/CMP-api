@@ -137,6 +137,43 @@ class User implements UserEntityInterface, IdentifiedObject
 	}
 
 
+	public function setName(string $name)
+	{
+
+		$this->name = $name;
+		return $this;
+	}
+
+
+	public function setSurname(string $surname)
+	{
+
+		$this->surname = $surname;
+		return $this;
+	}
+
+
+	public function setType(int $type)
+	{
+		$this->type = $type;
+		return $this;
+	}
+
+
+	public function setEmail(string $email)
+	{
+		$this->email = $email;
+		return $this;
+	}
+
+
+	public function setPhone(string $phone)
+	{
+		$this->phone = $phone;
+		return $this;
+	}
+
+
 	public function changePassword($old, $new): bool
 	{
 		if (!$this->checkPassword($old))

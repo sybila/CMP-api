@@ -29,6 +29,18 @@ class UserGroup implements IdentifiedObject
 	 */
 	private $users;
 
+	/**
+	 * @var string
+	 * @ORM\Column
+	 */
+	private $description;
+
+	/**
+	 * @var string
+	 * @ORM\Column
+	 */
+	private $type;
+
 
 	public function getIdentifier()
 	{
@@ -45,6 +57,18 @@ class UserGroup implements IdentifiedObject
 	public function getUsers()
 	{
 		return $this->users;
+	}
+
+
+	public function getType()
+	{
+		return $this->type;
+	}
+
+
+	public function getDescription()
+	{
+		return $this->description;
 	}
 
 

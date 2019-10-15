@@ -2,49 +2,49 @@
 
 namespace App\Repositories\Authorization;
 
-use App\Entity\Authorization\UserGroup;
+use App\Entity\Authorization\UserGroupRole;
 use App\Entity\Repositories\IEndpointRepository;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Common\Persistence\ObjectRepository;
 use Doctrine\ORM\EntityManager;
 use League\OAuth2\Server\Entities\ClientEntityInterface;
 
-class UserGroupRepository implements IEndpointRepository
+class UserGroupRoleRepository implements IEndpointRepository
 {
 
 	/** @var EntityManager */
 	private $em;
 
 	/** @var ObjectRepository */
-	private $userGroupRepository;
+	private $userGroupRoleRepository;
 
-	/** @var UserGroup */
-	private $userGroup;
+	/** @var UserGroupRole */
+	private $UserGroupRole;
 
 
 	public function __construct(EntityManager $em)
 	{
 		$this->em = $em;
-		$this->userGroupRepository = $em->getRepository(UserGroup::class);
+		$this->userGroupRoleRepository = $em->getRepository(UserGroupRole::class);
 	}
 
 
-	public function getById(int $id): ?UserGroup
+	public function getById(int $id): ?UserGroupRole
 	{
-		return $this->userGroupRepository->find($id);
+		return $this->userGroupRoleRepository->find($id);
 	}
 
 
 	public function get(int $id)
 	{
-		return $this->em->find(UserGroup::class, $id);
+		return $this->em->find(UserGroupRole::class, $id);
 	}
 
 
 	public function getList(array $filter, array $sort, array $limit): array
 	{
 		$query = $this->buildListQuery($filter)
-			->select('g.id, g.name, g.type, g.description');
+			->select('gr.id, gr.tier, gr.name');
 		return $query->getQuery()->getArrayResult();
 	}
 
@@ -52,7 +52,7 @@ class UserGroupRepository implements IEndpointRepository
 	public function getNumResults(array $filter): int
 	{
 		return ((int) $this->buildListQuery($filter)
-				->select('COUNT(g)')
+				->select('COUNT(gr)')
 				->getQuery()
 				->getScalarResult());
 	}
@@ -61,7 +61,7 @@ class UserGroupRepository implements IEndpointRepository
 	private function buildListQuery(array $filter): QueryBuilder
 	{
 		$query = $this->em->createQueryBuilder()
-			->from(UserGroup::class, 'g');
+			->from(UserGroupRole::class, 'gr');
 		return $query;
 	}
 

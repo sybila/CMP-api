@@ -30,29 +30,29 @@ unset($c['logger']);
 
 \Tracy\Debugger::enable($c->settings['tracy']['mode'], $c->settings['tracy']['logDir']);
 \Tracy\Debugger::timer('execution');
-//\Tracy\Debugger::$onFatalError[] = function(\Throwable $exception)
-//{
-//	header('Content-type: application/json');
-//	echo json_encode([
-//		'status' => 'error',
-//		'code' => 500,
-//		'message' => '',
-//	]);
-//};
+/* \Tracy\Debugger::$onFatalError[] = function(\Throwable $exception)
+  {
+  header('Content-type: application/json');
+  echo json_encode([
+  'status' => 'error',
+  'code' => 500,
+  'message' => '',
+  ]);
+  }; */
 
 $c['persistentData'] = function (Container $c) {
-	return (object)['needsFlush' => false];
+	return (object) ['needsFlush' => false];
 };
 
 // Doctrine
 $c[EntityManager::class] = function (Container $c) {
 	$settings = $c->settings;
 	$config = \Doctrine\ORM\Tools\Setup::createAnnotationMetadataConfiguration(
-		$settings['doctrine']['meta']['entity_path'],
-		$settings['doctrine']['meta']['auto_generate_proxies'],
-		$settings['doctrine']['meta']['proxy_dir'],
-		$settings['doctrine']['meta']['cache'],
-		false
+			$settings['doctrine']['meta']['entity_path'],
+			$settings['doctrine']['meta']['auto_generate_proxies'],
+			$settings['doctrine']['meta']['proxy_dir'],
+			$settings['doctrine']['meta']['cache'],
+			false
 	);
 
 	$config->addCustomStringFunction('TYPE', \App\Doctrine\ORM\Query\Functions\TypeFunction::class);
@@ -67,9 +67,9 @@ $c['foundHandler'] = function (Container $c) {
 $c['notFoundHandler'] = function (Container $c) {
 	return function (Request $request, Response $response) {
 		return $response->withStatus(404)->withJson([
-			'status' => 'error',
-			'message' => 'Page not found',
-			'code' => 404,
+				'status' => 'error',
+				'message' => 'Page not found',
+				'code' => 404,
 		]);
 	};
 };
@@ -77,10 +77,10 @@ $c['notFoundHandler'] = function (Container $c) {
 $c['notAllowedHandler'] = function (Container $c) {
 	return function (Request $request, Response $response, array $allowedHttpMethods) {
 		return $response->withStatus(405)->withJson([
-			'status' => 'error',
-			'code' => 405,
-			'message' => 'Allowed methods: ' . implode(', ', $allowedHttpMethods),
-			'methods' => $allowedHttpMethods,
+				'status' => 'error',
+				'code' => 405,
+				'message' => 'Allowed methods: ' . implode(', ', $allowedHttpMethods),
+				'methods' => $allowedHttpMethods,
 		]);
 	};
 };
@@ -92,16 +92,16 @@ $c['errorHandler'] = function (Container $c) {
 					'status' => 'error',
 					'code' => $exception->getCode(),
 					'message' => $exception->getMessage(),
-				] + $exception->getAdditionalData());
+					] + $exception->getAdditionalData());
 
 		if (!\Tracy\Debugger::$productionMode)
 			throw $exception;
 
 		\Tracy\Debugger::log($exception);
 		return $response->withStatus(500)->withJson([
-			'status' => 'error',
-			'code' => 500,
-			'message' => '',
+				'status' => 'error',
+				'code' => 500,
+				'message' => '',
 		]);
 	};
 };
@@ -210,8 +210,16 @@ $c[AuthRepo\UserRepository::class] = function (Container $c) {
 	return new AuthRepo\UserRepository($c[EntityManager::class]);
 };
 
+$c[AuthRepo\UserTypeRepository::class] = function (Container $c) {
+	return new AuthRepo\UserTypeRepository($c[EntityManager::class]);
+};
+
 $c[AuthRepo\UserGroupRepository::class] = function (Container $c) {
 	return new AuthRepo\UserGroupRepository($c[EntityManager::class]);
+};
+
+$c[AuthRepo\UserGroupRoleRepository::class] = function (Container $c) {
+	return new AuthRepo\UserGroupRoleRepository($c[EntityManager::class]);
 };
 
 $c[AuthRepo\ScopeRepository::class] = function (Container $c) {
@@ -222,8 +230,7 @@ $c[AuthRepo\AccessTokenRepository::class] = function (Container $c) {
 	return new AuthRepo\AccessTokenRepository($c[EntityManager::class]);
 };
 
-$c[AuthRepo\RefreshTokenRepository::class] = function(Container $c)
-{
+$c[AuthRepo\RefreshTokenRepository::class] = function(Container $c) {
 	return new AuthRepo\RefreshTokenRepository($c[EntityManager::class]);
 };
 
@@ -237,12 +244,12 @@ $c[AuthorizationServer::class] = function (Container $c) {
 	);
 
 	$srv->enableGrantType(new RefreshTokenGrant(
-		$c[AuthRepo\RefreshTokenRepository::class]
+			$c[AuthRepo\RefreshTokenRepository::class]
 	));
 
 	$srv->enableGrantType(new PasswordGrant(
-		$c[AuthRepo\UserRepository::class],
-		$c[AuthRepo\RefreshTokenRepository::class]
+			$c[AuthRepo\UserRepository::class],
+			$c[AuthRepo\RefreshTokenRepository::class]
 	));
 
 	$srv->enableGrantType(new ClientCredentialsGrant);

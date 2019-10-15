@@ -11,6 +11,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 abstract class WritableRepositoryController extends RepositoryController
 {
+
 	use ValidatedController;
 
 	/** @var \stdClass */
@@ -34,11 +35,13 @@ abstract class WritableRepositoryController extends RepositoryController
 	 */
 	protected $beforeDelete = [];
 
+
 	public function __construct(Container $c)
 	{
 		parent::__construct($c);
 		$this->data = $c['persistentData'];
 	}
+
 
 	/**
 	 * fill $object with data from $body, do additional validations
@@ -47,6 +50,7 @@ abstract class WritableRepositoryController extends RepositoryController
 	 */
 	abstract protected function setData(IdentifiedObject $object, ArgumentParser $body): void;
 
+
 	/**
 	 * Create object to be inserted, can be as simple as `return new SomeObject;`
 	 * @param ArgumentParser $body request body
@@ -54,16 +58,19 @@ abstract class WritableRepositoryController extends RepositoryController
 	 */
 	abstract protected function createObject(ArgumentParser $body): IdentifiedObject;
 
+
 	/**
 	 * Check object to be inserted if it contains all required fields
 	 * @param IdentifiedObject $object
 	 */
 	abstract protected function checkInsertObject(IdentifiedObject $object): void;
 
+
 	protected function getModifyId(ArgumentParser $args): int
 	{
 		return $args->getInt('id');
 	}
+
 
 	public function add(Request $request, Response $response, ArgumentParser $args): Response
 	{
@@ -83,6 +90,7 @@ abstract class WritableRepositoryController extends RepositoryController
 		return self::formatInsert($response, $object->getId());
 	}
 
+
 	public function edit(Request $request, Response $response, ArgumentParser $args): Response
 	{
 		$this->runEvents($this->beforeRequest, $request, $response, $args);
@@ -100,6 +108,7 @@ abstract class WritableRepositoryController extends RepositoryController
 		return self::formatOk($response);
 	}
 
+
 	public function delete(Request $request, Response $response, ArgumentParser $args): Response
 	{
 		$this->runEvents($this->beforeRequest, $request, $response, $args);
@@ -109,6 +118,24 @@ abstract class WritableRepositoryController extends RepositoryController
 		$this->data->needsFlush = true;
 		return self::formatOk($response);
 	}
+
+
+	/**
+	 * Iterate over array of argument names, throw exception if an argument is missing
+	 * @param array $keys
+	 * @param ArgumentParser $body
+	 * @return void
+	 * @throws MissingRequiredKeyException
+	 */
+	protected function verifyMandatoryArguments(array $keys, ArgumentParser $body): void
+	{
+		foreach ($keys as $key) {
+			if (!$body->hasKey($key)) {
+				throw new MissingRequiredKeyException($key);
+			}
+		}
+	}
+
 
 	abstract protected function getValidator(): Assert\Collection;
 }

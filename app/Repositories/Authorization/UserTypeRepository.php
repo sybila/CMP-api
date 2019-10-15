@@ -2,49 +2,49 @@
 
 namespace App\Repositories\Authorization;
 
-use App\Entity\Authorization\UserGroup;
+use App\Entity\Authorization\UserType;
 use App\Entity\Repositories\IEndpointRepository;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Common\Persistence\ObjectRepository;
 use Doctrine\ORM\EntityManager;
 use League\OAuth2\Server\Entities\ClientEntityInterface;
 
-class UserGroupRepository implements IEndpointRepository
+class UserTypeRepository implements IEndpointRepository
 {
 
 	/** @var EntityManager */
 	private $em;
 
 	/** @var ObjectRepository */
-	private $userGroupRepository;
+	private $userTypeRepository;
 
-	/** @var UserGroup */
-	private $userGroup;
+	/** @var UserType */
+	private $UserType;
 
 
 	public function __construct(EntityManager $em)
 	{
 		$this->em = $em;
-		$this->userGroupRepository = $em->getRepository(UserGroup::class);
+		$this->userTypeRepository = $em->getRepository(UserType::class);
 	}
 
 
-	public function getById(int $id): ?UserGroup
+	public function getById(int $id): ?UserType
 	{
-		return $this->userGroupRepository->find($id);
+		return $this->userTypeRepository->find($id);
 	}
 
 
 	public function get(int $id)
 	{
-		return $this->em->find(UserGroup::class, $id);
+		return $this->em->find(UserType::class, $id);
 	}
 
 
 	public function getList(array $filter, array $sort, array $limit): array
 	{
 		$query = $this->buildListQuery($filter)
-			->select('g.id, g.name, g.type, g.description');
+			->select('ut.id, ut.tier, ut.name');
 		return $query->getQuery()->getArrayResult();
 	}
 
@@ -52,7 +52,7 @@ class UserGroupRepository implements IEndpointRepository
 	public function getNumResults(array $filter): int
 	{
 		return ((int) $this->buildListQuery($filter)
-				->select('COUNT(g)')
+				->select('COUNT(ut)')
 				->getQuery()
 				->getScalarResult());
 	}
@@ -61,7 +61,7 @@ class UserGroupRepository implements IEndpointRepository
 	private function buildListQuery(array $filter): QueryBuilder
 	{
 		$query = $this->em->createQueryBuilder()
-			->from(UserGroup::class, 'g');
+			->from(UserType::class, 'ut');
 		return $query;
 	}
 

@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Entity\{
 	Authorization\User,
 	Authorization\UserGroup,
+	Authorization\UserGroupToUser,
 	IdentifiedObject
 };
 use App\Entity\Repositories\IEndpointRepository;
@@ -35,6 +36,7 @@ final class UserController extends WritableRepositoryController
 	public function __construct(Container $c)
 	{
 		parent::__construct($c);
+
 		$this->userRepository = $c->get(UserRepository::class);
 	}
 
@@ -50,10 +52,13 @@ final class UserController extends WritableRepositoryController
 		/** @var User $user */
 		return [
 			'id' => $user->getId(),
+			'username' => $user->getUsername(),
 			'name' => $user->getName(),
 			'surname' => $user->getSurname(),
-			'groups' => $user->getGroups()->map(function (UserGroup $group) {
-					return ['id' => $group->getId(), 'name' => $group->getName()];
+			'type' => (int) $user->getType(),
+			'groups' => $user->getGroups()->map(function (UserGroupToUser $groupLink) {
+					$group = $groupLink->getUserGroupId();
+					return ['id' => $group->getId(), 'role' => (int) $groupLink->getRoleId(), 'name' => $group->getName()];
 				})->toArray(),
 		];
 	}
@@ -62,36 +67,48 @@ final class UserController extends WritableRepositoryController
 	protected function setData(IdentifiedObject $user, ArgumentParser $body): void
 	{
 		/** @var User $user */
+		!$body->hasKey('username') ?: $user->setName($body->getString('username'));
+		!$body->hasKey('name') ?: $user->setName($body->getString('name'));
+		!$body->hasKey('surname') ?: $user->setSurname($body->getString('surname'));
+		!$body->hasKey('type') ?: $user->setType($body->getString('type'));
+		!$body->hasKey('email') ?: $user->setEmail($body->getString('email'));
+		!$body->hasKey('phone') ?: $user->setPhone($body->getString('phone'));
+		// TODO password hash
+		//!$body->hasKey('groups') ?: $user->setGroups($body->getString('groups'));
 	}
 
 
 	protected function createObject(ArgumentParser $body): IdentifiedObject
 	{
-
+		$this->verifyMandatoryArguments(['username', 'name', 'surname', 'type'], $body);
+		dump(new User($body['username']));
+		return new User($body['username']);
 	}
 
 
 	protected function checkInsertObject(IdentifiedObject $user): void
 	{
-
+		//TODO
 	}
 
 
 	public function delete(Request $request, Response $response, ArgumentParser $args): Response
 	{
-
+		// TODO: verify group dependencies
+		return parent::delete($request, $response, $args);
 	}
 
 
 	protected function getValidator(): Assert\Collection
 	{
-		$validatorArray = parent::getValidatorArray();
-		return new Assert\Collection(array_merge($validatorArray, [
-				'userId' => new Assert\Type(['type' => 'integer']),
-				'description' => new Assert\Type(['type' => 'string']),
-				'visualisation' => new Assert\Type(['type' => 'string']),
-				'status' => new Assert\Type(['type' => 'string']),
-		]));
+		return new Assert\Collection([
+			'username' => new Assert\Type(['type' => 'string']),
+			'name' => new Assert\Type(['type' => 'string']),
+			'surname' => new Assert\Type(['type' => 'string']),
+			'type' => new Assert\Type(['type' => 'integer']),
+			'email' => new Assert\Type(['type' => 'string']),
+			'phone' => new Assert\Type(['type' => 'string']),
+		]);
 	}
 
 
