@@ -25,7 +25,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @property-read ExperimentNoteRepository $repository
  * @method ExperimentNote getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
-final class ExperimentNoteController extends ParentedEBaseController
+final class ExperimentNoteController extends ParentedRepositoryController
 {
 	/** @var ExperimentNoteRepository */
 	private $noteRepository;
@@ -44,18 +44,16 @@ final class ExperimentNoteController extends ParentedEBaseController
 	protected function getData(IdentifiedObject $note): array
 	{
 		/** @var ExperimentNote $note */
-		$eBaseData = parent::getData($note);
-		return array_merge ($eBaseData, [
+		return [
 			'time' => $note->getTime(),
 			'note' => $note->getNote(),
 			'imgLink' => $note->getImgLink(),
-		]);
+		];
 	}
 
 	protected function setData(IdentifiedObject $note, ArgumentParser $data): void
 	{
 		/** @var ExperimentNote $note */
-		parent::setData($note, $data);
 		$note->getExperimentId() ?: $note->setExperimentId($this->repository->getParent());
 		!$data->hasKey('time') ?: $note->setTime($data->getFloat('time'));
 		!$data->hasKey('note') ?: $note->setNote($data->getString('note'));
@@ -64,12 +62,6 @@ final class ExperimentNoteController extends ParentedEBaseController
 
 	protected function createObject(ArgumentParser $body): IdentifiedObject
 	{
-		/*if (!$body->hasKey('time'))
-			throw new MissingRequiredKeyException('time');
-		/*if (!$body->hasKey('note'))
-			throw new MissingRequiredKeyException('note');
-		/*if (!$body->hasKey('imgLink'))
-			throw new MissingRequiredKeyException('imgLink');*/
 		return new ExperimentNote;
 	}
 
@@ -89,10 +81,9 @@ final class ExperimentNoteController extends ParentedEBaseController
 
 	protected function getValidator(): Assert\Collection
 	{
-		$validatorArray = parent::getValidatorArray();
-		return new Assert\Collection(array_merge($validatorArray, [
+		return new Assert\Collection( [
 			'experimentId' => new Assert\Type(['type' => 'integer']),
-		]));
+		]);
 	}
 
 	protected static function getObjectName(): string

@@ -169,9 +169,9 @@ class BioquantityVariable implements IdentifiedObject
 
 	/**
 	 * Get experimentVariableId
-	 * @return null|integer
+	 * @return ExperimentVariable
 	 */
-	public function getExperimentVariableId(): ?int
+	public function getExperimentVariableId(): ExperimentVariable
 	{
 		return $this->experimentVariableId;
 	}

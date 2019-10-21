@@ -71,4 +71,12 @@ class BioquantityMethodRepository implements IDependentSBaseRepository
 			->setParameter('bioquantityId', $this->bioquantity->getId());
 		return $query;
 	}
+
+    public function add($object): void
+    {
+    }
+
+    public function remove($object): void
+    {
+    }
 }

@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Entity\{BioquantityVariable,
     Bioquantity,
     BioquantityMethod,
+    ExperimentVariable,
     IdentifiedObject,
     Repositories\BioquantityMethodRepository,
     Repositories\BioquantityVariableRepository,
@@ -26,7 +27,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @property-read BioquantityVariableRepository $repository
  * @method BioquantityVariable getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
-final class BioquantityVariableController extends ParentedEBaseController
+final class BioquantityVariableController extends ParentedRepositoryController
 {
 
 	/** @var BioquantityVariableRepository */
@@ -47,21 +48,20 @@ final class BioquantityVariableController extends ParentedEBaseController
 	protected function getData(IdentifiedObject $variable): array
 	{
 		/** @var BioquantityVariable $variable */
-		$eBaseData = parent::getData($variable);
-		return array_merge($eBaseData, [
+        if($variable != null) {
+		return [
             'name' => $variable->getName(),
-			'experimentVariableId' => $variable->getExperimentVariableId(),
+			'experimentVariableId' => $variable->getExperimentVariableId() != null ? ExperimentVariableController::getData($variable->getExperimentVariableId()):null,
 			'timeFrom' => $variable->getTimeFrom(),
             'timeTo' => $variable->getTimeTo(),
 			'value' => $variable->getValue(),
-		]);
+		];
+        }
 	}
 
 	protected function setData(IdentifiedObject $variable, ArgumentParser $data): void
 	{
 		/** @var BioquantityVariable $variable */
-		parent::setData($variable, $data);
-        $variable->setBioquantityId($this->repository->getParent()->getBioquantityId()->getId());
         $variable->getMethodId() ?: $variable->setMethodId($this->repository->getParent());
         !$data->hasKey('experimentVariableId') ?: $variable->setExperimentVariableId($data->getInt('experimentVariableId'));
         !$data->hasKey('timeFrom') ?: $variable->setTimeFrom($data->getFloat('timeFrom'));
@@ -99,11 +99,10 @@ final class BioquantityVariableController extends ParentedEBaseController
 
 	protected function getValidator(): Assert\Collection
 	{
-		$validatorArray = parent::getValidatorArray();
-		return new Assert\Collection(array_merge($validatorArray, [
+		return new Assert\Collection([
 			'name' => new Assert\Type(['type' => 'string']),
 			/*'time' => new Assert\Type(['type' => 'float']),*/
-		]));
+		]);
 	}
 
 	protected static function getObjectName(): string

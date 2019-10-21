@@ -26,7 +26,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @property-read ExperimentVariableRepository $repository
  * @method ExperimentVariable getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
-final class ExperimentVariableController extends ParentedEBaseController
+final class ExperimentVariableController extends ParentedRepositoryController
 {
 	/** @var ExperimentVariableRepository */
 	private $variableRepository;
@@ -45,8 +45,8 @@ final class ExperimentVariableController extends ParentedEBaseController
 	protected function getData(IdentifiedObject $variable): array
 	{
 		/** @var ExperimentVariable $variable */
-		$eBaseData = parent::getData($variable);
-		return array_merge ($eBaseData, [
+		return [
+		    'id' => $variable->getId(),
 			'name' => $variable->getName(),
 			'code' => $variable->getCode(),
 			'type' => $variable->getType(),
@@ -59,13 +59,13 @@ final class ExperimentVariableController extends ParentedEBaseController
             'bioquantityVariables' => $variable->getBioquantities()->map(function(BioquantityVariable $bio){
                 return['varName'=> $bio->getName(), 'timeFrom' => $bio->getTimeFrom(), 'timeTo' => $bio->getTimeTo()];
             })
-		]);
+		];
 	}
 
 	protected function setData(IdentifiedObject $variable, ArgumentParser $data): void
 	{
 		/** @var ExperimentVariable $variable */
-		parent::setData($variable, $data);
+		//parent::setData($variable, $data);
 		$variable->getExperimentId() ?: $variable->setExperimentId($this->repository->getParent());
 		!$data->hasKey('name') ?: $variable->setName($data->getString('name'));
 		!$data->hasKey('code') ?: $variable->setCode($data->getString('code'));
@@ -76,8 +76,8 @@ final class ExperimentVariableController extends ParentedEBaseController
 	{
 		if (!$body->hasKey('name'))
 			throw new MissingRequiredKeyException('name');
-		/*if (!$body->hasKey('code'))
-			throw new MissingRequiredKeyException('code');*/
+		if (!$body->hasKey('code'))
+			throw new MissingRequiredKeyException('code');
 		return new ExperimentVariable;
 	}
 
@@ -88,8 +88,8 @@ final class ExperimentVariableController extends ParentedEBaseController
 			throw new MissingRequiredKeyException('experimentId');
 		if ($variable->getName() === null)
 			throw new MissingRequiredKeyException('name');
-		/*if ($variable->getCode() === null)
-			throw new MissingRequiredKeyException('code');*/
+		if ($variable->getCode() === null)
+			throw new MissingRequiredKeyException('code');
 	}
 
 	public function delete(Request $request, Response $response, ArgumentParser $args): Response
@@ -105,10 +105,9 @@ final class ExperimentVariableController extends ParentedEBaseController
 
 	protected function getValidator(): Assert\Collection
 	{
-		$validatorArray = parent::getValidatorArray();
-		return new Assert\Collection(array_merge($validatorArray, [
+		return new Assert\Collection( [
 			'experimentId' => new Assert\Type(['type' => 'integer']),
-		]));
+		]);
 	}
 
 	protected static function getObjectName(): string

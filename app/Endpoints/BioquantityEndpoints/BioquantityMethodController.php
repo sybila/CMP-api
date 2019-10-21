@@ -27,7 +27,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @property-read BioquantityMethodRepository $repository
  * @method BioquantityMethod getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
-final class BioquantityMethodController extends ParentedEBaseController
+final class BioquantityMethodController extends ParentedRepositoryController
 {
 	/** @var BioquantityMethodRepository */
 	private $methodRepository;
@@ -46,33 +46,29 @@ final class BioquantityMethodController extends ParentedEBaseController
 	protected function getData(IdentifiedObject $method): array
 	{
 		/** @var BioquantityMethod $method */
-		$eBaseData = parent::getData($method);
-		return array_merge ($eBaseData, [
+		return [
 			'value' => $method->getValue(),
 			'formula' => $method->getFormula(),
 			'source' => $method->getSource(),
 			'variables' => $method->getVariables()->map(function (BioquantityVariable $var) {
 				return ['id' => $var->getId(), 'name' => $var->getName(), 'value' => $var->getValue()];
 			})->toArray(),
-		]);
+		];
 	}
 
 	protected function setData(IdentifiedObject $method, ArgumentParser $data): void
 	{
 		/** @var BioquantityMethod $method */
-		parent::setData($method, $data);
         $method->getBioquantityId() ?: $method->setBioquantityId($this->repository->getParent());
 		!$data->hasKey('value') ?: $method->setValue($data->getFloat('value'));
-		!$data->hasKey('formula') ?: $method->setFormula($data->getString('code'));
-		!$data->hasKey('source') ?: $method->setSource($data->getString('type'));
+		!$data->hasKey('formula') ?: $method->setFormula($data->getString('formula'));
+		!$data->hasKey('source') ?: $method->setSource($data->getString('source'));
 	}
 
 	protected function createObject(ArgumentParser $body): IdentifiedObject
 	{
-		/*if (!$body->hasKey('value'))
-			throw new MissingRequiredKeyException('value');*/
-		/*if (!$body->hasKey('code'))
-			throw new MissingRequiredKeyException('code');*/
+		if (!$body->hasKey('value'))
+			throw new MissingRequiredKeyException('value');
 		return new BioquantityMethod();
 	}
 
@@ -94,10 +90,9 @@ final class BioquantityMethodController extends ParentedEBaseController
 
 	protected function getValidator(): Assert\Collection
 	{
-		$validatorArray = parent::getValidatorArray();
-		return new Assert\Collection(array_merge($validatorArray, [
+		return new Assert\Collection([
 			'bioquantityId' => new Assert\Type(['type' => 'integer']),
-		]));
+		]);
 	}
 
 	protected static function getObjectName(): string

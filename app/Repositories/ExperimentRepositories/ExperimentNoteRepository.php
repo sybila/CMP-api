@@ -71,4 +71,12 @@ class ExperimentNoteRepository implements IDependentSBaseRepository
 			->setParameter('experimentId', $this->experiment->getId());
 		return $query;
 	}
+
+    public function add($object): void
+    {
+    }
+
+    public function remove($object): void
+    {
+    }
 }

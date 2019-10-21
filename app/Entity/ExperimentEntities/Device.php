@@ -33,11 +33,23 @@ class Device implements IdentifiedObject
 	 */
 	private $address;
 
-	/**
-	 * @var ArrayCollection
-	 * @ORM\ManyToMany(targetEntity="ExperimentDevices", mappedBy="deviceId")
-	 */
-	private $experiments;
+	///**
+	// * @var ArrayCollection
+	 //* @ORM\ManyToMany(targetEntity="ExperimentDevices", mappedBy="deviceId")
+	// */
+	//private $experiments;
+
+    /**
+     * Many Device have Many Experiment.
+     * @ORM\ManyToMany(targetEntity="Experiment", inversedBy="devices")
+     * @ORM\JoinTable(name="experiment_device",  joinColumns={@ORM\JoinColumn(name="dev_id", referencedColumnName="id")},
+     * inverseJoinColumns={@ORM\JoinColumn(name="exp_id", referencedColumnName="id")})
+     */
+    private $experiments;
+
+    public function __construct() {
+        $this->experiments = new \Doctrine\Common\Collections\ArrayCollection();
+    }
 
 	/**
 	 * Get type

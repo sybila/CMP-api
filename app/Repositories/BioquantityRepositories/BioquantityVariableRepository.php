@@ -32,7 +32,7 @@ class BioquantityVariableRepository implements IDependentSBaseRepository
 
 	public function get(int $id)
 	{
-		return $this->em->find(BioquantityMethod::class, $id);
+		return $this->em->find(BioquantityVariable::class, $id);
 	}
 
 	public function getNumResults(array $filter): int
@@ -74,4 +74,11 @@ class BioquantityVariableRepository implements IDependentSBaseRepository
 		return $query;
 	}
 
+    public function add($object): void
+    {
+    }
+
+    public function remove($object): void
+    {
+    }
 }

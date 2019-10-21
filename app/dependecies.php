@@ -263,6 +263,10 @@ $c[EntityRepo\BioquantityVariableRepository::class] = function (Container $c) {
     return new EntityRepo\BioquantityVariableRepository($c[EntityManager::class]);
 };
 
+$c[EntityRepo\DeviceRepository::class] = function (Container $c) {
+    return new EntityRepo\DeviceRepository($c[EntityManager::class]);
+};
+
 $c[AuthorizationServer::class] = function (Container $c) {
 	$srv = new AuthorizationServer(
 		$c[AuthRepo\ClientRepository::class],

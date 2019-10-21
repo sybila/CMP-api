@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\Criteria;
@@ -99,13 +100,36 @@ class Experiment implements IdentifiedObject
      * @ORM\OneToMany(targetEntity="ExperimentModels", mappedBy="ExperimentId", fetch="EAGER")
      */
     private $experimentModels;
-
-	/**
+    /**
 	 * @var ArrayCollection
-	 * @ORM\ManyToMany(targetEntity="ExperimentDevice", mappedBy="experimentId")
+     * @ORM\ManyToMany(targetEntity="Device", mappedBy="experimentId")
+     * @ORM\JoinTable(name="experiment_device", joinColumns={@ORM\JoinColumn(name="dev_id", referencedColumnName="id")},
+     * inverseJoinColumns={@ORM\JoinColumn(name="exp_id", referencedColumnName="id")})
 	 */
 	private $devices;
 
+    ///**
+    // * Many Experiment have Many Device.
+     //* @ManyToMany(targetEntity="Device")
+    // * @JoinTable(name="experiment_device",
+    // *      joinColumns={@JoinColumn(name="dev_id", referencedColumnName="id")},
+     //*      inverseJoinColumns={@JoinColumn(name="exp_id", referencedColumnName="id")}
+     //*      )
+     //*/
+    //private $devices;
+
+    // ...
+
+    /*public function __construct() {
+        $this->devices = new \Doctrine\Common\Collections\ArrayCollection();
+    }*/
+
+    public function __construct()
+    {
+        $this->inserted = new DateTimeJson;
+        $this->started = new DateTimeJson;
+        $this->devices = new ArrayCollection();
+    }
 
 	/**
 	 * Get name
@@ -188,23 +212,22 @@ class Experiment implements IdentifiedObject
 
 	/**
 	 * Get started
-	 * @return DateTimeJson|null
+	 * @return DateTimeJson
 	 */
-	public function getStarted(): ?DateTimeJson
+	public function getStarted(): DateTimeJson
 	{
 		return $this->started;
 	}
 
-	/**
+	/*/**
 	 * Set started
-	 * @param DateTimeJson $started
 	 * @return Experiment
 	 */
-	public function setStarted($started): Experiment
+	/*public function setStarted(): Experiment
 	{
-		$this->started = $started;
+		$this->started = new DateTimeJson();
 		return $this;
-	}
+	}*/
 
 	/**
 	 * Get inserted
@@ -215,16 +238,15 @@ class Experiment implements IdentifiedObject
 		return $this->inserted;
 	}
 
-	/**
+	/*/**
 	 * Set inserted
-	 * @param DateTimeJson $inserted
 	 * @return Experiment
 	 */
-	public function setInserted($inserted): Experiment
+	/*public function setInserted(): Experiment
 	{
-		$this->inserted = $inserted;
+		$this->inserted = new DateTimeJson();
 		return $this;
-	}
+	}*/
 
 	/**
 	 * Get userId
@@ -294,9 +316,9 @@ class Experiment implements IdentifiedObject
     }
 
     /**
-     * @return ExperimentDevice[]|Collection
+     * @return Device[]|Collection
      */
-    public function getExperimentDevices(): Collection
+    public function getDevices(): Collection
     {
         return $this->devices;
     }

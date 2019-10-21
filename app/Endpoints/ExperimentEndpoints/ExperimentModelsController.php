@@ -26,7 +26,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @property-read ExperimentModelsRepository $repository
  * @method ExperimentModels getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
-final class ExperimentModelsController extends ParentedEBaseController
+final class ExperimentModelsController extends ParentedRepositoryController
 {
 	/** @var ExperimentModelsRepository */
 	private $modelsRepository;
@@ -45,14 +45,13 @@ final class ExperimentModelsController extends ParentedEBaseController
 	protected function getData(IdentifiedObject $modelsRelation): array
 	{
 		/** @var ExperimentModels $modelsRelation */
-		$eBaseData = parent::getData($modelsRelation);
-		return array_merge ($eBaseData, [
+		return [
 			'ExperimentId' => $modelsRelation->getExperimentRelationModelId(),
             'ModelId' => $modelsRelation->getModelRelationExperimentId(),
             'relatedModels' => $modelsRelation->getRelatedModels()->map(function (Model $relatedModels) {
                 return ['id' => $relatedModels->getId(), 'name' => $relatedModels->getName()];
             })->toArray(),
-		]);
+		];
 	}
 
 	protected function setData(IdentifiedObject $modelRelation, ArgumentParser $data): void

@@ -3,6 +3,7 @@
 namespace App\Entity\Repositories;
 
 use App\Entity\Experiment;
+use App\Entity\ExperimentValues;
 use App\Entity\ExperimentVariable;
 use App\Entity\IdentifiedObject;
 use Doctrine\ORM\EntityManager;
@@ -11,7 +12,7 @@ use Doctrine\ORM\QueryBuilder;
 class ExperimentVariableRepository implements IDependentSBaseRepository
 {
 	/** @var EntityManager * */
-	protected $em;
+	private $em;
 
 	/** @var \Doctrine\ORM\VariableRepository */
 	private $repository;
@@ -47,7 +48,8 @@ class ExperimentVariableRepository implements IDependentSBaseRepository
 	{
 		$query = $this->buildListQuery($filter)
 			->select('c.id, c.name, c.code, c.type');
-		return $query->getQuery()->getArrayResult();
+
+        return $query->getQuery()->getArrayResult();
 	}
 
 	public function getParent(): IdentifiedObject
@@ -71,4 +73,15 @@ class ExperimentVariableRepository implements IDependentSBaseRepository
 			->setParameter('experimentId', $this->experiment->getId());
 		return $query;
 	}
+
+    /**
+     * @param Experiment $object
+     */
+    public function add($object): void
+    {
+    }
+
+    public function remove($object): void
+    {
+    }
 }

@@ -194,8 +194,11 @@ return function(App $app)
 	(new RouteHelper)
 		->setRoute(Ctl\ExperimentController::class, '/experiments')
 		->register();
+    (new RouteHelper)
+        ->setRoute(Ctl\VariablesValuesController::class, '/experimentvalues')
+        ->register();
 	(new RouteHelper)
-		->setRoute(Ctl\ExperimentVariableController::class, '/experiments/{experiment-id:\\d+}/variables')
+        ->setRoute(Ctl\ExperimentVariableController::class, '/experiments/{experiment-id:\\d+}/variables')
 		->register();
 	(new RouteHelper)
 		->setRoute(Ctl\ExperimentValueController::class, '/experiments/{experiment-id:\\d+}/variables/{variable-id:\\d+}/values')
@@ -204,7 +207,7 @@ return function(App $app)
 		->setRoute(Ctl\ExperimentNoteController::class, '/experiments/{experiment-id:\\d+}/notes')
 		->register();
     (new RouteHelper)
-        ->setRoute(Ctl\ExperimentDeviceController::class, '/experiments/{experiment-id:\\d+}/devices')
+        ->setRoute(Ctl\DeviceController::class, '/experiments/{experiment-id:\\d+}/devices')
         ->register();
     (new RouteHelper)
         ->setRoute(Ctl\ExperimentRelationController::class, '/experiments/{experiment-id:\\d+}/relations')

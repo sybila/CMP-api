@@ -2,38 +2,38 @@
 
 namespace App\Entity\Repositories;
 
+use App\Entity\Device;
 use App\Entity\Experiment;
-use App\Entity\ExperimentValues;
-use App\Entity\ExperimentVariable;
+use App\Entity\ExperimentDevice;
 use App\Entity\IdentifiedObject;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 
-class ExperimentValueRepository implements IDependentSBaseRepository
+class DeviceRepository implements IDependentSBaseRepository
 {
 	/** @var EntityManager * */
-	private $em;
+	protected $em;
 
-	/** @var \Doctrine\ORM\ValueRepository */
+	/** @var \Doctrine\ORM\DeviceRepository */
 	private $repository;
 
-	/** @var ExperimentVariable */
-	private $experimentVariable;
+	/** @var Experiment */
+	private $experiment;
 
 	public function __construct(EntityManager $em)
 	{
 		$this->em = $em;
-		$this->repository = $em->getRepository(ExperimentValues::class);
+		$this->repository = $em->getRepository(Device::class);
 	}
 
 	protected static function getParentClassName(): string
 	{
-		return ExperimentVariable::class;
+		return Experiment::class;
 	}
 
 	public function get(int $id)
 	{
-		return $this->em->find(ExperimentValues::class, $id);
+		return $this->em->find(Device::class, $id);
 	}
 
 	public function getNumResults(array $filter): int
@@ -47,38 +47,32 @@ class ExperimentValueRepository implements IDependentSBaseRepository
 	public function getList(array $filter, array $sort, array $limit): array
 	{
 		$query = $this->buildListQuery($filter)
-			->select('c.id, c.time, c.value');
-
-        return $query->getQuery()->getArrayResult();
+			->select('c.id, c.name, c.type, c.address');
+		return $query->getQuery()->getArrayResult();
 	}
 
 	public function getParent(): IdentifiedObject
 	{
-		return $this->experimentVariable;
+		return $this->experiment;
 	}
 
 	public function setParent(IdentifiedObject $object): void
 	{
 		$className = static::getParentClassName();
 		if (!($object instanceof $className))
-			throw new \Exception('Parent of variable must be ' . $className);
-		$this->experimentVariable = $object;
+			throw new \Exception('Parent of note must be ' . $className);
+		$this->experiment = $object;
 	}
 
 	private function buildListQuery(array $filter): QueryBuilder
 	{
 		$query = $this->em->createQueryBuilder()
-			->from(ExperimentValues::class, 'c')
-            ->where('c.variableId = :variableId')
-            ->setParameters([
-                'variableId' => $this->experimentVariable->getId()
-            ]);
+			->from(Device::class, 'c')
+			->where('c.experiments = :experimentId')
+			->setParameter('experimentId', $this->experiment->getId());
 		return $query;
 	}
 
-    /**
-     * @param ExperimentVariable $object
-     */
     public function add($object): void
     {
     }

@@ -6,6 +6,18 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
+
+interface IExpValueObject
+{
+    public function addValue(ExperimentValues $value);
+    public function removeValue(ExperimentValues $value);
+
+    /**
+     * @return ExperimentValues[]|Collection
+     */
+    public function getValues(): Collection;
+}
+
 /**
  * @ORM\Entity
  * @ORM\Table(name="experiment_variable_value")
@@ -122,4 +134,23 @@ class ExperimentValues implements IdentifiedObject
 		return $this;
 	}
 }
-	
+
+/**
+ * @ORM\Entity
+ * @ORM\Table(name="experiment_variable")
+ */
+class VariableValue extends ExperimentValues
+{
+    use Identifier;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="ExperimentVariable", inversedBy="values")
+     * @ORM\JoinColumn(name="Id", referencedColumnName="id")
+     */
+    protected $variable;
+
+    public function setVariable(ExperimentVariable $variable)
+    {
+        $this->variable = $variable;
+    }
+}

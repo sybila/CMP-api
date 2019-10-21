@@ -29,7 +29,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @property-read ExperimentValueRepository $repository
  * @method ExperimentValues getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
-final class ExperimentValueController extends ParentedEBaseController
+final class ExperimentValueController extends ParentedRepositoryController
 {
 
 	/** @var ExperimentValueRepository */
@@ -50,17 +50,15 @@ final class ExperimentValueController extends ParentedEBaseController
 	protected function getData(IdentifiedObject $value): array
 	{
 		/** @var ExperimentValues $value */
-		$eBaseData = parent::getData($value);
-		return array_merge($eBaseData, [
+		return [
 			'time' => $value->getTime(),
 			'value' => $value->getValue(),
-		]);
+		];
 	}
 
 	protected function setData(IdentifiedObject $value, ArgumentParser $data): void
 	{
 		/** @var ExperimentValues $value */
-		parent::setData($value, $data);
 		$value->setExperimentId($this->repository->getParent()->getExperimentId()->getId());
 		$value->getVariableId() ?: $value->setVariableId($this->repository->getParent());
 		!$data->hasKey('time') ?: $value->setTime($data->getFloat('time'));
@@ -97,11 +95,10 @@ final class ExperimentValueController extends ParentedEBaseController
 
 	protected function getValidator(): Assert\Collection
 	{
-		$validatorArray = parent::getValidatorArray();
-		return new Assert\Collection(array_merge($validatorArray, [
-			/*'value' => new Assert\Type(['type' => 'float']),
-			'time' => new Assert\Type(['type' => 'float']),*/
-		]));
+		return new Assert\Collection([
+            //'value' => new Assert\Type(['type' => 'float']),
+			//'time' => new Assert\Type(['type' => 'double']),
+		]);
 	}
 
 	protected static function getObjectName(): string
