@@ -14,6 +14,7 @@ use Slim\Http\Response;
 
 abstract class RepositoryController extends AbstractController
 {
+
 	use SortableController;
 	use PageableController;
 
@@ -26,9 +27,15 @@ abstract class RepositoryController extends AbstractController
 	 */
 	protected $beforeRequest = [];
 
+
 	abstract protected static function getRepositoryClassName(): string;
+
+
 	abstract protected static function getObjectName(): string;
+
+
 	abstract protected function getData(IdentifiedObject $object): array;
+
 
 	/**
 	 * @param array $events
@@ -41,24 +48,27 @@ abstract class RepositoryController extends AbstractController
 			call_user_func_array($event, $args);
 	}
 
+
 	protected function getReadIds(ArgumentParser $args): array
 	{
-		return array_map(function($item)
-		{
-			return (int)$item;
+		return array_map(function($item) {
+			return (int) $item;
 		}, explode(',', $args->getString('id')));
 	}
+
 
 	protected function getFilter(ArgumentParser $args): array
 	{
 		return [];
 	}
 
+
 	public function __construct(Container $c)
 	{
 		parent::__construct($c);
 		$this->repository = $c->get(static::getRepositoryClassName());
 	}
+
 
 	public function read(Request $request, Response $response, ArgumentParser $args)
 	{
@@ -73,16 +83,18 @@ abstract class RepositoryController extends AbstractController
 		return self::formatOk($response, $this->repository->getList($filter, self::getSort($args), $limit));
 	}
 
+
 	public function readIdentified(Request $request, Response $response, ArgumentParser $args): Response
 	{
 		$this->runEvents($this->beforeRequest, $request, $response, $args);
 
 		$data = [];
 		foreach ($this->getReadIds($args) as $id)
-			$data[] = $this->getData($this->getObject((int)$id));
+			$data[] = $this->getData($this->getObject((int) $id));
 
 		return self::formatOk($response, $data);
 	}
+
 
 	/**
 	 * @param int                      $id
@@ -103,18 +115,21 @@ abstract class RepositoryController extends AbstractController
 			$ent = $repository->get($id);
 			if (!$ent)
 				throw new NonExistingObjectException($id, $objectName);
-		}
-		catch (ORMException $e) {
+		} catch (ORMException $e) {
 			throw new InternalErrorException('Failed getting ' . $objectName . ' ID ' . $id, $e);
 		}
 
 		return $ent;
 	}
 
+
 	// ============================================== HELPERS
 
 	protected static function identifierGetter(): \Closure
 	{
-		return function(IdentifiedObject $object) { return $object->getId(); };
+		return function(IdentifiedObject $object) {
+			return $object->getId();
+		};
 	}
+
 }

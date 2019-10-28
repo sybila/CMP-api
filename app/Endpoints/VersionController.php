@@ -10,6 +10,7 @@ class VersionController extends AbstractController
 {
 	public function __invoke(Request $request, Response $response, ArgumentParser $args)
 	{
-		return self::formatOk($response, ['version' => '0.2']);
+		return self::formatOk($response, ['version' => '0.2',
+			'"password" hashed' => password_hash("password", PASSWORD_DEFAULT)]);
 	}
 }

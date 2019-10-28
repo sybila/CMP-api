@@ -10,10 +10,15 @@ use Slim\Http\Response;
 
 class RouteHelper
 {
+
 	const LIST = 0x01;
+
 	const DETAIL = 0x02;
+
 	const ADD = 0x04;
+
 	const EDIT = 0x08;
+
 	const DELETE = 0x10;
 
 	const ALL = self::LIST | self::DETAIL | self::ADD | self::EDIT | self::DELETE;
@@ -36,6 +41,7 @@ class RouteHelper
 	/** @var int */
 	private $authMask = 0;
 
+
 	public function setRoute(string $className, string $path): RouteHelper
 	{
 		$this->className = $className;
@@ -43,11 +49,13 @@ class RouteHelper
 		return $this;
 	}
 
+
 	public function setMask(int $mask): RouteHelper
 	{
 		$this->mask = $mask;
 		return $this;
 	}
+
 
 	public function setAuthMask(int $mask): RouteHelper
 	{
@@ -55,55 +63,50 @@ class RouteHelper
 		return $this;
 	}
 
+
 	public function register(string $idName = 'id')
 	{
 		$routes = [];
 
-		if ($this->mask & self::LIST)
-		{
+		if ($this->mask & self::LIST) {
 			$routes[] = $route = self::$app->get($this->path, $this->className . ':read');
 			if ($this->authMask & self::LIST)
 				$route->add(self::$authMiddleware);
 		}
 
-		if ($this->mask & self::DETAIL)
-		{
+		if ($this->mask & self::DETAIL) {
 			$routes[] = $route = self::$app->get($this->path . '/{' . $idName . ':(?:\\d,?)+}', $this->className . ':readIdentified');
 			if ($this->authMask & self::LIST)
 				$route->add(self::$authMiddleware);
 		}
 
-		if ($this->mask & self::ADD)
-		{
+		if ($this->mask & self::ADD) {
 			$routes[] = $route = self::$app->post($this->path, $this->className . ':add');
 			if ($this->authMask & self::LIST)
 				$route->add(self::$authMiddleware);
 		}
 
-		if ($this->mask & self::EDIT)
-		{
+		if ($this->mask & self::EDIT) {
 			$routes[] = $route = self::$app->put($this->path . '/{' . $idName . ':\\d+}', $this->className . ':edit');
 			if ($this->authMask & self::LIST)
 				$route->add(self::$authMiddleware);
 		}
 
-		if ($this->mask & self::DELETE)
-		{
+		if ($this->mask & self::DELETE) {
 			$routes[] = $route = self::$app->delete($this->path . '/{' . $idName . ':\\d+}', $this->className . ':delete');
 			if ($this->authMask & self::LIST)
 				$route->add(self::$authMiddleware);
 		}
 	}
+
 }
 
-return function(App $app)
-{
+return function(App $app) {
 	RouteHelper::$app = $app;
 	RouteHelper::$authMiddleware = new ResourceServerMiddleware($app->getContainer()[ResourceServer::class]);
 
 	// main
-	$app->get('/', function (Request $request, Response $response, Helpers\ArgumentParser $args)
-	{
+	$app->get('/', function (Request $request, Response $response, Helpers\ArgumentParser $args) {
 		return $response->withRedirect('/version');
 	});
 
@@ -190,6 +193,18 @@ return function(App $app)
 		->register();
 	(new RouteHelper)
 		->setRoute(Ctl\ModelParentedRuleController::class, '/models/{model-id:\\d+}/rules')
+		->register();
+	(new RouteHelper)
+		->setRoute(Ctl\UserController::class, '/users')
+		->register();
+	(new RouteHelper)
+		->setRoute(Ctl\UserTypeController::class, '/userTypes')
+		->register();
+	(new RouteHelper)
+		->setRoute(Ctl\UserGroupController::class, '/userGroups')
+		->register();
+	(new RouteHelper)
+		->setRoute(Ctl\UserGroupRoleController::class, '/userGroupRoles')
 		->register();
 
 	// model species

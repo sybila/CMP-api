@@ -61,6 +61,59 @@ types:
       password:
         type: string
         required: true
+  User:
+    properties:
+      id: Identifier
+      username:
+        type: String
+        required: true
+      name:
+        type: String
+        required: true
+      surname:
+        type: String
+        required: true
+      password:
+        type: String
+        required: true
+      type: UserType
+      email: String
+      groups:
+        Collection: UserGroup
+  UserType:
+    properties:
+      id: Identifier
+      tier:
+        type: Integer
+        required: true
+      name:
+        type: String
+        required: true
+  UserGroup:
+    properties:
+      id: Identifier
+      name:
+        type: String
+        required: true
+      type:
+        type: Integer
+        required: true
+      description:
+        type: String
+        required: ture
+      users:
+        Collection: User
+  UserGroupRole:
+    properties:
+      id: Identifier
+      tier:
+        type: Integer
+        required: true
+      name:
+        type: String
+        required: true
+
+
   Classification:
     properties:
       id: Identifier
@@ -753,7 +806,58 @@ resourceTypes:
   description: Authorization endpoint
   post:
     is: [Insert: {type: AuthorizationCodeRequest}]
-
+/users:
+  description: User endpoint
+    get:
+      is: [Collection: {type: User}]
+    post:
+      is: [Insert: {type: User}]
+    /{id}:
+      uriParameters:
+        id:
+          UrlIdentifierList
+      get:
+        is: [type: User]
+      put:
+        is: [Update: {type: User}]
+      delete:
+        is: [Delete]
+/userTypes:
+  description: Types of user group roles endpoint
+    get:
+      is: [Collection: {type: UserType}]
+    /{id}:
+      uriParameters:
+        id:
+          UrlIdentifierList
+      get:
+        is: [type: UserType]
+/userGroups:
+  description: User group endpoint
+    get:
+      is: [Collection: {type: UserGroup}]
+    post:
+      is: [Insert: {type: UserGroup}]
+  /{id}:
+    uriParameters:
+      id:
+        UrlIdentifierList
+    get:
+      is: [type: UserGroup]
+    put:
+      is: [Update: {type: UserGroup}]
+    delete:
+      is: [Delete]
+/userGroupRoles:
+  description: Types of user group roles endpoint
+    get:
+      is: [Collection: {type: UserGroupRole}]
+    /{id}:
+      uriParameters:
+        id:
+        UrlIdentifierList
+      get:
+        is: [type: UserGroupRole]
 #BCS
 /annotations:
   /types:
