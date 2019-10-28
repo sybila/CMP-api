@@ -77,4 +77,25 @@ class UserGroup implements IdentifiedObject
 		$this->id = (int) $identifier;
 	}
 
+
+	public function setName(string $name)
+	{
+		$this->name = $name;
+		return $name;
+	}
+
+
+	public function setType(int $type)
+	{
+		$this->type = $type;
+		return $type;
+	}
+
+
+	public function setDescription(string $description)
+	{
+		$this->description = $description;
+		return $description;
+	}
+
 }

@@ -62,12 +62,12 @@ final class UserGroupController extends WritableRepositoryController
 	}
 
 
-	protected function setData(IdentifiedObject $userGroup, ArgumentParser $data): void
+	protected function setData(IdentifiedObject $userGroup, ArgumentParser $body): void
 	{
 		/** @var UserGroup $userGroup */
-		!$body->hasKey('name') ?: $model->setApprovedId($body->getString('name'));
-		!$body->hasKey('type') ?: $model->setApprovedId($body->getString('type'));
-		!$body->hasKey('description') ?: $model->setApprovedId($body->getString('description'));
+		!$body->hasKey('name') ?: $userGroup->setName($body->getString('name'));
+		!$body->hasKey('type') ?: $userGroup->setType($body->getString('type'));
+		!$body->hasKey('description') ?: $userGroup->setDescription($body->getString('description'));
 	}
 
 

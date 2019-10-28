@@ -11,8 +11,7 @@ use App\Entity\{
 use App\Entity\Repositories\IEndpointRepository;
 use App\Repositories\Authorization\UserRepository;
 use App\Exceptions\{
-	DependentResourcesBoundException,
-	MissingRequiredKeyException
+	DependentResourcesBoundException
 };
 use App\Helpers\ArgumentParser;
 use Slim\Container;
@@ -68,27 +67,34 @@ final class UserController extends WritableRepositoryController
 	{
 		/** @var User $user */
 		!$body->hasKey('username') ?: $user->setName($body->getString('username'));
+		!$body->hasKey('password') ?: $user->setPasswordHash($user->hashPassword($body->getString('password')));
 		!$body->hasKey('name') ?: $user->setName($body->getString('name'));
 		!$body->hasKey('surname') ?: $user->setSurname($body->getString('surname'));
 		!$body->hasKey('type') ?: $user->setType($body->getString('type'));
 		!$body->hasKey('email') ?: $user->setEmail($body->getString('email'));
 		!$body->hasKey('phone') ?: $user->setPhone($body->getString('phone'));
-		// TODO password hash
 		//!$body->hasKey('groups') ?: $user->setGroups($body->getString('groups'));
 	}
 
 
 	protected function createObject(ArgumentParser $body): IdentifiedObject
 	{
-		$this->verifyMandatoryArguments(['username', 'name', 'surname', 'type'], $body);
-		dump(new User($body['username']));
+		$this->verifyMandatoryArguments(['username', 'password', 'name', 'surname', 'type'], $body);
 		return new User($body['username']);
 	}
 
 
 	protected function checkInsertObject(IdentifiedObject $user): void
 	{
-		//TODO
+		/** @var User user */
+		if ($user->getUsername() === null)
+			throw new MissingRequiredKeyException('username');
+		if ($user->getName() === null)
+			throw new MissingRequiredKeyException('name');
+		if ($user->getSurname() === null)
+			throw new MissingRequiredKeyException('surname');
+		if ($user->getType() === null)
+			throw new MissingRequiredKeyException('type');
 	}
 
 
@@ -103,6 +109,7 @@ final class UserController extends WritableRepositoryController
 	{
 		return new Assert\Collection([
 			'username' => new Assert\Type(['type' => 'string']),
+			'password' => new Assert\Type(['type' => 'string']),
 			'name' => new Assert\Type(['type' => 'string']),
 			'surname' => new Assert\Type(['type' => 'string']),
 			'type' => new Assert\Type(['type' => 'integer']),

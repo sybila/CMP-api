@@ -139,7 +139,6 @@ class User implements UserEntityInterface, IdentifiedObject
 
 	public function setName(string $name)
 	{
-
 		$this->name = $name;
 		return $this;
 	}
@@ -147,8 +146,14 @@ class User implements UserEntityInterface, IdentifiedObject
 
 	public function setSurname(string $surname)
 	{
-
 		$this->surname = $surname;
+		return $this;
+	}
+
+
+	public function setPasswordHash(string $passwordHash)
+	{
+		$this->passwordHash = $passwordHash;
 		return $this;
 	}
 

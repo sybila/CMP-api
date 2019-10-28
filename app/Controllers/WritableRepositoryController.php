@@ -8,6 +8,7 @@ use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;
 use Symfony\Component\Validator\Constraints as Assert;
+use App\Exceptions\MissingRequiredKeyException;
 
 abstract class WritableRepositoryController extends RepositoryController
 {
