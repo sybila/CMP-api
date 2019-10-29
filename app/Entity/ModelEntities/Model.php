@@ -94,6 +94,14 @@ class Model implements IdentifiedObject
 	 */
 	private $unitDefinitions;
 
+    /**
+     * @var ArrayCollection
+     * @ORM\ManyToMany(targetEntity="Experiment", inversedBy="experimentModels")
+     * @ORM\JoinTable(name="experiment_to_model", joinColumns={@ORM\JoinColumn(name="modelId", referencedColumnName="id")},
+     * inverseJoinColumns={@ORM\JoinColumn(name="experimrntId", referencedColumnName="id")})
+     */
+    private $experiments;
+
 	/**
 	 * Get userId
 	 * @return integer
@@ -248,4 +256,35 @@ class Model implements IdentifiedObject
 		return $this->unitDefinitions;
 	}
 
+    /**
+     * @return Experiment[]|Collection
+     */
+    public function getExperiment(): Collection
+    {
+        return $this->experiments;
+    }
+
+    /**
+     * @param Experiment $experiment
+     */
+    public function addExperiment(Experiment $experiment)
+    {
+        if ($this->experiments->contains($experiment)) {
+            return;
+        }
+        $this->experiments->add($experiment);
+        $experiment->addModel($this);
+    }
+
+    /**
+     * @param Experiment $experiment
+     */
+    public function removeExperiment(Experiment $experiment)
+    {
+        if (!$this->experiments->contains($experiment)) {
+            return;
+        }
+        $this->experiments->removeElement($experiment);
+        $experiment->removeModel($this);
+    }
 }

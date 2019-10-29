@@ -48,7 +48,7 @@ class Device implements IdentifiedObject
     private $experiments;
 
     public function __construct() {
-        $this->experiments = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->experiments = new ArrayCollection();
     }
 
 	/**
@@ -118,5 +118,29 @@ class Device implements IdentifiedObject
 	{
 		return $this->experiments;
 	}
+
+    /**
+     * @param Experiment $experiment
+     */
+    public function addExperiment(Experiment $experiment)
+    {
+        if ($this->experiments->contains($experiment)) {
+            return;
+        }
+        $this->experiments->add($experiment);
+        $experiment->addDevice($this);
+    }
+
+    /**
+     * @param Experiment $experiment
+     */
+    public function removeExperiment(Experiment $experiment)
+    {
+        if (!$this->experiments->contains($experiment)) {
+            return;
+        }
+        $this->experiments->removeElement($experiment);
+        $experiment->removeDevice($this);
+    }
 
 }

@@ -207,13 +207,7 @@ return function(App $app)
 		->setRoute(Ctl\ExperimentNoteController::class, '/experiments/{experiment-id:\\d+}/notes')
 		->register();
     (new RouteHelper)
-        ->setRoute(Ctl\DeviceController::class, '/experiments/{experiment-id:\\d+}/devices')
-        ->register();
-    (new RouteHelper)
-        ->setRoute(Ctl\ExperimentRelationController::class, '/experiments/{experiment-id:\\d+}/relations')
-        ->register();
-    (new RouteHelper)
-        ->setRoute(Ctl\ExperimentModelsController::class, '/experiments/{experiment-id:\\d+}/models')
+        ->setRoute(Ctl\ExperimentVariableNoteController::class, '/experiments/{experiment-id:\\d+}/variables/{variable-id:\\d+}/notes')
         ->register();
     (new RouteHelper)
         ->setRoute(Ctl\BioquantityController::class, '/bioquantities')
@@ -223,6 +217,9 @@ return function(App $app)
         ->register();
     (new RouteHelper)
         ->setRoute(Ctl\BioquantityVariableController::class, '/bioquantities/{bioquantitiy-id:\\d+}/methods/{method-id:\\d+}/variables')
+        ->register();
+    (new RouteHelper)
+        ->setRoute(Ctl\DeviceController::class, '/devices')
         ->register();
 
 	// model species

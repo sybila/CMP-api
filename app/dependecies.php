@@ -239,16 +239,8 @@ $c[EntityRepo\ExperimentNoteRepository::class] = function (Container $c) {
 	return new EntityRepo\ExperimentNoteRepository($c[EntityManager::class]);
 };
 
-$c[EntityRepo\ExperimentRelationRepository::class] = function (Container $c) {
-    return new EntityRepo\ExperimentRelationRepository($c[EntityManager::class]);
-};
-
-$c[EntityRepo\ExperimentDeviceRepository::class] = function (Container $c) {
-    return new EntityRepo\ExperimentDeviceRepository($c[EntityManager::class]);
-};
-
-$c[EntityRepo\ExperimentModelsRepository::class] = function (Container $c) {
-    return new EntityRepo\ExperimentModelsRepository($c[EntityManager::class]);
+$c[EntityRepo\ExperimentVariableNoteRepository::class] = function (Container $c) {
+    return new EntityRepo\ExperimentVariableNoteRepository($c[EntityManager::class]);
 };
 
 $c[EntityRepo\BioquantityRepository::class] = function (Container $c) {

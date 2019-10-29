@@ -76,6 +76,18 @@ class Bioquantity implements IdentifiedObject
      */
     private $methods;
 
+    /**
+     * @var ArrayCollection
+     * @ORM\ManyToMany(targetEntity="Experiment", inversedBy="bioquantities")
+     * @ORM\JoinTable(name="bioquantities_experiment", joinColumns={@ORM\JoinColumn(name="bionum_id", referencedColumnName="id")},
+     * inverseJoinColumns={@ORM\JoinColumn(name="exp_id", referencedColumnName="id")})
+     */
+    private $experiments;
+
+    public function __construct()
+    {
+        $this->experiments = new ArrayCollection();
+    }
 
 	/**
 	 * Get name
@@ -223,6 +235,38 @@ class Bioquantity implements IdentifiedObject
     public function getMethods(): Collection
     {
         return $this->methods;
+    }
+
+    /**
+     * @return Experiment[]|Collection
+     */
+    public function getExperiments(): Collection
+    {
+        return $this->experiments;
+    }
+
+    /**
+     * @param Experiment $experiment
+     */
+    public function addExperiment(Experiment $experiment)
+    {
+        if ($this->experiments->contains($experiment)) {
+            return;
+        }
+        $this->experiments->add($experiment);
+        $experiment->addBioquantity($this);
+    }
+
+    /**
+     * @param Experiment $experiment
+     */
+    public function removeExperiment(Experiment $experiment)
+    {
+        if (!$this->experiments->contains($experiment)) {
+            return;
+        }
+        $this->experiments->removeElement($experiment);
+        $experiment->removeBioquantity($this);
     }
 
 }
