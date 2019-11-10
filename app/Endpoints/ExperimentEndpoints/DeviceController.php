@@ -7,6 +7,7 @@ use App\Entity\{Bioquantity,
     Experiment,
     IdentifiedObject,
     Repositories\DeviceRepository,
+    Repositories\ExperimentRepository,
     Repositories\IEndpointRepository};
 use App\Exceptions\{
     DependentResourcesBoundException,
@@ -27,11 +28,13 @@ final class DeviceController extends WritableRepositoryController
 {
     /** @var DeviceRepository */
     private $deviceRepository;
+    private $experimentRepository;
 
     public function __construct(Container $c)
     {
         parent::__construct($c);
         $this->deviceRepository = $c->get(DeviceRepository::class);
+        $this->experimentRepository = $c->get(ExperimentRepository::class);
     }
 
     protected static function getAllowedSort(): array
@@ -61,6 +64,8 @@ final class DeviceController extends WritableRepositoryController
         !$data->hasKey('name') ?: $device->setName($data->getString('name'));
         !$data->hasKey('type') ?: $device->setType($data->getString('type'));
         !$data->hasKey('address') ?: $device->setAddress($data->getInt('type'));
+        !$data->hasKey('addRelatedExperimentId') ?: $device->addExperiment($this->experimentRepository->get($data->getInt('addRelatedExperimentId')));
+        !$data->hasKey('removeRelatedExperimentId') ?: $device->removeExperiment($this->experimentRepository->get($data->getInt('removeRelatedExperimentId')));
     }
 
     protected function createObject(ArgumentParser $body): IdentifiedObject

@@ -98,7 +98,7 @@ class Model implements IdentifiedObject
      * @var ArrayCollection
      * @ORM\ManyToMany(targetEntity="Experiment", inversedBy="experimentModels")
      * @ORM\JoinTable(name="experiment_to_model", joinColumns={@ORM\JoinColumn(name="modelId", referencedColumnName="id")},
-     * inverseJoinColumns={@ORM\JoinColumn(name="experimrntId", referencedColumnName="id")})
+     * inverseJoinColumns={@ORM\JoinColumn(name="experimentId", referencedColumnName="id")})
      */
     private $experiments;
 

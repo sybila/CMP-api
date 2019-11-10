@@ -4,15 +4,13 @@ namespace App\Controllers;
 
 use App\Entity\{Bioquantity,
     Experiment,
-    ExperimentModels,
     IdentifiedObject,
     ExperimentVariable,
-    ExperimentRelation,
-    ExperimentDevice,
     ExperimentNote,
     Device,
     Model,
-    Organism,
+    Repositories\BioquantityRepository,
+    Repositories\DeviceRepository,
     Repositories\IEndpointRepository,
     Repositories\ExperimentRepository,
     Repositories\ModelRepository,
@@ -37,12 +35,18 @@ final class ExperimentController extends WritableRepositoryController
 	/** @var ExperimentRepository */
 	private $experimentRepository;
     private $organismRepository;
+    private $modelRepository;
+    private $deviceRepository;
+    private $bioquantityRepository;
 
-	public function __construct(Container $c)
+    public function __construct(Container $c)
 	{
 		parent::__construct($c);
 		$this->experimentRepository = $c->get(ExperimentRepository::class);
         $this->organismRepository = $c->get(OrganismRepository::class);
+        $this->modelRepository = $c->get(ModelRepository::class);
+        $this->bioquantityRepository = $c->get(BioquantityRepository::class);
+        $this->deviceRepository = $c->get(DeviceRepository::class);
 	}
 
 	protected static function getAllowedSort(): array
@@ -96,6 +100,14 @@ final class ExperimentController extends WritableRepositoryController
 		!$data->hasKey('organismId') ?: $experiment->setOrganismId($this->organismRepository->get($data->getInt('organismId')));
 		!$data->hasKey('protocol') ?: $experiment->setProtocol($data->getString('protocol'));
 		!$data->hasKey('status') ?: $experiment->setStatus($data->getString('status'));
+        !$data->hasKey('addRelatedExperimentId') ?: $experiment->addExperiment($this->experimentRepository->get($data->getInt('addRelatedExperimentId')));
+        !$data->hasKey('removeRelatedExperimentId') ?: $experiment->removeExperiment($this->experimentRepository->get($data->getInt('removeRelatedExperimentId')));
+        !$data->hasKey('addRelatedModelId') ?: $experiment->addModel($this->modelRepository->get($data->getInt('addRelatedModelId')));
+        !$data->hasKey('removeRelatedModelId') ?: $experiment->removeModel($this->modelRepository->get($data->getInt('removeRelatedModelId')));
+        !$data->hasKey('addRelatedBioquantityId') ?: $experiment->addBioquantity($this->bioquantityRepository->get($data->getInt('addRelatedBioquantityId')));
+        !$data->hasKey('removeRelatedBioquantityId') ?: $experiment->removeBioquantity($this->bioquantityRepository->get($data->getInt('removeRelatedBioquantityId')));
+        !$data->hasKey('addRelatedDeviceId') ?: $experiment->addDevice($this->deviceRepository->get($data->getInt('addRelatedDeviceId')));
+        !$data->hasKey('removeRelatedDeviceId') ?: $experiment->removeDevice($this->deviceRepository->get($data->getInt('removeRelatedDeviceId')));
 	}
 
 	protected function createObject(ArgumentParser $body): IdentifiedObject

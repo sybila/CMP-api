@@ -33,12 +33,14 @@ final class BioquantityController extends WritableRepositoryController
 {
 	/** @var BioquantityRepository */
 	private $bioquantityRepository;
+    private $experimentRepository;
     private $organismRepository;
 
 	public function __construct(Container $c)
 	{
 		parent::__construct($c);
 		$this->bioquantityRepository = $c->get(BioquantityRepository::class);
+        $this->experimentRepository = $c->get(ExperimentRepository::class);
 		$this->organismRepository = $c->get(OrganismRepository::class);
 	}
 
@@ -77,6 +79,8 @@ final class BioquantityController extends WritableRepositoryController
 		!$data->hasKey('isValid') ?: $bioquantity->setIsValid($data->getBool('isValid'));
 		!$data->hasKey('description') ?: $bioquantity->setDescription($data->getString('description'));
 		!$data->hasKey('organismId') ?: $bioquantity->setOrganismId($this->organismRepository->get($data->getInt('organismId')));
+        !$data->hasKey('addRelatedExperimentId') ?: $bioquantity->addExperiment($this->experimentRepository->get($data->getInt('addRelatedExperimentId')));
+        !$data->hasKey('removeRelatedExperimentId') ?: $bioquantity->removeExperiment($this->experimentRepository->get($data->getInt('removeRelatedExperimentId')));
 		//!$data->hasKey('unitId') ?: $bioquantity->setUnitId($data->getInt('unitId'));
 		//!$data->hasKey('entityId') ?: $bioquantity->setEntityId($data->getString('status'));
 	}
