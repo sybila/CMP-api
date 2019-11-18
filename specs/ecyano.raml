@@ -306,15 +306,15 @@ types:
       isConstant: boolean
   Specie:
     type: ListSpecie
-      properties:
-        reactionItems:
-          type: IdentifierList
-          description: List of reactionItem IDs
+    properties:
+      reactionItems:
+        type: IdentifierList
+        description: List of reactionItem IDs
   ListReaction:
     properties:
       id: Identifier
       modelId: Identifier
-      commpartmentId: Integer
+      commpartmentId: integer
       name: string
       reversible: boolean
       fast: boolean
