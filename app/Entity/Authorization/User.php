@@ -81,6 +81,10 @@ class User implements UserEntityInterface, IdentifiedObject
 	}
 
 
+	/**
+	 * Get id
+	 * @return integer
+	 */
 	public function getIdentifier()
 	{
 		return $this->getId();
