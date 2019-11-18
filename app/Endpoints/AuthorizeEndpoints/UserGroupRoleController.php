@@ -4,10 +4,10 @@ namespace App\Controllers;
 
 use App\Entity\{
 	Authorization\UserGroupRole,
-	IdentifiedObject,
+	IdentifiedObject
 };
 use App\Repositories\{
-	Authorization\UserGroupRoleRepository,
+	Authorization\UserGroupRoleRepository
 };
 
 final class UserGroupRoleController extends RepositoryController
