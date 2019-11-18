@@ -4,10 +4,10 @@ namespace App\Controllers;
 
 use App\Entity\{
 	Authorization\UserType,
-	IdentifiedObject,
+	IdentifiedObject
 };
 use App\Repositories\{
-	Authorization\UserTypeRepository,
+	Authorization\UserTypeRepository
 };
 
 final class UserTypeController extends RepositoryController
