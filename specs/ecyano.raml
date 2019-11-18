@@ -65,41 +65,41 @@ types:
     properties:
       id: Identifier
       username:
-        type: String
+        type: string
         required: true
       name:
-        type: String
+        type: string
         required: true
       surname:
-        type: String
+        type: string
         required: true
       password:
-        type: String
+        type: string
         required: true
       type: UserType
-      email: String
+      email: string
       groups:
         Collection: UserGroup
   UserType:
     properties:
       id: Identifier
       tier:
-        type: Integer
+        type: integer
         required: true
       name:
-        type: String
+        type: string
         required: true
   UserGroup:
     properties:
       id: Identifier
       name:
-        type: String
+        type: string
         required: true
       type:
-        type: Integer
+        type: integer
         required: true
       description:
-        type: String
+        type: string
         required: ture
       users:
         Collection: User
@@ -107,10 +107,10 @@ types:
     properties:
       id: Identifier
       tier:
-        type: Integer
+        type: integer
         required: true
       name:
-        type: String
+        type: string
         required: true
 
 
