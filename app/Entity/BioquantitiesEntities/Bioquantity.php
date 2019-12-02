@@ -9,7 +9,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity
- * @ORM\Table(name="bioquantities")
+ * @ORM\Table(name="bioquantity")
  * @ORM\DiscriminatorColumn(name="hierarchy_type", type="string")
  */
 class Bioquantity implements IdentifiedObject
@@ -58,12 +58,6 @@ class Bioquantity implements IdentifiedObject
 	 */
 	private $IsAutomatic;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Entity", inversedBy="bioquantities")
-	 * @ORM\JoinColumn(name="entity_id", referencedColumnName="id")
-	 */
-	private $entityId;
-
 	/**Atribut neexistuje
 	 * @ORM\ManyToOne(targetEntity="...", inversedBy="...")
 	 * @ORM\JoinColumn(name="attribute_id", referencedColumnName="id")
@@ -76,6 +70,18 @@ class Bioquantity implements IdentifiedObject
      */
     private $methods;
 
+    /**
+     * @var ArrayCollection
+     * @ORM\ManyToMany(targetEntity="Experiment", inversedBy="bioquantities")
+     * @ORM\JoinTable(name="bioquantity_to_experiment", joinColumns={@ORM\JoinColumn(name="bionum_id", referencedColumnName="id")},
+     * inverseJoinColumns={@ORM\JoinColumn(name="exp_id", referencedColumnName="id")})
+     */
+    private $experiments;
+
+    public function __construct()
+    {
+        $this->experiments = new ArrayCollection();
+    }
 
 	/**
 	 * Get name
@@ -223,6 +229,38 @@ class Bioquantity implements IdentifiedObject
     public function getMethods(): Collection
     {
         return $this->methods;
+    }
+
+    /**
+     * @return Experiment[]|Collection
+     */
+    public function getExperiments(): Collection
+    {
+        return $this->experiments;
+    }
+
+    /**
+     * @param Experiment $experiment
+     */
+    public function addExperiment(Experiment $experiment)
+    {
+        if ($this->experiments->contains($experiment)) {
+            return;
+        }
+        $this->experiments->add($experiment);
+        $experiment->addBioquantity($this);
+    }
+
+    /**
+     * @param Experiment $experiment
+     */
+    public function removeExperiment(Experiment $experiment)
+    {
+        if (!$this->experiments->contains($experiment)) {
+            return;
+        }
+        $this->experiments->removeElement($experiment);
+        $experiment->removeBioquantity($this);
     }
 
 }

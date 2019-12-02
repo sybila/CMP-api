@@ -23,7 +23,6 @@ class ExperimentRepository implements IEndpointRepository
 
 	public function get(int $id)
 	{
-		//dump(Experiment::class, $id);exit;
 		return $this->em->find(Experiment::class, $id);
 	}
 
@@ -37,8 +36,9 @@ class ExperimentRepository implements IEndpointRepository
 
 	public function getList(array $filter, array $sort, array $limit): array
 	{
+	    //$this->em->getRepository(Experiment)->findAll();
 		$query = $this->buildListQuery($filter)
-			->select('e.id, e.name, e.description, e.protocol, e.started, e.inserted, e.status');
+			->select('e.id, e.name, e.description, e.started, e.inserted, e.status');
 		return $query->getQuery()->getArrayResult();
 	}
 

@@ -53,6 +53,7 @@ final class ExperimentValueController extends ParentedRepositoryController
 		return [
 			'time' => $value->getTime(),
 			'value' => $value->getValue(),
+            'isAutomatic' => $value->getIsAutomatic(),
 		];
 	}
 
@@ -63,6 +64,7 @@ final class ExperimentValueController extends ParentedRepositoryController
 		$value->getVariableId() ?: $value->setVariableId($this->repository->getParent());
 		!$data->hasKey('time') ?: $value->setTime($data->getFloat('time'));
 		!$data->hasKey('value') ?: $value->setValue($data->getFloat('value'));
+        !$data->hasKey('isAutomatic') ?: $value->setIsAutomatic($data->getBool('isAutomatic'));
 	}
 
 	protected function createObject(ArgumentParser $body): IdentifiedObject

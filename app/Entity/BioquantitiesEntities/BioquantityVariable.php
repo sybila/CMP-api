@@ -16,13 +16,13 @@ class BioquantityVariable implements IdentifiedObject
 
 	/**
 	 * @ORM\ManyToOne(targetEntity="BioquantityMethod", inversedBy="variables")
-	 * @ORM\JoinColumn(name="id_bioquantity_form", referencedColumnName="id")
+	 * @ORM\JoinColumn(name="method_id", referencedColumnName="id")
 	 */
 	protected $methodId;
 
 	/**
 	 * @var string
-	 * @ORM\Column(type="string", name="name_var")
+	 * @ORM\Column(type="string", name="name")
 	 */
 	private $name;
 	
@@ -47,7 +47,7 @@ class BioquantityVariable implements IdentifiedObject
 
 	/**
 	 * @ORM\ManyToOne(targetEntity="ExperimentVariable", inversedBy="bioquantityVariables")
-	 * @ORM\JoinColumn(name="id_var_experiment", referencedColumnName="id")
+	 * @ORM\JoinColumn(name="exp_var_id", referencedColumnName="id")
 	 */
 	protected $experimentVariableId;
 
@@ -143,7 +143,7 @@ class BioquantityVariable implements IdentifiedObject
      */
     public function setTimeTo($timeTo): BioquantityVariable
     {
-        $this->timeFrom = $timeTo;
+        $this->timeTo = $timeTo;
         return $this;
     }
 
@@ -169,9 +169,9 @@ class BioquantityVariable implements IdentifiedObject
 
 	/**
 	 * Get experimentVariableId
-	 * @return ExperimentVariable
+	 * @return null|ExperimentVariable
 	 */
-	public function getExperimentVariableId(): ExperimentVariable
+	public function getExperimentVariableId(): ?ExperimentVariable
 	{
 		return $this->experimentVariableId;
 	}

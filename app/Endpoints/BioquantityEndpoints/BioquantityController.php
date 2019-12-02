@@ -5,12 +5,14 @@ namespace App\Controllers;
 use App\Entity\{AnnotationTerm,
     Bioquantity,
     BioquantityMethod,
+    Experiment,
     IdentifiedObject,
     BioquantityVariable,
     Organism,
     Repositories\IEndpointRepository,
     Repositories\ExperimentRepository,
-    Repositories\BioquantityRepository};
+    Repositories\BioquantityRepository,
+    Repositories\OrganismRepository};
 use App\Exceptions\{
 	DependentResourcesBoundException,
 	MissingRequiredKeyException
@@ -31,11 +33,15 @@ final class BioquantityController extends WritableRepositoryController
 {
 	/** @var BioquantityRepository */
 	private $bioquantityRepository;
+    private $experimentRepository;
+    private $organismRepository;
 
 	public function __construct(Container $c)
 	{
 		parent::__construct($c);
 		$this->bioquantityRepository = $c->get(BioquantityRepository::class);
+        $this->experimentRepository = $c->get(ExperimentRepository::class);
+		$this->organismRepository = $c->get(OrganismRepository::class);
 	}
 
 	protected static function getAllowedSort(): array
@@ -57,25 +63,25 @@ final class BioquantityController extends WritableRepositoryController
                 'methods' => $bioquantity->getMethods()->map(function (BioquantityMethod $method) {
                     return ['id' => $method->getId(), 'value' => $method->getValue()];
                 })->toArray(),
+                'experiments' => $bioquantity->getExperiments()->map(function (Experiment $experiment) {
+                    return ['id' => $experiment->getId(), 'name' => $experiment->getName(), 'description' => $experiment->getDescription()];
+                })->toArray(),
                 ];
         }
 	}
 
-    protected function getOrganism(ArgumentParser $body): Organism
-    {
-        return Organism::tryGet('termType', $body->getString('termType'));
-    }
 
 	protected function setData(IdentifiedObject $bioquantity, ArgumentParser $data): void
 	{
 		/** @var Bioquantity $bioquantity */
-		//!$data->hasKey('userId') ?: $experiment->setUserId($data->getInt('userId'));
 		!$data->hasKey('name') ?: $bioquantity->setName($data->getString('name'));
 		!$data->hasKey('isAutomatic') ?: $bioquantity->setIsAutomatic($data->getBool('isAutomatic'));
 		!$data->hasKey('isValid') ?: $bioquantity->setIsValid($data->getBool('isValid'));
 		!$data->hasKey('description') ?: $bioquantity->setDescription($data->getString('description'));
-		!$data->hasKey('organismId') ?: $bioquantity->setOrganismId($this->getOrganism($data));
-		!$data->hasKey('unitId') ?: $bioquantity->setUnitId($data->getInt('unitId'));
+		!$data->hasKey('organismId') ?: $bioquantity->setOrganismId($this->organismRepository->get($data->getInt('organismId')));
+        !$data->hasKey('addRelatedExperimentId') ?: $bioquantity->addExperiment($this->experimentRepository->get($data->getInt('addRelatedExperimentId')));
+        !$data->hasKey('removeRelatedExperimentId') ?: $bioquantity->removeExperiment($this->experimentRepository->get($data->getInt('removeRelatedExperimentId')));
+		//!$data->hasKey('unitId') ?: $bioquantity->setUnitId($data->getInt('unitId'));
 		//!$data->hasKey('entityId') ?: $bioquantity->setEntityId($data->getString('status'));
 	}
 
@@ -108,7 +114,6 @@ final class BioquantityController extends WritableRepositoryController
 		return new Assert\Collection( [
 			//'userId' => new Assert\Type(['type' => 'integer']),
 			'description' => new Assert\Type(['type' => 'string']),
-			//'visualisation' => new Assert\Type(['type' => 'string']),
 			'IsValid' => new Assert\Type(['type' => 'bool']),
             'IsAutomatic' => new Assert\Type(['type' => 'bool']),
 		]);

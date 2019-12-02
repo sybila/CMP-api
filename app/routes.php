@@ -111,85 +111,8 @@ return function(App $app)
 	$app->get('/version', Ctl\VersionController::class);
 	$app->post('/authorize', Ctl\AuthorizeController::class);
 
-	// annotations
-	$app->get('/annotations/types', Ctl\AnnotationController::class . ':readTypes');
-	$app->get('/annotations/link/{type}', Ctl\AnnotationController::class . ':readLink');
-
-	(new RouteHelper)
-		->setRoute(Ctl\ClassificationController::class, '/classifications')
-		->setMask(RouteHelper::ALL & ~RouteHelper::LIST)
-		->register();
 	(new RouteHelper)
 		->setRoute(Ctl\OrganismController::class, '/organisms')
-		->register();
-	(new RouteHelper)
-		->setRoute(Ctl\EntityController::class, '/entities')
-		->register();
-	(new RouteHelper)
-		->setRoute(Ctl\EntityBcsAnnotationsController::class, '/entities/{entity-id:\\d+}/annotations')
-		->register();
-	(new RouteHelper)
-		->setRoute(Ctl\EntityNoteController::class, '/entities/{entity-id:\\d+}/notes')
-		->register();
-	(new RouteHelper)
-		->setRoute(Ctl\RuleController::class, '/rules')
-		->register();
-	(new RouteHelper)
-		->setRoute(Ctl\RuleBcsAnnotationsController::class, '/rules/{rule-id:\\d+}/annotations')
-		->register();
-	(new RouteHelper)
-		->setRoute(Ctl\RuleNoteController::class, '/rules/{rule-id:\\d+}/notes')
-		->register();
-	(new RouteHelper)
-		->setRoute(Ctl\ModelController::class, '/models')
-		->register();
-	(new RouteHelper)
-		->setRoute(Ctl\ModelCompartmentController::class, '/models/{model-id:\\d+}/compartments')
-		->register();
-	(new RouteHelper)
-		->setRoute(Ctl\ModelSpecieController::class, '/models/{model-id:\\d+}/compartments/{compartment-id:\\d+}/species')
-		->register();
-	(new RouteHelper)
-		->setRoute(Ctl\ModelReactionController::class, '/models/{model-id:\\d+}/reactions')
-		->register();
-	(new RouteHelper)
-		->setRoute(Ctl\ModelFunctionController::class, '/models/{model-id:\\d+}/reactions/{reaction-id:\\d+}/functions')
-		->register();
-	(new RouteHelper)
-		->setRoute(Ctl\ModelFunctionDefinitionController::class, '/models/{model-id:\\d+}/functionDefinitions')
-		->register();
-	(new RouteHelper)
-		->setRoute(Ctl\ReactionParentedReactionItemController::class, '/models/{model-id:\\d+}/reactions/{reaction-id:\\d+}/reactionItems')
-		->register();
-	(new RouteHelper)
-		->setRoute(Ctl\SpecieParentedReactionItemController::class, '/models/{model-id:\\d+}/compartments/{compartment-id:\\d+}/species/{specie-id:\\d+}/reactionItems')
-		->register();
-	(new RouteHelper)
-		->setRoute(Ctl\ModelConstraintController::class, '/models/{model-id:\\d+}/constraints')
-		->register();
-	(new RouteHelper)
-		->setRoute(Ctl\ModelEventController::class, '/models/{model-id:\\d+}/events')
-		->register();
-	(new RouteHelper)
-		->setRoute(Ctl\ModelEventAssignmentController::class, '/models/{model-id:\\d+}/events/{event-id:\\d+}/eventAssignments')
-		->register();
-	(new RouteHelper)
-		->setRoute(Ctl\ModelUnitDefinitionController::class, '/models/{model-id:\\d+}/unitDefinitions')
-		->register();
-	(new RouteHelper)
-		->setRoute(Ctl\ModelUnitController::class, '/units')
-		->register();
-	(new RouteHelper)
-		->setRoute(Ctl\ModelInitialAssignmentController::class, '/models/{model-id:\\d+}/initialAssignments')
-		->register();
-	(new RouteHelper)
-		->setRoute(Ctl\ModelParentedParameterController::class, '/models/{model-id:\\d+}/parameters')
-		->register();
-	(new RouteHelper)
-		->setRoute(Ctl\ReactionItemParentedParameterController::class, '/models/{model-id:\\d+}/reactions/{reactionItem-id:\\d+}/parameters')
-		->register();
-	(new RouteHelper)
-		->setRoute(Ctl\ModelParentedRuleController::class, '/models/{model-id:\\d+}/rules')
 		->register();
 	(new RouteHelper)
 		->setRoute(Ctl\ExperimentController::class, '/experiments')
@@ -207,13 +130,10 @@ return function(App $app)
 		->setRoute(Ctl\ExperimentNoteController::class, '/experiments/{experiment-id:\\d+}/notes')
 		->register();
     (new RouteHelper)
-        ->setRoute(Ctl\DeviceController::class, '/experiments/{experiment-id:\\d+}/devices')
+        ->setRoute(Ctl\ExperimentVariableNoteController::class, '/experiments/{experiment-id:\\d+}/variables/{variable-id:\\d+}/notes')
         ->register();
     (new RouteHelper)
-        ->setRoute(Ctl\ExperimentRelationController::class, '/experiments/{experiment-id:\\d+}/relations')
-        ->register();
-    (new RouteHelper)
-        ->setRoute(Ctl\ExperimentModelsController::class, '/experiments/{experiment-id:\\d+}/models')
+        ->setRoute(Ctl\ExperimentEventController::class, '/experiments/{experiment-id:\\d+}/events')
         ->register();
     (new RouteHelper)
         ->setRoute(Ctl\BioquantityController::class, '/bioquantities')
@@ -224,15 +144,13 @@ return function(App $app)
     (new RouteHelper)
         ->setRoute(Ctl\BioquantityVariableController::class, '/bioquantities/{bioquantitiy-id:\\d+}/methods/{method-id:\\d+}/variables')
         ->register();
-
-	// model species
-	$app->get('/models/{model-id:\\d+}/species/{sbmlId}', Ctl\ModelSpecieController::class . ':readSbmlId');
-	$app->get('/models/{model-id:\\d+}/parameters/{sbmlId}', Ctl\ModelParentedParameterController::class . ':readSbmlId');
-
-	// entities
-	$app->post('/entities/{id:\\d+}/status', Ctl\EntityController::class . ':editStatus');
-	$app->get('/entities/{code}', Ctl\EntityController::class . ':readCode');
-
-	// classifications
-	$app->get('/classifications[/{type}]', Ctl\ClassificationController::class . ':read');
+    (new RouteHelper)
+        ->setRoute(Ctl\DeviceController::class, '/devices')
+        ->register();
+    (new RouteHelper)
+        ->setRoute(Ctl\UnitController::class, '/units')
+        ->register();
+    (new RouteHelper)
+        ->setRoute(Ctl\ProtocolController::class, '/protocols')
+        ->register();
 };

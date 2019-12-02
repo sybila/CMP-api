@@ -21,18 +21,12 @@ class ExperimentVariable implements IdentifiedObject
 	 */
 	protected $experimentId;
 
-	/**NEEXISTUJE unit
-	 * @ORM\ManyToOne(targetEntity="...", inversedBy="...")
+	/**
+	 * @ORM\ManyToOne(targetEntity="Unit")
 	 * @ORM\JoinColumn(name="unit_id", referencedColumnName="id")
 	 */
-	//protected $unitId;
+	protected $unitId;
 
-
-	/**NEEXISTUJE
-	 * @ORM\ManyToOne(targetEntity="...", inversedBy="...")
-	 * @ORM\JoinColumn(name="attribute_id", referencedColumnName="id")
-	 */
-	//protected $attributeId;
 
 	/**
 	 * @var string
@@ -98,6 +92,26 @@ class ExperimentVariable implements IdentifiedObject
 		$this->experimentId = $experimentId;
 		return $this;
 	}
+
+    /**
+     * Get unitId
+     * @return Unit
+     */
+    public function getUnitId()
+    {
+        return $this->unitId;
+    }
+
+    /**
+     * Set unitId
+     * @param integer $unitId
+     * @return ExperimentVariable
+     */
+    public function setUnitId($unitId): ExperimentVariable
+    {
+        $this->unitId = $unitId;
+        return $this;
+    }
 
 
 	/**

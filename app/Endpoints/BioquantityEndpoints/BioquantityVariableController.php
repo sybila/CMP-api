@@ -9,6 +9,7 @@ use App\Entity\{BioquantityVariable,
     IdentifiedObject,
     Repositories\BioquantityMethodRepository,
     Repositories\BioquantityVariableRepository,
+    Repositories\ExperimentVariableRepository,
     Repositories\IEndpointRepository};
 
 use App\Exceptions\
@@ -32,11 +33,13 @@ final class BioquantityVariableController extends ParentedRepositoryController
 
 	/** @var BioquantityVariableRepository */
 	private $variableRepository;
+    private $experimentVariableRepository;
 
 	public function __construct(Container $c)
 	{
 		parent::__construct($c);
 		$this->variableRepository = $c->get(BioquantityVariableRepository::class);
+        $this->experimentVariableRepository = $c->get(ExperimentVariableRepository::class);
 	}
 
 	protected static function getAllowedSort(): array
@@ -63,12 +66,12 @@ final class BioquantityVariableController extends ParentedRepositoryController
 	{
 		/** @var BioquantityVariable $variable */
         $variable->getMethodId() ?: $variable->setMethodId($this->repository->getParent());
-        !$data->hasKey('experimentVariableId') ?: $variable->setExperimentVariableId($data->getInt('experimentVariableId'));
+        !$data->hasKey('experimentVariableId') ?: $variable->setExperimentVariableId($this->experimentVariableRepository->get($data->getInt('experimentVariableId')));
         !$data->hasKey('timeFrom') ?: $variable->setTimeFrom($data->getFloat('timeFrom'));
 		!$data->hasKey('timeTo') ?: $variable->setTimeTo($data->getFloat('timeTo'));
 		!$data->hasKey('value') ?: $variable->setValue($data->getFloat('value'));
         !$data->hasKey('name') ?: $variable->setName($data->getString('name'));
-        !$data->hasKey('source') ?: $variable->setName($data->getString('source'));
+        !$data->hasKey('source') ?: $variable->setSource($data->getString('source'));
 	}
 
 	protected function createObject(ArgumentParser $body): IdentifiedObject

@@ -50,7 +50,7 @@ class Experiment implements IdentifiedObject
 	 * @var string
 	 * @ORM\Column(type="string", name="protocol")
 	 */
-	private $protocol;
+	//private $protocol;
 
 	/**
 	 * @var DateTimeJson
@@ -88,47 +88,46 @@ class Experiment implements IdentifiedObject
 	 */
 	private $notes;
 
-
     /**
      * @var ArrayCollection
-     * @ORM\OneToMany(targetEntity="ExperimentRelation", mappedBy="firstExperimentId", fetch="EAGER")
+     * @ORM\ManyToMany(targetEntity="Experiment", inversedBy="experimentRelation")
+     * @ORM\JoinTable(name="experiment_to_experiment", joinColumns={@ORM\JoinColumn(name="1exp_id", referencedColumnName="id")},
+     * inverseJoinColumns={@ORM\JoinColumn(name="2exp_id", referencedColumnName="id")})
      */
     private $experimentRelation;
 
     /**
-     * @var ArrayCollection
-     * @ORM\OneToMany(targetEntity="ExperimentModels", mappedBy="ExperimentId", fetch="EAGER")
-     */
-    private $experimentModels;
-    /**
 	 * @var ArrayCollection
-     * @ORM\ManyToMany(targetEntity="Device", mappedBy="experimentId")
-     * @ORM\JoinTable(name="experiment_device", joinColumns={@ORM\JoinColumn(name="dev_id", referencedColumnName="id")},
-     * inverseJoinColumns={@ORM\JoinColumn(name="exp_id", referencedColumnName="id")})
+     * @ORM\ManyToMany(targetEntity="Device", inversedBy="experiments")
+     * @ORM\JoinTable(name="experiment_to_device", joinColumns={@ORM\JoinColumn(name="exp_id", referencedColumnName="id")},
+     * inverseJoinColumns={@ORM\JoinColumn(name="dev_id", referencedColumnName="id")})
 	 */
 	private $devices;
 
-    ///**
-    // * Many Experiment have Many Device.
-     //* @ManyToMany(targetEntity="Device")
-    // * @JoinTable(name="experiment_device",
-    // *      joinColumns={@JoinColumn(name="dev_id", referencedColumnName="id")},
-     //*      inverseJoinColumns={@JoinColumn(name="exp_id", referencedColumnName="id")}
-     //*      )
-     //*/
-    //private $devices;
+    /**
+     * @var ArrayCollection
+     * @ORM\ManyToMany(targetEntity="Protocol", inversedBy="experiments")
+     * @ORM\JoinTable(name="experiment_to_protocol", joinColumns={@ORM\JoinColumn(name="exp_id", referencedColumnName="id")},
+     * inverseJoinColumns={@ORM\JoinColumn(name="protocol_id", referencedColumnName="id")})
+     */
+    private $protocols;
 
-    // ...
+    /**
+     * @var ArrayCollection
+     * @ORM\ManyToMany(targetEntity="Bioquantity", inversedBy="experiments")
+     * @ORM\JoinTable(name="bioquantity_to_experiment", joinColumns={@ORM\JoinColumn(name="exp_id", referencedColumnName="id")},
+     * inverseJoinColumns={@ORM\JoinColumn(name="bionum_id", referencedColumnName="id")})
+     */
+    private $bioquantities;
 
-    /*public function __construct() {
-        $this->devices = new \Doctrine\Common\Collections\ArrayCollection();
-    }*/
 
     public function __construct()
     {
         $this->inserted = new DateTimeJson;
-        $this->started = new DateTimeJson;
+        //$this->started = new DateTimeJson;
         $this->devices = new ArrayCollection();
+        $this->protocols = new ArrayCollection();
+        $this->bioquantities = new ArrayCollection();
     }
 
 	/**
@@ -173,7 +172,7 @@ class Experiment implements IdentifiedObject
 
 	/**
 	 * Set organismId
-	 * @param integer $organismId
+	 * @param Organism $organismId
 	 * @return Experiment
 	 */
 	public function setOrganismId($organismId): Experiment
@@ -190,25 +189,6 @@ class Experiment implements IdentifiedObject
 	{
 		return $this->organismId;
 	}
-	/**
-	 * Get protocol
-	 * @return string|null
-	 */
-	public function getProtocol(): ?string
-	{
-		return $this->protocol;
-	}
-
-	/**
-	 * Set protocol
-	 * @param string $protocol
-	 * @return Experiment
-	 */
-	public function setProtocol($protocol): Experiment
-	{
-		$this->protocol = $protocol;
-		return $this;
-	}
 
 	/**
 	 * Get started
@@ -219,15 +199,16 @@ class Experiment implements IdentifiedObject
 		return $this->started;
 	}
 
-	/*/**
-	 * Set started
-	 * @return Experiment
-	 */
-	/*public function setStarted(): Experiment
+    /**
+     * Set started
+     * @param string $started
+     * @return Experiment
+     */
+	public function setStarted(string $started): Experiment
 	{
-		$this->started = new DateTimeJson();
+		$this->started = date_create_from_format('d/m/Y:H:i:s', $started);
 		return $this;
-	}*/
+	}
 
 	/**
 	 * Get inserted
@@ -238,15 +219,103 @@ class Experiment implements IdentifiedObject
 		return $this->inserted;
 	}
 
-	/*/**
-	 * Set inserted
-	 * @return Experiment
-	 */
-	/*public function setInserted(): Experiment
-	{
-		$this->inserted = new DateTimeJson();
-		return $this;
-	}*/
+
+    /**
+     * @param Bioquantity $bioquantity
+     */
+    public function addBioquantity(Bioquantity $bioquantity)
+    {
+        if ($this->bioquantities->contains($bioquantity)) {
+            return;
+        }
+        $this->bioquantities->add($bioquantity);
+        $bioquantity->addExperiment($this);
+    }
+
+    /**
+     * @param Bioquantity $bioquantity
+     */
+    public function removeBioquantity(Bioquantity $bioquantity)
+    {
+        if (!$this->bioquantities->contains($bioquantity)) {
+            return;
+        }
+        $this->bioquantities->removeElement($bioquantity);
+        $bioquantity->removeExperiment($this);
+    }
+
+
+    /**
+     * @param Device $device
+     */
+    public function addDevice(Device $device)
+    {
+        if ($this->devices->contains($device)) {
+            return;
+        }
+        $this->devices->add($device);
+        $device->addExperiment($this);
+    }
+
+    /**
+     * @param Device $device
+     */
+    public function removeDevice(Device $device)
+    {
+        if (!$this->devices->contains($device)) {
+            return;
+        }
+        $this->devices->removeElement($device);
+        $device->removeExperiment($this);
+    }
+
+    /**
+     * @param  Experiment $experiment
+     * @return void
+     */
+    public function addExperiment(Experiment $experiment)
+    {
+        if (!$this->experimentRelation->contains($experiment)) {
+            $this->experimentRelation->add($experiment);
+            $experiment->addExperiment($this);
+        }
+    }
+
+    /**
+     * @param  Experiment $experiment
+     * @return void
+     */
+    public function removeExperiment(Experiment $experiment)
+    {
+        if ($this->experimentRelation->contains($experiment)) {
+            $this->experimentRelation->removeElement($experiment);
+            $experiment->removeExperiment($this);
+        }
+    }
+
+    /**
+     * @param  Protocol $protocol
+     * @return void
+     */
+    public function addProtocol(Protocol $protocol)
+    {
+        if (!$this->protocols->contains($protocol)) {
+            $this->protocols->add($protocol);
+            $protocol->addExperiment($this);
+        }
+    }
+
+    /**
+     * @param  Protocol $protocol
+     * @return void
+     */
+    public function removeProtocol(Protocol $protocol)
+    {
+        if ($this->protocols->contains($protocol)) {
+            $this->protocols->removeElement($protocol);
+            $protocol->removeExperiment($this);
+        }
+    }
 
 	/**
 	 * Get userId
@@ -299,20 +368,12 @@ class Experiment implements IdentifiedObject
 		return $this->variables;
 	}
 
-	/**
-	 * @return ExperimentNote[]|Collection
-	 */
-	public function getNote(): Collection
-	{
-		return $this->notes;
-	}
-
     /**
-     * @return ExperimentRelation[]|Collection
+     * @return Bioquantity[]|Collection
      */
-    public function getExperimentRelation(): Collection
+    public function getBioquantities(): Collection
     {
-        return $this->experimentRelation;
+        return $this->bioquantities;
     }
 
     /**
@@ -324,10 +385,30 @@ class Experiment implements IdentifiedObject
     }
 
     /**
-     * @return ExperimentRelation[]|Collection
+     * @return Protocol|null
      */
-    public function getExperimentModels(): Collection
+    public function getProtocol(): ?Protocol
     {
-        return $this->experimentModels;
+        $len = count($this->protocols);
+        if($len > 0){
+            return $this->protocols[$len - 1];
+        }
+       return null;
+    }
+
+	/**
+	 * @return ExperimentNote[]|Collection
+	 */
+	public function getNote(): Collection
+	{
+		return $this->notes;
+	}
+
+    /**
+     * @return Experiment[]|Collection
+     */
+    public function getExperimentRelation(): Collection
+    {
+        return $this->experimentRelation;
     }
 }

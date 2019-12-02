@@ -29,7 +29,7 @@ class ExperimentValues implements IdentifiedObject
 
 	/**
 	 * @ORM\ManyToOne(targetEntity="ExperimentVariable", inversedBy="values")
-	 * @ORM\JoinColumn(name="experimentVariableId", referencedColumnName="id")
+	 * @ORM\JoinColumn(name="var_id", referencedColumnName="id")
 	 */
 	protected $variableId;
 
@@ -44,6 +44,12 @@ class ExperimentValues implements IdentifiedObject
 	 * @ORM\Column(type="float", name="value")
 	 */
 	private $value;
+
+    /**
+     * @var boolean
+     * @ORM\Column(type="boolean", name="is_automatic")
+     */
+    private $isAutomatic;
 	
 	/**
 	 * Get id
@@ -133,6 +139,26 @@ class ExperimentValues implements IdentifiedObject
 		$this->value = $value;
 		return $this;
 	}
+
+    /**
+     * Get isAutomatic
+     * @return boolean
+     */
+    public function getIsAutomatic(): bool
+    {
+        return $this->isAutomatic;
+    }
+
+    /**
+     * Set isAutomatic
+     * @param boolean $isAutomatic
+     * @return ExperimentValues
+     */
+    public function setIsAutomatic($isAutomatic): ExperimentValues
+    {
+        $this->isAutomatic = $isAutomatic;
+        return $this;
+    }
 }
 
 /**

@@ -2,18 +2,21 @@
 
 namespace App\Controllers;
 
-use App\Entity\{Experiment,
-    ExperimentModels,
+use App\Entity\{Bioquantity,
+    Experiment,
     IdentifiedObject,
     ExperimentVariable,
-    ExperimentRelation,
-    ExperimentDevice,
     ExperimentNote,
     Device,
-    Organism,
+    Model,
+    Protocol,
+    Repositories\BioquantityRepository,
+    Repositories\DeviceRepository,
     Repositories\IEndpointRepository,
     Repositories\ExperimentRepository,
-    Repositories\ModelRepository};
+    Repositories\ModelRepository,
+    Repositories\OrganismRepository,
+    Repositories\ProtocolRepository};
 use App\Exceptions\{
 	DependentResourcesBoundException,
 	MissingRequiredKeyException
@@ -33,11 +36,19 @@ final class ExperimentController extends WritableRepositoryController
 {
 	/** @var ExperimentRepository */
 	private $experimentRepository;
+    private $organismRepository;
+    private $deviceRepository;
+    private $bioquantityRepository;
+    private $protocolRepository;
 
-	public function __construct(Container $c)
+    public function __construct(Container $c)
 	{
 		parent::__construct($c);
 		$this->experimentRepository = $c->get(ExperimentRepository::class);
+        $this->organismRepository = $c->get(OrganismRepository::class);
+        $this->bioquantityRepository = $c->get(BioquantityRepository::class);
+        $this->deviceRepository = $c->get(DeviceRepository::class);
+        $this->protocolRepository = $c->get(ProtocolRepository::class);
 	}
 
 	protected static function getAllowedSort(): array
@@ -54,7 +65,7 @@ final class ExperimentController extends WritableRepositoryController
                 'userId' => $experiment->getUserId(),
                 'name' => $experiment->getName(),
                 'description' => $experiment->getDescription(),
-                'protocol' => $experiment->getProtocol(),
+                'protocol' => $experiment->getProtocol() != null ?  ProtocolController::getData($experiment->getProtocol()) : null,
                 'inserted' => $experiment->getInserted(),
                 'started' => $experiment->getStarted(),
                 'status' => (string)$experiment->getStatus(),
@@ -62,21 +73,18 @@ final class ExperimentController extends WritableRepositoryController
                 'variables' => $experiment->getVariables()->map(function (ExperimentVariable $variable) {
                     return ['id' => $variable->getId(), 'name' => $variable->getName(), 'code' => $variable->getCode(), 'type' => $variable->getType()];
                 })->toArray(),
-                /*'devices' => $experiment->getDevices()->map(function (Device $device) {
-                    return ['id' => $device->getId(), 'name' => $device->getName(), 'address' => $device->getAddress()];
-                })->toArray(),*/
                 'notes' => $experiment->getNote()->map(function (ExperimentNote $note) {
                     return ['id' => $note->getId(), 'note' => $note->getNote()];
                 })->toArray(),
-                'experimentRelation' => $experiment->getExperimentRelation()->map(function (ExperimentRelation $experimentRelation) {
-                    return [ 'id' => $experimentRelation->getSecondExperimentId()->getId(), 'name' => $experimentRelation->getSecondExperimentId()->getName()];
+                'experimentsInRelation' => $experiment->getExperimentRelation()->map(function (Experiment $experiment) {
+                    return [ 'id' => $experiment->getId(), 'name' => $experiment->getName()];
                 })->toArray(),
-                'experimentModels' => $experiment->getExperimentModels()->map(function (ExperimentModels $experimentModels) {
-                    return [ 'id' => $experimentModels->getModelRelationExperimentId()->getId(), 'name' => $experimentModels->getModelRelationExperimentId()->getName()];
+                'bioquantities' => $experiment->getBioquantities()->map(function (Bioquantity $bioquantity) {
+                    return ['id' => $bioquantity->getId(), 'name' => $bioquantity->getName(), 'description' => $bioquantity->getDescription()];
                 })->toArray(),
-              /* 'devices' => $experiment->getExperimentDevices()->map(function (Device $devices) {
-                return ['experimentId' => $devices->getExperimentId(), 'deviceId' => $devices->getDeviceId()()];
-                })->toArray(),*/
+                'devices' => $experiment->getDevices()->map(function (Device $device) {
+                      return ['id' => $device->getId(), 'name' => $device->getName(), 'address' => $device->getAddress()];
+                })->toArray(),
             ];
         }
 	}
@@ -84,21 +92,23 @@ final class ExperimentController extends WritableRepositoryController
 	protected function setData(IdentifiedObject $experiment, ArgumentParser $data): void
 	{
 		/** @var Experiment $experiment */
-		//!$data->hasKey('userId') ?: $experiment->setUserId($data->getInt('userId'));
+		!$data->hasKey('userId') ?: $experiment->setUserId($data->getInt('userId'));
 		!$data->hasKey('name') ?: $experiment->setName($data->getString('name'));
-		//!$data->hasKey('started') ?: $experiment->setStarted($data->getDateTime('started'));
-		//!$data->hasKey('inserted') ?: $experiment->setInserted($data->getDateTime('inserted'));
+		!$data->hasKey('started') ?: $experiment->setStarted($data->getString('started'));
 		!$data->hasKey('description') ?: $experiment->setDescription($data->getString('description'));
-		!$data->hasKey('organismId') ?: $experiment->setOrganismId(Organism::getId($data->getInt('organismId')));
-		!$data->hasKey('protocol') ?: $experiment->setProtocol($data->getString('protocol'));
+		!$data->hasKey('organismId') ?: $experiment->setOrganismId($this->organismRepository->get($data->getInt('organismId')));
+		!$data->hasKey('protocol') ?: $experiment->addProtocol($this->protocolRepository->get($data->getInt('protocol')));
 		!$data->hasKey('status') ?: $experiment->setStatus($data->getString('status'));
+        !$data->hasKey('addRelatedExperimentId') ?: $experiment->addExperiment($this->experimentRepository->get($data->getInt('addRelatedExperimentId')));
+        !$data->hasKey('removeRelatedExperimentId') ?: $experiment->removeExperiment($this->experimentRepository->get($data->getInt('removeRelatedExperimentId')));
+        !$data->hasKey('addRelatedBioquantityId') ?: $experiment->addBioquantity($this->bioquantityRepository->get($data->getInt('addRelatedBioquantityId')));
+        !$data->hasKey('removeRelatedBioquantityId') ?: $experiment->removeBioquantity($this->bioquantityRepository->get($data->getInt('removeRelatedBioquantityId')));
+        !$data->hasKey('addRelatedDeviceId') ?: $experiment->addDevice($this->deviceRepository->get($data->getInt('addRelatedDeviceId')));
+        !$data->hasKey('removeRelatedDeviceId') ?: $experiment->removeDevice($this->deviceRepository->get($data->getInt('removeRelatedDeviceId')));
 	}
 
 	protected function createObject(ArgumentParser $body): IdentifiedObject
 	{
-	    //Zatim neni userId
-		/*if (!$body->hasKey('user_id'))
-			throw new MissingRequiredKeyException('user_id');*/
         if (!$body->hasKey('name'))
             throw new MissingRequiredKeyException('name');
         if (!$body->hasKey('status'))
@@ -109,8 +119,6 @@ final class ExperimentController extends WritableRepositoryController
 	protected function checkInsertObject(IdentifiedObject $experiment): void
 	{
 		/** @var Experiment $experiment */
-		/*if ($experiment->getUserId() === null)
-			throw new MissingRequiredKeyException('user_id');*/
         if ($experiment->getName() === null)
             throw new MissingRequiredKeyException('name');
         if ($experiment->getStatus() === null)
@@ -131,7 +139,6 @@ final class ExperimentController extends WritableRepositoryController
 	protected function getValidator(): Assert\Collection
 	{
 		return new Assert\Collection([
-			//'userId' => new Assert\Type(['type' => 'integer']),
 			'description' => new Assert\Type(['type' => 'string']),
 			'status' => new Assert\Type(['type' => 'string']),
 		]);

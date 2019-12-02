@@ -2,115 +2,109 @@
 
 namespace App\Controllers;
 
-use App\Entity\{
-    Experiment,
+use App\Entity\{Bioquantity,
     Device,
-	ExperimentDevice,
-	IdentifiedObject,
-	Repositories\IEndpointRepository,
-	Repositories\ExperimentRepository,
+    Experiment,
+    IdentifiedObject,
     Repositories\DeviceRepository,
-	Repositories\ExperimentDeviceRepository
-};
-use App\Exceptions\
-{
-	DependentResourcesBoundException,
-	MissingRequiredKeyException
+    Repositories\ExperimentRepository,
+    Repositories\IEndpointRepository};
+use App\Exceptions\{
+    DependentResourcesBoundException,
+    MissingRequiredKeyException
 };
 use App\Helpers\ArgumentParser;
 use Slim\Container;
 use Slim\Http\{
-	Request, Response
+    Request, Response
 };
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * @property-read DeviceRepository $repository
- * @method ExperimentDevice getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
+ * @property-read Repository $repository
+ * @method Device getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
-final class DeviceController extends ParentedEBaseController
+final class DeviceController extends WritableRepositoryController
 {
-	/** @var DeviceRepository */
-	private $deviceRepository;
+    /** @var DeviceRepository */
+    private $deviceRepository;
+    private $experimentRepository;
 
-	public function __construct(Container $v)
-	{
-		parent::__construct($v);
-		$this->deviceRepository = $v->get(DeviceRepository::class);
-	}
+    public function __construct(Container $c)
+    {
+        parent::__construct($c);
+        $this->deviceRepository = $c->get(DeviceRepository::class);
+        $this->experimentRepository = $c->get(ExperimentRepository::class);
+    }
 
-	protected static function getAllowedSort(): array
-	{
-		return ['deviceId', 'name', 'type', 'address'];
-	}
+    protected static function getAllowedSort(): array
+    {
+        return ['id, type, name, address'];
+    }
 
-	protected function getData(IdentifiedObject $device): array
-	{
-		/** @var Device $device */
-		$eBaseData = parent::getData($device);
-		return array_merge ($eBaseData, [
-			'type' => $device->getType(),
-			'name' => $device->getName(),
-			'address' => $device->getAddress(),
-		]);
-	}
+    protected function getData(IdentifiedObject $device): array
+    {
+        /** @var Device $device */
+        if($device != null) {
+            return  [
+                'id' => $device->getId(),
+                'name' => $device->getName(),
+                'type' => $device->getType(),
+                'address' => $device->getAddress(),
+                'experiments' => $device->getExperiments()->map(function (Experiment $experiment) {
+                    return ['id' => $experiment->getId(), 'name' => $experiment->getName(), 'description' => $experiment->getDescription()];
+                })->toArray(),
+            ];
+        }
+    }
 
-	protected function setData(IdentifiedObject $device, ArgumentParser $data): void
-	{
-		/** @var Device $device */
-		parent::setData($device, $data);
+    protected function setData(IdentifiedObject $device, ArgumentParser $data): void
+    {
+        /** @var Device $device */
         !$data->hasKey('name') ?: $device->setName($data->getString('name'));
         !$data->hasKey('type') ?: $device->setType($data->getString('type'));
-        !$data->hasKey('address') ?: $device->setAddress($data->getInt('inserted'));
-	}
+        !$data->hasKey('address') ?: $device->setAddress($data->getString('address'));
+        !$data->hasKey('addRelatedExperimentId') ?: $device->addExperiment($this->experimentRepository->get($data->getInt('addRelatedExperimentId')));
+        !$data->hasKey('removeRelatedExperimentId') ?: $device->removeExperiment($this->experimentRepository->get($data->getInt('removeRelatedExperimentId')));
+    }
 
-	protected function createObject(ArgumentParser $body): IdentifiedObject
-	{
-		if (!$body->hasKey('id'))
-			throw new MissingRequiredKeyException('id');
+    protected function createObject(ArgumentParser $body): IdentifiedObject
+    {
         if (!$body->hasKey('name'))
             throw new MissingRequiredKeyException('name');
-		return new Device;
-	}
+        return new Device();
+    }
 
-	protected function checkInsertObject(IdentifiedObject $variable): void
-	{
-		/** @var Device $device */
-		if ($device->getName() === null)
-			throw new MissingRequiredKeyException('experimentId');
-	}
+    protected function checkInsertObject(IdentifiedObject $device): void
+    {
+        /** @var Experiment $experiment */
+        if ($device->getName() === null)
+            throw new MissingRequiredKeyException('name');
+    }
 
-	public function delete(Request $request, Response $response, ArgumentParser $args): Response
-	{
-		return parent::delete($request, $response, $args);
-	}
+    public function delete(Request $request, Response $response, ArgumentParser $args): Response
+    {
+        /** @var Device $device */
+        $device = $this->getObject($args->getInt('id'));
+        if (!$device->getExperiments()->isEmpty())
+            throw new DependentResourcesBoundException('experiments');
+        return parent::delete($request, $response, $args);
+    }
 
-	protected function getValidator(): Assert\Collection
-	{
-		$validatorArray = parent::getValidatorArray();
-		return new Assert\Collection(array_merge($validatorArray, [
-			'name' => new Assert\Type(['type' => 'string']),
-            //'deviceId' => new Assert\Type(['type' => 'integer']),
-		]));
-	}
+    protected function getValidator(): Assert\Collection
+    {
+        return new Assert\Collection([
+            'name' => new Assert\Type(['type' => 'string']),
+        ]);
+    }
 
-	protected static function getObjectName(): string
-	{
-		return 'device';
-	}
+    protected static function getObjectName(): string
+    {
+        return 'device';
+    }
 
-	protected static function getRepositoryClassName(): string
-	{
-		return DeviceRepository::Class;
-	}
-
-	protected static function getParentRepositoryClassName(): string
-	{
-		return ExperimentRepository::class;
-	}
-
-	protected function getParentObjectInfo(): array
-	{
-		return ['experiment-id', 'experiment'];
-	}
+    protected static function getRepositoryClassName(): string
+    {
+        return DeviceRepository::Class;
+    }
 }

@@ -5,6 +5,18 @@ namespace App\Entity;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
+
+interface IExperimentNoteObject
+{
+    public function addNote(ExperimentNote $note);
+    public function removeNote(ExperimentNote $note);
+
+    /**
+     * @return ExperimentNote[]|Collection
+     */
+    public function getNotes(): Collection;
+}
+
 /**
  * @ORM\Entity
  * @ORM\Table(name="experiment_note")

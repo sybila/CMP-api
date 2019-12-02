@@ -8,7 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity
- * @ORM\Table(name="devices")
+ * @ORM\Table(name="device")
  * @ORM\DiscriminatorColumn(name="hierarchy_type", type="string")
  */
 class Device implements IdentifiedObject
@@ -28,27 +28,21 @@ class Device implements IdentifiedObject
 	private $name;
 
 	/**
-	 * @var integer
-	 * @ORM\Column(type="integer", name="address")
+	 * @var string
+	 * @ORM\Column(type="string", name="address")
 	 */
 	private $address;
-
-	///**
-	// * @var ArrayCollection
-	 //* @ORM\ManyToMany(targetEntity="ExperimentDevices", mappedBy="deviceId")
-	// */
-	//private $experiments;
 
     /**
      * Many Device have Many Experiment.
      * @ORM\ManyToMany(targetEntity="Experiment", inversedBy="devices")
-     * @ORM\JoinTable(name="experiment_device",  joinColumns={@ORM\JoinColumn(name="dev_id", referencedColumnName="id")},
+     * @ORM\JoinTable(name="experiment_to_device",  joinColumns={@ORM\JoinColumn(name="dev_id", referencedColumnName="id")},
      * inverseJoinColumns={@ORM\JoinColumn(name="exp_id", referencedColumnName="id")})
      */
     private $experiments;
 
     public function __construct() {
-        $this->experiments = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->experiments = new ArrayCollection();
     }
 
 	/**
@@ -93,16 +87,16 @@ class Device implements IdentifiedObject
 
 	/**
 	 * Get address
-	 * @return int
+	 * @return string
 	 */
-	public function getAddress(): ?int
+	public function getAddress(): ?string
 	{
 		return $this->address;
 	}
 
 	/**
 	 * Set address
-	 * @param int $address
+	 * @param string $address
 	 * @return Device
 	 */
 	public function setAddress($address): Device
@@ -118,5 +112,29 @@ class Device implements IdentifiedObject
 	{
 		return $this->experiments;
 	}
+
+    /**
+     * @param Experiment $experiment
+     */
+    public function addExperiment(Experiment $experiment)
+    {
+        if ($this->experiments->contains($experiment)) {
+            return;
+        }
+        $this->experiments->add($experiment);
+        $experiment->addDevice($this);
+    }
+
+    /**
+     * @param Experiment $experiment
+     */
+    public function removeExperiment(Experiment $experiment)
+    {
+        if (!$this->experiments->contains($experiment)) {
+            return;
+        }
+        $this->experiments->removeElement($experiment);
+        $experiment->removeDevice($this);
+    }
 
 }

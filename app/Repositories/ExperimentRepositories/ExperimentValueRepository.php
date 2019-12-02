@@ -47,7 +47,7 @@ class ExperimentValueRepository implements IDependentSBaseRepository
 	public function getList(array $filter, array $sort, array $limit): array
 	{
 		$query = $this->buildListQuery($filter)
-			->select('c.id, c.time, c.value');
+			->select('c.id, c.time, c.value, c.isAutomatic');
 
         return $query->getQuery()->getArrayResult();
 	}

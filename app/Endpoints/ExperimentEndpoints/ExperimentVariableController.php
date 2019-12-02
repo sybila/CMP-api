@@ -9,7 +9,8 @@ use App\Entity\{BioquantityVariable,
     IdentifiedObject,
     Repositories\IEndpointRepository,
     Repositories\ExperimentRepository,
-    Repositories\ExperimentVariableRepository};
+    Repositories\ExperimentVariableRepository,
+    Repositories\UnitRepository};
 use App\Exceptions\
 {
 	DependentResourcesBoundException,
@@ -35,6 +36,7 @@ final class ExperimentVariableController extends ParentedRepositoryController
 	{
 		parent::__construct($v);
 		$this->variableRepository = $v->get(ExperimentVariableRepository::class);
+        $this->unitRepository = $v->get(UnitRepository::class);
 	}
 
 	protected static function getAllowedSort(): array
@@ -49,6 +51,7 @@ final class ExperimentVariableController extends ParentedRepositoryController
 		    'id' => $variable->getId(),
 			'name' => $variable->getName(),
 			'code' => $variable->getCode(),
+            'unit' => $variable->getUnitId()!= null ? UnitController::getData($variable->getUnitId()):null,
 			'type' => $variable->getType(),
             'notes' => $variable->getNote()->map(function (ExperimentNote $note) {
                 return ['id' => $note->getId(), 'note' => $note->getNote(), 'time' =>  $note->getTime()];
@@ -57,15 +60,14 @@ final class ExperimentVariableController extends ParentedRepositoryController
 				return ['id' => $val->getId(), 'time' => $val->getTime(), 'value' => $val->getValue()];
 			})->toArray(),
             'bioquantityVariables' => $variable->getBioquantities()->map(function(BioquantityVariable $bio){
-                return['varName'=> $bio->getName(), 'timeFrom' => $bio->getTimeFrom(), 'timeTo' => $bio->getTimeTo()];
-            })
+                return['varName'=> $bio->getName(), 'timeFrom'=> $bio->getTimeFrom(), 'timeTo'=> $bio->getTimeTo()];
+            })->toArray(),
 		];
 	}
 
 	protected function setData(IdentifiedObject $variable, ArgumentParser $data): void
 	{
 		/** @var ExperimentVariable $variable */
-		//parent::setData($variable, $data);
 		$variable->getExperimentId() ?: $variable->setExperimentId($this->repository->getParent());
 		!$data->hasKey('name') ?: $variable->setName($data->getString('name'));
 		!$data->hasKey('code') ?: $variable->setCode($data->getString('code'));
@@ -76,8 +78,6 @@ final class ExperimentVariableController extends ParentedRepositoryController
 	{
 		if (!$body->hasKey('name'))
 			throw new MissingRequiredKeyException('name');
-		if (!$body->hasKey('code'))
-			throw new MissingRequiredKeyException('code');
 		return new ExperimentVariable;
 	}
 
@@ -88,8 +88,6 @@ final class ExperimentVariableController extends ParentedRepositoryController
 			throw new MissingRequiredKeyException('experimentId');
 		if ($variable->getName() === null)
 			throw new MissingRequiredKeyException('name');
-		if ($variable->getCode() === null)
-			throw new MissingRequiredKeyException('code');
 	}
 
 	public function delete(Request $request, Response $response, ArgumentParser $args): Response
