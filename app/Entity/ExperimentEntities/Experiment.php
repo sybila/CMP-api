@@ -2,12 +2,10 @@
 
 namespace App\Entity;
 
-use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Doctrine\Common\Collections\Criteria;
-use Doctrine\ORM\Mapping as ORM;
 use App\Helpers\DateTimeJson;
+use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity
@@ -99,15 +97,15 @@ class Experiment implements IdentifiedObject
     /**
      * @var ArrayCollection
      * @ORM\ManyToMany(targetEntity="Model", inversedBy="experiments")
-     * @ORM\JoinTable(name="experiment_to_model", joinColumns={@ORM\JoinColumn(name="experimentId", referencedColumnName="id")},
-     * inverseJoinColumns={@ORM\JoinColumn(name="modelId", referencedColumnName="id")})
+     * @ORM\JoinTable(name="experiment_to_model", joinColumns={@ORM\JoinColumn(name="exp_id", referencedColumnName="id")},
+     * inverseJoinColumns={@ORM\JoinColumn(name="model_id", referencedColumnName="id")})
      */
     private $experimentModels;
 
     /**
 	 * @var ArrayCollection
      * @ORM\ManyToMany(targetEntity="Device", inversedBy="experiments")
-     * @ORM\JoinTable(name="experiment_device", joinColumns={@ORM\JoinColumn(name="exp_id", referencedColumnName="id")},
+     * @ORM\JoinTable(name="experiment_to_device", joinColumns={@ORM\JoinColumn(name="exp_id", referencedColumnName="id")},
      * inverseJoinColumns={@ORM\JoinColumn(name="dev_id", referencedColumnName="id")})
 	 */
 	private $devices;
@@ -115,7 +113,7 @@ class Experiment implements IdentifiedObject
     /**
      * @var ArrayCollection
      * @ORM\ManyToMany(targetEntity="Bioquantity", inversedBy="experiments")
-     * @ORM\JoinTable(name="bioquantities_experiment", joinColumns={@ORM\JoinColumn(name="exp_id", referencedColumnName="id")},
+     * @ORM\JoinTable(name="bioquantity_to_experiment", joinColumns={@ORM\JoinColumn(name="exp_id", referencedColumnName="id")},
      * inverseJoinColumns={@ORM\JoinColumn(name="bionum_id", referencedColumnName="id")})
      */
     private $bioquantities;

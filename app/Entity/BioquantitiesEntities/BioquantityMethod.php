@@ -17,7 +17,7 @@ class BioquantityMethod implements IdentifiedObject
 
 	/**
 	 * @ORM\ManyToOne(targetEntity="Bioquantity", inversedBy="methods")
-	 * @ORM\JoinColumn(name="id_bioquantity", referencedColumnName="id")
+	 * @ORM\JoinColumn(name="bioquantity_id", referencedColumnName="id")
 	 */
 	protected $bioquantityId;
 

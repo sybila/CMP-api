@@ -9,7 +9,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity
- * @ORM\Table(name="bioquantities")
+ * @ORM\Table(name="bioquantity")
  * @ORM\DiscriminatorColumn(name="hierarchy_type", type="string")
  */
 class Bioquantity implements IdentifiedObject
@@ -79,7 +79,7 @@ class Bioquantity implements IdentifiedObject
     /**
      * @var ArrayCollection
      * @ORM\ManyToMany(targetEntity="Experiment", inversedBy="bioquantities")
-     * @ORM\JoinTable(name="bioquantities_experiment", joinColumns={@ORM\JoinColumn(name="bionum_id", referencedColumnName="id")},
+     * @ORM\JoinTable(name="bioquantity_to_experiment", joinColumns={@ORM\JoinColumn(name="bionum_id", referencedColumnName="id")},
      * inverseJoinColumns={@ORM\JoinColumn(name="exp_id", referencedColumnName="id")})
      */
     private $experiments;

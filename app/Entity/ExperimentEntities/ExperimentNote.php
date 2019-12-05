@@ -5,7 +5,6 @@ namespace App\Entity;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
-
 interface IExperimentNoteObject
 {
     public function addNote(ExperimentNote $note);
@@ -150,7 +149,7 @@ class ExperimentNote implements IdentifiedObject
 	 * Get imgLink
 	 * @return string|null
 	 */
-	public function getimgLink(): ?string
+	public function getImgLink(): ?string
 	{
 		return $this->imgLink;
 	}

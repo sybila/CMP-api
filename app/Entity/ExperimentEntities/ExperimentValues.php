@@ -2,10 +2,8 @@
 
 namespace App\Entity;
 
-use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-
 
 interface IExpValueObject
 {
@@ -29,7 +27,7 @@ class ExperimentValues implements IdentifiedObject
 
 	/**
 	 * @ORM\ManyToOne(targetEntity="ExperimentVariable", inversedBy="values")
-	 * @ORM\JoinColumn(name="experimentVariableId", referencedColumnName="id")
+	 * @ORM\JoinColumn(name="exp_var_id", referencedColumnName="id")
 	 */
 	protected $variableId;
 
@@ -53,26 +51,6 @@ class ExperimentValues implements IdentifiedObject
 	{
 		return $this->id;
 	}
-
-    /**
-     * Get experimentId
-     * @return integer
-     */
-    public function getExperimentId()
-    {
-        return $this->experimentId;
-    }
-
-    /**
-     * Set experimentId
-     * @param integer $experimentId
-     * @return ExperimentValues
-     */
-    public function setExperimentId($experimentId): ExperimentValues
-    {
-        $this->experimentId = $experimentId;
-        return $this;
-    }
 
 	/**
 	 * Get variableId

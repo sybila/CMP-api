@@ -8,7 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity
- * @ORM\Table(name="devices")
+ * @ORM\Table(name="device")
  * @ORM\DiscriminatorColumn(name="hierarchy_type", type="string")
  */
 class Device implements IdentifiedObject
@@ -26,18 +26,6 @@ class Device implements IdentifiedObject
 	 * @ORM\Column(type="string", name="name")
 	 */
 	private $name;
-
-	/**
-	 * @var integer
-	 * @ORM\Column(type="integer", name="address")
-	 */
-	private $address;
-
-	///**
-	// * @var ArrayCollection
-	 //* @ORM\ManyToMany(targetEntity="ExperimentDevices", mappedBy="deviceId")
-	// */
-	//private $experiments;
 
     /**
      * Many Device have Many Experiment.
@@ -88,26 +76,6 @@ class Device implements IdentifiedObject
 	public function setName($name): Device
 	{
 		$this->name = $name;
-		return $this;
-	}
-
-	/**
-	 * Get address
-	 * @return int
-	 */
-	public function getAddress(): ?int
-	{
-		return $this->address;
-	}
-
-	/**
-	 * Set address
-	 * @param int $address
-	 * @return Device
-	 */
-	public function setAddress($address): Device
-	{
-		$this->address = $address;
 		return $this;
 	}
 

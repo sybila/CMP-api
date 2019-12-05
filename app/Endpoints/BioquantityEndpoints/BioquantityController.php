@@ -81,13 +81,10 @@ final class BioquantityController extends WritableRepositoryController
 		!$data->hasKey('organismId') ?: $bioquantity->setOrganismId($this->organismRepository->get($data->getInt('organismId')));
         !$data->hasKey('addRelatedExperimentId') ?: $bioquantity->addExperiment($this->experimentRepository->get($data->getInt('addRelatedExperimentId')));
         !$data->hasKey('removeRelatedExperimentId') ?: $bioquantity->removeExperiment($this->experimentRepository->get($data->getInt('removeRelatedExperimentId')));
-		//!$data->hasKey('unitId') ?: $bioquantity->setUnitId($data->getInt('unitId'));
-		//!$data->hasKey('entityId') ?: $bioquantity->setEntityId($data->getString('status'));
 	}
 
 	protected function createObject(ArgumentParser $body): IdentifiedObject
 	{
-	    //Zatim neni userId
 		if (!$body->hasKey('name'))
 			throw new MissingRequiredKeyException('name');
 		return new Bioquantity;
@@ -112,7 +109,6 @@ final class BioquantityController extends WritableRepositoryController
 	protected function getValidator(): Assert\Collection
 	{
 		return new Assert\Collection( [
-			//'userId' => new Assert\Type(['type' => 'integer']),
 			'description' => new Assert\Type(['type' => 'string']),
 			'IsValid' => new Assert\Type(['type' => 'bool']),
             'IsAutomatic' => new Assert\Type(['type' => 'bool']),

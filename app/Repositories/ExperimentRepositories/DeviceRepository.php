@@ -38,7 +38,7 @@ class DeviceRepository implements IEndpointRepository
     public function getList(array $filter, array $sort, array $limit): array
     {
         $query = $this->buildListQuery($filter)
-            ->select('d.id, d.name, d.type, d.address');
+            ->select('d.id, d.name, d.type');
         return $query->getQuery()->getArrayResult();
     }
 

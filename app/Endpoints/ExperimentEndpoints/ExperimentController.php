@@ -84,7 +84,7 @@ final class ExperimentController extends WritableRepositoryController
                     return ['id' => $bioquantity->getId(), 'name' => $bioquantity->getName(), 'description' => $bioquantity->getDescription()];
                 })->toArray(),
                 'devices' => $experiment->getDevices()->map(function (Device $device) {
-                      return ['id' => $device->getId(), 'name' => $device->getName(), 'address' => $device->getAddress()];
+                      return ['id' => $device->getId(), 'name' => $device->getName()];
                 })->toArray(),
             ];
         }
@@ -93,7 +93,6 @@ final class ExperimentController extends WritableRepositoryController
 	protected function setData(IdentifiedObject $experiment, ArgumentParser $data): void
 	{
 		/** @var Experiment $experiment */
-		//!$data->hasKey('userId') ?: $experiment->setUserId($data->getInt('userId'));
 		!$data->hasKey('name') ?: $experiment->setName($data->getString('name'));
 		!$data->hasKey('started') ?: $experiment->setStarted($data->getString('started'));
 		!$data->hasKey('description') ?: $experiment->setDescription($data->getString('description'));
