@@ -76,8 +76,6 @@ final class BioquantityVariableController extends ParentedRepositoryController
 
 	protected function createObject(ArgumentParser $body): IdentifiedObject
 	{
-       if (!$body->hasKey('name'))
-            throw new MissingRequiredKeyException('name');
 		return new BioquantityVariable();
 	}
 
@@ -86,12 +84,6 @@ final class BioquantityVariableController extends ParentedRepositoryController
 		/** @var BioquantityVariable $variable */
 		if ($variable->getMethodId() === null)
 			throw new MissingRequiredKeyException('methodId');
-        if ($variable->getName() === null)
-            throw new MissingRequiredKeyException('name');
-		/*if ($variable->getTime() === null)
-			throw new MissingRequiredKeyException('time');
-		if ($variable->getValue() === null)
-			throw new MissingRequiredKeyException('value');*/
 	}
 
 	public function delete(Request $request, Response $response, ArgumentParser $args): Response
@@ -104,7 +96,6 @@ final class BioquantityVariableController extends ParentedRepositoryController
 	{
 		return new Assert\Collection([
 			'name' => new Assert\Type(['type' => 'string']),
-			/*'time' => new Assert\Type(['type' => 'float']),*/
 		]);
 	}
 

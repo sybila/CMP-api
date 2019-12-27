@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Entity\{Bioquantity,
     Experiment,
+    ExperimentEvent,
     IdentifiedObject,
     ExperimentVariable,
     ExperimentNote,
@@ -12,6 +13,7 @@ use App\Entity\{Bioquantity,
     Protocol,
     Repositories\BioquantityRepository,
     Repositories\DeviceRepository,
+    Repositories\ExperimentEventRepository,
     Repositories\IEndpointRepository,
     Repositories\ExperimentRepository,
     Repositories\ModelRepository,
@@ -40,6 +42,7 @@ final class ExperimentController extends WritableRepositoryController
     private $deviceRepository;
     private $bioquantityRepository;
     private $protocolRepository;
+    private $eventRepository;
 
     public function __construct(Container $c)
 	{
@@ -49,6 +52,7 @@ final class ExperimentController extends WritableRepositoryController
         $this->bioquantityRepository = $c->get(BioquantityRepository::class);
         $this->deviceRepository = $c->get(DeviceRepository::class);
         $this->protocolRepository = $c->get(ProtocolRepository::class);
+        $this->eventRepository = $c->get(ExperimentEventRepository::class);
 	}
 
 	protected static function getAllowedSort(): array
@@ -84,6 +88,9 @@ final class ExperimentController extends WritableRepositoryController
                 })->toArray(),
                 'devices' => $experiment->getDevices()->map(function (Device $device) {
                       return ['id' => $device->getId(), 'name' => $device->getName(), 'address' => $device->getAddress()];
+                })->toArray(),
+                'events' => $experiment->getEvent()->map(function (ExperimentEvent $event){
+                    return[$event->getId() != null ? ExperimentEventController::getData($this->eventRepository->get($event->getId())):null];
                 })->toArray(),
             ];
         }

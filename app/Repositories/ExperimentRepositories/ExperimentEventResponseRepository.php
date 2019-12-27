@@ -2,39 +2,38 @@
 
 namespace App\Entity\Repositories;
 
-use App\Entity\Experiment;
 use App\Entity\ExperimentEvent;
-use App\Entity\ExperimentValues;
-use App\Entity\ExperimentVariable;
+use App\Entity\ExperimentEventArg;
+use App\Entity\ExperimentEventResponse;
 use App\Entity\IdentifiedObject;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 
-class ExperimentEventRepository implements IDependentSBaseRepository
+class ExperimentEventResponseRepository implements IDependentSBaseRepository
 {
 	/** @var EntityManager * */
 	private $em;
 
-	/** @var \Doctrine\ORM\EventRepository */
+	/** @var \Doctrine\ORM\EventResponseRepository */
 	private $repository;
 
-	/** @var Experiment */
-	private $experiment;
+	/** @var ExperimentEvent */
+	private $event;
 
 	public function __construct(EntityManager $em)
 	{
 		$this->em = $em;
-		$this->repository = $em->getRepository(ExperimentEvent::class);
+		$this->repository = $em->getRepository(ExperimentEventResponse::class);
 	}
 
 	protected static function getParentClassName(): string
 	{
-		return Experiment::class;
+		return ExperimentEvent::class;
 	}
 
 	public function get(int $id)
 	{
-		return $this->em->find(ExperimentEvent::class, $id);
+		return $this->em->find(ExperimentEventResponse::class, $id);
 	}
 
 	public function getNumResults(array $filter): int
@@ -48,35 +47,35 @@ class ExperimentEventRepository implements IDependentSBaseRepository
 	public function getList(array $filter, array $sort, array $limit): array
 	{
 		$query = $this->buildListQuery($filter)
-			->select('c.id, c.time');
+			->select('c.id, c.value');
 
         return $query->getQuery()->getArrayResult();
 	}
 
 	public function getParent(): IdentifiedObject
 	{
-		return $this->experiment;
+		return $this->event;
 	}
 
 	public function setParent(IdentifiedObject $object): void
 	{
 		$className = static::getParentClassName();
 		if (!($object instanceof $className))
-			throw new \Exception('Parent of event must be ' . $className);
-		$this->experiment = $object;
+			throw new \Exception('Parent of variable must be ' . $className);
+		$this->event = $object;
 	}
 
 	private function buildListQuery(array $filter): QueryBuilder
 	{
 		$query = $this->em->createQueryBuilder()
-			->from(ExperimentEvent::class, 'c')
-			->where('c.experimentId = :experimentId')
-			->setParameter('experimentId', $this->experiment->getId());
+			->from(ExperimentEventArg::class, 'c')
+			->where('c.eventId = :eventId')
+			->setParameter('eventId', $this->event->getId());
 		return $query;
 	}
 
     /**
-     * @param Experiment $object
+     * @param ExperimentEvent $object
      */
     public function add($object): void
     {

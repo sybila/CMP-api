@@ -179,6 +179,22 @@ $c[EntityRepo\ProtocolRepository::class] = function (Container $c) {
     return new EntityRepo\ProtocolRepository($c[EntityManager::class]);
 };
 
+$c[EntityRepo\ExperimentEventTypeRepository::class] = function (Container $c) {
+    return new EntityRepo\ExperimentEventTypeRepository($c[EntityManager::class]);
+};
+
+$c[EntityRepo\ExperimentEventVarTypeRepository::class] = function (Container $c) {
+    return new EntityRepo\ExperimentEventVarTypeRepository($c[EntityManager::class]);
+};
+
+$c[EntityRepo\ExperimentEventArgRepository::class] = function (Container $c) {
+    return new EntityRepo\ExperimentEventArgRepository($c[EntityManager::class]);
+};
+
+$c[EntityRepo\ExperimentEventResponseRepository::class] = function (Container $c) {
+    return new EntityRepo\ExperimentEventResponseRepository($c[EntityManager::class]);
+};
+
 $c[AuthorizationServer::class] = function (Container $c) {
 	$srv = new AuthorizationServer(
 		$c[AuthRepo\ClientRepository::class],

@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use Consistence\Type\Type;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -27,26 +29,41 @@ class ExperimentEvent implements IdentifiedObject
 	 */
 	private $time;
 
-	/**
-	 * @var string
-	 * @ORM\Column(type="string", name="event")
-	 */
-	private $event;
+    /**
+     * @ORM\ManyToOne(targetEntity="ExperimentEventType")
+     * @ORM\JoinColumn(name="type_id", referencedColumnName="id")
+     */
+    protected $typeId;
 
     /**
-     * @var string
-     * @ORM\Column(type="string", columnDefinition="ENUM('error', 'change', 'info')")
+     * @ORM\ManyToOne(targetEntity="Device")
+     * @ORM\JoinColumn(name="device_id", referencedColumnName="id")
      */
-    private $type;
+    protected $deviceId;
+
 
     /**
      * @var bool
-     * @ORM\Column(type="boolean", name="is_automatic")
+     * @ORM\Column(type="boolean", name="success")
      */
-    private $isAutomatic;
+    private $success;
+
+    /**
+     * @var ArrayCollection
+     * @ORM\OneToMany(targetEntity="ExperimentEventArg", mappedBy="eventId")
+     */
+    private $args;
+
+    /**
+     * @var ArrayCollection
+     * @ORM\OneToMany(targetEntity="ExperimentEventResponse", mappedBy="eventId")
+     */
+    private $responses;
+
+
 	
 	/**
-	 * Get id
+	 * Get ExperimentEvent
 	 * @return integer
 	 */
 	public function getId(): ?int
@@ -95,63 +112,80 @@ class ExperimentEvent implements IdentifiedObject
 		return $this;
 	}
 
-	/**
-	 * Get event
-	 * @return string|null
-	 */
-	public function getEvent(): ?string
-	{
-		return $this->event;
-	}
+    /**
+     * Get typeId
+     * @return ExperimentEventType
+     */
+    public function getTypeId(): ?ExperimentEventType
+    {
+        return $this->typeId;
+    }
 
-	/**
-	 * Set event
-	 * @param string $event
-	 * @return ExperimentEvent
-	 */
-	public function setEvent($event): ExperimentEvent
-	{
-		$this->event = $event;
-		return $this;
-	}
+    /**
+     * Set type
+     * @param ExperimentEventType $type
+     * @return ExperimentEvent
+     */
+    public function setTypeId($type): ExperimentEvent
+    {
+        $this->typeId = $type;
+        return $this;
+    }
 
-	/**
-	 * Get type
-	 * @return string|null
-	 */
-	public function getType(): ?string
-	{
-		return $this->type;
-	}
+    /**
+     * Get deviceId
+     * @return Device
+     */
+    public function getDeviceId(): ?Device
+    {
+        return $this->deviceId;
+    }
 
-	/**
-	 * Set type
-	 * @param string $type
-	 * @return ExperimentEvent
-	 */
-	public function setType($type): ExperimentEvent
-	{
-		$this->type = $type;
-		return $this;
-	}
+    /**
+     * Set deviceId
+     * @param Device $device
+     * @return ExperimentEvent
+     */
+    public function setDeviceId($device): ExperimentEvent
+    {
+        $this->deviceId = $device;
+        return $this;
+    }
+
 
     /**
      * Get type
      * @return boolean
      */
-    public function getIsAutomatic(): bool
+    public function getSuccess(): bool
     {
-        return $this->isAutomatic;
+        return $this->success;
     }
 
     /**
-     * Set isAutomatic
-     * @param boolean $isAutomatic
+     * Set success
+     * @param boolean $success
      * @return ExperimentEvent
      */
-    public function setIsAutomatic($isAutomatic): ExperimentEvent
+    public function setSuccess($success): ExperimentEvent
     {
-        $this->isAutomatic = $isAutomatic;
+        $this->success = $success;
         return $this;
+    }
+
+    /**
+     * @return ExperimentEventArg[]|Collection
+     */
+    public function getArgs(): Collection
+    {
+        return $this->args;
+    }
+
+    /**
+     * @return ExperimentEventResponse[]|Collection
+     */
+    public function getResponses(): Collection
+    {
+        return $this->responses;
     }
 }

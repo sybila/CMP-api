@@ -90,6 +90,12 @@ class Experiment implements IdentifiedObject
 
     /**
      * @var ArrayCollection
+     * @ORM\OneToMany(targetEntity="ExperimentEvent", mappedBy="experimentId")
+     */
+    private $events;
+
+    /**
+     * @var ArrayCollection
      * @ORM\ManyToMany(targetEntity="Experiment", inversedBy="experimentRelation")
      * @ORM\JoinTable(name="experiment_to_experiment", joinColumns={@ORM\JoinColumn(name="1exp_id", referencedColumnName="id")},
      * inverseJoinColumns={@ORM\JoinColumn(name="2exp_id", referencedColumnName="id")})
@@ -124,7 +130,6 @@ class Experiment implements IdentifiedObject
     public function __construct()
     {
         $this->inserted = new DateTimeJson;
-        //$this->started = new DateTimeJson;
         $this->devices = new ArrayCollection();
         $this->protocols = new ArrayCollection();
         $this->bioquantities = new ArrayCollection();
@@ -403,6 +408,14 @@ class Experiment implements IdentifiedObject
 	{
 		return $this->notes;
 	}
+
+    /**
+     * @return ExperimentEvent[]|Collection
+     */
+    public function getEvent(): Collection
+    {
+        return $this->events;
+    }
 
     /**
      * @return Experiment[]|Collection

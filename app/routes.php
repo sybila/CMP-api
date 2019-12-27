@@ -153,4 +153,16 @@ return function(App $app)
     (new RouteHelper)
         ->setRoute(Ctl\ProtocolController::class, '/protocols')
         ->register();
+    (new RouteHelper)
+        ->setRoute(Ctl\ExperimentEventTypeController::class, '/eventtypes')
+        ->register();
+    (new RouteHelper)
+        ->setRoute(Ctl\ExperimentEventVarTypeController::class, '/eventvartypes')
+        ->register();
+    (new RouteHelper)
+        ->setRoute(Ctl\ExperimentEventArgController::class, '/experiments/{experiment-id:\\d+}/events/{event-id:\\d+}/args')
+        ->register();
+    (new RouteHelper)
+        ->setRoute(Ctl\ExperimentEventResponseController::class, '/experiments/{experiment-id:\\d+}/events/{event-id:\\d+}/responses')
+        ->register();
 };
