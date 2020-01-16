@@ -195,6 +195,35 @@ return function(App $app) {
 		->setRoute(Ctl\ModelParentedRuleController::class, '/models/{model-id:\\d+}/rules')
 		->register();
 	(new RouteHelper)
+		->setRoute(Ctl\ExperimentController::class, '/experiments')
+		->register();
+    (new RouteHelper)
+        ->setRoute(Ctl\VariablesValuesController::class, '/experimentvalues')
+        ->register();
+	(new RouteHelper)
+        ->setRoute(Ctl\ExperimentVariableController::class, '/experiments/{experiment-id:\\d+}/variables')
+		->register();
+	(new RouteHelper)
+		->setRoute(Ctl\ExperimentValueController::class, '/experiments/{experiment-id:\\d+}/variables/{variable-id:\\d+}/values')
+		->register();
+	(new RouteHelper)
+		->setRoute(Ctl\ExperimentNoteController::class, '/experiments/{experiment-id:\\d+}/notes')
+		->register();
+    (new RouteHelper)
+        ->setRoute(Ctl\ExperimentVariableNoteController::class, '/experiments/{experiment-id:\\d+}/variables/{variable-id:\\d+}/notes')
+        ->register();
+    (new RouteHelper)
+        ->setRoute(Ctl\BioquantityController::class, '/bioquantities')
+        ->register();
+    (new RouteHelper)
+        ->setRoute(Ctl\BioquantityMethodController::class, '/bioquantities/{bioquantity-id:\\d+}/methods')
+        ->register();
+    (new RouteHelper)
+        ->setRoute(Ctl\BioquantityVariableController::class, '/bioquantities/{bioquantitiy-id:\\d+}/methods/{method-id:\\d+}/variables')
+        ->register();
+    (new RouteHelper)
+        ->setRoute(Ctl\DeviceController::class, '/devices')
+        ->register();
 		->setRoute(Ctl\UserController::class, '/users')
 		->register();
 	(new RouteHelper)

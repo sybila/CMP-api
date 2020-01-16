@@ -106,11 +106,11 @@ abstract class RepositoryController extends AbstractController
 	 */
 	protected function getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
 	{
+		
 		if (!$repository)
 			$repository = $this->repository;
 		if (!$objectName)
 			$objectName = static::getObjectName();
-
 		try {
 			$ent = $repository->get($id);
 			if (!$ent)

@@ -20,7 +20,7 @@ $config = require __DIR__ . '/../app/settings.php';
 
 Type::overrideType('datetime', DateTimeJsonType::class);
 Type::overrideType('datetime_immutable', DateTimeJsonType::class);
-Type::overrideType('datetimetz', DateTimeJsonType::class);
+Type::overrideType('datetime', DateTimeJsonType::class);
 
 $c = new Container($config);
 unset($c['errorHandler']);
@@ -232,6 +232,42 @@ $c[AuthRepo\AccessTokenRepository::class] = function (Container $c) {
 
 $c[AuthRepo\RefreshTokenRepository::class] = function(Container $c) {
 	return new AuthRepo\RefreshTokenRepository($c[EntityManager::class]);
+};
+
+$c[EntityRepo\ExperimentRepository::class] = function (Container $c) {
+	return new EntityRepo\ExperimentRepository($c[EntityManager::class]);
+};
+
+$c[EntityRepo\ExperimentVariableRepository::class] = function (Container $c) {
+	return new EntityRepo\ExperimentVariableRepository($c[EntityManager::class]);
+};
+
+$c[EntityRepo\ExperimentValueRepository::class] = function (Container $c) {
+	return new EntityRepo\ExperimentValueRepository($c[EntityManager::class]);
+};
+
+$c[EntityRepo\ExperimentNoteRepository::class] = function (Container $c) {
+	return new EntityRepo\ExperimentNoteRepository($c[EntityManager::class]);
+};
+
+$c[EntityRepo\ExperimentVariableNoteRepository::class] = function (Container $c) {
+    return new EntityRepo\ExperimentVariableNoteRepository($c[EntityManager::class]);
+};
+
+$c[EntityRepo\BioquantityRepository::class] = function (Container $c) {
+    return new EntityRepo\BioquantityRepository($c[EntityManager::class]);
+};
+
+$c[EntityRepo\BioquantityMethodRepository::class] = function (Container $c) {
+    return new EntityRepo\BioquantityMethodRepository($c[EntityManager::class]);
+};
+
+$c[EntityRepo\BioquantityVariableRepository::class] = function (Container $c) {
+    return new EntityRepo\BioquantityVariableRepository($c[EntityManager::class]);
+};
+
+$c[EntityRepo\DeviceRepository::class] = function (Container $c) {
+    return new EntityRepo\DeviceRepository($c[EntityManager::class]);
 };
 
 $c[AuthorizationServer::class] = function (Container $c) {

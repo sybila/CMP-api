@@ -59,6 +59,12 @@ class ArgumentParser implements \ArrayAccess, \IteratorAggregate
 			throw new InvalidTypeException($key, 'int');
 	}
 
+    public function getDateTime(string $key): DateTimeJson
+    {
+        echo($key);
+        return strtotime($key);
+    }
+
 	public function getString(string $key): string
 	{
 		$value = $this->get($key);
@@ -76,6 +82,7 @@ class ArgumentParser implements \ArrayAccess, \IteratorAggregate
 		else
 			throw new InvalidTypeException($key, 'float');
 	}
+
 
 	public function getBool(string $key): bool
 	{

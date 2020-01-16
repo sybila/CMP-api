@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -23,6 +25,12 @@ class Organism implements IdentifiedObject
 	 * @ORM\Column(type="string")
 	 */
 	protected $code;
+
+	/**
+	 * @var ArrayCollection
+	 * @ORM\OneToMany(targetEntity="Experiment", mappedBy="organismId")
+	 */
+	private $experiments;
 
 	public function getCode(): ?string
 	{
@@ -48,5 +56,13 @@ class Organism implements IdentifiedObject
 	public function setName(string $name): void
 	{
 		$this->name = $name;
+	}
+
+	/**
+	 * @return Experiment[]|Collection
+	 */
+	public function getExperiment(): Collection
+	{
+		return $this->experiments;
 	}
 }

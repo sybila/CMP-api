@@ -2,35 +2,34 @@
 
 namespace App\Entity\Repositories;
 
-use App\Entity\Model;
+use App\Entity\Experiment;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 
-class ModelRepository implements IEndpointRepository
+class ExperimentRepository implements IEndpointRepository
 {
 
 	/** @var EntityManager * */
 	protected $em;
 
-	/** @var \Doctrine\ORM\ModelRepository */
+	/** @var \Doctrine\ORM\ExperimentRepository */
 	private $repository;
 
 	public function __construct(EntityManager $em)
 	{
 		$this->em = $em;
-		$this->repository = $em->getRepository(Model::class);
+		$this->repository = $em->getRepository(Experiment::class);
 	}
 
 	public function get(int $id)
 	{
-		//dump($this->em->find(Model::class, $id));exit;
-		return $this->em->find(Model::class, $id);
+		return $this->em->find(Experiment::class, $id);
 	}
 
 	public function getNumResults(array $filter): int
 	{
 		return ((int)$this->buildListQuery($filter)
-			->select('COUNT(m)')
+			->select('COUNT(e)')
 			->getQuery()
 			->getScalarResult());
 	}
@@ -38,14 +37,14 @@ class ModelRepository implements IEndpointRepository
 	public function getList(array $filter, array $sort, array $limit): array
 	{
 		$query = $this->buildListQuery($filter)
-			->select('m.id, m.name, m.sbmlId, m.sboTerm, m.notes, m.annotation, m.userId, m.approvedId, m.status');
+			->select('e.id, e.name, e.description, e.protocol, e.started, e.inserted, e.status');
 		return $query->getQuery()->getArrayResult();
 	}
 
 	private function buildListQuery(array $filter): QueryBuilder
 	{
 		$query = $this->em->createQueryBuilder()
-			->from(Model::class, 'm');
+			->from(Experiment::class, 'e');
 		return $query;
 	}
 
