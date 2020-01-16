@@ -33,6 +33,87 @@ types:
     minimum: 1
     required: false
     description: Same as HTTP code or custom (700+, listed in /version/errors docs) when HTTP code is 400
+  AuthorizationCodeRequest:
+    properties:
+      grant_type:
+        description: Type of requested access token
+        type: string
+        enum: ["client_credentials", "authorization_code", "refresh_token"]
+        required: true
+      client_id:
+        type: string
+        required: true
+      client_secret:
+        type: string
+        required: true
+  RefreshCodeRequest:
+    type: AuthorizationCodeRequest
+    properties:
+      refresh_token:
+        type: string
+        required: true
+  PasswordCodeRequest:
+    type: AuthorizationCodeRequest
+    properties:
+      username:
+        type: string
+        required: true
+      password:
+        type: string
+        required: true
+  User:
+    properties:
+      id: Identifier
+      username:
+        type: string
+        required: true
+      name:
+        type: string
+        required: true
+      surname:
+        type: string
+        required: true
+      password:
+        type: string
+        required: true
+      type: UserType
+      email: string
+      groups:
+        Collection: UserGroup
+  UserType:
+    properties:
+      id: Identifier
+      tier:
+        type: integer
+        required: true
+      name:
+        type: string
+        required: true
+  UserGroup:
+    properties:
+      id: Identifier
+      name:
+        type: string
+        required: true
+      type:
+        type: integer
+        required: true
+      description:
+        type: string
+        required: ture
+      users:
+        Collection: User
+  UserGroupRole:
+    properties:
+      id: Identifier
+      tier:
+        type: integer
+        required: true
+      name:
+        type: string
+        required: true
+
+
   Classification:
     properties:
       id: Identifier
@@ -225,15 +306,15 @@ types:
       isConstant: boolean
   Specie:
     type: ListSpecie
-      properties:
-        reactionItems:
-          type: IdentifierList
-          description: List of reactionItem IDs
+    properties:
+      reactionItems:
+        type: IdentifierList
+        description: List of reactionItem IDs
   ListReaction:
     properties:
       id: Identifier
       modelId: Identifier
-      commpartmentId: Integer
+      commpartmentId: integer
       name: string
       reversible: boolean
       fast: boolean
@@ -720,6 +801,64 @@ resourceTypes:
       710 - Invalid entity specified as location (must be Compartment), error details: {given: given type}
       711 - Invalid entity specified as parent, error details: {parent: parent type, child: child type}
 
+#Authorization
+/authorize:
+  description: Authorization endpoint
+  post:
+    is: [Insert: {type: AuthorizationCodeRequest}]
+/users:
+  description: User endpoint
+    get:
+      is: [Collection: {type: User}]
+    post:
+      is: [Insert: {type: User}]
+    /{id}:
+      uriParameters:
+        id:
+          UrlIdentifierList
+      get:
+        is: [type: User]
+      put:
+        is: [Update: {type: User}]
+      delete:
+        is: [Delete]
+/userTypes:
+  description: Types of user group roles endpoint
+    get:
+      is: [Collection: {type: UserType}]
+    /{id}:
+      uriParameters:
+        id:
+          UrlIdentifierList
+      get:
+        is: [type: UserType]
+/userGroups:
+  description: User group endpoint
+    get:
+      is: [Collection: {type: UserGroup}]
+    post:
+      is: [Insert: {type: UserGroup}]
+  /{id}:
+    uriParameters:
+      id:
+        UrlIdentifierList
+    get:
+      is: [type: UserGroup]
+    put:
+      is: [Update: {type: UserGroup}]
+    delete:
+      is: [Delete]
+/userGroupRoles:
+  description: Types of user group roles endpoint
+    get:
+      is: [Collection: {type: UserGroupRole}]
+    /{id}:
+      uriParameters:
+        id:
+        UrlIdentifierList
+      get:
+        is: [type: UserGroupRole]
+#BCS
 /annotations:
   /types:
     description: List of valid annotation term types - databases
@@ -855,7 +994,7 @@ resourceTypes:
         get:
           is: [IdCollection: {description: Get all products of this rule}]
 
-#BCSRepositories part follows
+# Models
 
 /models:
   get:
