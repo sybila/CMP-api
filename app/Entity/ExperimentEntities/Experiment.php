@@ -235,16 +235,6 @@ class Experiment implements IdentifiedObject
 		return $this->inserted;
 	}
 
-	/*/**
-	 * Set inserted
-	 * @return Experiment
-	 */
-	/*public function setInserted(): Experiment
-	{
-		$this->inserted = new DateTimeJson();
-		return $this;
-	}*/
-
 
     /**
      * @param Bioquantity $bioquantity
