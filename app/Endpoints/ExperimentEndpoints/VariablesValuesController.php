@@ -56,6 +56,7 @@ final class VariablesValuesController extends RepositoryController
                         'id' => $variable->getId(),
                         'name' => $variable->getName(),
                         'code' => $variable->getCode(),
+                        'type' => $variable->getType(),
                         'values' => $variable->getValues()->map(function (ExperimentValues $val){
                             return [
                                 'time' => $val->getTime(),
