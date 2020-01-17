@@ -224,6 +224,7 @@ return function(App $app) {
     (new RouteHelper)
         ->setRoute(Ctl\DeviceController::class, '/devices')
         ->register();
+    (new RouteHelper())
 		->setRoute(Ctl\UserController::class, '/users')
 		->register();
 	(new RouteHelper)
