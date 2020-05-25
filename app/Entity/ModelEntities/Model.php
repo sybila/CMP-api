@@ -41,6 +41,12 @@ class Model implements IdentifiedObject
 	private $status;
 
 	/**
+     * @var string
+     * @ORM\Column (type="string")
+     */
+	private $origin;
+
+	/**
 	 * @var ArrayCollection
 	 * @ORM\OneToMany(targetEntity="ModelCompartment", mappedBy="modelId")
 	 */
@@ -182,6 +188,22 @@ class Model implements IdentifiedObject
 		return $this;
 	}
 
+    /**
+     * @return string
+     */
+    public function getOrigin(): string
+    {
+        return $this->origin;
+    }
+
+    /**
+     * @param string $origin
+     */
+    public function setOrigin(string $origin): void
+    {
+        $this->origin = $origin;
+    }
+
 	/**
 	 * @return ModelCompartment[]|Collection
 	 */
@@ -263,6 +285,7 @@ class Model implements IdentifiedObject
     {
         return $this->experiments;
     }
+
 
     /**
      * @param Experiment $experiment

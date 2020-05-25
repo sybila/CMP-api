@@ -4,6 +4,8 @@ namespace App\Controllers;
 
 use App\Entity\IdentifiedObject;
 use App\Entity\Repositories\IEndpointRepository;
+use App\Exceptions\EmptyArraySelection;
+use App\Exceptions\EmptySelectionException;
 use App\Exceptions\InternalErrorException;
 use App\Exceptions\NonExistingObjectException;
 use App\Helpers\ArgumentParser;
@@ -59,7 +61,16 @@ abstract class RepositoryController extends AbstractController
 
 	protected function getFilter(ArgumentParser $args): array
 	{
-		return [];
+        $filter = [];
+
+        if ($args->hasKey('filter'))
+        {
+            foreach ($args->getArray('filter') as $by => $expr)
+            {
+                $filter[$by] = $expr;
+            }
+        }
+        return $filter;
 	}
 
 
@@ -73,9 +84,11 @@ abstract class RepositoryController extends AbstractController
 	public function read(Request $request, Response $response, ArgumentParser $args)
 	{
 		$this->runEvents($this->beforeRequest, $request, $response, $args);
-
 		$filter = static::getFilter($args);
 		$numResults = $this->repository->getNumResults($filter);
+		if (!$numResults) {
+		    throw new EmptyArraySelection($filter);
+        }
 		$limit = static::getPaginationData($args, $numResults);
 		$response = $response->withHeader('X-Count', $numResults);
 		$response = $response->withHeader('X-Pages', $limit['pages']);

@@ -7,7 +7,6 @@ use App\Helpers\ArgumentParser;
 
 trait SortableController
 {
-	abstract protected static function getAllowedSort(): array;
 	protected static function getSort(ArgumentParser $args): array
 	{
 		$order = [];
@@ -24,7 +23,7 @@ trait SortableController
 				if ($how !== 'ASC' && $how !== 'DESC')
 					throw new InvalidSortFieldException('ascdesc');
 
-				if (!in_array($by, self::getAllowedSort()))
+				if (!in_array($by, static::getAllowedSort()))
 					throw new InvalidSortFieldException($by);
 
 				$order[$by] = $how;
@@ -33,4 +32,5 @@ trait SortableController
 
 		return $order;
 	}
+    abstract protected static function getAllowedSort(): array;
 }

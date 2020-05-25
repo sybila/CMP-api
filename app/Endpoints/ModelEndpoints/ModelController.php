@@ -43,9 +43,14 @@ final class ModelController extends SBaseController
 		$this->modelRepository = $c->get(ModelRepository::class);
 	}
 
+    protected static function getAlias(): string
+    {
+        return 'm';
+    }
+
 	protected static function getAllowedSort(): array
 	{
-		return ['id, name, userId, approvedId, status'];
+		return ['id', 'name', 'userId', 'approvedId', 'status', 'origin'];
 	}
 
 	protected function getData(IdentifiedObject $model): array
@@ -57,6 +62,7 @@ final class ModelController extends SBaseController
 			'approvedId' => $model->getApprovedId(),
 			'description' => $model->getDescription(),
 			'status' => (string)$model->getStatus(),
+			'origin' => $model->getOrigin(),
 			'compartments' => $model->getCompartments()->map(function (ModelCompartment $compartment) {
 				return ['id' => $compartment->getId(), 'name' => $compartment->getName()];
 			})->toArray(),
@@ -79,7 +85,7 @@ final class ModelController extends SBaseController
 				return ['id' => $reaction->getId(), 'name' => $reaction->getName()];
 			})->toArray(),
 			'rules' => $model->getRules()->map(function (ModelRule $rule) {
-				return ['id' => $rule->getId(), 'equation' => $rule->getEquation()];
+			    return ['id' => $rule->getId(), 'equation' => $rule->getEquation()];
 			})->toArray(),
 			'unitDefinitions' => $model->getUnitDefinitions()->map(function (ModelUnitDefinition $unitDefinition) {
 				return ['id' => $unitDefinition->getId(), 'name' => $unitDefinition->getName()];
@@ -95,6 +101,7 @@ final class ModelController extends SBaseController
 		!$data->hasKey('approvedId') ?: $model->setApprovedId($data->getString('approvedId'));
 		!$data->hasKey('description') ?: $model->setDescription($data->getString('description'));
 		!$data->hasKey('status') ?: $model->setStatus($data->getString('status'));
+		!$data->hasKey('origin') ?: $model->setOrigin($data->getString('origin'));
 	}
 
 	protected function createObject(ArgumentParser $body): IdentifiedObject
@@ -128,11 +135,11 @@ final class ModelController extends SBaseController
 		if (!$model->getInitialAssignments()->isEmpty())
 			throw new DependentResourcesBoundException('initialAssignments');
 		if (!$model->getParameters()->isEmpty())
-			throw new DependentResourcesBoundException('constraints');
+			throw new DependentResourcesBoundException('parameters');
 		if (!$model->getRules()->isEmpty())
-			throw new DependentResourcesBoundException('reaction');
-		if (!$model->getReactions()->isEmpty())
 			throw new DependentResourcesBoundException('rules');
+		if (!$model->getReactions()->isEmpty())
+			throw new DependentResourcesBoundException('reactions');
 		if (!$model->getUnitDefinitions()->isEmpty())
 			throw new DependentResourcesBoundException('unitDefinitions');
 		return parent::delete($request, $response, $args);

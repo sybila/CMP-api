@@ -29,8 +29,8 @@ class ModelRule implements IdentifiedObject
 	use SBase;
 
 	/**
-	 * @var integer
-	 * @ORM\Column(type="integer", name="model_id")
+     * @ORM\ManyToOne(targetEntity="Model", inversedBy="modelRules")
+	 * @ORM\JoinColumn(name="model_id", referencedColumnName="id")
 	 */
 	private $modelId;
 
@@ -77,7 +77,7 @@ class ModelRule implements IdentifiedObject
 	 * Get modelId
 	 * @return integer
 	 */
-	public function getModelId(): ?int
+	public function getModelId() //: ?int
 	{
 		return $this->modelId;
 	}

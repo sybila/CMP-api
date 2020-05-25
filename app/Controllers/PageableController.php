@@ -13,7 +13,6 @@ trait PageableController
 	protected static function getPaginationData(ArgumentParser $args, int $resultCount): array
 	{
 		self::validate($args, self::getPaginationValidator());
-
 		if ($args->hasKey('take'))
 		{
 			$offset = 0;

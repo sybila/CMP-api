@@ -129,6 +129,23 @@ class InvalidSortFieldException extends ApiException
 	}
 }
 
+class EmptyArraySelection extends ApiException
+{
+    const CODE = 703;
+    public function __construct(array $filter, ?Throwable $previous = null)
+    {
+        $filters = '';
+        foreach ($filter as $by=>$expr) {
+            if ($filters != null) {
+                $filters .= ', ';
+            }
+            $filters .= "{$by} LIKE {$expr}";
+        }
+        parent::__construct($previous)
+            ->setMessage('Filter (%s) returns empty list of objects.', $filters);
+    }
+}
+
 class InvalidEnumValueException extends ApiException
 {
 	const CODE = 706;
