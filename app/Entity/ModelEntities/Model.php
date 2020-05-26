@@ -191,7 +191,7 @@ class Model implements IdentifiedObject
     /**
      * @return string
      */
-    public function getOrigin(): string
+    public function getOrigin(): ?string
     {
         return $this->origin;
     }
