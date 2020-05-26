@@ -50,7 +50,7 @@ final class ModelController extends SBaseController
 
 	protected static function getAllowedSort(): array
 	{
-		return ['id', 'name', 'userId', 'approvedId', 'status', 'origin'];
+		return ['id', 'name', 'userId', 'approvedId', 'status'];
 	}
 
 	protected function getData(IdentifiedObject $model): array
@@ -62,7 +62,7 @@ final class ModelController extends SBaseController
 			'approvedId' => $model->getApprovedId(),
 			'description' => $model->getDescription(),
 			'status' => (string)$model->getStatus(),
-			'origin' => $model->getOrigin(),
+			//'origin' => $model->getOrigin(),
 			'compartments' => $model->getCompartments()->map(function (ModelCompartment $compartment) {
 				return ['id' => $compartment->getId(), 'name' => $compartment->getName()];
 			})->toArray(),

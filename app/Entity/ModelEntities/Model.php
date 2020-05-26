@@ -198,8 +198,9 @@ class Model implements IdentifiedObject
 
     /**
      * @param string $origin
+     * @return Model
      */
-    public function setOrigin(string $origin): void
+    public function setOrigin(string $origin): Model
     {
         $this->origin = $origin;
     }
