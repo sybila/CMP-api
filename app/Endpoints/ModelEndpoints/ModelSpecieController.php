@@ -39,6 +39,11 @@ final class ModelSpecieController extends ParentedSBaseController
 		$this->specieRepository = $c->get(ModelSpecieRepository::class);
 	}
 
+    protected static function getAlias(): string
+    {
+        return 's';
+    }
+
 	protected static function getAllowedSort(): array
 	{
 		return ['id', 'name'];

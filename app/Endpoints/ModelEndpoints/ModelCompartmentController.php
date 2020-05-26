@@ -40,6 +40,11 @@ final class ModelCompartmentController extends ParentedSBaseController
 		$this->compartmentRepository = $c->get(ModelCompartmentRepository::class);
 	}
 
+    protected static function getAlias(): string
+    {
+        return 'c';
+    }
+
 	protected static function getAllowedSort(): array
 	{
 		return ['id', 'name'];

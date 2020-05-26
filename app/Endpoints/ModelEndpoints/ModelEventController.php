@@ -39,6 +39,11 @@ final class ModelEventController extends ParentedSBaseController
 		$this->eventRepository = $c->get(ModelCompartmentRepository::class);
 	}
 
+	protected static function getAlias(): string
+    {
+        return 'e';
+    }
+
 	protected static function getAllowedSort(): array
 	{
 		return ['id', 'name'];

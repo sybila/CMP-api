@@ -62,16 +62,18 @@ abstract class RepositoryController extends AbstractController
 	protected function getFilter(ArgumentParser $args): array
 	{
         $filter = [];
-
+        $alias = static::getAlias();
         if ($args->hasKey('filter'))
         {
             foreach ($args->getArray('filter') as $by => $expr)
             {
+                $by = $alias . "." . $by;
                 $filter[$by] = $expr;
             }
         }
         return $filter;
 	}
+    abstract protected static function getAlias(): string;
 
 
 	public function __construct(Container $c)

@@ -5,6 +5,7 @@ namespace App\Entity\Repositories;
 use App\Entity\ModelSpecie;
 use App\Entity\ModelCompartment;
 use App\Entity\IdentifiedObject;
+use App\Helpers\QueryRepositoryHelper;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 
@@ -45,13 +46,15 @@ class ModelSpecieRepository implements IDependentSBaseRepository
 		return ((int)$this->buildListQuery($filter)
 			->select('COUNT(s)')
 			->getQuery()
-			->getScalarResult());
+			->getSingleScalarResult());
 	}
 
 	public function getList(array $filter, array $sort, array $limit): array
 	{
 		$query = $this->buildListQuery($filter)
 			->select('s.id, s.name, s.sbmlId, s.sboTerm, s.notes, s.annotation, s.initialExpression, s.hasOnlySubstanceUnits, s.isConstant, s.boundaryCondition');
+        $query = QueryRepositoryHelper::addFilterPaginationSortDql($query, $filter, $sort, $limit);
+
 		return $query->getQuery()->getArrayResult();
 	}
 

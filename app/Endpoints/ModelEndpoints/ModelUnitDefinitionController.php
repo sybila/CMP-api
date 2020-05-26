@@ -38,6 +38,10 @@ final class ModelUnitDefinitionController extends ParentedSBaseController
 		$this->unitDefinitionRepository = $c->get(ModelUnitDefinitionRepository::class);
 	}
 
+    protected static function getAlias(): string
+    {
+        return 'u';
+    }
 	protected static function getAllowedSort(): array
 	{
 		return ['id', 'name', 'symbol'];

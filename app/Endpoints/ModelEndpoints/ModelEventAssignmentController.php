@@ -36,6 +36,11 @@ final class ModelEventAssignmentController extends ParentedSBaseController
 		$this->eventAssignmentRepository = $c->get(ModelEventAssignmentRepository::class);
 	}
 
+    protected static function getAlias(): string
+    {
+        return 'e';
+    }
+
 	protected static function getAllowedSort(): array
 	{
 		return ['id', 'name'];

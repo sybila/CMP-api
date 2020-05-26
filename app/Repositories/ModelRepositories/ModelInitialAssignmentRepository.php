@@ -5,6 +5,7 @@ namespace App\Entity\Repositories;
 use App\Entity\Model;
 use App\Entity\IdentifiedObject;
 use App\Entity\ModelInitialAssignment;
+use App\Helpers\QueryRepositoryHelper;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 
@@ -37,13 +38,15 @@ class ModelInitialAssignmentRepository implements IDependentSBaseRepository
 		return ((int)$this->buildListQuery($filter)
 			->select('COUNT(i)')
 			->getQuery()
-			->getScalarResult());
+			->getSingleScalarResult());
 	}
 
 	public function getList(array $filter, array $sort, array $limit): array
 	{
 		$query = $this->buildListQuery($filter)
 			->select('i.id, i.name, i.sbmlId, i.sboTerm, i.notes, i.annotation, i.formula');
+        $query = QueryRepositoryHelper::addFilterPaginationSortDql($query, $filter, $sort, $limit);
+
 		return $query->getQuery()->getArrayResult();
 	}
 

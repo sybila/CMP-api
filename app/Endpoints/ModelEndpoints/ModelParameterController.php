@@ -47,6 +47,11 @@ abstract class ModelParameterController extends ParentedSBaseController
 		$this->parameterRepository = $c->get(ModelParameterRepository::class);
 	}
 
+    protected static function getAlias(): string
+    {
+        return 'p';
+    }
+
 	protected static function getAllowedSort(): array
 	{
 		return ['id, name'];

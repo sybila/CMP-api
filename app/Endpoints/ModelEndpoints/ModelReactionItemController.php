@@ -44,6 +44,11 @@ abstract class ModelReactionItemController extends ParentedSBaseController
 		$this->reactionItemRepository = $c->get(ModelReactionItemRepository::class);
 	}
 
+	protected static function getAlias(): string
+    {
+        return 'r';
+    }
+
 	protected static function getAllowedSort(): array
 	{
 		return ['id', 'name'];

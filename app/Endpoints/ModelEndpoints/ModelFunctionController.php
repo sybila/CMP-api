@@ -31,6 +31,11 @@ final class ModelFunctionController extends ParentedSBaseController
 		$this->functionRepository = $c->get(ModelFunctionRepository::class);
 	}
 
+    protected static function getAlias(): string
+    {
+        return 'f';
+    }
+
 	protected static function getAllowedSort(): array
 	{
 		return ['id', 'name'];

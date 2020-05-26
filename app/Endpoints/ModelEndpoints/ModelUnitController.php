@@ -42,6 +42,11 @@ final class ModelUnitController extends SBaseController
 		$this->modelUnitRepository = $c->get(ModelUnitRepository::class);
 	}
 
+	protected static function getAlias(): string
+    {
+        return 'u';
+    }
+
 	protected static function getAllowedSort(): array
 	{
 		return ['id, name'];

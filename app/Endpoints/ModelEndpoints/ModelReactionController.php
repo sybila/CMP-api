@@ -39,6 +39,11 @@ final class ModelReactionController extends ParentedSBaseController
 		$this->reactionRepository = $c->get(ModelReactionRepository::class);
 	}
 
+    protected static function getAlias(): string
+    {
+        return 'r';
+    }
+
 	protected static function getAllowedSort(): array
 	{
 		return ['id', 'name'];

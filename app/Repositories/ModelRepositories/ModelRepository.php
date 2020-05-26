@@ -3,6 +3,7 @@
 namespace App\Entity\Repositories;
 
 use App\Entity\Model;
+use App\Helpers\QueryRepositoryHelper;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 
@@ -39,22 +40,8 @@ class ModelRepository implements IEndpointRepository
 	{
 		$query = $this->buildListQuery($filter)
 			->select('m.id, m.name, m.sbmlId, m.sboTerm, m.notes, m.annotation, m.userId, m.approvedId, m.status');
-		if ($limit['limit']){
-		    $query = $query->setMaxResults($limit['limit']);
-        }
-		if($limit['offset']){
-		    $query = $query->setFirstResult($limit['offset']);
-        }
-        if (!empty($sort)) {
-            $sortBy = '';
-            foreach ($sort as $by=>$how) {
-                if ($sortBy != null) {
-                    $sortBy .= ', ';
-                }
-                $sortBy .= "m.{$by} {$how}";
-            }
-            $query = $query->add('orderBy', $sortBy);
-        }
+        $query = QueryRepositoryHelper::addFilterPaginationSortDql($query, $filter, $sort, $limit);
+
 		return $query->getQuery()->getArrayResult();
 	}
 
@@ -62,13 +49,6 @@ class ModelRepository implements IEndpointRepository
 	{
 		$query = $this->em->createQueryBuilder()
 			->from(Model::class, 'm');
-		if (!empty($filter)) {
-		    foreach ($filter as $by=>$expr) {
-                $query = $query
-                    ->andWhere("m.$by LIKE '%$expr%'");
-		    }
-		    //TODO "did you mean {bla bla} (closest similar name, iterate via all models, do similar_text())"
-		}
 		return $query;
 	}
 

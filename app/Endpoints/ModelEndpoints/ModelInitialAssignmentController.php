@@ -35,6 +35,11 @@ final class ModelInitialAssignmentController extends ParentedSBaseController
 		$this->initialAssignmentRepository = $c->get(ModelInitialAssignmentRepository::class);
 	}
 
+    protected static function getAlias(): string
+    {
+        return 'i';
+    }
+
 	protected static function getAllowedSort(): array
 	{
 		return ['id', 'name'];

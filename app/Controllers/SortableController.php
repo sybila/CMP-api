@@ -10,6 +10,8 @@ trait SortableController
 	protected static function getSort(ArgumentParser $args): array
 	{
 		$order = [];
+		$fullSortQuery = '';
+		$alias = static::getAlias();
 
 		if ($args->hasKey('sort'))
 		{
@@ -26,11 +28,20 @@ trait SortableController
 				if (!in_array($by, static::getAllowedSort()))
 					throw new InvalidSortFieldException($by);
 
-				$order[$by] = $how;
+                $order[$by] = $how;
+
+				if ($fullSortQuery != null){
+				    $fullSortQuery .= ', ';
+                }
+				$fullSortQuery .= $alias . ".{$by} {$how}";
 			}
-		}
+			if (!empty($order)){
+			    $order['fullSortQuery'] = $fullSortQuery;
+			}
+        }
 
 		return $order;
 	}
     abstract protected static function getAllowedSort(): array;
+	abstract protected static function getAlias(): string;
 }

@@ -9,3 +9,4 @@ settings.local.php
 /www/docs
 /config/*.priv
 /config/*.pub
+.htaccess

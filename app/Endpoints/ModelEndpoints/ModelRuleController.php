@@ -39,6 +39,11 @@ abstract class ModelRuleController extends ParentedSBaseController
 		$this->modelRuleRepository = $c->get(ModelRuleRepository::class);
 	}
 
+    protected static function getAlias(): string
+    {
+        return 'r';
+    }
+
 	protected static function getAllowedSort(): array
 	{
 		return ['id'];

@@ -5,6 +5,7 @@ namespace App\Entity\Repositories;
 use App\Entity\Model;
 use App\Entity\ModelFunctionDefinition;
 use App\Entity\IdentifiedObject;
+use App\Helpers\QueryRepositoryHelper;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 
@@ -40,13 +41,15 @@ class ModelFunctionDefinitionRepository implements IDependentSBaseRepository
 		return ((int)$this->buildListQuery($filter)
 			->select('COUNT(f)')
 			->getQuery()
-			->getScalarResult());
+			->getSingleScalarResult());
 	}
 
 	public function getList(array $filter, array $sort, array $limit): array
 	{
 		$query = $this->buildListQuery($filter)
 			->select('f.id, f.name, f.sbmlId, f.sboTerm, f.notes, f.annotation, f.formula');
+        $query = QueryRepositoryHelper::addFilterPaginationSortDql($query, $filter, $sort, $limit);
+
 		return $query->getQuery()->getArrayResult();
 	}
 

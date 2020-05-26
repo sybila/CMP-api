@@ -5,6 +5,7 @@ namespace App\Entity\Repositories;
 use App\Entity\Model;
 use App\Entity\ModelCompartment;
 use App\Entity\IdentifiedObject;
+use App\Helpers\QueryRepositoryHelper;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 
@@ -40,14 +41,16 @@ class ModelCompartmentRepository implements IDependentSBaseRepository
 		return ((int)$this->buildListQuery($filter)
 			->select('COUNT(c)')
 			->getQuery()
-			->getScalarResult());
+			->getSingleScalarResult());
 	}
 
 	public function getList(array $filter, array $sort, array $limit): array
 	{
 		$query = $this->buildListQuery($filter)
 			->select('c.id, c.name, c.sbmlId, c.sboTerm, c.notes, c.annotation, c.spatialDimensions, c.size, c.isConstant');
-		return $query->getQuery()->getArrayResult();
+        $query = QueryRepositoryHelper::addFilterPaginationSortDql($query, $filter, $sort, $limit);
+
+        return $query->getQuery()->getArrayResult();
 	}
 
 	public function getParent(): IdentifiedObject

@@ -6,6 +6,7 @@ use App\Entity\ModelReaction;
 use App\Entity\ModelSpecie;
 use App\Entity\ModelReactionItem;
 use App\Entity\IdentifiedObject;
+use App\Helpers\QueryRepositoryHelper;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 
@@ -46,13 +47,14 @@ class ModelReactionItemRepository implements IDependentSBaseRepository
 		return ((int)$this->buildListQuery($filter)
 			->select('COUNT(r)')
 			->getQuery()
-			->getScalarResult());
+			->getSingleScalarResult());
 	}
 
 	public function getList(array $filter, array $sort, array $limit): array
 	{
 		$query = $this->buildListQuery($filter)
 			->select('r.id, r.name, r.sbmlId, r.sboTerm, r.notes, r.annotation, r.type, r.value, r.stoichiometry');
+        $query = QueryRepositoryHelper::addFilterPaginationSortDql($query, $filter, $sort, $limit);
 
 		return $query->getQuery()->getArrayResult();
 	}

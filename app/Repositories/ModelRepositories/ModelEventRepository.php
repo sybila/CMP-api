@@ -5,6 +5,7 @@ namespace App\Entity\Repositories;
 use App\Entity\Model;
 use App\Entity\ModelEvent;
 use App\Entity\IdentifiedObject;
+use App\Helpers\QueryRepositoryHelper;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 
@@ -37,13 +38,14 @@ class ModelEventRepository implements IDependentSBaseRepository
 		return ((int)$this->buildListQuery($filter)
 			->select('COUNT(e)')
 			->getQuery()
-			->getScalarResult());
+			->getSingleScalarResult());
 	}
 
 	public function getList(array $filter, array $sort, array $limit): array
 	{
 		$query = $this->buildListQuery($filter)
 			->select('e.id, e.name, e.sbmlId, e.sboTerm, e.notes, e.annotation, e.delay, e.trigger, e.priority');
+        $query = QueryRepositoryHelper::addFilterPaginationSortDql($query, $filter, $sort, $limit);
 
 		return $query->getQuery()->getArrayResult();
 	}
