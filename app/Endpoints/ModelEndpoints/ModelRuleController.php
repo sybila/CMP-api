@@ -54,7 +54,7 @@ abstract class ModelRuleController extends ParentedSBaseController
 		/** @var ModelRule $rule */
 		$sBaseData = parent::getData($rule);
 		return array_merge($sBaseData, [
-			'modelId' => $rule->getModelId(),
+			'modelId' => $rule->getModelId()->getId(),
 		]);
 	}
 

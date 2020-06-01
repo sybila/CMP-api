@@ -10,6 +10,10 @@ types:
     minimum: 1
     required: true
     example: 15
+  IdentifierName:
+    properties:
+      id: Identifier
+      name: string
   UrlIdentifierList:
     description: Multiple Identifiers separated by comma
     type: string
@@ -19,6 +23,10 @@ types:
   IdentifierList:
     type: array
     items: integer
+    uniqueItems: true
+  IdentifierNameList:
+    type: array
+    items: IdentifierName
     uniqueItems: true
   OptionalIdentifier:
     type: integer
@@ -250,272 +258,246 @@ types:
       code:
         type: string
         description: Database code to be used within API requests/responses
+
+##Model specification starts here
+#First, general types definitions
   SbmlId:
     type: string
-    descrtiption: String Identifier for SBML document
+    description: String Identifier for SBML document
   ModelStatus:
     type: string
     enum: ["new", "TBA", "active"]
-  ListModel:
+  Formula:
+    type: string
+    description: In MathML format
+  SBaseEntity:
     properties:
       id: Identifier
-      userId: Identifier
-      approvedId: OptionalIdentifier
+      sbmlId:
+        type: string
+        description: String Identifier for SBML document
       name:
         type: string
-        description: Name of the model
-      status: ModelStatus
+        required: true
+      metaId:
+        type: string
+        description: TBA
+      sboTerm:
+        type: string
+        description: TBA
+      annotation:
+        type: string
+        description: TBA
+      notes:
+        types: string
+        description: TBA
+#Following types are more specific. They follow the pattern of a couple:
+#1. Entity - type definition - derived from {entity}Repository
+#2. EntityDetail - type definition - derived from {entity}Controller
   Model:
-    type: ListModel
+    type: SBaseEntity
     properties:
-      sbmlId: SbmlId
-      description: string
+      userId: Identifier
+      approvedId: OptionalIdentifier
+      status: ModelStatus
+  ModelDetail:
+    type: Model
+    properties:
       compartments:
-        type: IdentifierList
-        description: List of compartment IDs
-  ListModelCompartment:
+        type: IdentifierNameList
+      constraints:
+        type: array
+        items:
+          properties:
+            id: Identifier
+            formula: Formula
+      events:
+        type: IdentifierNameList
+      functionDefinitions:
+        type: IdentifierNameList
+      initialAssignments:
+        type: array
+        items:
+          properties:
+            id: Identifier
+            formula: Formula
+      parameters:
+        type: IdentifierNameList
+      reactions:
+        type: IdentifierNameList
+      rules:
+        type: array
+        items:
+          properties:
+            id: Identifier
+            equation: Formula
+      unitDefinitions:
+        type: IdentifierNameList
+
+  ModelCompartment:
+    type: SBaseEntity
     properties:
-        id: Identifier
-        modelId: Identifier
-        name: string
         spatialDimensions: integer
         size: integer
         isConstant: boolean
-  ModelCompartment:
-    type: ListModelCompartment
+  ModelCompartmentDetail:
+    type: ModelCompartment
     properties:
       species:
-        type: IdentifierList
-        description: List of specie IDs
+        type: IdentifierNameList
       reactions:
-        type: IdentifierList
-        descripiton: List of reaction IDs
+        type: IdentifierNameList
+      rules:
+        type: array
+        items:
+          properties:
+            id: Identifier
+            equation: Formula
       unitDefinitions:
-        type: IdentifierList
-        description: List of unit IDs
-  ListSpecie:
+        type: IdentifierNameList
+
+  ModelSpecie:
+    type: SBaseEntity
     properties:
-      id: Identifier
-      compartmentId: Identifier
-      modelId: Identifier
-      name: string
-      equationType: string
       initialExpression: string
-      boundaryCondition: string
       hasOnlySubstanceUnits: boolean
       isConstant: boolean
-  Specie:
-    type: ListSpecie
+      boundaryCondition: string
+  ModelSpecieDetail:
+    type: ModelSpecie
     properties:
       reactionItems:
-        type: IdentifierList
-        description: List of reactionItem IDs
-  ListReaction:
+        type: IdentifierNameList
+      rules:
+        type: array
+        items:
+          properties:
+            id: Identifier
+            equation: Formula
+
+  ModelReactionItem:
+    type: SBaseEntity
     properties:
-      id: Identifier
+      type: string
+      value: number
+      stoichiometry: number
+  ModelReactionItemDetail:
+    type: SBaseEntity
+    properties:
+      reactionId: Identifier
+      specieId: OptionalIdentifier
+      parameterId: OptionalIdentifier
+
+  ModelReaction:
+    type: SBaseEntity
+    properties:
+      isReversible: integer
+      rate: Formula
+  ModelReactionDetail:
+    type: ModelReaction
+    properties:
       modelId: Identifier
-      commpartmentId: integer
-      name: string
-      reversible: boolean
-      fast: boolean
-  Reaction:
-    properties:
+      compartmentId: Identifier
       reactionItems:
-        type: IdentifierList
-        description: List of reactionItem IDs
+        type: IdentifierNameList
       functions:
-        type: IdentifierList
-        description: List of function IDs
-  ListFunction:
+        type: IdentifierNameList
+      parameters:
+        type: IdentifierNameList
+
+  ModelFunction:
     properties:
       id: Identifier
       reactionId: Identifier
       name: string
       formula: string
-  Function:
-    type: ListFunction
-  ListKineticLaw:
+  ModelFunctionDetail:
+    type: ModelFunction
+
+  ModelRule:
     properties:
       id: Identifier
-      reactionItemId: Identifier
-      equation: string
-  KineticLaw:
-    type: ListKineticLaw
-ListModel:
-    type: SBase
-    properties:
-      userId: Identifier
-      approvedId: OptionalIdentifier
-      status: ModelStatus
-      origin: ModelOrigin
-  Model:
-    type: ListModel
-    properties:
-      compartments:
-        type: IdentifierList
-        description: List of compartment IDs
-      constraints:
-        type: IdentifierList
-        description: List of constraint IDs
-      events:
-        type: IdentifierList
-        description: List of event IDs
-      functionDefinitions:
-        type: IdentifierList
-        description: List of function definition IDs
-      initialAssignments:
-        type: IdentifierList
-        description: List of initial assignment IDs
-      parameters:
-        type: IdentifierList
-        description: List of parameter IDs
-      reactions:
-        type: IdentifierList
-        description: List of reaction IDs
-      rules:
-        type: IdentifierList
-        description: List of rule IDs
-      unitDefinitions:
-        type: IdentifierList
-        description: List of unit definition IDs
-  ListModelCompartment:
-    type: SBase
-    properties:
-        modelId: Identifier
-        spatialDimensions: integer
-        size: integer
-        isConstant: boolean
-  ModelCompartment:
-    type: ListModelCompartment
-    properties:
-      species:
-        type: IdentifierList
-        description: List of specie IDs
-      reactions:
-        type: IdentifierList
-        descripiton: List of reaction IDs
-      rules:
-        type: IdentifierList
-        description: List of rule IDs
-      unitDefinitions:
-        type: IdentifierList
-        description: List of unit IDs
-  ListModelSpecie:
-    type: SBase
-    properties:
-      compartmentId: Identifier
       modelId: Identifier
-      initialExpression: string
-      boundaryCondition: string
-      hasOnlySubstanceUnits: boolean
-      isConstant: boolean
-  ModelSpecie:
-    type: ListModelSpecie
-    properties:
-      reactionItems:
-        type: IdentifierList
-        description: List of reactionItem IDs
-      rules:
-        type: IdentifierList
-        description: List of rule IDs
-  ListModelReaction:
-    type: SBase
+  ModelRuleDetail:
+    type: SBaseEntity
     properties:
       modelId: Identifier
-      commpartmentId: integer
-      rate: string
-      reversible: boolean
-  ModelReaction:
-    properties:
-      reactionItems:
-        type: IdentifierList
-        description: List of reactionItem IDs
-  ListModelRule:
-    type: SBase
-    properties:
-      modelId: Identifier
-      specieId: OptionalIdentifier
-      compartmentId: OptionalIdentifier
-      parameterId: OptionalIdentifier
-      ruleType: string
-      equation: string
-  ModelRule:
-    type: ListModelRule
-  ListModelConstraint:
-    type: SBase
+      #specieId: OptionalIdentifier
+      #compartmentId: OptionalIdentifier
+      #parameterId: OptionalIdentifier
+      #ruleType: string
+      #equation: string
+
+  ModelConstraint:
+    type: SBaseEntity
     properties:
       modelId: Identifier
       message: string
       formula: string
-  ModelConstraint:
-    type: ListModelConstraint
-  ListModelUnit:
-    type: SBase
-    properties:
-      baseUnitId: OptionalIdentifier
-      symbol: string
-      exponent: number
-      multiplier: number
-  ModelUnit:
-    type: ListModelUnit
-    properties:
-      definitions:
-        type: IdentifierList
-        description: List of unit definition IDs
-  ListModelUnitDefinition:
-    type: SBase
-  ModelUnitDefinition:
-    type: ListModelUnitDefinition
-    properties:
-      units:
-        type: IdentifierList
-        description: List of unit IDs
-  ListModelEvent:
-    type: SBase
+  ModelConstraintDetail:
+    type: ModelConstraint
+
+  ModelEvent:
+    type: SBaseEntity
     properties:
       modelId: Identifier
       trigger: string
       delay: string
       priority: string
-      evaluaterOnTrigger: integer
-  ModelEvent:
-    type: ListModelEvent
+  ModelEventDetail:
+    type: ModelEvent
     properties:
+      evaluateOnTrigger: boolean
       eventAssignments:
-        type: IdentifierList
-        description: List of eventAssignment IDs
-  ListModelEventAssignment:
-    type: SBase
-    properties:
-      eventId: Identifier
-      formula: string
+        type: array
+        items:
+          properties:
+            id: Identifier
+            formula: Formula
+
   ModelEventAssignment:
-    type: ListModelEventAssignment
-  ListModelInitialAssignment:
-    type: SBase
+    type: SBaseEntity
     properties:
-      modelId: Identifier
       formula: string
+  ModelEventAssignmentDetail:
+    type: ModelEventAssignment
+
   ModelInitialAssignment:
-    type: ListModelInitialAssignment
-  ListModelFunctionDefinition:
-    type: SBase
+    type: SBaseEntity
+    properties:
+      #modelId: Identifier
+      formula: string
+  ModelInitialAssignmentDetail:
+    type: ModelInitialAssignment
+
+  ModelFunctionDefinition:
     properties:
       modelId: Identifier
       formula: string
-  ModelFunctionDefinition:
-    type: ListModelFunctionDefinition
-  ListModelReactionItem:
-    type: SBase
+  ModelFunctionDefinitionDetail:
+    type: ModelFunctionDefinition
+
+  ModelUnitDefinition:
+    type: SBaseEntity
     properties:
-      reactionId: Identifier
-      specieId: OptionalIdentifier
-      parameterId: OptionalIdentifier
-      type: string
-      value: number
-      stoichiometry: number
-  ModelReactionItem:
-    type: ListModelReactionItem
+      symbol: string
+      compartmentId: Identifier
+  ModelUnitDefinitionDetail:
+    type: ModelUnitDefinition
+    properties:
+      units: array
+
+  Unit:
+    type: SBaseEntity
+    properties:
+      baseUnitId: OptionalIdentifier
+      symbol: string
+      exponent: number
+      multiplier: number
+  UnitDetail:
+    type: Unit
+
+
 
 traits:
   Collection:
@@ -691,10 +673,19 @@ traits:
         default: '[id]=asc'
         description: |
           query parameter array where keys are sort keys and values are direction (asc/desc),
-          possible keys: <<keys>>
+          <br> possible keys: <<keys>>
         type: string
         required: false
         example: 'endpoint?sort[key1]=asc&sort[key2]=desc'
+  Filterable:
+    queryParameters:
+      filter:
+        description: |
+          query parameter array where keys are filter keys and values are expressions to search for,
+          <br> possible keys: any of the attributes
+        type: string
+        required: false
+        example: 'endpoint?filter[key1]=ABC&filter[key2]=123'
   Pageable:
     queryParameters:
       perPage:
@@ -734,6 +725,46 @@ traits:
             type: integer
 
 resourceTypes:
+  _object:
+    get:
+      description: Get detail of <<resourcePathName|!singularize>>
+      responses:
+        200:
+          body:
+            application/json:
+              type: object
+              properties:
+                status: ResponseStatus
+                code: ResponseCode
+                data:
+                  description: <i>Known discrepancy</i> - this array always contains only one item
+                  type: array
+                  items: <<type>>
+    put:
+      is: [Update: {type: ModelCompartment}]
+    delete:
+      is: [Delete]
+
+  _objectList:
+    usage: Use this resourceType to represent any collection of items
+    description: Get all <<resourcePathName|!pluralize>>
+    get:
+      description: Retrieve all <<resourcePathName|!pluralize>>
+      responses:
+        200:
+          body:
+            application/json:
+              type: object
+              properties:
+                status: ResponseStatus
+                code: ResponseCode
+                data:
+                  type: array
+                  items: <<type>>
+      is: [Sortable: {keys: <<sortBy>>}, Filterable, Pageable, Limitable]
+    post:
+      is: [Insert: {type: <<type>>Detail}]
+
   EntityList:
     get:
       is: [Collection: {type: <<type>>}, Sortable: {keys: 'id, name, type, code'}, Pageable, Limitable]
@@ -997,170 +1028,63 @@ resourceTypes:
 # Models
 
 /models:
-  get:
-     is: [Collection: {type: ListModel}, Sortable: {keys: 'id, name, userId, approvedId, status'}]
-  post:
-    is: [Insert: {type: Model}]
+  type: {_objectList: {type: Model, "sortBy" : "id, name, userId, approvedId, status"} }
   /{id}:
-    get:
-      is: [ObjectList: {type: Model}]
-    put:
-      is: [Update: {type: Model}]
-    delete:
-      is: [Delete]
+    type: {_object: {type: ModelDetail}}
     /compartments:
-      get:
-        is: [Collection: {type: ListModelCompartment}, Sortable: {keys: 'id, name, modelId'}]
-      post:
-        is: [Insert: {type: ModelCompartment}]
+      type: {_objectList: {type: ModelCompartment, "sortBy" : 'id, name, modelId'} }
       /{id}:
-        get:
-          is: [ObjectList: {type: ModelCompartment}]
-        put:
-          is: [Update: {type: ModelCompartment}]
-        delete:
-          is: [Delete]
+        type: {_object: {type: ModelCompartmentDetail}}
         /species:
-          get:
-            is: [Collection: {type: ListModelSpecie}, Sortable: {keys: 'id, modelId'}]
-          post:
-            is: [Insert: {type: ModelSpecie}]
+          type: {_objectList: {type: ModelSpecie, "sortBy" : 'id, modelId'} }
           /{id}:
-            get:
-              is: [ObjectList: {type: ModelSpecie}]
-            put:
-              is: [Update: {type: ModelSpecie}]
-            delete:
-              is: [Delete]
+            type: {_object: {type: ModelSpecieDetail}}
             /reactionItems:
-              get:
-                is: [Collection: {type: ListModelReactionItem}]
-              post:
-                  is: [Insert: {type:  ModelReactionItem}]
+              type: {_objectList: {type: ModelReactionItem, "sortBy" : 'id, name'} }
               /{id}:
-                get:
-                  is: [ObjectList: {type:  ModelReactionItem}]
-                put:
-                  is: [Update: {type: ModelReactionItem}]
-                delete:
-                  is: [Delete]
+                type: {_object: {type: ModelReactionItemDetail}}
     /reactions:
-      get:
-        is: [Collection: {type: ListModelReaction}]
-      post:
-        is: [Insert: {type: ModelReaction}]
+      type: {_objectList: {type: ModelReaction, "sortBy" : 'id, name'} }
       /{id}:
-        get:
-          is: [ObjectList: {type: ModelReaction}]
-        put:
-          is: [Update: {type: ModelReaction}]
-        delete:
-          is: [Delete]
-      /reactionItems:
-        get:
-          is: [Collection: {type: ListModelReactionItem}]
-        post:
-            is: [Insert: {type:  ModelReactionItem}]
-        /{id}:
-          get:
-            is: [ObjectList: {type: ModelReactionItem}]
-          put:
-            is: [Update: {type: ModelReactionItem}]
-          delete:
-            is: [Delete]
+        type: {_object: {type: ModelReactionDetail}}
+        /reactionItems:
+          type: {_objectList: {type: ModelReactionItem, "sortBy" : 'id, name'} }
+          /{id}:
+            type: {_object: {type: ModelReactionItemDetail}}
+        /functions:
+          type: {_objectList: {type: ModelFunction, "sortBy" : 'id, name'}}
+          /{id}:
+            type: {_object: {type: ModelFunctionDetail}}
     /constraints:
-      get:
-        is: [Collection: {type: ListModelConstraint}, Sortable: {keys: 'id, modelId'}]
-      post:
-        is: [Insert: {type: ModelConstraint}]
+      type: {_objectList: {type: ModelConstraint, "sortBy" : 'id, name'} }
       /{id}:
-        get:
-          is: [ObjectList: {type: ModelConstraint}]
-        put:
-          is: [Update: {type: ModelConstraint}]
-        delete:
-          is: [Delete]
+        type: {_object: {type: ModelConstraintDetail}}
     /events:
-      get:
-        is: [Collection: {type: ListModelEvent}, Sortable: {keys: 'id, modelId'}]
-      post:
-        is: [Insert: {type: ModelEvent}]
+      type: {_objectList: {type: ModelEvent, "sortBy" : 'id, name'} }
       /{id}:
-        get:
-          is: [ObjectList: {type: ModelEvent}]
-        put:
-          is: [Update: {type: ModelEvent}]
-        delete:
-          is: [Delete]
+        type: {_object: {type: ModelEventDetail}}
       /eventAssignments:
-        get:
-          is: [Collection: {type: ListModelEventAssignment}, Sortable: {keys: 'id, modelId'}]
-        post:
-          is: [Insert: {type: ModelEventAssignment}]
+        type: {_objectList: {type: ModelEventAssignment, "sortBy" : 'id, name, modelId'} }
         /{id}:
-          get:
-            is: [ObjectList: {type: ModelEventAssignment}]
-          put:
-            is: [Update: {type: ModelEventAssignment}]
-          delete:
-            is: [Delete]
+          type: {_object: {type: ModelEventAssignmentDetail}}
     /initialAssignments:
-      get:
-        is: [Collection: {type: ListModelInitialAssignment}, Sortable: {keys: 'id, modelId'}]
-      post:
-        is: [Insert: {type: ModelInitialAssignment}]
+      type: {_objectList: {type: ModelInitialAssignment, "sortBy" : 'id, modelId'} }
       /{id}:
-        get:
-         is: [ObjectList: {type: ModelInitialAssignment}]
-        put:
-          is: [Update: {type: ModelInitialAssignment}]
-        delete:
-          is: [Delete]
+        type: {_object: {type: ModelInitialAssignmentDetail}}
     /functionDefinitions:
-      get:
-        is: [Collection: {type: ListModelFunctionDefinition}, Sortable: {keys: 'id, modelId'}]
-      post:
-        is: [Insert: {type: ModelFunctionDefinition}]
+      type: {_objectList: {type: ModelFunctionDefinition, "sortBy" : 'id, modelId'} }
       /{id}:
-        get:
-         is: [ObjectList: {type: ModelFunctionDefinition}]
-        put:
-          is: [Update: {type: ModelFunctionDefinition}]
-        delete:
-          is: [Delete]
+        type: {_object: {type: ModelFunctionDefinitionDetail}}
     /rules:
-      get:
-        is: [Collection: {type: ListModelRule}, Sortable: {keys: 'id, modelId'}]
-      post:
-        is: [Insert: {type:  ModelRule}]
+      type: {_objectList: {type: ModelRule, "sortBy" : 'id, modelId'} }
       /{id}:
-        get:
-          is: [ObjectList: {type:  ModelRule}]
-        put:
-          is: [Update: {type: ModelRule}]
-        delete:
-          is: [Delete]
+        type: {_object: {type: ModelRuleDetail}}
     /unitDefinitions:
-      get:
-        is: [Collection: {type: ListModelUnitDefinition}, Sortable: {keys: 'id, modelId'}]
-      post:
-        is: [Insert: {type: ModelUnitDefinition}]
+      type: {_objectList: {type: ModelUnitDefinition, "sortBy" : 'id, modelId'} }
       /{id}:
-        get:
-          is: [ObjectList: {type: ModelUnitDefinition}]
-        put:
-          is: [Update: {type: ModelUnitDefinition}]
-        delete:
-          is: [Delete]
+        type: {_object: {type: ModelUnitDefinitionDetail}}
+
 /units:
-  get:
-    is: [Collection: {type: ListModelUnit}, Sortable: {keys: 'id'}]
-  post:
-    is: [Insert: {type: ModelUnit}]
-  /{id}:
-    get:
-      is: [ObjectList: {type: ModelUnit}]
-    put:
-      is: [Update: {type: ModelUnit}]
-    delete:
-      is: [Delete]
+  type: {_objectList: {type: Unit, "sortBy" : 'id, name'} }
+    /{id}:
+      type: {_object: {type: UnitDetail}}

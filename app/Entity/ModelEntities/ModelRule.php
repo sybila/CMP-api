@@ -77,7 +77,7 @@ class ModelRule implements IdentifiedObject
 	 * Get modelId
 	 * @return integer
 	 */
-	public function getModelId() //: ?int
+	public function getModelId()
 	{
 		return $this->modelId;
 	}

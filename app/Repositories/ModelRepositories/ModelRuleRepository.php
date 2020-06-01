@@ -17,8 +17,8 @@ class ModelRuleRepository implements IDependentSBaseRepository
 	/** @var \Doctrine\ORM\ModelRuleRepository */
 	private $repository;
 
-	/** @var IdentifiedObject */
-	private $object;
+	/** @var Model */
+	private $model; //object
 
 	public function __construct(EntityManager $em)
 	{
@@ -47,7 +47,7 @@ class ModelRuleRepository implements IDependentSBaseRepository
 	public function getList(array $filter, array $sort, array $limit): array
 	{
 		$query = $this->buildListQuery($filter)
-			->select('r.id, r.modelId');
+			->select('r.id, (r.modelId) AS modelId');
         $query = QueryRepositoryHelper::addFilterPaginationSortDql($query, $filter, $sort, $limit);
 
 		return $query->getQuery()->getArrayResult();
@@ -60,20 +60,20 @@ class ModelRuleRepository implements IDependentSBaseRepository
 		if (!($object instanceof $className))
 			throw new \Exception('Parent of rule must be ' . $className);
 
-		$this->object = $object;
+		$this->model = $object;
 	}
 
 	private function buildListQuery(array $filter): QueryBuilder
 	{
 		$query = $this->em->createQueryBuilder()
 			->from(ModelRule::class, 'r')
-			->where('r.modelId = :modelId')
-			->setParameter('modelId', $this->object->getId());
+			->where('r.modelId = :thisModelId')
+			->setParameter('thisModelId', $this->model->getId());
 		return $query;
 	}
 
 	public function getParent(): IdentifiedObject
 	{
-		return $this->object;
+		return $this->model;
 	}
 }
