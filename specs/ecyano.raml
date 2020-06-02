@@ -3,8 +3,9 @@ title: Ecyano API
 version: 0.2
 baseUri: https://api.e-cyanobacterium.org
 mediaType: application/json
-protocols: HTTPS
+protocols: [HTTPS]
 types:
+### Definitions of common types
   Identifier:
     type: integer
     minimum: 1
@@ -41,6 +42,8 @@ types:
     minimum: 1
     required: false
     description: Same as HTTP code or custom (700+, listed in /version/errors docs) when HTTP code is 400
+
+### User module types //needs revision
   AuthorizationCodeRequest:
     properties:
       grant_type:
@@ -84,10 +87,10 @@ types:
       password:
         type: string
         required: true
-      type: UserType
+      type:
+        type: UserType
       email: string
-      groups:
-        Collection: UserGroup
+      groups: array
   UserType:
     properties:
       id: Identifier
@@ -108,9 +111,9 @@ types:
         required: true
       description:
         type: string
-        required: ture
+        required: true
       users:
-        Collection: User
+        type: User[]
   UserGroupRole:
     properties:
       id: Identifier
@@ -121,7 +124,7 @@ types:
         type: string
         required: true
 
-
+### BCS types //needs revision
   Classification:
     properties:
       id: Identifier
@@ -259,8 +262,8 @@ types:
         type: string
         description: Database code to be used within API requests/responses
 
-##Model specification starts here
-#First, general types definitions
+### Model types specification starts here
+## First, common model types definitions
   SbmlId:
     type: string
     description: String Identifier for SBML document
@@ -289,9 +292,9 @@ types:
         type: string
         description: TBA
       notes:
-        types: string
+        type: string
         description: TBA
-#Following types are more specific. They follow the pattern of a couple:
+## Following types are more specific. They follow the pattern of a couple:
 #1. Entity - type definition - derived from {entity}Repository
 #2. EntityDetail - type definition - derived from {entity}Controller
   Model:
@@ -382,7 +385,7 @@ types:
       value: number
       stoichiometry: number
   ModelReactionItemDetail:
-    type: SBaseEntity
+    type: ModelReactionItem
     properties:
       reactionId: Identifier
       specieId: OptionalIdentifier
@@ -545,6 +548,20 @@ traits:
               status: ResponseStatus
               code: ResponseCode
               data:
+                type: array
+                items: <<type>>
+  Retrieve:
+    description: Get detail of <<resourcePathName|!singularize>>
+    responses:
+      200:
+        body:
+          application/json:
+            type: object
+            properties:
+              status: ResponseStatus
+              code: ResponseCode
+              data:
+                description: <i>Known discrepancy</i> - this array always contains only one item
                 type: array
                 items: <<type>>
   Insert:
@@ -741,7 +758,7 @@ resourceTypes:
                   type: array
                   items: <<type>>
     put:
-      is: [Update: {type: ModelCompartment}]
+      is: [Update: {type: <<type>>}]
     delete:
       is: [Delete]
 
@@ -839,56 +856,51 @@ resourceTypes:
     is: [Insert: {type: AuthorizationCodeRequest}]
 /users:
   description: User endpoint
-    get:
-      is: [Collection: {type: User}]
-    post:
-      is: [Insert: {type: User}]
-    /{id}:
-      uriParameters:
-        id:
-          UrlIdentifierList
-      get:
-        is: [type: User]
-      put:
-        is: [Update: {type: User}]
-      delete:
-        is: [Delete]
+  get:
+    is: [Collection: {type: User}]
+  post:
+    is: [Insert: {type: User}]
+  /{id}:
+    uriParameters:
+      id:
+        UrlIdentifierList
+    type: {_object: {type: User}}
 /userTypes:
   description: Types of user group roles endpoint
-    get:
-      is: [Collection: {type: UserType}]
-    /{id}:
-      uriParameters:
-        id:
-          UrlIdentifierList
-      get:
-        is: [type: UserType]
-/userGroups:
-  description: User group endpoint
-    get:
-      is: [Collection: {type: UserGroup}]
-    post:
-      is: [Insert: {type: UserGroup}]
+  get:
+    is: [Collection: {type: UserType}]
   /{id}:
     uriParameters:
       id:
         UrlIdentifierList
     get:
-      is: [type: UserGroup]
+      is: [Retrieve: {type: UserType}]
+/userGroups:
+  description: User group endpoint
+  get:
+    is: [Collection: {type: UserGroup}]
+  post:
+    is: [Insert: {type: UserGroup}]
+  /{id}:
+    uriParameters:
+      id:
+        UrlIdentifierList
+    get:
+      is: [Retrieve: {type: UserGroup}]
     put:
       is: [Update: {type: UserGroup}]
     delete:
       is: [Delete]
 /userGroupRoles:
   description: Types of user group roles endpoint
-    get:
-      is: [Collection: {type: UserGroupRole}]
-    /{id}:
-      uriParameters:
-        id:
+  get:
+    is: [Collection: {type: UserGroupRole}]
+  /{id}:
+    uriParameters:
+      id:
         UrlIdentifierList
-      get:
-        is: [type: UserGroupRole]
+    get:
+      is: [Retrieve: {type: UserGroupRole}]
 #BCS
 /annotations:
   /types:
@@ -967,9 +979,7 @@ resourceTypes:
   description: Entity Signatures
   type: {EntityList: {type: ListEntitySignature}}
   get:
-    queryParameters:
-      sort:
-        enum: ["id", "name", "code", "type"]
+    is: [Sortable: {keys: "id, name, code, type"}]
   post:
     is: [Insert: {type: AllEntitySignature}]
   /{id}:
@@ -993,7 +1003,7 @@ resourceTypes:
       description: Get specific entity by code
       is: [Object: {type: AllEntitySignature}]
   /status:
-    type: [EntitySetStatus: {name: entity}]
+    type: {EntitySetStatus: {name: "entity"}}
 #    /compartment:
 #      type: {EntityList: {type: Compartment}}
 #    /complex:
@@ -1086,5 +1096,5 @@ resourceTypes:
 
 /units:
   type: {_objectList: {type: Unit, "sortBy" : 'id, name'} }
-    /{id}:
-      type: {_object: {type: UnitDetail}}
+  /{id}:
+    type: {_object: {type: UnitDetail}}
