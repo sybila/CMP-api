@@ -144,4 +144,9 @@ final class RuleController extends WritableRepositoryController
 		if ($rule->getEquation() == '')
 			throw new MissingRequiredKeyException('equation');
 	}
+
+    protected static function getAlias(): string
+    {
+        return 'r';
+    }
 }

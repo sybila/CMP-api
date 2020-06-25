@@ -78,4 +78,9 @@ final class VariablesValuesController extends RepositoryController
 	{
 		return ExperimentRepository::Class;
 	}
+
+    protected static function getAlias(): string
+    {
+        return 'v';
+    }
 }

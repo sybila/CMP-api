@@ -78,4 +78,9 @@ final class ClassificationController extends WritableRepositoryController
 		if ($classification->getName() == '')
 			throw new MissingRequiredKeyException('name');
 	}
+
+    protected static function getAlias(): string
+    {
+        return 'c';
+    }
 }

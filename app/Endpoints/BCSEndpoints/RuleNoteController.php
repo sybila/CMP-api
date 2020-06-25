@@ -81,4 +81,9 @@ class RuleNoteController extends ParentedRepositoryController
 		if ($note->getText() == '')
 			throw new MissingRequiredKeyException('text');
 	}
+
+    protected static function getAlias(): string
+    {
+        return 'n';
+    }
 }

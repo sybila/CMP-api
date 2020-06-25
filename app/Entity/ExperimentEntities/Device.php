@@ -28,6 +28,12 @@ class Device implements IdentifiedObject
 	private $name;
 
     /**
+     * @var string
+     * @ORM\Column(type="string", name="annotation")
+     */
+    private $annotation;
+
+    /**
      * Many Device have Many Experiment.
      * @ORM\ManyToMany(targetEntity="Experiment", inversedBy="devices")
      * @ORM\JoinTable(name="experiment_device",  joinColumns={@ORM\JoinColumn(name="dev_id", referencedColumnName="id")},
@@ -43,7 +49,7 @@ class Device implements IdentifiedObject
 	 * Get type
 	 * @return string
 	 */
-	public function getType(): ?string
+	public function getType(): string
 	{
 		return $this->type;
 	}
@@ -63,7 +69,7 @@ class Device implements IdentifiedObject
 	 * Get name
 	 * @return string
 	 */
-	public function getName(): ?string
+	public function getName(): string
 	{
 		return $this->name;
 	}
@@ -78,6 +84,26 @@ class Device implements IdentifiedObject
 		$this->name = $name;
 		return $this;
 	}
+
+    /**
+     * Get annotation
+     * @return string
+     */
+    public function getAnnotation(): ?string
+    {
+        return $this->annotation;
+    }
+
+    /**
+     * Set annotation
+     * @param string $annotation
+     * @return Device
+     */
+    public function setAnnotation($annotation): Device
+    {
+        $this->annotation = $annotation;
+        return $this;
+    }
 
 	/**
 	 * @return Experiment[]|Collection

@@ -16,8 +16,9 @@
 		"doctrine/orm": "^2.6",
 		"league/oauth2-server": "^7.3",
 		"ext-json": "*",
-		"ext-pdo": "*"
-	},
+		"ext-pdo": "*",
+      "ext-simplexml": "*"
+    },
 	"require-dev": {
 		"nette/utils": "^2.4",
 		"nette/database": "^2.4",

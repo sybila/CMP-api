@@ -236,6 +236,9 @@ return function(App $app) {
 	(new RouteHelper)
 		->setRoute(Ctl\UserGroupRoleController::class, '/userGroupRoles')
 		->register();
+    (new RouteHelper)
+        ->setRoute(Ctl\ReadXMLController::class, '/read/xml/{file-path}')
+        ->register();
 
 	// model species
 	$app->get('/models/{model-id:\\d+}/species/{sbmlId}', Ctl\ModelSpecieController::class . ':readSbmlId');

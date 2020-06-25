@@ -401,4 +401,9 @@ final class EntityController extends WritableRepositoryController
 		if ($entity->getName() == '')
 			throw new MissingRequiredKeyException('name');
 	}
+
+    protected static function getAlias(): string
+    {
+        return 'e';
+    }
 }

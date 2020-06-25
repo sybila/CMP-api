@@ -105,4 +105,9 @@ final class ExperimentNoteController extends ParentedRepositoryController
 	{
 		return ['experiment-id', 'experiment'];
 	}
+
+    protected static function getAlias(): string
+    {
+        return 'n';
+    }
 }

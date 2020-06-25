@@ -50,6 +50,7 @@ final class DeviceController extends WritableRepositoryController
                 'id' => $device->getId(),
                 'name' => $device->getName(),
                 'type' => $device->getType(),
+                'annotation' => $device->getAnnotation(),
                 'experiments' => $device->getExperiments()->map(function (Experiment $experiment) {
                     return ['id' => $experiment->getId(), 'name' => $experiment->getName(), 'description' => $experiment->getDescription()];
                 })->toArray(),
@@ -62,6 +63,7 @@ final class DeviceController extends WritableRepositoryController
         /** @var Device $device */
         !$data->hasKey('name') ?: $device->setName($data->getString('name'));
         !$data->hasKey('type') ?: $device->setType($data->getString('type'));
+        !$data->hasKey('annotation') ?: $device->setAnnotation($data->getString('annotation'));
         !$data->hasKey('addRelatedExperimentId') ?: $device->addExperiment($this->experimentRepository->get($data->getInt('addRelatedExperimentId')));
         !$data->hasKey('removeRelatedExperimentId') ?: $device->removeExperiment($this->experimentRepository->get($data->getInt('removeRelatedExperimentId')));
     }
@@ -75,7 +77,7 @@ final class DeviceController extends WritableRepositoryController
 
     protected function checkInsertObject(IdentifiedObject $device): void
     {
-        /** @var Experiment $experiment */
+        /** @var Device $device*/
         if ($device->getName() === null)
             throw new MissingRequiredKeyException('name');
     }
@@ -104,5 +106,10 @@ final class DeviceController extends WritableRepositoryController
     protected static function getRepositoryClassName(): string
     {
         return DeviceRepository::Class;
+    }
+
+    protected static function getAlias(): string
+    {
+        return 'd';
     }
 }

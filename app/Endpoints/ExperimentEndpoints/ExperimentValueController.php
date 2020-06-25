@@ -120,4 +120,9 @@ final class ExperimentValueController extends ParentedRepositoryController
 	{
 		return ['variable-id', 'variable'];
 	}
+
+    protected static function getAlias(): string
+    {
+        return 'v';
+    }
 }

@@ -107,4 +107,9 @@ final class ExperimentVariableNoteController extends ParentedRepositoryControlle
 	{
 		return ['variable-id', 'variable'];
 	}
+
+    protected static function getAlias(): string
+    {
+        return 'n';
+    }
 }

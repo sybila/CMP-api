@@ -124,4 +124,9 @@ final class BioquantityController extends WritableRepositoryController
 	{
 		return BioquantityRepository::Class;
 	}
+
+    protected static function getAlias(): string
+    {
+        return 'b';
+    }
 }

@@ -122,4 +122,9 @@ final class BioquantityVariableController extends ParentedRepositoryController
 	{
 		return ['method-id', 'method'];
 	}
+
+    protected static function getAlias(): string
+    {
+        return 'v';
+    }
 }

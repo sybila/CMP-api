@@ -75,4 +75,9 @@ final class OrganismController extends WritableRepositoryController
 		if ($organism->getCode() == '')
 			throw new MissingRequiredKeyException('code');
 	}
+
+    protected static function getAlias(): string
+    {
+        return 'o';
+    }
 }
