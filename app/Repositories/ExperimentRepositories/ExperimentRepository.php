@@ -3,6 +3,7 @@
 namespace App\Entity\Repositories;
 
 use App\Entity\Experiment;
+use App\Helpers\QueryRepositoryHelper;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 
@@ -38,6 +39,7 @@ class ExperimentRepository implements IEndpointRepository
 	{
 		$query = $this->buildListQuery($filter)
 			->select('e.id, e.name, e.description, e.protocol, e.started, e.inserted, e.status');
+        $query = QueryRepositoryHelper::addFilterPaginationSortDql($query, $filter, $sort, $limit);
 		return $query->getQuery()->getArrayResult();
 	}
 

@@ -5,6 +5,7 @@ namespace App\Entity\Repositories;
 use App\Entity\BioquantityMethod;
 use App\Entity\BioquantityVariable;
 use App\Entity\IdentifiedObject;
+use App\Helpers\QueryRepositoryHelper;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 
@@ -47,6 +48,7 @@ class BioquantityVariableRepository implements IDependentSBaseRepository
 	{
 		$query = $this->buildListQuery($filter)
 			->select('s.id','s.name, s.value, s.timeFrom, s.timeTo, s.source');
+        $query = QueryRepositoryHelper::addFilterPaginationSortDql($query, $filter, $sort, $limit);
 		return $query->getQuery()->getArrayResult();
 	}
 

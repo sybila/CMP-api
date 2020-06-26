@@ -4,6 +4,7 @@ namespace App\Entity\Repositories;
 
 use App\Entity\Device;
 use App\Entity\Experiment;
+use App\Helpers\QueryRepositoryHelper;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 
@@ -39,6 +40,7 @@ class DeviceRepository implements IEndpointRepository
     {
         $query = $this->buildListQuery($filter)
             ->select('d.id, d.name, d.type, d.annotation');
+        $query = QueryRepositoryHelper::addFilterPaginationSortDql($query, $filter, $sort, $limit);
         return $query->getQuery()->getArrayResult();
     }
 

@@ -6,6 +6,7 @@ use App\Entity\Experiment;
 use App\Entity\ExperimentValues;
 use App\Entity\ExperimentVariable;
 use App\Entity\IdentifiedObject;
+use App\Helpers\QueryRepositoryHelper;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 
@@ -39,7 +40,7 @@ class ExperimentVariableRepository implements IDependentSBaseRepository
 	public function getNumResults(array $filter): int
 	{
 		return ((int)$this->buildListQuery($filter)
-			->select('COUNT(c)')
+			->select('COUNT(v)')
 			->getQuery()
 			->getScalarResult());
 	}
@@ -47,8 +48,8 @@ class ExperimentVariableRepository implements IDependentSBaseRepository
 	public function getList(array $filter, array $sort, array $limit): array
 	{
 		$query = $this->buildListQuery($filter)
-			->select('c.id, c.name, c.code, c.type');
-
+			->select('v.id, v.name, v.code, v.type');
+        $query = QueryRepositoryHelper::addFilterPaginationSortDql($query, $filter, $sort, $limit);
         return $query->getQuery()->getArrayResult();
 	}
 
@@ -68,8 +69,8 @@ class ExperimentVariableRepository implements IDependentSBaseRepository
 	private function buildListQuery(array $filter): QueryBuilder
 	{
 		$query = $this->em->createQueryBuilder()
-			->from(ExperimentVariable::class, 'c')
-			->where('c.experimentId = :experimentId')
+			->from(ExperimentVariable::class, 'v')
+			->where('v.experimentId = :experimentId')
 			->setParameter('experimentId', $this->experiment->getId());
 		return $query;
 	}

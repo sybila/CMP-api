@@ -56,7 +56,7 @@ final class ExperimentController extends WritableRepositoryController
 
 	protected static function getAllowedSort(): array
 	{
-		return ['id, name, userId, status'];
+		return ['id', 'name', 'userId', 'status', 'description', 'started', 'inserted'];
 	}
 
 	protected function getData(IdentifiedObject $experiment): array

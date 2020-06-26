@@ -3,6 +3,7 @@
 namespace App\Entity\Repositories;
 
 use App\Entity\Bioquantity;
+use App\Helpers\QueryRepositoryHelper;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 
@@ -38,6 +39,7 @@ class BioquantityRepository implements IEndpointRepository
 	{
 		$query = $this->buildListQuery($filter)
 			->select('b.id, b.name, b.description, b.IsAutomatic, b.IsValid');
+        $query = QueryRepositoryHelper::addFilterPaginationSortDql($query, $filter, $sort, $limit);
 		return $query->getQuery()->getArrayResult();
 	}
 
