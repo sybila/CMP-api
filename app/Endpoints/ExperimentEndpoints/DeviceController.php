@@ -39,7 +39,7 @@ final class DeviceController extends WritableRepositoryController
 
     protected static function getAllowedSort(): array
     {
-        return ['id, type, name'];
+        return ['id', 'type', 'name'];
     }
 
     protected function getData(IdentifiedObject $device): array
