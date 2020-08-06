@@ -130,4 +130,8 @@ final class UserController extends WritableRepositoryController
 		return UserRepository::Class;
 	}
 
+    protected static function getAlias(): string
+    {
+        return 'u';
+    }
 }

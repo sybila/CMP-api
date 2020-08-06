@@ -112,4 +112,8 @@ final class UserGroupController extends WritableRepositoryController
 		return UserGroupRepository::Class;
 	}
 
+    protected static function getAlias(): string
+    {
+        return 'g';
+    }
 }

@@ -42,4 +42,8 @@ final class UserGroupRoleController extends RepositoryController
 		return UserGroupRoleRepository::class;
 	}
 
+    protected static function getAlias(): string
+    {
+        return 'gr';
+    }
 }
