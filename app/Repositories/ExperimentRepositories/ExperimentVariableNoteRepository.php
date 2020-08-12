@@ -49,7 +49,7 @@ class ExperimentVariableNoteRepository implements IDependentSBaseRepository
 	{
 		$query = $this->buildListQuery($filter)
 			->select('n.id, n.time, n.note, n.imgLink');
-        $query = QueryRepositoryHelper::addFilterPaginationSortDql($query, $filter, $sort, $limit);
+        $query = QueryRepositoryHelper::addPaginationSortDql($query, $sort, $limit);
 		return $query->getQuery()->getArrayResult();
 	}
 
@@ -72,6 +72,7 @@ class ExperimentVariableNoteRepository implements IDependentSBaseRepository
 			->from(ExperimentNote::class, 'n')
 			->where('n.variableId = :variableId')
 			->setParameter('variableId', $this->variable->getId());
+        $query = QueryRepositoryHelper::addFilterDql($query, $filter);
 		return $query;
 	}
 

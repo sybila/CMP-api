@@ -48,7 +48,7 @@ class BioquantityMethodRepository implements IDependentSBaseRepository
 	{
 		$query = $this->buildListQuery($filter)
 			->select('c.id, c.value, c.formula, c.source');
-        $query = QueryRepositoryHelper::addFilterPaginationSortDql($query, $filter, $sort, $limit);
+        $query = QueryRepositoryHelper::addPaginationSortDql($query, $sort, $limit);
 		return $query->getQuery()->getArrayResult();
 	}
 

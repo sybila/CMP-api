@@ -38,7 +38,7 @@ class ModelUnitRepository implements ISBaseRepository
 	{
 		$query = $this->buildListQuery($filter)
 			->select('u.id, (u.baseUnitId) as baseUnitId, u.name, u.sbmlId, u.sboTerm, u.notes, u.annotation, u.symbol, u.exponent, u.multiplier');
-        $query = QueryRepositoryHelper::addFilterPaginationSortDql($query, $filter, $sort, $limit);
+        $query = QueryRepositoryHelper::addPaginationSortDql($query, $sort, $limit);
 
 		return $query->getQuery()->getArrayResult();
 	}
@@ -47,7 +47,7 @@ class ModelUnitRepository implements ISBaseRepository
 	{
 		$query = $this->em->createQueryBuilder()
 			->from(ModelUnit::class, 'u');
-
+        $query = QueryRepositoryHelper::addFilterDql($query, $filter);
 		return $query;
 	}
 

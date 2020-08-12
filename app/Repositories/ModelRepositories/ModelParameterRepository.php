@@ -60,7 +60,7 @@ class ModelParameterRepository implements IDependentSBaseRepository
 	{
 		$query = $this->buildListQuery($filter)
 			->select('p.id, p.name, p.sbmlId, p.sboTerm, p.notes, p.annotation, p.value, p.isConstant');
-        $query = QueryRepositoryHelper::addFilterPaginationSortDql($query, $filter, $sort, $limit);
+        $query = QueryRepositoryHelper::addPaginationSortDql($query, $sort, $limit);
 
 		return $query->getQuery()->getArrayResult();
 	}
@@ -102,6 +102,7 @@ class ModelParameterRepository implements IDependentSBaseRepository
 				->where('p.reactionId = :reactionId')
 				->setParameter('reactionId', $this->parent->getId());
 		}
+        $query = QueryRepositoryHelper::addFilterDql($query, $filter);
 		return $query;
 	}
 }

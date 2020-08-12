@@ -54,7 +54,7 @@ class ModelReactionRepository implements IDependentSBaseRepository
 	{
 		$query = $this->buildListQuery($filter)
 			->select('r.id, r.name, r.sbmlId, r.sboTerm, r.notes, r.annotation, r.isReversible, r.rate');
-        $query = QueryRepositoryHelper::addFilterPaginationSortDql($query, $filter, $sort, $limit);
+        $query = QueryRepositoryHelper::addPaginationSortDql($query, $sort, $limit);
 
 		return $query->getQuery()->getArrayResult();
 	}
@@ -73,6 +73,7 @@ class ModelReactionRepository implements IDependentSBaseRepository
 			->from(ModelReaction::class, 'r')
 			->where('r.modelId = :modelId')
 			->setParameter('modelId', $this->model->getId());
+        $query = QueryRepositoryHelper::addFilterDql($query, $filter);
 		return $query;
 	}
 }

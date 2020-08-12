@@ -53,7 +53,7 @@ class ModelSpecieRepository implements IDependentSBaseRepository
 	{
 		$query = $this->buildListQuery($filter)
 			->select('s.id, s.name, s.sbmlId, s.sboTerm, s.notes, s.annotation, s.initialExpression, s.hasOnlySubstanceUnits, s.isConstant, s.boundaryCondition');
-        $query = QueryRepositoryHelper::addFilterPaginationSortDql($query, $filter, $sort, $limit);
+        $query = QueryRepositoryHelper::addPaginationSortDql($query, $sort, $limit);
 
 		return $query->getQuery()->getArrayResult();
 	}
@@ -79,6 +79,7 @@ class ModelSpecieRepository implements IDependentSBaseRepository
 			->setParameters([
 				'compartmentId' => $this->compartment->getId()
 			]);
+        $query = QueryRepositoryHelper::addFilterDql($query, $filter);
 		return $query;
 	}
 

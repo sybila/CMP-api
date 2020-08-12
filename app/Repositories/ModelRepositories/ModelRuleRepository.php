@@ -48,7 +48,7 @@ class ModelRuleRepository implements IDependentSBaseRepository
 	{
 		$query = $this->buildListQuery($filter)
 			->select('r.id, r.modelId');
-        $query = QueryRepositoryHelper::addFilterPaginationSortDql($query, $filter, $sort, $limit);
+        $query = QueryRepositoryHelper::addPaginationSortDql($query, $sort, $limit);
 
 		return $query->getQuery()->getArrayResult();
 	}
@@ -69,6 +69,7 @@ class ModelRuleRepository implements IDependentSBaseRepository
 			->from(ModelRule::class, 'r')
 			->where('r.modelId = :modelId')
 			->setParameter('modelId', $this->object->getId());
+        $query = QueryRepositoryHelper::addFilterDql($query, $filter);
 		return $query;
 	}
 

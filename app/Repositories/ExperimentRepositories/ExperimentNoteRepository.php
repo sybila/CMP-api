@@ -48,7 +48,7 @@ class ExperimentNoteRepository implements IDependentSBaseRepository
 	{
 		$query = $this->buildListQuery($filter)
 			->select('n.id, n.time, n.note, n.imgLink');
-        $query = QueryRepositoryHelper::addFilterPaginationSortDql($query, $filter, $sort, $limit);
+        $query = QueryRepositoryHelper::addPaginationSortDql($query, $sort, $limit);
 		return $query->getQuery()->getArrayResult();
 	}
 
@@ -71,6 +71,7 @@ class ExperimentNoteRepository implements IDependentSBaseRepository
 			->from(ExperimentNote::class, 'n')
 			->where('c.experimentId = :experimentId')
 			->setParameter('experimentId', $this->experiment->getId());
+        $query = QueryRepositoryHelper::addFilterDql($query, $filter);
 		return $query;
 	}
 

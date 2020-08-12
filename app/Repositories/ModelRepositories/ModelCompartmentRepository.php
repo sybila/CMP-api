@@ -48,7 +48,7 @@ class ModelCompartmentRepository implements IDependentSBaseRepository
 	{
 		$query = $this->buildListQuery($filter)
 			->select('c.id, c.name, c.sbmlId, c.sboTerm, c.notes, c.annotation, c.spatialDimensions, c.size, c.isConstant');
-        $query = QueryRepositoryHelper::addFilterPaginationSortDql($query, $filter, $sort, $limit);
+        $query = QueryRepositoryHelper::addPaginationSortDql($query, $sort, $limit);
 
         return $query->getQuery()->getArrayResult();
 	}
@@ -72,6 +72,7 @@ class ModelCompartmentRepository implements IDependentSBaseRepository
 			->from(ModelCompartment::class, 'c')
 			->where('c.modelId = :modelId')
 			->setParameter('modelId', $this->model->getId());
+        $query = QueryRepositoryHelper::addFilterDql($query, $filter);
 		return $query;
 	}
 }

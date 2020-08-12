@@ -40,7 +40,7 @@ class DeviceRepository implements IEndpointRepository
     {
         $query = $this->buildListQuery($filter)
             ->select('d.id, d.name, d.type, d.annotation');
-        $query = QueryRepositoryHelper::addFilterPaginationSortDql($query, $filter, $sort, $limit);
+        $query = QueryRepositoryHelper::addPaginationSortDql($query, $sort, $limit);
         return $query->getQuery()->getArrayResult();
     }
 
@@ -48,6 +48,7 @@ class DeviceRepository implements IEndpointRepository
     {
         $query = $this->em->createQueryBuilder()
             ->from(Device::class, 'd');
+        $query = QueryRepositoryHelper::addFilterDql($query, $filter);
         return $query;
     }
 

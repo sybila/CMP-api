@@ -45,7 +45,7 @@ class ModelEventRepository implements IDependentSBaseRepository
 	{
 		$query = $this->buildListQuery($filter)
 			->select('e.id, e.name, e.sbmlId, e.sboTerm, e.notes, e.annotation, e.delay, e.trigger, e.priority');
-        $query = QueryRepositoryHelper::addFilterPaginationSortDql($query, $filter, $sort, $limit);
+        $query = QueryRepositoryHelper::addPaginationSortDql($query, $sort, $limit);
 
 		return $query->getQuery()->getArrayResult();
 	}
@@ -69,6 +69,7 @@ class ModelEventRepository implements IDependentSBaseRepository
 			->from(ModelEvent::class, 'e')
 			->where('e.modelId = :modelId')
 			->setParameter('modelId', $this->object->getId());
+        $query = QueryRepositoryHelper::addFilterDql($query, $filter);
 		return $query;
 	}
 

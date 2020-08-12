@@ -39,7 +39,7 @@ class ExperimentRepository implements IEndpointRepository
 	{
 		$query = $this->buildListQuery($filter)
 			->select('e.id, e.name, e.description, e.protocol, e.started, e.inserted, e.status');
-        $query = QueryRepositoryHelper::addFilterPaginationSortDql($query, $filter, $sort, $limit);
+        $query = QueryRepositoryHelper::addPaginationSortDql($query, $sort, $limit);
 		return $query->getQuery()->getArrayResult();
 	}
 
@@ -47,6 +47,7 @@ class ExperimentRepository implements IEndpointRepository
 	{
 		$query = $this->em->createQueryBuilder()
 			->from(Experiment::class, 'e');
+        $query = QueryRepositoryHelper::addFilterDql($query, $filter);
 		return $query;
 	}
 

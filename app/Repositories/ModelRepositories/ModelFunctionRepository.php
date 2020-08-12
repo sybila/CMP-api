@@ -50,7 +50,7 @@ class ModelFunctionRepository implements IDependentEndpointRepository
 	{
 		$query = $this->buildListQuery($filter)
 			->select('f.id, f.name, f.formula');
-        $query = QueryRepositoryHelper::addFilterPaginationSortDql($query, $filter, $sort, $limit);
+        $query = QueryRepositoryHelper::addPaginationSortDql($query, $sort, $limit);
 
 		return $query->getQuery()->getArrayResult();
 	}
@@ -66,6 +66,7 @@ class ModelFunctionRepository implements IDependentEndpointRepository
 			->from(ModelFunction::class, 'f')
 			->where('f.reactionId = :reactionId')
 			->setParameter('reactionId', $this->object->getId());
+        $query = QueryRepositoryHelper::addFilterDql($query, $filter);
 		return $query;
 	}
 
