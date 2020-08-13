@@ -73,6 +73,7 @@ class BioquantityVariableRepository implements IDependentSBaseRepository
 			->setParameters([
 				'methodId' => $this->method->getId()
 			]);
+        $query = QueryRepositoryHelper::addFilterDql($query, $filter);
 		return $query;
 	}
 
