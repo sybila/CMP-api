@@ -104,22 +104,16 @@ abstract class RepositoryController extends AbstractController
 		$this->runEvents($this->beforeRequest, $request, $response, $args);
 
 		$data = [];
-		$data_buff = [];
-		foreach ($this->getReadIds($args) as $id)
-		    if (!str_contains($request->getUri()->getPath(), 'experimentvalues')) {
-                $data[] = $this->getData($this->getObject((int)$id));
-            } else {
-		        if(!$args->hasKey('page') && !$args->hasKey('perPage'))
-                {
-                    $data[] = $this->getData($this->getObject((int)$id));
-                } else {
-                    $data_buff[] = $this->getDataInnerPaging($this->getObject((int)$id), $args);
-                    $response = $response->withHeader('X-MaxCount', $data_buff[0]['maxCount']);
-                    $response = $response->withHeader('X-Pages', $args['perPage'] ? ceil($data_buff[0]['maxCount'] / $args['perPage']) : 1);
-                    $data[] = $data_buff[0]['data'];
-		        }
-		    }
-        return self::formatOk($response, $data);
+		foreach ($this->getReadIds($args) as $id) {
+		    $data = static::getPaginationOnDetail($args, $this->getData($this->getObject((int)$id)));
+            if (array_key_exists('maxCount', $data)){
+                $maxCount = $data['maxCount'];
+                $response = $response->withHeader('X-MaxCount', $maxCount);
+                $response = $response->withHeader('X-Pages', $args['perPage'] ? ceil($maxCount / $args['perPage']) : 1);
+                unset($data['maxCount']);
+            }
+        }
+		return self::formatOk($response, $data);
 	}
 
 

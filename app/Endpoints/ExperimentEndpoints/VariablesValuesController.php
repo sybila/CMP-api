@@ -69,40 +69,6 @@ final class VariablesValuesController extends RepositoryController
         }
 	}
 
-	protected function getDataInnerPaging(IdentifiedObject $experiment, ArgumentParser $args): array
-    {
-        /** @var Experiment $experiment */
-        if($experiment != null) {
-            $data_response =  [
-                'variables' => $experiment->getVariables()->map(function (ExperimentVariable $variable) use ($args) {
-                    return [
-                        'id' => $variable->getId(),
-                        'name' => $variable->getName(),
-                        'code' => $variable->getCode(),
-                        'type' => $variable->getType(),
-                        'values' => $variable->getValues()->map(function (ExperimentValues $val) use ($args) {
-                            return [
-                                'time' => $val->getTime(),
-                                'value' => $val->getValue()
-                            ];})->toArray(),
-                    ];
-                })->toArray(),
-            ];
-            $i = 0;
-            $numResult = 0;
-            foreach ($data_response['variables'] as $p_var) {
-                $paginated_data = $p_var['values'];
-                $numResult = count($paginated_data) > $numResult ? count($paginated_data) :  $numResult;
-                $data_response['variables'][$i]['values'] = array_slice($paginated_data,
-                    ($args['page'] - 1) * $args['perPage'], $args['perPage']);
-                $i = $i + 1;
-            }
-            $data['data'] = $data_response;
-            $data['maxCount'] = $numResult;
-            return $data;
-        }
-    }
-
 	protected static function getObjectName(): string
 	{
 		return 'experiment';
@@ -117,4 +83,5 @@ final class VariablesValuesController extends RepositoryController
     {
         return 'v';
     }
+
 }
