@@ -4,12 +4,14 @@ namespace App\Controllers;
 
 use App\Entity\IdentifiedObject;
 use App\Entity\Repositories\IEndpointRepository;
-use App\Exceptions\EmptyArraySelection;
 use App\Exceptions\EmptySelectionException;
 use App\Exceptions\InternalErrorException;
 use App\Exceptions\NonExistingObjectException;
 use App\Helpers\ArgumentParser;
+use App\Repositories\Authorization\UserRepository;
 use Doctrine\ORM\ORMException;
+use DoctrineProxies\__CG__\App\Entity\Authorization\User;
+use League\OAuth2\Server\ResourceServer;
 use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;
@@ -17,8 +19,7 @@ use Slim\Http\Response;
 abstract class RepositoryController extends AbstractController
 {
 
-	use SortableController;
-	use PageableController;
+	use SortableController, PageableController, RepoAccessController, FilterableController;
 
 	/** @var IEndpointRepository */
 	protected $repository;
@@ -29,6 +30,14 @@ abstract class RepositoryController extends AbstractController
 	 */
 	protected $beforeRequest = [];
 
+	/** @var ResourceServer */
+	protected $server;
+
+	/** @var UserRepository */
+    protected $user;
+
+    /** @var User */
+    protected $logged_user;
 
 	abstract protected static function getRepositoryClassName(): string;
 
@@ -59,39 +68,25 @@ abstract class RepositoryController extends AbstractController
 	}
 
 
-	protected function getFilter(ArgumentParser $args): array
-	{
-        $filter = [];
-        $alias = static::getAlias();
-        if ($args->hasKey('filter'))
-        {
-            foreach ($args->getArray('filter') as $by => $expr)
-            {
-                $by = $alias . "." . $by;
-                $filter[$by] = $expr;
-            }
-        }
-        return $filter;
-	}
-    abstract protected static function getAlias(): string;
-
-
 	public function __construct(Container $c)
 	{
 		parent::__construct($c);
 		$this->repository = $c->get(static::getRepositoryClassName());
+		$this->server = $c->get(ResourceServer::class);
+		$this->user = $c->get(UserRepository::class);
 	}
 
 
 	public function read(Request $request, Response $response, ArgumentParser $args)
 	{
-		$this->runEvents($this->beforeRequest, $request, $response, $args);
-		$filter = static::getFilter($args);
-		$numResults = $this->repository->getNumResults($filter);
-		if (!$numResults) {
-		    throw new EmptyArraySelection($filter);
-        }
-		$limit = static::getPaginationData($args, $numResults);
+	    $this->runEvents($this->beforeRequest, $request, $response, $args);
+
+	    $filter['accessFilter'] = static::validateList($request, $this->server, $this->user);
+        $filter['argFilter'] = static::getFilter($args);
+        $numResults = $this->repository->getNumResults($filter);
+        static::validateFilter($numResults, $filter['argFilter']);
+
+        $limit = static::getPaginationData($args, $numResults);
 		$response = $response->withHeader('X-Count', $numResults);
 		$response = $response->withHeader('X-Pages', $limit['pages']);
 
@@ -102,10 +97,11 @@ abstract class RepositoryController extends AbstractController
 	public function readIdentified(Request $request, Response $response, ArgumentParser $args): Response
 	{
 		$this->runEvents($this->beforeRequest, $request, $response, $args);
-
-		$data = [];
+        $data = [];
 		foreach ($this->getReadIds($args) as $id) {
-		    $data = static::getPaginationOnDetail($args, $this->getData($this->getObject((int)$id)));
+            $ent = $this->getObject((int)$id);
+            static::validateDetail($request, $this->server, $this->user);
+		    $data = static::getPaginationOnDetail($args, $this->getData($ent));
             if (array_key_exists('maxCount', $data)){
                 $maxCount = $data['maxCount'];
                 $response = $response->withHeader('X-MaxCount', $maxCount);
@@ -113,7 +109,7 @@ abstract class RepositoryController extends AbstractController
                 unset($data['maxCount']);
             }
         }
-		return self::formatOk($response, $data);
+        return self::formatOk($response, $data);
 	}
 
 

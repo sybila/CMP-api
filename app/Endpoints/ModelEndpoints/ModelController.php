@@ -59,6 +59,7 @@ final class ModelController extends SBaseController
 		$sBaseData = parent::getData($model);
 		return array_merge($sBaseData, [
 			'userId' => $model->getUserId(),
+			'groupId' => $model->getGroupId(),
 			'approvedId' => $model->getApprovedId(),
 			'description' => $model->getDescription(),
 			'status' => (string)$model->getStatus(),

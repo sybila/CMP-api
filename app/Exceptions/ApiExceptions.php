@@ -142,7 +142,7 @@ class EmptyArraySelection extends ApiException
             $filters .= "{$by} LIKE {$expr}";
         }
         parent::__construct($previous)
-            ->setMessage('Filter (%s) returns empty list of objects.', $filters);
+            ->setMessage('Empty list of objects returned. %s', $filters);
     }
 }
 
@@ -288,6 +288,27 @@ class RuleClassificationException extends ApiException
 		parent::__construct($previous)
 			->setMessage('Rules must have classification with type "rule"');
 	}
+}
+
+class InvalidAuthenticationException extends ApiException
+{
+    const CODE = 713;
+    public function __construct(string $field, ?Throwable $previous = null)
+    {
+        parent::__construct($previous)
+            ->setMessage('%s', $field);
+    }
+}
+
+class InvalidRoleException extends ApiException
+{
+    const CODE = 714;
+    public function __construct(string $action, string $api_action,
+                                string $uri, ?Throwable $previous = null)
+    {
+        parent::__construct($previous)
+            ->setMessage('Denied. Cannot %s resources on this uri: %s via %s method', $action, $uri, $api_action);
+    }
 }
 
 

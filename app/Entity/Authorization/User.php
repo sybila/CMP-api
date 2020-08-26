@@ -73,6 +73,12 @@ class User implements UserEntityInterface, IdentifiedObject
 	 */
 	private $groups;
 
+    /**
+     * @var boolean
+     * @ORM\Column(name="is_public")
+     */
+	private $isPublic;
+
 
 	public function __construct($username)
 	{
@@ -181,6 +187,19 @@ class User implements UserEntityInterface, IdentifiedObject
 		$this->phone = $phone;
 		return $this;
 	}
+
+
+    public function getIsPublic()
+    {
+        return $this->isPublic;
+    }
+
+
+    public function setIsPublic($isPublic): void
+    {
+        $this->isPublic = $isPublic;
+    }
+
 
 
 	public function changePassword($old, $new): bool

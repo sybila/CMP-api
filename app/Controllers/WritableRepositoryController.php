@@ -76,7 +76,7 @@ abstract class WritableRepositoryController extends RepositoryController
 	public function add(Request $request, Response $response, ArgumentParser $args): Response
 	{
 		$this->runEvents($this->beforeRequest, $request, $response, $args);
-
+		self::validateAdd($request, $this->server, $this->user);
 		$body = new ArgumentParser($request->getParsedBody());
 		$this->validate($body, $this->getValidator());
 		$object = $this->createObject($body);
@@ -95,9 +95,8 @@ abstract class WritableRepositoryController extends RepositoryController
 	public function edit(Request $request, Response $response, ArgumentParser $args): Response
 	{
 		$this->runEvents($this->beforeRequest, $request, $response, $args);
-
 		$object = $this->getObject($this->getModifyId($args));
-
+		self::validateEdit($request, $this->server, $this->user);
 		$body = new ArgumentParser($request->getParsedBody());
 		$this->validate($body, $this->getValidator());
 		$this->setData($object, $body);
@@ -114,6 +113,7 @@ abstract class WritableRepositoryController extends RepositoryController
 	{
 		$this->runEvents($this->beforeRequest, $request, $response, $args);
 		$entity = $this->getObject($this->getModifyId($args));
+        self::validateDelete($request, $this->server, $this->user);
 		$this->runEvents($this->beforeDelete, $entity);
 		$this->orm->remove($entity);
 		$this->data->needsFlush = true;

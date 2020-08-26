@@ -24,12 +24,25 @@ trait QueryRepositoryHelper
 
     public static function addFilterDql(QueryBuilder $query, array $filter) : QueryBuilder
     {
-        if (!empty($filter)) {
-            foreach ($filter as $by=>$expr) {
+        if (!empty($filter['accessFilter'])){
+            $query = static::addAccesibleDql($query, $filter['accessFilter']);
+        }
+        if (!empty($filter['argFilter'])) {
+            foreach ($filter['argFilter'] as $by=>$expr) {
                 $query = $query
                     ->andWhere("$by LIKE '%$expr%'");
             }
-            //TODO "did you mean {bla bla} (closest similar name, iterate via all models, do similar_text())"
+        }
+        return $query;
+    }
+
+    public static function addAccesibleDql(QueryBuilder $query, ?array $accessFilter) : QueryBuilder
+    {
+        if(property_exists($query->getRootEntities()[0],'groupId')){
+            foreach ($accessFilter as $owner=>$groupId) {
+                $query = $query
+                    ->orWhere("$groupId = $owner");
+            }
         }
         return $query;
     }

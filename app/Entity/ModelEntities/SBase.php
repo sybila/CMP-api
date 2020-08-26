@@ -178,4 +178,9 @@ trait SBase
 		$this->notes = $notes;
 		return $this;
 	}
+
+	public function getRootParent()
+    {
+        return $this;
+    }
 }

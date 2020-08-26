@@ -68,6 +68,12 @@ class Experiment implements IdentifiedObject
 	 */
 	//private $userId;
 
+    /**
+     * @var int
+     * @ORM\Column(type="integer", name="group_id")
+     */
+    private $groupId;
+
 	/**
 	 * @var string
      * @ORM\Column(type="string", columnDefinition="ENUM('private', 'public')")
@@ -434,4 +440,21 @@ class Experiment implements IdentifiedObject
     {
         return $this->experimentModels;
     }
+
+    /**
+     * @return int
+     */
+    public function getGroupId(): int
+    {
+        return $this->groupId;
+    }
+
+    /**
+     * @param int $groupId
+     */
+    public function setGroupId(int $groupId): void
+    {
+        $this->groupId = $groupId;
+    }
+
 }

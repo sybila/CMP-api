@@ -66,6 +66,7 @@ trait PageableController
      */
 	protected static function getPaginationOnDetail(ArgumentParser $args, array $data_response): array
     {
+        self::validate($args, self::getPaginationValidator());
         $paging = static::getAllowedPagingVar();
         if ($args->hasKey('perPage') && $args->hasKey('page') && !is_null($paging)){
             $i = 0;

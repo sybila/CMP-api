@@ -350,7 +350,7 @@ final class EntityController extends WritableRepositoryController
 		]);
 	}
 
-	protected function getSpecificValidator(string $type): Assert\Collection
+	protected function getSpecificValidator(string $type): ?Assert\Collection
 	{
 		switch ($type)
 		{
