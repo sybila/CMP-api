@@ -4,216 +4,22 @@
 namespace App\Controllers;
 
 
+use App\Entity\Authorization\User;
+use App\Entity\Authorization\UserGroup;
+use App\Entity\Authorization\UserGroupToUser;
+use App\Entity\Experiment;
+use App\Entity\Model;
 use App\Exceptions\InvalidAuthenticationException;
 use App\Exceptions\InvalidRoleException;
 use App\Repositories\Authorization\UserRepository;
 use App\Exceptions\InvalidArgumentException;
+use Doctrine\Common\Collections\Criteria;
 use Slim\Http\Request;
-use League\OAuth2\Server\Exception\OAuthServerException;
 use League\OAuth2\Server\ResourceServer;
 
 
 trait RepoAccessController
 {
-
-    /**
-     * @param Request $request that should be validated
-     * @param ResourceServer $server this is what validates
-     * @param UserRepository $user this is who needs validation
-     * @return array additional collection filter,
-     * key (is group id of users groups) => value (is prepared for dql filter)
-     * @throws InvalidArgumentException if user with non-existing role
-     * @throws InvalidAuthenticationException if auth fails
-     */
-    protected static function validateList(Request $request, ResourceServer $server, UserRepository $user) : array
-    {
-        $user_permissions = self::getAccess($request, $server, $user);
-        switch ($user_permissions['user_type']){
-            case $user::ADMIN:
-                return [];
-            case $user::POWER:
-            case $user::REGISTERED:
-            case $user::GUEST:
-                $quasi_filter = [];
-                $roles = [];
-                $target_obj = static::getAlias() . ".groupId";
-                foreach ($user_permissions['groups'] as $group) {
-                    $roles[$group['groupId']] = $group['roleId'];
-                    $quasi_filter[$group['groupId']] = $target_obj;
-                }
-                $rootParent = self::getRootParent($request->getUri()->getPath());
-                $user->hasAccessToObject($rootParent['type'], $rootParent['id'], $roles);
-                return $quasi_filter;
-            default:
-                throw new InvalidArgumentException('user_type', $user_permissions['user_type'],
-                    'This user type does not exist on the platform');
-        }
-    }
-
-    /**
-     * @param Request $request that should be validated
-     * @param ResourceServer $server this is what validates
-     * @param UserRepository $user this is who needs validation
-     * @return bool true - the action was validated, false - not
-     * @throws InvalidArgumentException if user with non-existing role
-     * @throws InvalidAuthenticationException if auth fails
-     */
-    protected static function validateDetail(Request $request, ResourceServer $server, UserRepository $user) : bool
-    {
-        $user_permissions = self::getAccess($request, $server, $user);
-        switch ($user_permissions['user_type']){
-            case $user::ADMIN:
-                return true;
-            case $user::POWER:
-            case $user::REGISTERED:
-            case $user::GUEST:
-                $roles = [];
-                foreach ($user_permissions['groups'] as $group) {
-                    $roles[$group['groupId']] = $group['roleId'];
-                }
-                $rootParent = self::getRootParent($request->getUri()->getPath());
-                $user->hasAccessToObject($rootParent['type'], $rootParent['id'], $roles);
-                return true;
-            default:
-                throw new InvalidArgumentException('user_type', $user_permissions['user_type'],
-                    'This user type does not exist on the platform');
-        }
-    }
-
-    /**
-     * @param Request $request that should be validated
-     * @param ResourceServer $server this is what validates
-     * @param UserRepository $user this is who needs validation
-     * @return bool true - the action was validated, false - not
-     * @throws InvalidArgumentException if user with non-existing role
-     * @throws InvalidAuthenticationException if auth fails
-     * @throws InvalidRoleException if role permissions are not enough
-     */
-    protected static function validateAdd(Request $request, ResourceServer $server, UserRepository $user) : bool
-    {
-        $user_permissions = self::getAccess($request, $server, $user);
-        switch ($user_permissions['user_type']){
-            case $user::ADMIN:
-                return true;
-            case $user::POWER:
-            case $user::REGISTERED:
-                $roles = [];
-                foreach ($user_permissions['groups'] as $group) {
-                    $roles[$group['groupId']] = $group['roleId'];
-                }
-                $rootParent = self::getRootParent($request->getUri()->getPath());
-                $user_group = $user->hasAccessToObject($rootParent['type'], $rootParent['id'], $roles);
-                if (!in_array($roles[$user_group], $user::CAN_ADD)  ||
-                    in_array($rootParent['type'],['users', 'userGroups'])){
-                    throw new InvalidRoleException('add', 'POST',
-                        $request->getUri()->getPath());
-                }
-                return true;
-            case $user::GUEST:
-                throw new InvalidRoleException('add', 'POST', $request->getUri()->getPath());
-            default:
-                throw new InvalidArgumentException('user_type', $user_permissions['user_type'],
-                    'This user type does not exist on the platform');
-        }
-    }
-
-    /**
-     * @param Request $request that should be validated
-     * @param ResourceServer $server this is what validates
-     * @param UserRepository $user this is who needs validation
-     * @return bool true - the action was validated, false - not
-     * @throws InvalidArgumentException if user with non-existing role
-     * @throws InvalidAuthenticationException if auth fails
-     * @throws InvalidRoleException if role permissions are not enough
-     */
-    protected static function validateEdit(Request $request, ResourceServer $server, UserRepository $user) : bool
-    {
-        $user_permissions = self::getAccess($request, $server, $user);
-        switch ($user_permissions['user_type']){
-            case $user::ADMIN:
-                return true;
-            case $user::POWER:
-            case $user::REGISTERED:
-                $roles = [];
-                foreach ($user_permissions['groups'] as $group) {
-                    $roles[$group['groupId']] = $group['roleId'];
-                }
-                $rootParent = self::getRootParent($request->getUri()->getPath());
-                $user_group = $user->hasAccessToObject($rootParent['type'], $rootParent['id'], $roles);
-                if (!in_array($roles[$user_group], $user::CAN_EDIT)){
-                    throw new InvalidRoleException('edit', 'PUT',
-                        $request->getUri()->getPath());
-                }
-                return true;
-            case $user::GUEST:
-                throw new InvalidRoleException('edit', 'PUT', $request->getUri()->getPath());
-            default:
-                throw new InvalidArgumentException('user_type', $user_permissions['user_type'],
-                    'This user type does not exist on the platform');
-        }
-    }
-
-    /**
-     * @param Request $request that should be validated
-     * @param ResourceServer $server this is what validates
-     * @param UserRepository $user this is who needs validation
-     * @return bool true - the action was validated, false - not
-     * @throws InvalidArgumentException if user with non-existing role
-     * @throws InvalidAuthenticationException if auth fails
-     * @throws InvalidRoleException if role permissions are not enough
-     */
-    protected static function validateDelete(Request $request, ResourceServer $server, UserRepository $user) : bool
-    {
-        $user_permissions = self::getAccess($request, $server, $user);
-        switch ($user_permissions['user_type']){
-            case $user::ADMIN:
-                return true;
-            case $user::POWER:
-            case $user::REGISTERED:
-                $roles = [];
-                foreach ($user_permissions['groups'] as $group) {
-                    $roles[$group['groupId']] = $group['roleId'];
-                }
-                $rootParent = self::getRootParent($request->getUri()->getPath());
-                $user_group = $user->hasAccessToObject($rootParent['type'], $rootParent['id'], $roles);
-                if (!in_array($roles[$user_group], $user::CAN_DELETE) ||
-                    in_array($rootParent['type'],['users', 'userGroups'])){
-                    throw new InvalidRoleException('delete', 'DELETE',
-                        $request->getUri()->getPath());
-                }
-                return true;
-            case $user::GUEST:
-                throw new InvalidRoleException('delete', 'DELETE', $request->getUri()->getPath());
-            default:
-                throw new InvalidArgumentException('user_type', $user_permissions['user_type'],
-                    'This user type does not exist on the platform');
-        }
-    }
-
-    protected static function validationNotByGroup(string $api_action, string $resource_type, int $u_id){
-
-    }
-
-    /**
-     * @param Request $request needed for auth.
-     * @param ResourceServer $server handles the authentication.
-     * @param UserRepository $user is who needs the access.
-     * @return array key 'groups' contains array of arrays of keys [groupId, groupRole], key user_type contains
-     * the type of the user in int (1-4) ~> admin, power, registered, guest.
-     * @throws InvalidAuthenticationException
-     */
-    protected static function getAccess(Request $request, ResourceServer $server, UserRepository $user): array
-    {
-        try {
-            $request = $server->validateAuthenticatedRequest($request);
-        } catch (OAuthServerException $e) {
-            throw new InvalidAuthenticationException($e->getMessage());
-        }
-        $u_id = $request->getAttribute('oauth_user_id');
-
-        return ['groups' => $user->getGroups($u_id), 'user_type' => $user->getById($u_id)->getType(),
-            'user_id' => $u_id];
-    }
 
 
     /**
@@ -225,5 +31,153 @@ trait RepoAccessController
         $split = explode('/', $path);
         return ['type' => $split[1], 'id' => $split[2]];
     }
+
+
+    public function hasAccessToObject(array $userGroups): ?int
+    {
+        $parentClass = null;
+        $parent = self::getRootParent($_SERVER['REDIRECT_URL']);
+        if($parent['id']) {
+            switch ($parent['type']) {
+                case 'models':
+                    $parentClass = Model::class;
+                    break;
+                case 'experiments':
+                    $parentClass = Experiment::class;
+                    break;
+                case 'userGroups':
+                    $acc_obj = $this->orm->getRepository(UserGroup::class)->find($parent['id']);
+                    if (array_key_exists($userGroups, $parent['id']) || $acc_obj->getIsPublic())
+                    {
+                        return $parent['id'];
+                    } else {
+                        throw new InvalidAuthenticationException("You cannot access this resource.",
+                            "Not a member of the group.");
+                    }
+                    break;
+                case 'users':
+                    $user = $this->orm->getRepository(User::class)->find($parent['id']);
+                    $groups = $userGroups['group_wise'];
+                    $related = $user->getGroups()->map(function (UserGroupToUser $groupLink) use ($groups) {
+                        $group = $groupLink->getUserGroupId();
+                        return $group->getId() != UserGroup::PUBLIC_SPACE ? !is_null($groups[$group->getId()]) : false;
+                    })->toArray();
+                    if (array_reduce($related, function($carry, $rel) {return $carry || $rel; }) || $user->getIsPublic()){
+                        return true;
+                    } else {
+                        throw new InvalidAuthenticationException("You cannot access this resource.",
+                            "Not public or not a member of the same group.");
+                    }
+                default:
+                    return true;
+            }
+            $acc_obj = $this->orm->getRepository($parentClass)->find($parent['id']);
+            if(property_exists($parentClass, 'groupId') && array_key_exists($acc_obj->getGroupId(), $userGroups))
+            {
+                return $acc_obj->getGroupId();
+            } else {
+                throw new InvalidAuthenticationException("You cannot access this resource.",
+                    "Not a member of the group.");
+            }
+        }
+        return true;
+    }
+
+    public function getAccessFilter(array $userGroups): ?array
+    {
+        $quasi_filter = [];
+        $parentClass = null;
+        $parent = self::getRootParent($_SERVER['REDIRECT_URL']);
+        switch ($parent['type']) {
+            case 'models':
+            case 'experiments':
+                //TODO? SO HOW DO WE USE GROUPS
+                $dql = static::getAlias() . ".groupId";
+                $quasi_filter = array_map(function () use ($dql) { return $dql; }, $userGroups);
+                break;
+            case 'userGroups':
+                $dql = static::getAlias() . ".id";
+                $acc_obj = $this->orm->getRepository(UserGroup::class)
+                    ->matching(Criteria::create()->where(Criteria::expr()->eq('isPublic', true)))
+                    ->map(function (UserGroup $group) { return $group->getId();})->toArray();
+                foreach (array_flip($acc_obj) as $id => $trash) {
+                    $userGroups[$id] = $dql;
+                }
+                $quasi_filter = array_map(function () use ($dql) { return $dql; }, $userGroups);
+                unset($quasi_filter[UserGroup::PUBLIC_SPACE]);
+                break;
+            case 'users':
+                $dql = static::getAlias() . ".id";
+                foreach ($this->getVisibleUsersId($userGroups) as $user){
+                    $quasi_filter[$user] = $dql;
+                }
+                break;
+            default:
+                return null;
+        }
+        return $quasi_filter;
+    }
+
+    public function canManipulate(int $role, int $id, array $can_add): bool
+    {
+        $parentClass = null;
+        $parent = self::getRootParent($_SERVER['REDIRECT_URL']);
+        if ($parent['id']) {
+            switch ($parent['type']) {
+                case 'models':
+                case 'experiments':
+                    if (!in_array($role, $can_add))
+                        return false;
+                    break;
+                case 'userGroups':
+                    if ($role != User::OWNER_ROLE) {
+                        return false;
+                    }
+                    break;
+                case 'users':
+                    if ($id != $parent['id']){
+                        return false;
+                    }
+                    break;
+                default:
+                    return false;
+            }
+        }
+    }
+
+    public function canAdd(int $role, int $id) {
+        $parentClass = null;
+        $parent = self::getRootParent($_SERVER['REDIRECT_URL']);
+        if ($parent['id']) {
+            switch ($parent['type']) {
+                case 'models':
+                case 'experiments':
+                    if (!in_array($role, User::CAN_ADD)){
+                        return false;
+                    }
+                    break;
+                default:
+                    return true;
+            }
+        }
+    }
+
+    public function getVisibleUsersId(array $fromGroups){
+        $publicUsers = $this->orm->getRepository(User::class)
+            ->matching(Criteria::create()->where(Criteria::expr()->eq('isPublic', true)))
+            ->map(function (User $user) { return $user->getId(); })->toArray();
+        $groupRepo = $this->orm->getRepository(UserGroup::class);
+        foreach ($fromGroups as $id => $role){
+            if($id != UserGroup::PUBLIC_SPACE){
+                $group = $groupRepo->find($id)->getUsers()->map(function (UserGroupToUser $groupLink) {
+                    $user = $groupLink->getUserId();
+                    return $user->getId();
+                })->toArray();
+                $publicUsers = array_merge($publicUsers, $group);
+            }
+        }
+        return array_unique($publicUsers);
+    }
+
 
 }

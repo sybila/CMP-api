@@ -8,6 +8,7 @@ use App\Entity\{
 	Authorization\UserGroupToUser,
 	IdentifiedObject
 };
+use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\Repositories\IEndpointRepository;
 use App\Repositories\Authorization\UserRepository;
 use App\Exceptions\{
@@ -65,7 +66,7 @@ final class UserController extends WritableRepositoryController
 
 	protected function setData(IdentifiedObject $user, ArgumentParser $body): void
 	{
-	    /** @var User $user */
+		/** @var User $user */
 		!$body->hasKey('username') ?: $user->setName($body->getString('username'));
 		!$body->hasKey('password') ?: $user->setPasswordHash($user->hashPassword($body->getString('password')));
 		!$body->hasKey('name') ?: $user->setName($body->getString('name'));

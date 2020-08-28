@@ -16,6 +16,9 @@ use League\OAuth2\Server\Entities\UserEntityInterface;
 class UserGroup implements IdentifiedObject
 {
 
+    const PUBLIC_SPACE = 1;
+    const ADMIN_SPACE = 2;
+
 	use Identifier;
 
 	/**

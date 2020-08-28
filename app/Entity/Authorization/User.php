@@ -6,6 +6,7 @@ use App\Entity\Identifier;
 use App\Entity\IdentifiedObject;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\Mapping as ORM;
 use League\OAuth2\Server\Entities\UserEntityInterface;
 
@@ -17,6 +18,19 @@ class User implements UserEntityInterface, IdentifiedObject
 {
 
 	use Identifier;
+
+    /**
+     * constants for platform user types
+     */
+    const ADMIN = 1;
+    const POWER = 2;
+    const REGISTERED = 3;
+    const GUEST = 0; //pun intended
+
+    const CAN_ADD = [4,5,6,7,8];
+    const CAN_EDIT = [2,3,6,7,8];
+    const CAN_DELETE = [1,3,5,7,8];
+    const OWNER_ROLE = 8;
 
 	const PASSWORD_ALGORITHM = PASSWORD_DEFAULT;
 
@@ -69,6 +83,7 @@ class User implements UserEntityInterface, IdentifiedObject
 	private $phone;
 
 	/**
+     * @var ArrayCollection
 	 * @ORM\OneToMany(targetEntity="UserGroupToUser", mappedBy="userId")
 	 */
 	private $groups;
@@ -84,6 +99,7 @@ class User implements UserEntityInterface, IdentifiedObject
 	{
 		$this->username = $username;
 		$this->accessTokens = new ArrayCollection;
+		$this->groups = new ArrayCollection();
 	}
 
 
@@ -140,11 +156,14 @@ class User implements UserEntityInterface, IdentifiedObject
 		return $this->phone;
 	}
 
-
+    /**
+     * @return Collection|UserGroupToUser[]
+     */
 	public function getGroups()
 	{
 		return $this->groups;
 	}
+
 
 
 	public function setName(string $name)

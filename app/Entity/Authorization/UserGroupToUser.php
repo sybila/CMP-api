@@ -19,26 +19,10 @@ class UserGroupToUser implements IdentifiedObject
 	use Identifier;
 
 	/**
-	 * @ORM\ManyToOne(targetEntity="User", inversedBy="id")
-	 * @ORM\JoinColumn(name="user_id", referencedColumnName="user_id")
+	 * @ORM\ManyToOne(targetEntity="User", inversedBy="groups")
+	 * @ORM\JoinColumn(name="user_id", referencedColumnName="id")
      */
 	private $userId;
-
-    /**
-     * @var integer
-     * @ORM\Column(name="user_id")
-     */
-    private $u_id;
-    //FIXME this is the same var as userId, having just another functionaly bcs of ORM, needed?
-    //FIXME careful, this plays role in UserRepository and RepoAccessController
-
-    /**
-     * @var integer
-     * @ORM\Column(name="user_group_id")
-     */
-	private $groupId;
-	//FIXME this is the same var as userGroupId, having just another functionaly bcs of ORM, needed?
-    //FIXME careful, this plays role in UserRepository and RepoAccessController
 
 	/**
 	 * @ORM\ManyToOne(targetEntity="UserGroup", inversedBy="userId")
@@ -76,9 +60,6 @@ class UserGroupToUser implements IdentifiedObject
 		return $this->roleId;
 	}
 
-    /**
-     * @return mixed
-     */
     public function getGroupId()
     {
         return $this->groupId;

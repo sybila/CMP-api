@@ -293,10 +293,10 @@ class RuleClassificationException extends ApiException
 class InvalidAuthenticationException extends ApiException
 {
     const CODE = 713;
-    public function __construct(string $field, ?Throwable $previous = null)
+    public function __construct(string $field, string $hint, ?Throwable $previous = null)
     {
         parent::__construct($previous)
-            ->setMessage('%s', $field);
+            ->setMessage('%s %s.', $field, $hint);
     }
 }
 

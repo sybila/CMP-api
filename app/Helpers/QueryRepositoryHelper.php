@@ -4,6 +4,10 @@
 namespace App\Helpers;
 
 
+use App\Entity\Authorization\User;
+use App\Entity\Authorization\UserGroup;
+use App\Entity\Experiment;
+use App\Entity\Model;
 use Doctrine\ORM\QueryBuilder;
 
 trait QueryRepositoryHelper
@@ -38,7 +42,8 @@ trait QueryRepositoryHelper
 
     public static function addAccesibleDql(QueryBuilder $query, ?array $accessFilter) : QueryBuilder
     {
-        if(property_exists($query->getRootEntities()[0],'groupId')){
+        if(in_array($query->getRootEntities()[0],
+            [Model::class, Experiment::class, UserGroup::class, User::class]) != false){
             foreach ($accessFilter as $owner=>$groupId) {
                 $query = $query
                     ->orWhere("$groupId = $owner");

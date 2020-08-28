@@ -4,6 +4,7 @@ namespace App\Repositories\Authorization;
 
 use App\Entity\Authorization\UserGroup;
 use App\Entity\Repositories\IEndpointRepository;
+use App\Helpers\QueryRepositoryHelper;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Common\Persistence\ObjectRepository;
 use Doctrine\ORM\EntityManager;
@@ -62,7 +63,7 @@ class UserGroupRepository implements IEndpointRepository
 	{
 		$query = $this->em->createQueryBuilder()
 			->from(UserGroup::class, 'g');
-		return $query;
+		return QueryRepositoryHelper::addFilterDql($query, $filter);
 	}
 
 }

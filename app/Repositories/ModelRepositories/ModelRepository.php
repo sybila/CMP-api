@@ -53,4 +53,8 @@ class ModelRepository implements IEndpointRepository
 		return $query;
 	}
 
+    public function getRootParent(): string
+    {
+        return 'models';
+    }
 }
