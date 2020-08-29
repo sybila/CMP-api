@@ -26,9 +26,9 @@ trait RepoAccessController
      * @param string $path
      * @return array with parent name and id
      */
-    protected static function getRootParent(string $path)
+    protected static function getRootParent()
     {
-        $split = explode('/', $path);
+        $split = array_diff(explode("/" , $_SERVER['REQUEST_URI']), explode("/", $_SERVER['SCRIPT_NAME']));
         return ['type' => $split[1], 'id' => $split[2]];
     }
 
@@ -36,7 +36,7 @@ trait RepoAccessController
     public function hasAccessToObject(array $userGroups): ?int
     {
         $parentClass = null;
-        $parent = self::getRootParent($_SERVER['REDIRECT_URL']);
+        $parent = self::getRootParent();
         if($parent['id']) {
             switch ($parent['type']) {
                 case 'models':
@@ -87,7 +87,7 @@ trait RepoAccessController
     {
         $quasi_filter = [];
         $parentClass = null;
-        $parent = self::getRootParent($_SERVER['REDIRECT_URL']);
+        $parent = self::getRootParent();
         switch ($parent['type']) {
             case 'models':
             case 'experiments':
@@ -121,7 +121,7 @@ trait RepoAccessController
     public function canManipulate(int $role, int $id, array $can_add): bool
     {
         $parentClass = null;
-        $parent = self::getRootParent($_SERVER['REDIRECT_URL']);
+        $parent = self::getRootParent();
         if ($parent['id']) {
             switch ($parent['type']) {
                 case 'models':
@@ -147,7 +147,7 @@ trait RepoAccessController
 
     public function canAdd(int $role, int $id) {
         $parentClass = null;
-        $parent = self::getRootParent($_SERVER['REDIRECT_URL']);
+        $parent = self::getRootParent();
         if ($parent['id']) {
             switch ($parent['type']) {
                 case 'models':
