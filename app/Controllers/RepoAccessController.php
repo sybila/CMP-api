@@ -23,13 +23,12 @@ trait RepoAccessController
 
 
     /**
-     * @param string $path
-     * @return array with parent name and id
+     * @return array with root parent name and id
      */
     protected static function getRootParent()
     {
         $split = array_diff(explode("/" , $_SERVER['REQUEST_URI']), explode("/", $_SERVER['SCRIPT_NAME']));
-        return ['type' => $split[1], 'id' => $split[2]];
+        return ['type' => array_shift($split), 'id' => array_shift($split)];
     }
 
 
@@ -63,13 +62,13 @@ trait RepoAccessController
                         return $group->getId() != UserGroup::PUBLIC_SPACE ? !is_null($groups[$group->getId()]) : false;
                     })->toArray();
                     if (array_reduce($related, function($carry, $rel) {return $carry || $rel; }) || $user->getIsPublic()){
-                        return true;
+                        return null;
                     } else {
                         throw new InvalidAuthenticationException("You cannot access this resource.",
                             "Not public or not a member of the same group.");
                     }
                 default:
-                    return true;
+                    return null;
             }
             $acc_obj = $this->orm->getRepository($parentClass)->find($parent['id']);
             if(property_exists($parentClass, 'groupId') && array_key_exists($acc_obj->getGroupId(), $userGroups))
@@ -80,7 +79,7 @@ trait RepoAccessController
                     "Not a member of the group.");
             }
         }
-        return true;
+        return null;
     }
 
     public function getAccessFilter(array $userGroups): ?array
@@ -91,6 +90,7 @@ trait RepoAccessController
         switch ($parent['type']) {
             case 'models':
             case 'experiments':
+            case 'experimentvalues':
                 //TODO? SO HOW DO WE USE GROUPS
                 $dql = static::getAlias() . ".groupId";
                 $quasi_filter = array_map(function () use ($dql) { return $dql; }, $userGroups);

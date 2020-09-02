@@ -44,9 +44,9 @@ trait QueryRepositoryHelper
     {
         if(in_array($query->getRootEntities()[0],
             [Model::class, Experiment::class, UserGroup::class, User::class]) != false){
-            foreach ($accessFilter as $owner=>$groupId) {
+            foreach ($accessFilter as $attr_id=>$attr) {
                 $query = $query
-                    ->orWhere("$groupId = $owner");
+                    ->orWhere("$attr = $attr_id");
             }
         }
         return $query;

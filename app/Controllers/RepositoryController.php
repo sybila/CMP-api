@@ -37,6 +37,9 @@ abstract class RepositoryController extends AbstractController
 	/** @var ResourceServer */
 	protected $server;
 
+    /** @var array*/
+	protected $user_permissions;
+
 	abstract protected static function getRepositoryClassName(): string;
 
 
@@ -87,9 +90,11 @@ abstract class RepositoryController extends AbstractController
             } catch (OAuthServerException $e) {
                 throw new InvalidAuthenticationException($e->getMessage(), $e->getHint());
             }
-            return $this->getUserPermissions($request->getAttribute('oauth_user_id'));
+            $this->user_permissions = $this->getUserPermissions($request->getAttribute('oauth_user_id'));
+            return $this->user_permissions;
         }
-        return ["group_wise" => [1 => 10], "platform_wise" => 0];
+        $this->user_permissions = ["group_wise" => [1 => 10], "platform_wise" => 0,  "user_id" => 0];
+        return ["group_wise" => [1 => 10], "platform_wise" => 0,  "user_id" => 0];
     }
 
 	public function read(Request $request, Response $response, ArgumentParser $args)
@@ -183,13 +188,14 @@ abstract class RepositoryController extends AbstractController
      * @throws InvalidArgumentException if user with non-existing role
      * @throws InvalidAuthenticationException
      */
-    public function validateList(array $user_permissions) : array
+    public function validateList(array $user_permissions) : ?array
     {
         switch ($user_permissions['platform_wise']){
             case User::ADMIN:
                 return [];
             case User::POWER:
             case User::REGISTERED:
+            case User::TEMPORARY:
             case User::GUEST:
                 $this->hasAccessToObject($user_permissions['group_wise']);
                 return $this->getAccessFilter($user_permissions['group_wise']);
@@ -212,6 +218,7 @@ abstract class RepositoryController extends AbstractController
                 return true;
             case User::POWER:
             case User::REGISTERED:
+            case User::TEMPORARY:
             case User::GUEST:
                 $this->hasAccessToObject($user_permissions['group_wise']);
                 return true;

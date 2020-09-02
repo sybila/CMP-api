@@ -2,25 +2,21 @@
 
 namespace App\Controllers;
 
-use App\Entity\{
-	Model,
-	IdentifiedObject,
-	ModelCompartment,
-	ModelConstraint,
-	ModelEvent,
-	ModelFunctionDefinition,
-	ModelInitialAssignment,
-	ModelParameter,
-	ModelReaction,
-	ModelRule,
-	ModelUnitDefinition,
-	Repositories\IEndpointRepository,
-	Repositories\ModelRepository
-};
-use App\Exceptions\{
-	DependentResourcesBoundException,
-	MissingRequiredKeyException
-};
+use App\Entity\{Authorization\User,
+    Model,
+    IdentifiedObject,
+    ModelCompartment,
+    ModelConstraint,
+    ModelEvent,
+    ModelFunctionDefinition,
+    ModelInitialAssignment,
+    ModelParameter,
+    ModelReaction,
+    ModelRule,
+    ModelUnitDefinition,
+    Repositories\IEndpointRepository,
+    Repositories\ModelRepository};
+use App\Exceptions\{DependentResourcesBoundException, InvalidRoleException, MissingRequiredKeyException};
 use App\Helpers\ArgumentParser;
 use Slim\Container;
 use Slim\Http\{
@@ -98,7 +94,8 @@ final class ModelController extends SBaseController
 	{
 		/** @var Model $model */
 		parent::setData($model, $data);
-		!$data->hasKey('userId') ?: $model->setUserId($data->getString('userId'));
+		$model->setUserId($this->user_permissions['user_id']);
+        !$data->hasKey('groupId') ?: $model->setGroupId($data->getString('groupId'));
 		!$data->hasKey('approvedId') ?: $model->setApprovedId($data->getString('approvedId'));
 		!$data->hasKey('description') ?: $model->setDescription($data->getString('description'));
 		!$data->hasKey('status') ?: $model->setStatus($data->getString('status'));
@@ -119,6 +116,12 @@ final class ModelController extends SBaseController
 		/** @var Model $model */
 		if ($model->getUserId() === null)
 			throw new MissingRequiredKeyException('userId');
+        if ($model->getGroupId() === null)
+            throw new MissingRequiredKeyException('groupId');
+        if ($this->user_permissions['platform_wise'] != User::ADMIN &&
+            !in_array($this->user_permissions['group_wise'][$model->getGroupId()],User::CAN_ADD))
+            throw new InvalidRoleException("assign group ID = {$model->getGroupId()} to this ",
+                'POST',$_SERVER['REQUEST_URI']);
 	}
 
 	public function delete(Request $request, Response $response, ArgumentParser $args): Response
@@ -150,6 +153,7 @@ final class ModelController extends SBaseController
 	{
 		$validatorArray = parent::getValidatorArray();
 		return new Assert\Collection(array_merge($validatorArray, [
+		    'groupId' => new Assert\Type(['type' => 'integer']),
 			'userId' => new Assert\Type(['type' => 'integer']),
 			'description' => new Assert\Type(['type' => 'string']),
 			'visualisation' => new Assert\Type(['type' => 'string']),

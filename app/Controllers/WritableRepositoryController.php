@@ -158,12 +158,14 @@ abstract class WritableRepositoryController extends RepositoryController
             case User::POWER:
             case User::REGISTERED:
                 $user_group = $this->hasAccessToObject($user_permissions['group_wise']);
-                if(!$this->canAdd($user_permissions['group_wise'][$user_group], $user_permissions['user_id']))
+                if(!is_null($user_group) &&
+                    !$this->canAdd($user_permissions['group_wise'][$user_group], $user_permissions['user_id']))
                 {
                     throw new InvalidRoleException('add', 'POST',
                         $_SERVER['REDIRECT_URL']);
                 }
                 return true;
+            case User::TEMPORARY:
             case User::GUEST:
                 throw new InvalidRoleException('add', 'POST', $_SERVER['REDIRECT_URL']);
             default:
@@ -193,6 +195,7 @@ abstract class WritableRepositoryController extends RepositoryController
                         $_SERVER['REDIRECT_URL']);
                 }
                 return true;
+            case User::TEMPORARY:
             case User::GUEST:
                 throw new InvalidRoleException('edit', 'PUT', $_SERVER['REDIRECT_URL']);
             default:
@@ -222,6 +225,7 @@ abstract class WritableRepositoryController extends RepositoryController
                         $_SERVER['REDIRECT_URL']);
                 }
                 return true;
+            case User::TEMPORARY:
             case User::GUEST:
                 throw new InvalidRoleException('delete', 'DELETE', $_SERVER['REDIRECT_URL']);
             default:

@@ -81,7 +81,7 @@ final class VariablesValuesController extends RepositoryController
 
     protected static function getAlias(): string
     {
-        return 'v';
+        return 'e';
     }
 
 }

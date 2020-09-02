@@ -213,7 +213,7 @@ final class EntityController extends WritableRepositoryController
 			$code = $data->getString('code');
 			if ($checkEntity = $this->repository->getByCode($code))
 				if ($checkEntity->getId() != $entity->getId())
-					throw new UniqueKeyViolationException('code', $checkEntity->getId());
+					throw new UniqueKeyViolationException('code', $checkEntity->getId(), 'entity');
 
 			$entity->setCode($code);
 		}

@@ -141,7 +141,7 @@ class Model implements IdentifiedObject
     /**
      * @return int
      */
-    public function getGroupId(): int
+    public function getGroupId(): ?int
     {
         return $this->groupId;
     }

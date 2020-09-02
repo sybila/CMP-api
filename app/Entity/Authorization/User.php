@@ -25,6 +25,7 @@ class User implements UserEntityInterface, IdentifiedObject
     const ADMIN = 1;
     const POWER = 2;
     const REGISTERED = 3;
+    const TEMPORARY = 4;
     const GUEST = 0; //pun intended
 
     const CAN_ADD = [4,5,6,7,8];
