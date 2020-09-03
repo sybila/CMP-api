@@ -160,6 +160,14 @@ trait RepoAccessController
                     return true;
             }
         }
+        else {
+            switch ($parent['type']) {
+                case 'users':
+                    return true;
+                default:
+                    return false;
+            }
+        }
     }
 
     public function getVisibleUsersId(array $fromGroups){

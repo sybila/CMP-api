@@ -167,7 +167,9 @@ abstract class WritableRepositoryController extends RepositoryController
                 return true;
             case User::TEMPORARY:
             case User::GUEST:
-                throw new InvalidRoleException('add', 'POST', $_SERVER['REDIRECT_URL']);
+                if(!$this->canAdd($user_permissions['group_wise'][1], $user_permissions['user_id']))
+                    throw new InvalidRoleException('add', 'POST', $_SERVER['REDIRECT_URL']);
+                return true;
             default:
                 throw new InvalidArgumentException('user_type', $user_permissions['user_type'],
                     'This user type does not exist on the platform');

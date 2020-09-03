@@ -103,7 +103,7 @@ final class UserController extends WritableRepositoryController
 
 	protected function createObject(ArgumentParser $body): IdentifiedObject
 	{
-		$this->verifyMandatoryArguments(['username', 'password', 'name', 'surname', 'type', 'email'], $body);
+		$this->verifyMandatoryArguments(['username', 'password', 'name', 'surname', 'email'], $body);
 		return new User($body['username']);
 	}
 
