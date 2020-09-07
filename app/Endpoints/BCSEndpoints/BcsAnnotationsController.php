@@ -107,6 +107,11 @@ class EntityBcsAnnotationsController extends BcsAnnotationsController
 	{
 		return ['entity-id', 'entity'];
 	}
+
+    protected static function getAlias(): string
+    {
+        // TODO: Implement getAlias() method.
+    }
 }
 
 /**
@@ -133,4 +138,9 @@ class RuleBcsAnnotationsController extends BcsAnnotationsController
 	{
 		return ['rule-id', 'rule'];
 	}
+
+    protected static function getAlias(): string
+    {
+        // TODO: Implement getAlias() method.
+    }
 }

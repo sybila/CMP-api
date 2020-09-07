@@ -48,7 +48,7 @@ class ModelFunctionDefinitionRepository implements IDependentSBaseRepository
 	{
 		$query = $this->buildListQuery($filter)
 			->select('f.id, f.name, f.sbmlId, f.sboTerm, f.notes, f.annotation, f.formula');
-        $query = QueryRepositoryHelper::addFilterPaginationSortDql($query, $filter, $sort, $limit);
+        $query = QueryRepositoryHelper::addPaginationSortDql($query, $sort, $limit);
 
 		return $query->getQuery()->getArrayResult();
 	}
@@ -72,6 +72,7 @@ class ModelFunctionDefinitionRepository implements IDependentSBaseRepository
 			->from(ModelFunctionDefinition::class, 'f')
 			->where('f.modelId = :modelId')
 			->setParameter('modelId', $this->model->getId());
+        $query = QueryRepositoryHelper::addFilterDql($query, $filter);
 		return $query;
 	}
 

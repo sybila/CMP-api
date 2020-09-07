@@ -16,6 +16,9 @@ use League\OAuth2\Server\Entities\UserEntityInterface;
 class UserGroup implements IdentifiedObject
 {
 
+    const PUBLIC_SPACE = 1;
+    const ADMIN_SPACE = 2;
+
 	use Identifier;
 
 	/**
@@ -41,6 +44,11 @@ class UserGroup implements IdentifiedObject
 	 */
 	private $type;
 
+    /**
+     * @var boolean
+     * @ORM\Column(name="is_public")
+     */
+	private $isPublic;
 
 	public function getIdentifier()
 	{
@@ -97,5 +105,18 @@ class UserGroup implements IdentifiedObject
 		$this->description = $description;
 		return $description;
 	}
+
+
+    public function getIsPublic()
+    {
+        return $this->isPublic;
+    }
+
+
+    public function setIsPublic($isPublic): void
+    {
+        $this->isPublic = $isPublic;
+    }
+
 
 }

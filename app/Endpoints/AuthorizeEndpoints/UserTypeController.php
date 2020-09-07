@@ -42,4 +42,8 @@ final class UserTypeController extends RepositoryController
 		return UserTypeRepository::class;
 	}
 
+    protected static function getAlias(): string
+    {
+        return 'ut';
+    }
 }

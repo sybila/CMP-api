@@ -48,7 +48,7 @@ class BioquantityVariableRepository implements IDependentSBaseRepository
 	{
 		$query = $this->buildListQuery($filter)
 			->select('s.id','s.name, s.value, s.timeFrom, s.timeTo, s.source');
-        $query = QueryRepositoryHelper::addFilterPaginationSortDql($query, $filter, $sort, $limit);
+        $query = QueryRepositoryHelper::addPaginationSortDql($query, $sort, $limit);
 		return $query->getQuery()->getArrayResult();
 	}
 
@@ -73,6 +73,7 @@ class BioquantityVariableRepository implements IDependentSBaseRepository
 			->setParameters([
 				'methodId' => $this->method->getId()
 			]);
+        $query = QueryRepositoryHelper::addFilterDql($query, $filter);
 		return $query;
 	}
 

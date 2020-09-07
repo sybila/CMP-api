@@ -22,6 +22,12 @@ class Model implements IdentifiedObject
 	 */
 	private $userId;
 
+    /**
+     * @var int
+     * @ORM\Column(type="integer", name="group_id")
+     */
+	private $groupId;
+
 	/**
 	 * @var int
 	 * @ORM\Column(type="integer", name="approved_id")
@@ -108,6 +114,10 @@ class Model implements IdentifiedObject
      */
     private $experiments;
 
+    public function getAlias(){
+        return 'm';
+    }
+
 	/**
 	 * Get userId
 	 * @return integer
@@ -127,6 +137,22 @@ class Model implements IdentifiedObject
 		$this->userId = $userId;
 		return $this;
 	}
+
+    /**
+     * @return int
+     */
+    public function getGroupId(): ?int
+    {
+        return $this->groupId;
+    }
+
+    /**
+     * @param int $groupId
+     */
+    public function setGroupId(int $groupId): void
+    {
+        $this->groupId = $groupId;
+    }
 
 	/**
 	 * Get approvedId

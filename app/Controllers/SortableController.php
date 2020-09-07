@@ -23,7 +23,7 @@ trait SortableController
 					$how = strtoupper($how);
 
 				if ($how !== 'ASC' && $how !== 'DESC')
-					throw new InvalidSortFieldException('ascdesc');
+					throw new InvalidSortFieldException('for sort should be \'asc\' or \'desc\'. Otherwise, the query');
 
 				if (!in_array($by, static::getAllowedSort()))
 					throw new InvalidSortFieldException($by);

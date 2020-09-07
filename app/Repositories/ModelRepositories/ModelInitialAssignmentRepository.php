@@ -45,7 +45,7 @@ class ModelInitialAssignmentRepository implements IDependentSBaseRepository
 	{
 		$query = $this->buildListQuery($filter)
 			->select('i.id, i.name, i.sbmlId, i.sboTerm, i.notes, i.annotation, i.formula');
-        $query = QueryRepositoryHelper::addFilterPaginationSortDql($query, $filter, $sort, $limit);
+        $query = QueryRepositoryHelper::addPaginationSortDql($query, $sort, $limit);
 
 		return $query->getQuery()->getArrayResult();
 	}
@@ -69,6 +69,7 @@ class ModelInitialAssignmentRepository implements IDependentSBaseRepository
 			->from(ModelInitialAssignment::class, 'i')
 			->where('i.modelId = :modelId')
 			->setParameter('modelId', $this->object->getId());
+        $query = QueryRepositoryHelper::addFilterDql($query, $filter);
 		return $query;
 	}
 }

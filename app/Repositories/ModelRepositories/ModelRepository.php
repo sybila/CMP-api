@@ -40,7 +40,7 @@ class ModelRepository implements IEndpointRepository
 	{
 		$query = $this->buildListQuery($filter)
 			->select('m.id, m.name, m.sbmlId, m.sboTerm, m.notes, m.annotation, m.userId, m.approvedId, m.status');
-        $query = QueryRepositoryHelper::addFilterPaginationSortDql($query, $filter, $sort, $limit);
+        $query = QueryRepositoryHelper::addPaginationSortDql($query, $sort, $limit);
 
 		return $query->getQuery()->getArrayResult();
 	}
@@ -49,6 +49,7 @@ class ModelRepository implements IEndpointRepository
 	{
 		$query = $this->em->createQueryBuilder()
 			->from(Model::class, 'm');
+		$query = QueryRepositoryHelper::addFilterDql($query, $filter);
 		return $query;
 	}
 

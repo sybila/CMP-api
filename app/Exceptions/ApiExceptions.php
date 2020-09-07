@@ -42,12 +42,16 @@ abstract class ApiException extends \Exception
 class UniqueKeyViolationException extends ApiException
 {
 	const CODE = 409;
-	public function __construct(string $key, int $id, Throwable $previous = null)
+	public function __construct(string $key, ?int $id, ?string $object, Throwable $previous = null)
 	{
-		parent::__construct($previous)
-			->setMessage('Object with given %s already exists with ID %d', $key, $id);
-
-		$this->additional = ['id' => $id, 'key' => $key];
+	    if ($id==null)
+            parent::__construct($previous)
+                ->setMessage('Some %s with given %s already exists.', $object, $key);
+        else {
+            parent::__construct($previous)
+                ->setMessage('Some %s with given %s already exists with ID %d', $object, $key, $id);
+            $this->additional = ['id' => $id, 'key' => $key];
+	    }
 	}
 
 	public function getHttpCode(): int
@@ -142,7 +146,7 @@ class EmptyArraySelection extends ApiException
             $filters .= "{$by} LIKE {$expr}";
         }
         parent::__construct($previous)
-            ->setMessage('Filter (%s) returns empty list of objects.', $filters);
+            ->setMessage('Empty list of objects returned. %s', $filters);
     }
 }
 
@@ -288,6 +292,37 @@ class RuleClassificationException extends ApiException
 		parent::__construct($previous)
 			->setMessage('Rules must have classification with type "rule"');
 	}
+}
+
+class InvalidAuthenticationException extends ApiException
+{
+    const CODE = 401;
+    public function __construct(string $field, string $hint, ?Throwable $previous = null)
+    {
+        parent::__construct($previous)
+            ->setMessage('%s %s.', $field, $hint);
+    }
+}
+
+class InvalidRoleException extends ApiException
+{
+    const CODE = 403;
+    public function __construct(string $action, string $api_action,
+                                string $uri, ?Throwable $previous = null)
+    {
+        parent::__construct($previous)
+            ->setMessage('Denied. Cannot %s resources on this uri: %s via %s method', $action, $uri, $api_action);
+    }
+}
+
+class ActionConflictException extends ApiException
+{
+    const CODE = 409;
+    public function __construct(string $message, ?Throwable $previous = null)
+    {
+        parent::__construct($previous)
+            ->setMessage('Conflict. %s', $message);
+    }
 }
 
 

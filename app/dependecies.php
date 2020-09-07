@@ -300,4 +300,6 @@ $c[ResourceServer::class] = function (Container $c) {
 	);
 };
 
+$c['mailer'] = $c->settings['mailer'];
+
 return $c;

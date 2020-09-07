@@ -39,7 +39,7 @@ class BioquantityRepository implements IEndpointRepository
 	{
 		$query = $this->buildListQuery($filter)
 			->select('b.id, b.name, b.description, b.IsAutomatic, b.IsValid');
-        $query = QueryRepositoryHelper::addFilterPaginationSortDql($query, $filter, $sort, $limit);
+        $query = QueryRepositoryHelper::addPaginationSortDql($query, $sort, $limit);
 		return $query->getQuery()->getArrayResult();
 	}
 

@@ -3,10 +3,18 @@
 namespace App\Repositories\Authorization;
 
 use App\Entity\Authorization\User;
+use App\Entity\Authorization\UserGroup;
+use App\Entity\Authorization\UserGroupToUser;
+use App\Entity\Experiment;
+use App\Entity\Model;
 use App\Entity\Repositories\IEndpointRepository;
+use App\Exceptions\InvalidAuthenticationException;
+use App\Helpers\QueryRepositoryHelper;
+use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Common\Persistence\ObjectRepository;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Tools\AttachEntityListenersListener;
 use League\OAuth2\Server\Entities\ClientEntityInterface;
 use League\OAuth2\Server\Repositories\UserRepositoryInterface;
 
@@ -18,9 +26,6 @@ class UserRepository implements UserRepositoryInterface, IEndpointRepository
 
 	/** @var ObjectRepository */
 	private $userRepository;
-
-	/** @var User */
-	private $user;
 
 
 	public function __construct(EntityManager $em)
@@ -58,7 +63,6 @@ class UserRepository implements UserRepositoryInterface, IEndpointRepository
 		return $this->em->find(User::class, $id);
 	}
 
-
 	public function getList(array $filter, array $sort, array $limit): array
 	{
 		$query = $this->buildListQuery($filter)
@@ -80,7 +84,7 @@ class UserRepository implements UserRepositoryInterface, IEndpointRepository
 	{
 		$query = $this->em->createQueryBuilder()
 			->from(User::class, 'u');
-		return $query;
+		return QueryRepositoryHelper::addFilterDql($query, $filter);
 	}
 
 }

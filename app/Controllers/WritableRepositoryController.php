@@ -2,7 +2,11 @@
 
 namespace App\Controllers;
 
+use App\Entity\Authorization\User;
 use App\Entity\IdentifiedObject;
+use App\Exceptions\InvalidArgumentException;
+use App\Exceptions\InvalidAuthenticationException;
+use App\Exceptions\InvalidRoleException;
 use App\Helpers\ArgumentParser;
 use Slim\Container;
 use Slim\Http\Request;
@@ -76,7 +80,7 @@ abstract class WritableRepositoryController extends RepositoryController
 	public function add(Request $request, Response $response, ArgumentParser $args): Response
 	{
 		$this->runEvents($this->beforeRequest, $request, $response, $args);
-
+        $this->validateAdd($this->getAccess($request));
 		$body = new ArgumentParser($request->getParsedBody());
 		$this->validate($body, $this->getValidator());
 		$object = $this->createObject($body);
@@ -95,9 +99,8 @@ abstract class WritableRepositoryController extends RepositoryController
 	public function edit(Request $request, Response $response, ArgumentParser $args): Response
 	{
 		$this->runEvents($this->beforeRequest, $request, $response, $args);
-
 		$object = $this->getObject($this->getModifyId($args));
-
+        $this->validateEdit($this->getAccess($request));
 		$body = new ArgumentParser($request->getParsedBody());
 		$this->validate($body, $this->getValidator());
 		$this->setData($object, $body);
@@ -114,6 +117,7 @@ abstract class WritableRepositoryController extends RepositoryController
 	{
 		$this->runEvents($this->beforeRequest, $request, $response, $args);
 		$entity = $this->getObject($this->getModifyId($args));
+        $this->validateDelete($this->getAccess($request));
 		$this->runEvents($this->beforeDelete, $entity);
 		$this->orm->remove($entity);
 		$this->data->needsFlush = true;
@@ -139,4 +143,96 @@ abstract class WritableRepositoryController extends RepositoryController
 
 
 	abstract protected function getValidator(): Assert\Collection;
+
+    /**
+     * @param array $user_permissions
+     * @return bool
+     * @throws InvalidArgumentException
+     * @throws InvalidRoleException|InvalidAuthenticationException
+     */
+    public function validateAdd(array $user_permissions) : bool
+    {
+        switch ($user_permissions['platform_wise']) {
+            case User::ADMIN:
+                return true;
+            case User::POWER:
+            case User::REGISTERED:
+                $user_group = $this->hasAccessToObject($user_permissions['group_wise']);
+                if(!is_null($user_group) &&
+                    !$this->canAdd($user_permissions['group_wise'][$user_group], $user_permissions['user_id']))
+                {
+                    throw new InvalidRoleException('add', 'POST',
+                        $_SERVER['REDIRECT_URL']);
+                }
+                return true;
+            case User::TEMPORARY:
+            case User::GUEST:
+                if(!$this->canAdd($user_permissions['group_wise'][1], $user_permissions['user_id']))
+                    throw new InvalidRoleException('add', 'POST', $_SERVER['REDIRECT_URL']);
+                return true;
+            default:
+                throw new InvalidArgumentException('user_type', $user_permissions['user_type'],
+                    'This user type does not exist on the platform');
+        }
+    }
+
+    /**
+     * @param array $user_permissions
+     * @return bool
+     * @throws InvalidArgumentException
+     * @throws InvalidAuthenticationException
+     * @throws InvalidRoleException
+     */
+    public function validateEdit(array $user_permissions) : bool
+    {
+        switch ($user_permissions['platform_wise']) {
+            case User::ADMIN:
+                return true;
+            case User::POWER:
+            case User::REGISTERED:
+                $user_group = $this->hasAccessToObject($user_permissions['group_wise']);
+                if (!$this->canManipulate($user_permissions['group_wise'][$user_group],
+                    $user_permissions['user_id'], User::CAN_EDIT)) {
+                    throw new InvalidRoleException('edit', 'PUT',
+                        $_SERVER['REDIRECT_URL']);
+                }
+                return true;
+            case User::TEMPORARY:
+            case User::GUEST:
+                throw new InvalidRoleException('edit', 'PUT', $_SERVER['REDIRECT_URL']);
+            default:
+                throw new InvalidArgumentException('user_type', $user_permissions['user_type'],
+                    'This user type does not exist on the platform');
+        }
+    }
+
+    /**
+     * @param array $user_permissions
+     * @return bool
+     * @throws InvalidArgumentException
+     * @throws InvalidAuthenticationException
+     * @throws InvalidRoleException
+     */
+    public function validateDelete(array $user_permissions) : bool
+    {
+        switch ($user_permissions['platform_wise']) {
+            case User::ADMIN:
+                return true;
+            case User::POWER:
+            case User::REGISTERED:
+                $user_group = $this->hasAccessToObject($user_permissions['group_wise']);
+                if (!$this->canManipulate($user_permissions['group_wise'][$user_group],
+                    $user_permissions['user_id'], User::CAN_DELETE)) {
+                    throw new InvalidRoleException('delete', 'DELETE',
+                        $_SERVER['REDIRECT_URL']);
+                }
+                return true;
+            case User::TEMPORARY:
+            case User::GUEST:
+                throw new InvalidRoleException('delete', 'DELETE', $_SERVER['REDIRECT_URL']);
+            default:
+                throw new InvalidArgumentException('user_type', $user_permissions['user_type'],
+                    'This user type does not exist on the platform');
+        }
+    }
 }

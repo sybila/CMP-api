@@ -19,15 +19,15 @@ class UserGroupToUser implements IdentifiedObject
 	use Identifier;
 
 	/**
-	 * @ORM\ManyToOne(targetEntity="User", inversedBy="groupId")
+	 * @ORM\ManyToOne(targetEntity="User", inversedBy="groups")
 	 * @ORM\JoinColumn(name="user_id", referencedColumnName="id")
-	 */
+     */
 	private $userId;
 
 	/**
 	 * @ORM\ManyToOne(targetEntity="UserGroup", inversedBy="userId")
 	 * @ORM\JoinColumn(name="user_group_id", referencedColumnName="id")
-	 */
+     */
 	private $userGroupId;
 
 	/**
@@ -59,5 +59,13 @@ class UserGroupToUser implements IdentifiedObject
 	{
 		return $this->roleId;
 	}
+
+    public function getGroupId()
+    {
+        return $this->groupId;
+    }
+
+
+
 
 }

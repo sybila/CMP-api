@@ -4,19 +4,16 @@
 namespace App\Helpers;
 
 
+use App\Entity\Authorization\User;
+use App\Entity\Authorization\UserGroup;
+use App\Entity\Experiment;
+use App\Entity\Model;
 use Doctrine\ORM\QueryBuilder;
 
 trait QueryRepositoryHelper
 {
-    public static function addFilterPaginationSortDql(QueryBuilder $query, array $filter, array $sort, array $limit ) : QueryBuilder
+    public static function addPaginationSortDql(QueryBuilder $query, array $sort, array $limit) : QueryBuilder
     {
-        if (!empty($filter)) {
-            foreach ($filter as $by=>$expr) {
-                $query = $query
-                    ->andWhere("$by LIKE '%$expr%'");
-            }
-            //TODO "did you mean {bla bla} (closest similar name, iterate via all models, do similar_text())"
-        }
         if ($limit['limit']){
             $query = $query->setMaxResults($limit['limit']);
         }
@@ -25,6 +22,32 @@ trait QueryRepositoryHelper
         }
         if (!empty($sort)) {
             $query = $query->add('orderBy', $sort['fullSortQuery']);
+        }
+        return $query;
+    }
+
+    public static function addFilterDql(QueryBuilder $query, array $filter) : QueryBuilder
+    {
+        if (!empty($filter['accessFilter'])){
+            $query = static::addAccesibleDql($query, $filter['accessFilter']);
+        }
+        if (!empty($filter['argFilter'])) {
+            foreach ($filter['argFilter'] as $by=>$expr) {
+                $query = $query
+                    ->andWhere("$by LIKE '%$expr%'");
+            }
+        }
+        return $query;
+    }
+
+    public static function addAccesibleDql(QueryBuilder $query, ?array $accessFilter) : QueryBuilder
+    {
+        if(in_array($query->getRootEntities()[0],
+            [Model::class, Experiment::class, UserGroup::class, User::class]) != false){
+            foreach ($accessFilter as $attr_id=>$attr) {
+                $query = $query
+                    ->orWhere("$attr = $attr_id");
+            }
         }
         return $query;
     }

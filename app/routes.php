@@ -112,7 +112,12 @@ return function(App $app) {
 
 	// version
 	$app->get('/version', Ctl\VersionController::class);
+
+	//OAuth2.0
 	$app->post('/authorize', Ctl\AuthorizeController::class);
+
+	//User confirm registration
+    $app->get('/users/{email}/{hash}', Ctl\UserController::class  . ':confirmRegistration');
 
 	// annotations
 	$app->get('/annotations/types', Ctl\AnnotationController::class . ':readTypes');

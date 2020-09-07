@@ -25,7 +25,7 @@ class AuthorizeController extends AbstractController
 		$this->server = $c[AuthorizationServer::class];
 	}
 
-	public function __invoke(Request $request, Response $response, ArgumentParser $args)
+public function __invoke(Request $request, Response $response, ArgumentParser $args)
 	{
 		try {
             $response = $this->server->respondToAccessTokenRequest($request, $response);

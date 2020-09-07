@@ -45,7 +45,7 @@ class ModelUnitDefinitionRepository implements IDependentSBaseRepository
 	{
 		$query = $this->buildListQuery($filter)
 			->select('u.id, u.name, u.sbmlId, u.sboTerm, u.notes, u.annotation, u.symbol, (u.compartmentId) as compartmentId' /*(u.localParameterId) as localParameterId,(u.parameterId) as parameterId'*/);
-        $query = QueryRepositoryHelper::addFilterPaginationSortDql($query, $filter, $sort, $limit);
+        $query = QueryRepositoryHelper::addPaginationSortDql($query, $sort, $limit);
 
 		return $query->getQuery()->getArrayResult();
 	}
@@ -69,6 +69,7 @@ class ModelUnitDefinitionRepository implements IDependentSBaseRepository
 			->from(ModelUnitDefinition::class, 'u')
 			->where('u.modelId = :modelId')
 			->setParameter('modelId', $this->object->getId());
+        $query = QueryRepositoryHelper::addFilterDql($query, $filter);
 		return $query;
 	}
 }

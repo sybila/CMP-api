@@ -49,7 +49,7 @@ class ExperimentValueRepository implements IDependentSBaseRepository
 	{
 		$query = $this->buildListQuery($filter)
 			->select('v.id, v.time, v.value');
-        $query = QueryRepositoryHelper::addFilterPaginationSortDql($query, $filter, $sort, $limit);
+        $query = QueryRepositoryHelper::addPaginationSortDql($query, $sort, $limit);
         return $query->getQuery()->getArrayResult();
 	}
 
@@ -74,6 +74,7 @@ class ExperimentValueRepository implements IDependentSBaseRepository
             ->setParameters([
                 'variableId' => $this->experimentVariable->getId()
             ]);
+        $query = QueryRepositoryHelper::addFilterDql($query, $filter);
 		return $query;
 	}
 
