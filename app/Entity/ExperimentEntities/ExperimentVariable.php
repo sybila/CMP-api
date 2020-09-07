@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -54,13 +56,13 @@ class ExperimentVariable implements IdentifiedObject
 
 	/**
 	 * @var ArrayCollection
-	 * @ORM\OneToMany(targetEntity="ExperimentValues", mappedBy="variableId")
+	 * @ORM\OneToMany(targetEntity="ExperimentValues", mappedBy="variableId", orphanRemoval=true)
 	 */
 	protected $values;
 
 	/**
 	 * @var ArrayCollection
-	 * @ORM\OneToMany(targetEntity="BioquantityVariable", mappedBy="experimentVariableId")
+	 * @ORM\OneToMany(targetEntity="BioquantityVariable", mappedBy="experimentVariableId", orphanRemoval=true)
 	 */
 	protected $bioquantityVariables;
 

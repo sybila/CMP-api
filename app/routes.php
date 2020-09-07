@@ -244,6 +244,9 @@ return function(App $app) {
 	$app->get('/models/{model-id:\\d+}/species/{sbmlId}', Ctl\ModelSpecieController::class . ':readSbmlId');
 	$app->get('/models/{model-id:\\d+}/parameters/{sbmlId}', Ctl\ModelParentedParameterController::class . ':readSbmlId');
 
+	//experiment
+    $app->delete('/experiment/{exp-id}/data',  Ctl\ExperimentController::class . ':deleteData');
+
 	// entities
 	$app->post('/entities/{id:\\d+}/status', Ctl\EntityController::class . ':editStatus');
 	$app->get('/entities/{code}', Ctl\EntityController::class . ':readCode');

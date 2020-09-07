@@ -11,6 +11,7 @@ use App\Entity\{Bioquantity,
     Model,
     Repositories\BioquantityRepository,
     Repositories\DeviceRepository,
+    Repositories\ExperimentVariableRepository,
     Repositories\IEndpointRepository,
     Repositories\ExperimentRepository,
     Repositories\ModelRepository,
@@ -137,11 +138,24 @@ final class ExperimentController extends WritableRepositoryController
 		/** @var Experiment $experiment */
 		$experiment = $this->getObject($args->getInt('id'));
 		if (!$experiment->getVariables()->isEmpty())
-			throw new DependentResourcesBoundException('variable');
+		    $experiment->getVariables()->clear();
 		if (!$experiment->getNote()->isEmpty())
-			throw new DependentResourcesBoundException('note');
+            $experiment->getNote()->clear();
 		return parent::delete($request, $response, $args);
 	}
+
+    public function deleteData(Request $request, Response $response, ArgumentParser $args): Response
+    {
+        /** @var Experiment $experiment */
+        $experiment = $this->getObject($args->getInt('exp-id'));
+        $vars = array();
+        if (!$experiment->getVariables()->isEmpty())
+            foreach ($experiment->getVariables() as $var){
+                $vars[] = $var->getName();
+                $this->experimentRepository->remove($var);
+            }
+        return self::formatOk($response, $vars);
+    }
 
 	protected function getValidator(): Assert\Collection
 	{

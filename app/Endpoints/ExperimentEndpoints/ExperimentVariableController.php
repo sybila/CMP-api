@@ -97,9 +97,9 @@ final class ExperimentVariableController extends ParentedRepositoryController
 		/** @var ExperimentVariable $variable */
 		$variable = $this->getObject($args->getInt('id'));
 		if (!$variable->getValues()->isEmpty())
-			throw new DependentResourcesBoundException('values');
+            $variable->getValues()->clear();
 		if (!$variable->getNote()->isEmpty())
-			throw new DependentResourcesBoundException('note');
+		    $variable->getNote()->clear();
 		return parent::delete($request, $response, $args);
 	}
 

@@ -50,4 +50,8 @@ class ExperimentRepository implements IEndpointRepository
 		return $query;
 	}
 
+	public function remove($object){
+	    $this->em->remove($object);
+	    $this->em->flush();
+    }
 }

@@ -59,7 +59,6 @@ final class ExperimentValueController extends ParentedRepositoryController
 	protected function setData(IdentifiedObject $value, ArgumentParser $data): void
 	{
 		/** @var ExperimentValues $value */
-		$value->setExperimentId($this->repository->getParent()->getExperimentId()->getId());
 		$value->getVariableId() ?: $value->setVariableId($this->repository->getParent());
 		!$data->hasKey('time') ?: $value->setTime($data->getFloat('time'));
 		!$data->hasKey('value') ?: $value->setValue($data->getFloat('value'));
@@ -67,7 +66,7 @@ final class ExperimentValueController extends ParentedRepositoryController
 
 	protected function createObject(ArgumentParser $body): IdentifiedObject
 	{
-		if (!$body->hasKey('time'))
+        if (!$body->hasKey('time'))
 			throw new MissingRequiredKeyException('time');
 		if (!$body->hasKey('value'))
 			throw new MissingRequiredKeyException('value');
@@ -77,8 +76,6 @@ final class ExperimentValueController extends ParentedRepositoryController
 	protected function checkInsertObject(IdentifiedObject $value): void
 	{
 		/** @var ExperimentValues $value */
-		if ($value->getExperimentId() === null)
-			throw new MissingRequiredKeyException('experimentId');
 		if ($value->getVariableId() === null)
 			throw new MissingRequiredKeyException('variableId');
 		if ($value->getTime() === null)

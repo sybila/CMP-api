@@ -76,13 +76,13 @@ class Experiment implements IdentifiedObject
 
 	/**
 	 * @var ArrayCollection
-	 * @ORM\OneToMany(targetEntity="ExperimentVariable", mappedBy="experimentId")
+	 * @ORM\OneToMany(targetEntity="ExperimentVariable", mappedBy="experimentId", orphanRemoval=true)
 	 */
 	private $variables;
 
 	/**
 	 * @var ArrayCollection
-	 * @ORM\OneToMany(targetEntity="ExperimentNote", mappedBy="experimentId")
+	 * @ORM\OneToMany(targetEntity="ExperimentNote", mappedBy="experimentId", orphanRemoval=true)
 	 */
 	private $notes;
 
