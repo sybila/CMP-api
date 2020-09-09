@@ -8,6 +8,7 @@ use App\Entity\{
 	Authorization\UserGroupToUser,
 	IdentifiedObject
 };
+use Symfony\Component\Mailer\Exception\InvalidArgumentException;
 use Symfony\Component\Mailer\Mailer;
 use App\Entity\Repositories\IEndpointRepository;
 use App\Repositories\Authorization\UserRepository;
@@ -171,10 +172,12 @@ final class UserController extends WritableRepositoryController
     //FIXME move me to some other place, once the platform notifications are implemented
 
     protected function sendConfirmationMail($receiver){
-        if(!$this->mailer['dsn']){
-            throw new MissingRequiredKeyException('dsn is not set up.');
+        try {
+            $transport = Transport::fromDsn($this->mailer['dsn']);
         }
-        $transport = Transport::fromDsn($this->mailer['dsn']);
+        catch (InvalidArgumentException $e) {
+            throw new MissingRequiredKeyException('dsn is not set up properly.');
+        }
         $hash = sha1($receiver . $this->mailer['salt']);
         $url = $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST'] . '/users/' . $receiver . '/' . $hash;
         $mailer = new Mailer($transport);
