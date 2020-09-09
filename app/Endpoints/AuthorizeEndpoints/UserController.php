@@ -171,10 +171,10 @@ final class UserController extends WritableRepositoryController
     //FIXME move me to some other place, once the platform notifications are implemented
 
     protected function sendConfirmationMail($receiver){
-        $transport = Transport::fromDsn($this->mailer['dsn']);
-        if(!$transport){
+        if(!$this->mailer['dsn']){
             throw new MissingRequiredKeyException('dsn is not set up.');
         }
+        $transport = Transport::fromDsn($this->mailer['dsn']);
         $hash = sha1($receiver . $this->mailer['salt']);
         $url = $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST'] . '/users/' . $receiver . '/' . $hash;
         $mailer = new Mailer($transport);
