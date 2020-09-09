@@ -9,6 +9,7 @@ use App\Entity\{
 	IdentifiedObject
 };
 use Symfony\Component\Mailer\Exception\InvalidArgumentException;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\Mailer;
 use App\Entity\Repositories\IEndpointRepository;
 use App\Repositories\Authorization\UserRepository;
@@ -186,7 +187,12 @@ final class UserController extends WritableRepositoryController
             ->to($receiver)
             ->subject('CMP: Confirm your registration')
             ->html("<p>If you want to fully activate your account click on <a href=$url>this link</a></p>");
-        $mailer->send($email);
+        try {
+            $mailer->send($email);
+        }
+        catch (TransportExceptionInterface $e){
+            throw new MissingRequiredKeyException($e->getMessage() . $e->getDebug());
+        }
     }
 
     public function confirmRegistration(Request $request, Response $response, ArgumentParser $args): Response
