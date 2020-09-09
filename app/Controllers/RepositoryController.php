@@ -79,7 +79,7 @@ abstract class RepositoryController extends AbstractController
     /**
      * @param Request $request needed for auth.
      * @return array key 'group_wise' contains array of associative array of key 'groupId' => groupRoleId (tier),
-     * key 'platform_wise' contains values from 0 to 3, (according to permissions on the platform)
+     * key 'platform_wise' contains values from 0 to 4, (according to permissions on the platform)
      * @throws InvalidAuthenticationException
      */
     public function getAccess(Request $request): array

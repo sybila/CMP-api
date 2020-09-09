@@ -146,7 +146,7 @@ final class UserController extends WritableRepositoryController
 			'type' => new Assert\Type(['type' => 'integer']),
 			'email' => new Assert\Email(),
 			'phone' => new Assert\Type(['type' => 'string']),
-            'isPublic' => new Assert\Type(['type' => 'bool'])
+            'isPublic' => new Assert\Type(['type' => 'int'])
 		]);
 	}
 
@@ -172,6 +172,9 @@ final class UserController extends WritableRepositoryController
 
     protected function sendConfirmationMail($receiver){
         $transport = Transport::fromDsn($this->mailer['dsn']);
+        if(!$transport){
+            throw new MissingRequiredKeyException('dsn is not set up.');
+        }
         $hash = sha1($receiver . $this->mailer['salt']);
         $url = $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST'] . '/users/' . $receiver . '/' . $hash;
         $mailer = new Mailer($transport);

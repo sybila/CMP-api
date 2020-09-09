@@ -113,10 +113,10 @@ return function(App $app) {
 	// version
 	$app->get('/version', Ctl\VersionController::class);
 
-	//OAuth2.0
+	// OAuth2.0
 	$app->post('/authorize', Ctl\AuthorizeController::class);
 
-	//User confirm registration
+	// User confirm registration
     $app->get('/users/{email}/{hash}', Ctl\UserController::class  . ':confirmRegistration');
 
 	// annotations
@@ -232,17 +232,20 @@ return function(App $app) {
     (new RouteHelper())
 		->setRoute(Ctl\UserController::class, '/users')
 		->register();
+    (new RouteHelper())
+        ->setRoute(Ctl\AnalysisTypeController::class, '/analysisTypes')
+        ->setMask(RouteHelper::LIST | RouteHelper::DETAIL)
+        ->register();
 	(new RouteHelper)
 		->setRoute(Ctl\UserTypeController::class, '/userTypes')
+        ->setMask(RouteHelper::LIST | RouteHelper::DETAIL)
 		->register();
 	(new RouteHelper)
 		->setRoute(Ctl\UserGroupController::class, '/userGroups')
 		->register();
 	(new RouteHelper)
 		->setRoute(Ctl\UserGroupRoleController::class, '/userGroupRoles')
-		->register();
-    (new RouteHelper)
-        ->setRoute(Ctl\ReadXMLController::class, '/read/xml/{file-path}')
+        ->setMask(RouteHelper::LIST | RouteHelper::DETAIL)
         ->register();
 
 	// model species
