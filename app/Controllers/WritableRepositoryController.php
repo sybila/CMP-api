@@ -162,7 +162,7 @@ abstract class WritableRepositoryController extends RepositoryController
                     !$this->canAdd($user_permissions['group_wise'][$user_group], $user_permissions['user_id']))
                 {
                     throw new InvalidRoleException('add', 'POST',
-                        $_SERVER['REDIRECT_URL']);
+                        $_SERVER['REQUEST_URI']);
                 }
                 return true;
             case User::TEMPORARY:

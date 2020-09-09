@@ -308,7 +308,7 @@ class InvalidRoleException extends ApiException
 {
     const CODE = 403;
     public function __construct(string $action, string $api_action,
-                                string $uri, ?Throwable $previous = null)
+                                ?string $uri, ?Throwable $previous = null)
     {
         parent::__construct($previous)
             ->setMessage('Denied. Cannot %s resources on this uri: %s via %s method', $action, $uri, $api_action);
