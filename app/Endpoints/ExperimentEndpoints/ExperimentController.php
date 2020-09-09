@@ -2,7 +2,8 @@
 
 namespace App\Controllers;
 
-use App\Entity\{Bioquantity,
+use App\Entity\{Authorization\User,
+    Bioquantity,
     Experiment,
     IdentifiedObject,
     ExperimentVariable,
@@ -25,6 +26,7 @@ use Slim\Container;
 use Slim\Http\{
 	Request, Response
 };
+use Symfony\Component\Finder\Exception\AccessDeniedException;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -113,15 +115,23 @@ final class ExperimentController extends WritableRepositoryController
         !$data->hasKey('removeRelatedBioquantityId') ?: $experiment->removeBioquantity($this->bioquantityRepository->get($data->getInt('removeRelatedBioquantityId')));
         !$data->hasKey('addRelatedDeviceId') ?: $experiment->addDevice($this->deviceRepository->get($data->getInt('addRelatedDeviceId')));
         !$data->hasKey('removeRelatedDeviceId') ?: $experiment->removeDevice($this->deviceRepository->get($data->getInt('removeRelatedDeviceId')));
+        !$data->hasKey('groupId') ?: $this->checkGroups($data->getInt('groupId')) || $experiment->setGroupId($data->getInt('groupId'));
 	}
 
+	protected function checkGroups($id) {
+        if (!array_key_exists($id, $this->user_permissions['group_wise'])){
+            throw new AccessDeniedException("Not a member of the group");
+        }
+    }
 	protected function createObject(ArgumentParser $body): IdentifiedObject
 	{
         if (!$body->hasKey('name'))
             throw new MissingRequiredKeyException('name');
         if (!$body->hasKey('status'))
             throw new MissingRequiredKeyException('status');
-		return new Experiment;
+        if (!$body->hasKey('groupId'))
+            throw new MissingRequiredKeyException('groupId' . serialize($this->user_permissions));
+        return new Experiment;
 	}
 
 	protected function checkInsertObject(IdentifiedObject $experiment): void
