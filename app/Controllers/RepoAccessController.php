@@ -16,6 +16,7 @@ use App\Exceptions\InvalidArgumentException;
 use Doctrine\Common\Collections\Criteria;
 use Slim\Http\Request;
 use League\OAuth2\Server\ResourceServer;
+use function MongoDB\BSON\toJSON;
 
 
 trait RepoAccessController
@@ -143,6 +144,7 @@ trait RepoAccessController
                     return false;
             }
         }
+        return true;
     }
 
     public function canAdd(int $role, int $id) {
@@ -163,11 +165,13 @@ trait RepoAccessController
         else {
             switch ($parent['type']) {
                 case 'users':
+                case 'experiments':
                     return true;
                 default:
                     return false;
             }
         }
+        return true;
     }
 
     public function getVisibleUsersId(array $fromGroups){

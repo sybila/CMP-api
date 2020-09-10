@@ -158,10 +158,11 @@ abstract class WritableRepositoryController extends RepositoryController
             case User::POWER:
             case User::REGISTERED:
                 $user_group = $this->hasAccessToObject($user_permissions['group_wise']);
+                dump('penis');
                 if(!is_null($user_group) &&
                     !$this->canAdd($user_permissions['group_wise'][$user_group], $user_permissions['user_id']))
                 {
-                    throw new InvalidRoleException('add', 'POST',
+                    throw new InvalidRoleException("add $user_group", 'POST',
                         $_SERVER['REQUEST_URI']);
                 }
                 return true;
