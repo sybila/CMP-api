@@ -489,6 +489,8 @@ types:
     type: ModelUnitDefinition
     properties:
       units: array
+      bionumbers:
+        type: IdentifierNameList
 
   Unit:
     type: SBaseEntity
@@ -499,6 +501,33 @@ types:
       multiplier: number
   UnitDetail:
     type: Unit
+
+# Bionumber entities
+
+  Bionumber:
+    properties:
+      id: Identifier
+      name: string
+      isValid: boolean
+      link: string
+      userId: Identifier
+      organismId: Identifier
+      unitId: Identifier
+      timeTo: datetime
+      timeFrom: datetime
+      valueTo: number
+      valueFrom: number
+      valueStep: number
+
+  BionumberDetail:
+    type: Bionumber
+    properties:
+      modelUnits:
+        type: IdentifierNameList
+      attributes:
+        type: IdentifierNameList
+      variableValues:
+        type: IdentifierNameList
 
 
 
@@ -1098,3 +1127,8 @@ resourceTypes:
   type: {_objectList: {type: Unit, "sortBy" : 'id, name'} }
   /{id}:
     type: {_object: {type: UnitDetail}}
+
+/bionumber:
+  type: {_objectList: {type: Bionumber, "sortBy" : 'id'} }
+  /{id}:
+    type: {_object: {type: BionumberDetail}}
