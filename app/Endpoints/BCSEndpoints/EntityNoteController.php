@@ -9,6 +9,7 @@ use App\Entity\Repositories\BcsNoteRepository;
 use App\Entity\Repositories\EntityRepository;
 use App\Entity\Repositories\EntityNoteRepository;
 use App\Exceptions\MissingRequiredKeyException;
+use App\Exceptions\WrongParentException;
 use App\Helpers\ArgumentParser;
 use App\Helpers\DateTimeJson;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -63,9 +64,9 @@ class EntityNoteController extends ParentedRepositoryController
 		return new EntityNote;
 	}
 
-	protected function getParentObjectInfo(): array
+	protected function getParentObjectInfo(): ParentObjectInfo
 	{
-		return ['entity-id', 'entity'];
+	    return new ParentObjectInfo('entity-id', 'entity');
 	}
 
 	protected function getValidator(): Assert\Collection
@@ -85,5 +86,10 @@ class EntityNoteController extends ParentedRepositoryController
     protected static function getAlias(): string
     {
         return 'n';
+    }
+
+    protected function checkParentValidity(IdentifiedObject $parent, IdentifiedObject $child)
+    {
+        // TODO: Implement checkParentValidity() method.
     }
 }

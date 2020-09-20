@@ -9,6 +9,7 @@ use App\Entity\Repositories\RuleNoteRepository;
 use App\Entity\Repositories\RuleRepository;
 use App\Entity\RuleNote;
 use App\Exceptions\MissingRequiredKeyException;
+use App\Exceptions\WrongParentException;
 use App\Helpers\ArgumentParser;
 use App\Helpers\DateTimeJson;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -63,9 +64,9 @@ class RuleNoteController extends ParentedRepositoryController
 		return new RuleNote;
 	}
 
-	protected function getParentObjectInfo(): array
+	protected function getParentObjectInfo(): ParentObjectInfo
 	{
-		return ['rule-id', 'rule'];
+	    return new ParentObjectInfo('rule-id', 'rule');
 	}
 
 	protected function getValidator(): Assert\Collection
@@ -85,5 +86,10 @@ class RuleNoteController extends ParentedRepositoryController
     protected static function getAlias(): string
     {
         return 'n';
+    }
+
+    protected function checkParentValidity(IdentifiedObject $parent, IdentifiedObject $child)
+    {
+        // TODO: Implement checkParentValidity() method.
     }
 }

@@ -112,7 +112,7 @@ final class UserController extends WritableRepositoryController
 
 	protected function checkInsertObject(IdentifiedObject $user): void
 	{
-		/** @var User user */
+		/** @var User $user */
 		if ($user->getUsername() === null)
 			throw new MissingRequiredKeyException('username');
 		if ($user->getName() === null)

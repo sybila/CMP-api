@@ -13,6 +13,7 @@ use App\Entity\Repositories\RuleAnnotationRepositoryImpl;
 use App\Entity\Repositories\RuleRepository;
 use App\Entity\RuleAnnotation;
 use App\Exceptions\MissingRequiredKeyException;
+use App\Exceptions\WrongParentException;
 use App\Helpers\ArgumentParser;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -103,14 +104,19 @@ class EntityBcsAnnotationsController extends BcsAnnotationsController
 		return EntityRepository::class;
 	}
 
-	protected function getParentObjectInfo(): array
+	protected function getParentObjectInfo(): ParentObjectInfo
 	{
-		return ['entity-id', 'entity'];
+	    return new ParentObjectInfo('entity-id', 'entity');
 	}
 
     protected static function getAlias(): string
     {
         // TODO: Implement getAlias() method.
+    }
+
+    protected function checkParentValidity(IdentifiedObject $parent, IdentifiedObject $child)
+    {
+        // TODO: Implement checkParentValidity() method.
     }
 }
 
@@ -134,13 +140,18 @@ class RuleBcsAnnotationsController extends BcsAnnotationsController
 		return RuleRepository::class;
 	}
 
-	protected function getParentObjectInfo(): array
+	protected function getParentObjectInfo(): ParentObjectInfo
 	{
-		return ['rule-id', 'rule'];
+	    return new ParentObjectInfo('rule-id', 'rule');
 	}
 
     protected static function getAlias(): string
     {
         // TODO: Implement getAlias() method.
+    }
+
+    protected function checkParentValidity(IdentifiedObject $parent, IdentifiedObject $child)
+    {
+        // TODO: Implement checkParentValidity() method.
     }
 }

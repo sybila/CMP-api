@@ -5,14 +5,17 @@ namespace App\Controllers;
 use App\Entity\Authorization\UserGroupToUser;
 use App\Entity\Authorization\User;
 use App\Entity\IdentifiedObject;
+use App\Entity\Model;
 use App\Entity\Repositories\IEndpointRepository;
 use App\Exceptions\EmptySelectionException;
 use App\Exceptions\InternalErrorException;
 use App\Exceptions\InvalidArgumentException;
 use App\Exceptions\InvalidAuthenticationException;
 use App\Exceptions\InvalidRoleException;
+use App\Exceptions\InvalidTypeException;
 use App\Exceptions\NonExistingObjectException;
 use App\Helpers\ArgumentParser;
+use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\ORMException;
 use League\OAuth2\Server\Exception\OAuthServerException;
 use League\OAuth2\Server\ResourceServer;
@@ -37,15 +40,26 @@ abstract class RepositoryController extends AbstractController
 	/** @var ResourceServer */
 	protected $server;
 
-    /** @var array*/
+    /** @var array */
 	protected $user_permissions;
 
+    /**
+     * Returns full class name of entity REPOSITORY that is related to this controller
+     * @return string
+     */
 	abstract protected static function getRepositoryClassName(): string;
 
-
+    /**
+     * Returns short class name of ENTITY that is related to this controller
+     * @return string
+     */
 	abstract protected static function getObjectName(): string;
 
-
+    /**
+     * Returns data prepared for output on DETAIL endpoint(.../{entity}/{id})
+     * @param IdentifiedObject $object
+     * @return array
+     */
 	abstract protected function getData(IdentifiedObject $object): array;
 
 
@@ -60,7 +74,11 @@ abstract class RepositoryController extends AbstractController
 			call_user_func_array($event, $args);
 	}
 
-
+    /**
+     * @param ArgumentParser $args
+     * @return array
+     * @throws InvalidTypeException
+     */
 	protected function getReadIds(ArgumentParser $args): array
 	{
 		return array_map(function($item) {
@@ -110,7 +128,17 @@ abstract class RepositoryController extends AbstractController
 		return self::formatOk($response, $this->repository->getList($filter, self::getSort($args), $limit));
 	}
 
-
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param ArgumentParser $args
+     * @return Response
+     * @throws InternalErrorException
+     * @throws InvalidArgumentException
+     * @throws InvalidAuthenticationException
+     * @throws InvalidTypeException
+     * @throws NonExistingObjectException
+     */
 	public function readIdentified(Request $request, Response $response, ArgumentParser $args): Response
 	{
 
@@ -156,6 +184,20 @@ abstract class RepositoryController extends AbstractController
 
 		return $ent;
 	}
+
+    /**
+     * @param string                $entityName
+     * @param int                   $id
+     * @return IdentifiedObject
+     * @throws NonExistingObjectException
+     */
+	protected function getObjectViaORM(string $entityName, int $id){
+        /** @var  IdentifiedObject $object */
+        $object = $this->orm->getRepository('App\Entity\\' . ucfirst($entityName))->find($id);
+        if (!$object)
+            throw new NonExistingObjectException($id, $entityName);
+        return $object;
+    }
 
 
 	// ============================================== HELPERS

@@ -4,13 +4,17 @@ namespace App\Controllers;
 
 use App\Entity\Authorization\User;
 use App\Entity\IdentifiedObject;
+use App\Exceptions\InternalErrorException;
 use App\Exceptions\InvalidArgumentException;
 use App\Exceptions\InvalidAuthenticationException;
 use App\Exceptions\InvalidRoleException;
+use App\Exceptions\InvalidTypeException;
+use App\Exceptions\NonExistingObjectException;
 use App\Helpers\ArgumentParser;
 use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;
+use stdClass;
 use Symfony\Component\Validator\Constraints as Assert;
 use App\Exceptions\MissingRequiredKeyException;
 
@@ -19,7 +23,7 @@ abstract class WritableRepositoryController extends RepositoryController
 
 	use ValidatedController;
 
-	/** @var \stdClass */
+	/** @var stdClass */
 	private $data;
 
 	/**
@@ -52,6 +56,7 @@ abstract class WritableRepositoryController extends RepositoryController
 	 * fill $object with data from $body, do additional validations
 	 * @param IdentifiedObject $object
 	 * @param ArgumentParser   $body
+     * @throws InvalidTypeException
 	 */
 	abstract protected function setData(IdentifiedObject $object, ArgumentParser $body): void;
 
@@ -60,6 +65,7 @@ abstract class WritableRepositoryController extends RepositoryController
 	 * Create object to be inserted, can be as simple as `return new SomeObject;`
 	 * @param ArgumentParser $body request body
 	 * @return IdentifiedObject
+     * @throws MissingRequiredKeyException
 	 */
 	abstract protected function createObject(ArgumentParser $body): IdentifiedObject;
 
@@ -67,6 +73,7 @@ abstract class WritableRepositoryController extends RepositoryController
 	/**
 	 * Check object to be inserted if it contains all required fields
 	 * @param IdentifiedObject $object
+     * @throws MissingRequiredKeyException
 	 */
 	abstract protected function checkInsertObject(IdentifiedObject $object): void;
 
@@ -90,6 +97,7 @@ abstract class WritableRepositoryController extends RepositoryController
 		$this->runEvents($this->beforeInsert, $object);
 
 		$this->orm->persist($object);
+
 		//FIXME: flush shouldn't be called here but in FlushMiddleware, but then we can't get inserted object id
 		$this->orm->flush();
 		return self::formatInsert($response, $object->getId());
@@ -147,8 +155,9 @@ abstract class WritableRepositoryController extends RepositoryController
     /**
      * @param array $user_permissions
      * @return bool
-     * @throws InvalidArgumentException
-     * @throws InvalidRoleException|InvalidAuthenticationException
+     * @throws InvalidArgumentException|InvalidAuthenticationException
+     * @throws InvalidRoleException|NonExistingObjectException
+     * @throws InternalErrorException
      */
     public function validateAdd(array $user_permissions) : bool
     {
@@ -168,7 +177,7 @@ abstract class WritableRepositoryController extends RepositoryController
             case User::TEMPORARY:
             case User::GUEST:
                 if(!$this->canAdd($user_permissions['group_wise'][1], $user_permissions['user_id']))
-                    throw new InvalidRoleException('add', 'POST', $_SERVER['REDIRECT_URL']);
+                    throw new InvalidRoleException('add', 'POST', $_SERVER['REQUEST_URI']);
                 return true;
             default:
                 throw new InvalidArgumentException('user_type', $user_permissions['user_type'],

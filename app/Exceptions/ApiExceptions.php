@@ -325,4 +325,15 @@ class ActionConflictException extends ApiException
     }
 }
 
+class WrongParentException extends ApiException
+{
+    const CODE = 403;
+    public function __construct(string $parent, ?int $pId,
+                                string $child, ?int $chId, ?Throwable $previous = null)
+    {
+        parent::__construct($previous)
+        ->setMessage('Cannot access %s with id %s from %s of id %s.', $child, $chId, $parent, $pId);
+    }
+}
+
 

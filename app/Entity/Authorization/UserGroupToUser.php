@@ -25,7 +25,7 @@ class UserGroupToUser implements IdentifiedObject
 	private $userId;
 
 	/**
-	 * @ORM\ManyToOne(targetEntity="UserGroup", inversedBy="userId")
+	 * @ORM\ManyToOne(targetEntity="UserGroup", inversedBy="users")
 	 * @ORM\JoinColumn(name="user_group_id", referencedColumnName="id")
      */
 	private $userGroupId;

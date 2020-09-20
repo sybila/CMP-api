@@ -230,11 +230,31 @@ return function(App $app) {
         ->setRoute(Ctl\DeviceController::class, '/devices')
         ->register();
     (new RouteHelper())
-		->setRoute(Ctl\UserController::class, '/users')
-		->register();
-    (new RouteHelper())
         ->setRoute(Ctl\AnalysisTypeController::class, '/analysisTypes')
         ->setMask(RouteHelper::LIST | RouteHelper::DETAIL)
+        ->register();
+    (new RouteHelper())
+        ->setRoute(Ctl\AnalysisToolController::class, '/analysisTools')
+        ->setMask(RouteHelper::LIST | RouteHelper::DETAIL)
+        ->register();
+    (new RouteHelper())
+        ->setRoute(Ctl\AnalysisMethodController::class, '/analysisMethods')
+        ->setMask(RouteHelper::LIST | RouteHelper::DETAIL)
+        ->register();
+    (new RouteHelper())
+        ->setRoute(Ctl\AnalysisSettingsController::class, '/analysisMethods/{meth-id:\\d+}/settings')
+        ->register();
+    (new RouteHelper())
+        ->setRoute(Ctl\AnalysisDatasetController::class, '/models/{model-id:\\d+}/datasets')
+        ->register();
+    (new RouteHelper())
+        ->setRoute(Ctl\AnalysisTaskController::class, '/{obj-type:experiment|model}s/{obj-id:\\d+}/tasks')
+        ->register();
+    (new RouteHelper())
+        ->setRoute(Ctl\AnalysisTaskController::class, '/analysisTasks')
+        ->register();
+    (new RouteHelper())
+        ->setRoute(Ctl\UserController::class, '/users')
         ->register();
 	(new RouteHelper)
 		->setRoute(Ctl\UserTypeController::class, '/userTypes')

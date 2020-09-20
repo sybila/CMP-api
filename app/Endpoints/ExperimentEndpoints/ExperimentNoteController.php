@@ -2,13 +2,12 @@
 
 namespace App\Controllers;
 
-use App\Entity\{
-	ExperimentNote,
-	IdentifiedObject,
-	Repositories\IEndpointRepository,
-	Repositories\ExperimentRepository,
-	Repositories\ExperimentNoteRepository
-};
+use App\Entity\{Experiment,
+    ExperimentNote,
+    IdentifiedObject,
+    Repositories\IEndpointRepository,
+    Repositories\ExperimentRepository,
+    Repositories\ExperimentNoteRepository};
 use App\Exceptions\
 {
 	DependentResourcesBoundException,
@@ -96,18 +95,18 @@ final class ExperimentNoteController extends ParentedRepositoryController
 		return ExperimentNoteRepository::Class;
 	}
 
-	protected static function getParentRepositoryClassName(): string
+	protected function getParentObjectInfo(): ParentObjectInfo
 	{
-		return ExperimentRepository::class;
-	}
-
-	protected function getParentObjectInfo(): array
-	{
-		return ['experiment-id', 'experiment'];
+	    return new ParentObjectInfo('experiment-id', 'experiment');
 	}
 
     protected static function getAlias(): string
     {
         return 'n';
+    }
+
+    protected function checkParentValidity(IdentifiedObject $parent, IdentifiedObject $child)
+    {
+        // TODO: Implement checkParentValidity() method.
     }
 }

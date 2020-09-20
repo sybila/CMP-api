@@ -9,11 +9,14 @@ use App\Entity\Authorization\UserGroup;
 use App\Entity\Authorization\UserGroupToUser;
 use App\Entity\Experiment;
 use App\Entity\Model;
+use App\Exceptions\InternalErrorException;
 use App\Exceptions\InvalidAuthenticationException;
 use App\Exceptions\InvalidRoleException;
+use App\Exceptions\NonExistingObjectException;
 use App\Repositories\Authorization\UserRepository;
 use App\Exceptions\InvalidArgumentException;
 use Doctrine\Common\Collections\Criteria;
+use Doctrine\ORM\ORMException;
 use Slim\Http\Request;
 use League\OAuth2\Server\ResourceServer;
 
@@ -70,7 +73,13 @@ trait RepoAccessController
                 default:
                     return null;
             }
-            $acc_obj = $this->orm->getRepository($parentClass)->find($parent['id']);
+            try {
+                $acc_obj = $this->orm->getRepository($parentClass)->find($parent['id']);
+                if (!$acc_obj)
+                    throw new NonExistingObjectException($parent['id'], $parent['type']);
+            } catch (ORMException $e) {
+                throw new InternalErrorException('Failed getting one of' . $parent['type'] . 'of ID ' . $parent['id'], $e);
+            }
             if(property_exists($parentClass, 'groupId') && array_key_exists($acc_obj->getGroupId(), $userGroups))
             {
                 return $acc_obj->getGroupId();
