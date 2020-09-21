@@ -218,15 +218,6 @@ return function(App $app) {
         ->setRoute(Ctl\ExperimentVariableNoteController::class, '/experiments/{experiment-id:\\d+}/variables/{variable-id:\\d+}/notes')
         ->register();
     (new RouteHelper)
-        ->setRoute(Ctl\BioquantityController::class, '/bioquantities')
-        ->register();
-    (new RouteHelper)
-        ->setRoute(Ctl\BioquantityMethodController::class, '/bioquantities/{bioquantity-id:\\d+}/methods')
-        ->register();
-    (new RouteHelper)
-        ->setRoute(Ctl\BioquantityVariableController::class, '/bioquantities/{bioquantitiy-id:\\d+}/methods/{method-id:\\d+}/variables')
-        ->register();
-    (new RouteHelper)
         ->setRoute(Ctl\DeviceController::class, '/devices')
         ->register();
     (new RouteHelper())
