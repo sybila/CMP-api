@@ -13,7 +13,7 @@ class ModelRepository implements IEndpointRepository
 	/** @var EntityManager * */
 	protected $em;
 
-	/** @var \Doctrine\ORM\ModelRepository */
+	/** @var \Doctrine\ORM\EntityRepository */
 	private $repository;
 
 	public function __construct(EntityManager $em)
@@ -24,7 +24,6 @@ class ModelRepository implements IEndpointRepository
 
 	public function get(int $id)
 	{
-		//dump($this->em->find(Model::class, $id));exit;
 		return $this->em->find(Model::class, $id);
 	}
 

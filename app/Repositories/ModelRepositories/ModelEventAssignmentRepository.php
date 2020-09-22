@@ -10,14 +10,17 @@ use App\Helpers\QueryRepositoryHelper;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 
-class ModelEventAssignmentRepository implements IDependentSBaseRepository
+class ModelEventAssignmentRepository implements IDependentEndpointRepository
 {
 
 	/** @var EntityManager * */
 	protected $em;
 
-	/** @var \Doctrine\ORM\EventAssignmentRepository */
+	/** @var \Doctrine\ORM\EntityRepository */
 	private $repository;
+
+    /** @var IdentifiedObject */
+    private $object;
 
 	public function __construct(EntityManager $em)
 	{
@@ -75,4 +78,13 @@ class ModelEventAssignmentRepository implements IDependentSBaseRepository
 		return $query;
 	}
 
+    public function add($object): void
+    {
+        // TODO: Implement add() method.
+    }
+
+    public function remove($object): void
+    {
+        // TODO: Implement remove() method.
+    }
 }

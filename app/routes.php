@@ -193,9 +193,11 @@ return function(App $app) {
 	(new RouteHelper)
 		->setRoute(Ctl\ModelParentedParameterController::class, '/models/{model-id:\\d+}/parameters')
 		->register();
+	#FIXME ------ WTH is this endpoint? Makes no sense
 	(new RouteHelper)
 		->setRoute(Ctl\ReactionItemParentedParameterController::class, '/models/{model-id:\\d+}/reactions/{reactionItem-id:\\d+}/parameters')
 		->register();
+	// ------------
 	(new RouteHelper)
 		->setRoute(Ctl\ModelParentedRuleController::class, '/models/{model-id:\\d+}/rules')
 		->register();

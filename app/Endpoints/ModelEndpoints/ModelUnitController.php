@@ -31,16 +31,10 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @property-read ModelUnitRepository $repository
  * @method ModelUnit getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
-final class ModelUnitController extends SBaseController
+final class ModelUnitController extends WritableRepositoryController
 {
-	/** @var ModelUnitRepository */
-	private $modelUnitRepository;
 
-	public function __construct(Container $c)
-	{
-		parent::__construct($c);
-		$this->modelUnitRepository = $c->get(ModelUnitRepository::class);
-	}
+    use \SBaseController;
 
 	protected static function getAlias(): string
     {
@@ -55,7 +49,7 @@ final class ModelUnitController extends SBaseController
 	protected function getData(IdentifiedObject $modelUnit): array
 	{
 		/** @var ModelUnit $modelUnit */
-		$sBaseData = parent::getData($modelUnit);
+		$sBaseData = $this->getSBaseData($modelUnit);
 		return array_merge($sBaseData, [
 			'baseUnitId' => $modelUnit->getBaseUnitId(),
 			'symbol' => $modelUnit->getSymbol(),
@@ -67,7 +61,7 @@ final class ModelUnitController extends SBaseController
 	protected function setData(IdentifiedObject $modelUnit, ArgumentParser $data): void
 	{
 		/** @var ModelUnit $modelUnit */
-		parent::setData($modelUnit, $data);
+        $this->setSBaseData($modelUnit, $data);
 		!$data->hasKey('baseUnitId') ?: $modelUnit->setSymbol($data->getInt('baseUnitId'));
 		!$data->hasKey('symbol') ?: $modelUnit->setSymbol($data->getString('symbol'));
 		!$data->hasKey('exponent') ?: $modelUnit->setExponent($data->getFloat('exponent'));
@@ -98,7 +92,7 @@ final class ModelUnitController extends SBaseController
 
 	protected function getValidator(): Assert\Collection
 	{
-		$validatorArray = parent::getValidatorArray();
+		$validatorArray = $this->getSBaseValidator();
 		return new Assert\Collection(array_merge($validatorArray, [
 			'baseUnitId' => new Assert\Type(['type' => 'integer']),
 			'symbol' => new Assert\Type(['type' => 'string']),

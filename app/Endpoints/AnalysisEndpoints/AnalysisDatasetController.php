@@ -6,6 +6,7 @@ namespace App\Controllers;
 
 use App\Entity\AnalysisDataset;
 use App\Entity\IdentifiedObject;
+use App\Entity\Model;
 use App\Entity\Repositories\AnalysisDatasetRepository;
 use App\Exceptions\MissingRequiredKeyException;
 use App\Exceptions\WrongParentException;
@@ -85,13 +86,13 @@ class AnalysisDatasetController extends ParentedRepositoryController
     {
         /** @var AnalysisDataset $child */
         if ($model->getId() != $child->getModelId()) {
-            throw new WrongParentException($this->getParentObjectInfo()->parentEntityName, $model->getId(),
+            throw new WrongParentException($this->getParentObjectInfo()->parentEntityClass, $model->getId(),
                 self::getObjectName(), $child->getId());
         }
     }
 
     protected function getParentObjectInfo(): ParentObjectInfo
     {
-        return new ParentObjectInfo('model-id', 'model');
+        return new ParentObjectInfo('model-id', Model::class);
     }
 }

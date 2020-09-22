@@ -13,11 +13,7 @@ use App\Entity\{
 	Repositories\ModelSpecieRepository,
 	Repositories\ModelReactionRepository
 };
-use App\Exceptions\
-{
-	MissingRequiredKeyException,
-	NonExistingObjectException
-};
+use App\Exceptions\{MissingRequiredKeyException, NonExistingObjectException, WrongParentException};
 use App\Helpers\ArgumentParser;
 use Doctrine\ORM\EntityManager;
 use Slim\Container;
@@ -27,22 +23,13 @@ use Slim\Http\{
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * @property-read ReactionItemRepository $repository
+ * @property-read ModelReactionItemRepository $repository
  * @method ModelReactionItem getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
-abstract class ModelReactionItemController extends ParentedSBaseController
+abstract class ModelReactionItemController extends ParentedRepositoryController
 {
-	/** @var ModelReactionItemRepository */
-	private $reactionItemRepository;
 
-	/** @var EntityManager * */
-	protected $em;
-
-	public function __construct(Container $c)
-	{
-		parent::__construct($c);
-		$this->reactionItemRepository = $c->get(ModelReactionItemRepository::class);
-	}
+    use \SBaseController;
 
 	protected static function getAlias(): string
     {
@@ -57,7 +44,7 @@ abstract class ModelReactionItemController extends ParentedSBaseController
 	protected function getData(IdentifiedObject $reactionItem): array
 	{
 		/** @var ModelReactionItem $reactionItem */
-		$sBaseData = parent::getData($reactionItem);
+		$sBaseData = $this->getSBaseData($reactionItem);
 		return array_merge($sBaseData, [
 			'reactionId' => $reactionItem->getReactionId()->getId(),
 			'specieId' => $reactionItem->getSpecieId() ? $reactionItem->getSpecieId()->getId() : null,
@@ -74,7 +61,7 @@ abstract class ModelReactionItemController extends ParentedSBaseController
 
 	protected function getValidator(): Assert\Collection
 	{
-		$validatorArray = parent::getValidatorArray();
+		$validatorArray = $this->getSBaseValidator();
 		return new Assert\Collection(array_merge($validatorArray, [
 			'name' => new Assert\Type(['type' => 'string']),
 		]));
@@ -93,7 +80,7 @@ abstract class ModelReactionItemController extends ParentedSBaseController
 	protected function setData(IdentifiedObject $reactionItem, ArgumentParser $data): void
 	{
 		/** @var ModelReactionItem reactionItem */
-		parent::setData($reactionItem, $data);
+        $this->setSBaseData($reactionItem, $data);
 		!$data->hasKey('type') ?: $reactionItem->setType($data->getString('type'));
 		!$data->hasKey('value') ?: $reactionItem->setValue($data->getInt('value'));
 		!$data->hasKey('stoichiometry') ?: $reactionItem->setStochiometry($data->getFloat('stoichiometry'));
@@ -104,23 +91,18 @@ abstract class ModelReactionItemController extends ParentedSBaseController
 final class ReactionParentedReactionItemController extends ModelReactionItemController
 {
 
-	protected static function getParentRepositoryClassName(): string
+	protected function getParentObjectInfo(): ParentObjectInfo
 	{
-		return ModelReactionRepository::class;
-	}
-
-	protected function getParentObjectInfo(): array
-	{
-		return ['reaction-id', 'reaction'];
+	    return new ParentObjectInfo('reaction-id', ModelReaction::class);
 	}
 
 	protected function setData(IdentifiedObject $reactionItem, ArgumentParser $data): void
 	{
 		/** @var ModelReactionItem $reactionItem */
-		$reactionItem->getReactionId() ?: $reactionItem->setReactionId($this->repository->getParent());
+		$reactionItem->getReactionId() ?: $reactionItem->setReactionId($this->repository->getParent()->getId());
 		if ($data->hasKey('specieId')) {
 			if ($data->hasKey('parameterId')) {
-				throw new Exception('reaction item cannot refer to specie and parameter at the same time');
+				throw new \Exception('reaction item cannot refer to specie and parameter at the same time');
 			}
 			$specie = $this->repository->getEntityManager()->find(ModelSpecie::class, $data->getInt('specieId'));
 			if ($specie === null) {
@@ -155,31 +137,31 @@ final class ReactionParentedReactionItemController extends ModelReactionItemCont
 			throw new MissingRequiredKeyException('specieId or parameterId');
 		return new ModelReactionItem;
 	}
+
+    protected function checkParentValidity(IdentifiedObject $parent, IdentifiedObject $child)
+    {
+        // TODO: Implement checkParentValidity() method.
+    }
 }
 
 final class SpecieParentedReactionItemController extends ModelReactionItemController
 {
 
-	protected static function getParentRepositoryClassName(): string
+	protected function getParentObjectInfo(): ParentObjectInfo
 	{
-		return ModelSpecieRepository::class;
-	}
-
-	protected function getParentObjectInfo(): array
-	{
-		return ['specie-id', 'specie'];
+	    return new ParentObjectInfo('specie-id', ModelSpecie::class);
 	}
 
 	protected function setData(IdentifiedObject $reactionItem, ArgumentParser $data): void
 	{
 		/** @var ModelReactionItem $reactionItem */
-		$reactionItem->getSpecieId() ?: $reactionItem->setSpecieId($this->repository->getParent());
+		$reactionItem->getSpecieId() ?: $reactionItem->setSpecieId($this->repository->getParent()->getId());
 		if ($data->hasKey('reactionId')) {
 			$reaction = $this->repository->getEntityManager()->find(ModelReaction::class, $data->getInt('reactionId'));
 			if ($reaction === null) {
 				throw new NonExistingObjectException($data->getInt('reactionId'), 'reaction');
 			}
-			$reactionItem->setReactionId($reaction);
+			$reactionItem->setReactionId($reaction->getId());
 		}
 		parent::setData($reactionItem, $data);
 	}
@@ -198,7 +180,12 @@ final class SpecieParentedReactionItemController extends ModelReactionItemContro
 		if (!$body->hasKey('reactionId'))
 			throw new MissingRequiredKeyException('reactionId');
 		if ($body->hasKey('parameterId'))
-			throw new Exception('reaction item cannot refer to specie and parameter at the same time');
+			throw new \Exception('reaction item cannot refer to specie and parameter at the same time');
 		return new ModelReactionItem;
 	}
+
+    protected function checkParentValidity(IdentifiedObject $parent, IdentifiedObject $child)
+    {
+        // TODO: Implement checkParentValidity() method.
+    }
 }

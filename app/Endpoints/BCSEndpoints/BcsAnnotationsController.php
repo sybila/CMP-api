@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Entity\Annotation;
 use App\Entity\AnnotationTerm;
+use App\Entity\Entity;
 use App\Entity\EntityAnnotation;
 use App\Entity\IdentifiedObject;
 use App\Entity\Repositories\AnnotationRepository;
@@ -11,6 +12,7 @@ use App\Entity\Repositories\EntityAnnotationRepositoryImpl;
 use App\Entity\Repositories\EntityRepository;
 use App\Entity\Repositories\RuleAnnotationRepositoryImpl;
 use App\Entity\Repositories\RuleRepository;
+use App\Entity\Rule;
 use App\Entity\RuleAnnotation;
 use App\Exceptions\MissingRequiredKeyException;
 use App\Exceptions\WrongParentException;
@@ -106,7 +108,7 @@ class EntityBcsAnnotationsController extends BcsAnnotationsController
 
 	protected function getParentObjectInfo(): ParentObjectInfo
 	{
-	    return new ParentObjectInfo('entity-id', 'entity');
+	    return new ParentObjectInfo('entity-id', Entity::class);
 	}
 
     protected static function getAlias(): string
@@ -142,7 +144,7 @@ class RuleBcsAnnotationsController extends BcsAnnotationsController
 
 	protected function getParentObjectInfo(): ParentObjectInfo
 	{
-	    return new ParentObjectInfo('rule-id', 'rule');
+	    return new ParentObjectInfo('rule-id', Rule::class);
 	}
 
     protected static function getAlias(): string

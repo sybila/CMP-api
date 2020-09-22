@@ -2,19 +2,13 @@
 
 namespace App\Controllers;
 
-use App\Entity\{
-	ModelEventAssignment,
-	IdentifiedObject,
-	Repositories\IEndpointRepository,
-	Repositories\ModelEventRepository,
-	Repositories\ModelEventAssignmentRepository
-};
-use App\Exceptions\
-{
-	MissingRequiredKeyException
-};
+use App\Entity\{ModelEvent,
+    ModelEventAssignment,
+    IdentifiedObject,
+    Repositories\IEndpointRepository,
+    Repositories\ModelEventAssignmentRepository};
+use App\Exceptions\{MissingRequiredKeyException, WrongParentException};
 use App\Helpers\ArgumentParser;
-use Slim\Container;
 use Slim\Http\{
 	Request, Response
 };
@@ -22,19 +16,12 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @property-read ModelEventAssignmentRepository $repository
- * @method EventAssignment getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
+ * @method ModelEventAssignment getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
-final class ModelEventAssignmentController extends ParentedSBaseController
+final class ModelEventAssignmentController extends ParentedRepositoryController
 {
 
-	/** @var ModelEventAssignmentRepository */
-	private $eventAssignmentRepository;
-
-	public function __construct(Container $c)
-	{
-		parent::__construct($c);
-		$this->eventAssignmentRepository = $c->get(ModelEventAssignmentRepository::class);
-	}
+    use \SBaseController;
 
     protected static function getAlias(): string
     {
@@ -49,7 +36,7 @@ final class ModelEventAssignmentController extends ParentedSBaseController
 	protected function getData(IdentifiedObject $eventAssignment): array
 	{
 		/** @var ModelEventAssignment $eventAssignment */
-		$sBaseData = parent::getData($eventAssignment);
+		$sBaseData = $this->getSBaseData($eventAssignment);
 		return array_merge($sBaseData, [
 			'formula' => $eventAssignment->getFormula()
 		]);
@@ -58,8 +45,8 @@ final class ModelEventAssignmentController extends ParentedSBaseController
 	protected function setData(IdentifiedObject $eventAssignment, ArgumentParser $data): void
 	{
 		/** @var ModelEventAssignment $eventAssignment */
-		parent::setData($eventAssignment, $data);
-		$eventAssignment->getEventId() ?: $eventAssignment->setEventId($this->repository->getParent());
+        $this->setSBaseData($eventAssignment, $data);
+		$eventAssignment->getEventId() ?: $eventAssignment->setEventId($this->repository->getParent()->getId());
 		!$data->hasKey('formula') ?: $eventAssignment->setFormula($data->getString('formula'));
 	}
 
@@ -84,7 +71,7 @@ final class ModelEventAssignmentController extends ParentedSBaseController
 
 	protected function getValidator(): Assert\Collection
 	{
-		$validatorArray = parent::getValidatorArray();
+		$validatorArray = $this->getSBaseValidator();
 		return new Assert\Collection(array_merge($validatorArray, [
 			'eventId' => new Assert\Type(['type' => 'integer']),
 			'formula' => new Assert\Type(['type' => 'string']),
@@ -101,13 +88,14 @@ final class ModelEventAssignmentController extends ParentedSBaseController
 		return ModelEventAssignmentRepository::Class;
 	}
 
-	protected static function getParentRepositoryClassName(): string
+
+	protected function getParentObjectInfo(): ParentObjectInfo
 	{
-		return ModelEventRepository::class;
+	    return new ParentObjectInfo('event-id', ModelEvent::class);
 	}
 
-	protected function getParentObjectInfo(): array
-	{
-		return ['event-id', 'event'];
-	}
+    protected function checkParentValidity(IdentifiedObject $parent, IdentifiedObject $child)
+    {
+        // TODO: Implement checkParentValidity() method.
+    }
 }

@@ -2,21 +2,16 @@
 
 namespace App\Controllers;
 
-use App\Entity\
-{
-	IdentifiedObject,
-	ModelParameter,
-	ModelReaction,
-	ModelReactionItem,
-	ModelFunction,
-	Repositories\IEndpointRepository,
-	Repositories\ModelRepository,
-	Repositories\ModelReactionRepository
-};
-use App\Exceptions\
-{
-	MissingRequiredKeyException
-};
+use App\Entity\{IdentifiedObject,
+    Model,
+    ModelParameter,
+    ModelReaction,
+    ModelReactionItem,
+    ModelFunction,
+    Repositories\IEndpointRepository,
+    Repositories\ModelRepository,
+    Repositories\ModelReactionRepository};
+use App\Exceptions\{MissingRequiredKeyException, WrongParentException};
 use App\Helpers\ArgumentParser;
 use Slim\Container;
 use Slim\Http\{
@@ -28,16 +23,10 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @property-read ModelReactionRepository $repository
  * @method ModelReaction getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
-final class ModelReactionController extends ParentedSBaseController
+final class ModelReactionController extends ParentedRepositoryController
 {
-	/** @var ModelReactionRepository */
-	private $reactionRepository;
 
-	public function __construct(Container $c)
-	{
-		parent::__construct($c);
-		$this->reactionRepository = $c->get(ModelReactionRepository::class);
-	}
+    use \SBaseController;
 
     protected static function getAlias(): string
     {
@@ -52,7 +41,7 @@ final class ModelReactionController extends ParentedSBaseController
 	protected function getData(IdentifiedObject $reaction): array
 	{
 		/** @var ModelReaction $reaction */
-		$sBaseData = parent::getData($reaction);
+		$sBaseData = $this->getSBaseData($reaction);
 		return array_merge($sBaseData, [
 			'modelId' => $reaction->getModelId()->getId(),
 			'compartmentId' => $reaction->getCompartmentId() ? $reaction->getCompartmentId()->getId() : null,
@@ -72,9 +61,9 @@ final class ModelReactionController extends ParentedSBaseController
 
 	protected function setData(IdentifiedObject $reaction, ArgumentParser $data): void
 	{
-		/** @var Reaction $reaction */
-		parent::setData($reaction, $data);
-		$reaction->getModelId() ?: $reaction->setModelId($this->repository->getParent());
+		/** @var ModelReaction $reaction */
+        $this->setSBaseData($reaction, $data);
+		$reaction->getModelId() ?: $reaction->setModelId($this->repository->getParent()->getId());
 		!$data->hasKey('compartmentId') ?: $reaction->setCompartmentId($data->getString('compartmentId'));
 		!$data->hasKey('isReversible') ?: $reaction->setIsReversible($data->getInt('isReversible'));
 		!$data->hasKey('rate') ?: $reaction->setRate($data->getString('rate'));
@@ -108,7 +97,7 @@ final class ModelReactionController extends ParentedSBaseController
 
 	protected function getValidator(): Assert\Collection
 	{
-		$validatorArray = parent::getValidatorArray();
+		$validatorArray = $this->getSBaseValidator();
 		return new Assert\Collection(array_merge($validatorArray, [
 			'isReversible' => new Assert\Type(['type' => 'integer']),
 			'rate' => new Assert\Type(['type' => 'string']),
@@ -125,13 +114,13 @@ final class ModelReactionController extends ParentedSBaseController
 		return ModelReactionRepository::Class;
 	}
 
-	protected static function getParentRepositoryClassName(): string
+	protected function getParentObjectInfo(): ParentObjectInfo
 	{
-		return ModelRepository::class;
+	    return new ParentObjectInfo('model-id', Model::class);
 	}
 
-	protected function getParentObjectInfo(): array
-	{
-		return ['model-id', 'model'];
-	}
+    protected function checkParentValidity(IdentifiedObject $parent, IdentifiedObject $child)
+    {
+        // TODO: Implement checkParentValidity() method.
+    }
 }

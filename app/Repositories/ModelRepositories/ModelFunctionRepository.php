@@ -14,8 +14,11 @@ class ModelFunctionRepository implements IDependentEndpointRepository
 	/** @var EntityManager * */
 	protected $em;
 
-	/** @var \Doctrine\ORM\ModelFunction */
+	/** @var \Doctrine\ORM\EntityRepository */
 	private $repository;
+
+    /** @var IdentifiedObject */
+    private $object;
 
 	public function __construct(EntityManager $em)
 	{
@@ -33,7 +36,7 @@ class ModelFunctionRepository implements IDependentEndpointRepository
 		return $this->em->find(ModelFunction::class, $id);
 	}
 
-	public function getParent()
+	public function getParent(): IdentifiedObject
 	{
 		return $this->object;
 	}

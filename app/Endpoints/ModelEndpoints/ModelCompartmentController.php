@@ -2,22 +2,17 @@
 
 namespace App\Controllers;
 
-use App\Entity\{
-	ModelCompartment,
-	ModelSpecie,
-	ModelReaction,
-	ModelRule,
-	ModelUnitDefinition,
-	IdentifiedObject,
-	Repositories\IEndpointRepository,
-	Repositories\ModelRepository,
-	Repositories\ModelCompartmentRepository
-};
-use App\Exceptions\
-{
-	DependentResourcesBoundException,
-	MissingRequiredKeyException
-};
+use App\Entity\{Model,
+    ModelCompartment,
+    ModelSpecie,
+    ModelReaction,
+    ModelRule,
+    ModelUnitDefinition,
+    IdentifiedObject,
+    Repositories\IEndpointRepository,
+    Repositories\ModelRepository,
+    Repositories\ModelCompartmentRepository};
+use App\Exceptions\{DependentResourcesBoundException, MissingRequiredKeyException, WrongParentException};
 use App\Helpers\ArgumentParser;
 use Slim\Container;
 use Slim\Http\{
@@ -29,16 +24,9 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @property-read ModelCompartmentRepository $repository
  * @method ModelCompartment getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
-final class ModelCompartmentController extends ParentedSBaseController
+final class ModelCompartmentController extends ParentedRepositoryController
 {
-	/** @var ModelCompartmentRepository */
-	private $compartmentRepository;
-
-	public function __construct(Container $c)
-	{
-		parent::__construct($c);
-		$this->compartmentRepository = $c->get(ModelCompartmentRepository::class);
-	}
+    use \SBaseController;
 
     protected static function getAlias(): string
     {
@@ -53,7 +41,7 @@ final class ModelCompartmentController extends ParentedSBaseController
 	protected function getData(IdentifiedObject $compartment): array
 	{
 		/** @var ModelCompartment $compartment */
-		$sBaseData = parent::getData($compartment);
+		$sBaseData = $this->getSBaseData($compartment);
 		return array_merge ($sBaseData, [
 			'spatialDimensions' => $compartment->getSpatialDimensions(),
 			'size' => $compartment->getSize(),
@@ -76,8 +64,8 @@ final class ModelCompartmentController extends ParentedSBaseController
 	protected function setData(IdentifiedObject $compartment, ArgumentParser $data): void
 	{
 		/** @var ModelCompartment $compartment */
-		parent::setData($compartment, $data);
-		$compartment->getModelId() ?: $compartment->setModelId($this->repository->getParent());
+		$this->setSBaseData($compartment, $data);
+		$compartment->getModelId() ?: $compartment->setModelId($this->repository->getParent()->getId());
 		!$data->hasKey('spatialDimensions') ?: $compartment->setSpatialDimensions($data->getString('spatialDimensions'));
 		!$data->hasKey('size') ?: $compartment->setSize($data->getString('size'));
 		!$data->hasKey('isConstant') ?: $compartment->setIsConstant($data->getInt('isConstant'));
@@ -105,8 +93,7 @@ final class ModelCompartmentController extends ParentedSBaseController
 
 	public function delete(Request $request, Response $response, ArgumentParser $args): Response
 	{
-		/** @var ModelCompartment $compartment */
-		$compartment = $this->getObject($args->getInt('id'));
+        $compartment = $this->getObject($args->getInt('id'));
 		if (!$compartment->getSpecies()->isEmpty())
 			throw new DependentResourcesBoundException('specie');
 		if (!$compartment->getRules()->isEmpty())
@@ -120,7 +107,7 @@ final class ModelCompartmentController extends ParentedSBaseController
 
 	protected function getValidator(): Assert\Collection
 	{
-		$validatorArray = parent::getValidatorArray();
+		$validatorArray = $this->getSBaseValidator();
 		return new Assert\Collection(array_merge($validatorArray, [
 			'modelId' => new Assert\Type(['type' => 'integer']),
 			'isConstant' => new Assert\Type(['type' => 'integer']),
@@ -144,8 +131,13 @@ final class ModelCompartmentController extends ParentedSBaseController
 		return ModelRepository::class;
 	}
 
-	protected function getParentObjectInfo(): array
+	protected function getParentObjectInfo(): ParentObjectInfo
 	{
-		return ['model-id', 'model'];
+	    return new ParentObjectInfo('model-id',Model::class);
 	}
+
+    protected function checkParentValidity(IdentifiedObject $parent, IdentifiedObject $child)
+    {
+        // TODO: Implement checkParentValidity() method.
+    }
 }

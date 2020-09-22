@@ -10,12 +10,12 @@ use App\Helpers\QueryRepositoryHelper;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 
-class ModelReactionItemRepository implements IDependentSBaseRepository
+class ModelReactionItemRepository implements IDependentEndpointRepository
 {
 	/** @var EntityManager * */
 	protected $em;
 
-	/** @var \Doctrine\ORM\ModelReactionItemRepository */
+	/** @var \Doctrine\ORM\EntityRepository */
 	private $repository;
 
 	/** @var IdentifiedObject */
@@ -100,4 +100,13 @@ class ModelReactionItemRepository implements IDependentSBaseRepository
 		return $query;
 	}
 
+    public function add($object): void
+    {
+        // TODO: Implement add() method.
+    }
+
+    public function remove($object): void
+    {
+        // TODO: Implement remove() method.
+    }
 }

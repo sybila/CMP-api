@@ -20,9 +20,10 @@ abstract class ParentedRepositoryController extends WritableRepositoryController
 {
 
     /**
-     * @return ParentObjectInfo - consists of first element - string that marks how is the parent-id
+     * Returns object with one variable - string that marks how is the parent-id
      * labelled in the route (how the ArgumentParser parses this argument)
-     * and the second element is the name of the parent entity.
+     * and the second element is the name of the class entity.
+     * @return ParentObjectInfo
      */
 	abstract protected function getParentObjectInfo(): ParentObjectInfo;
 
@@ -48,8 +49,10 @@ abstract class ParentedRepositoryController extends WritableRepositoryController
         } catch (Exception $e) {
             throw new MissingRequiredKeyException($e->getMessage());
         }
-        return $this->getObjectViaORM($info->parentEntityName, $id);
+        return $this->getObjectViaORM($info->parentEntityClass, $id);
 	}
+
+
 
 	public function __construct(Container $c)
 	{
@@ -102,7 +105,7 @@ class ParentObjectInfo
      * Short entity class name.
      * @var string
      */
-    public $parentEntityName;
+    public $parentEntityClass;
 
     /**
      * This has to reflect the SLIM route placeholder.
@@ -112,12 +115,12 @@ class ParentObjectInfo
 
     /**
      * ParentObjectInfo constructor.
-     * @param string $parentEntityName
+     * @param string $parentEntityClass
      * @param string $parentIdRoutePlaceholder
      */
-    public function __construct(string $parentIdRoutePlaceholder, string $parentEntityName)
+    public function __construct(string $parentIdRoutePlaceholder, string $parentEntityClass)
     {
-        $this->parentEntityName = $parentEntityName;
+        $this->parentEntityClass = $parentEntityClass;
         $this->parentIdRoutePlaceholder = $parentIdRoutePlaceholder;
     }
 }

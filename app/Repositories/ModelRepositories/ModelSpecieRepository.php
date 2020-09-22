@@ -9,12 +9,12 @@ use App\Helpers\QueryRepositoryHelper;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 
-class ModelSpecieRepository implements IDependentSBaseRepository
+class ModelSpecieRepository implements IDependentEndpointRepository
 {
 	/** @var EntityManager * */
 	protected $em;
 
-	/** @var \Doctrine\ORM\SpecieRepository */
+	/** @var \Doctrine\ORM\EntityRepository */
 	private $repository;
 
 	/** @var ModelCompartment */
@@ -26,7 +26,7 @@ class ModelSpecieRepository implements IDependentSBaseRepository
 		$this->repository = $em->getRepository(ModelSpecie::class);
 	}
 
-	public function getBySbmlId(string $sbmlId): ?ModelSpecie
+	public function getBySbmlId(string $sbmlId)
 	{
 		return $this->repository->findOneBy(['sbmlId' => $sbmlId]);
 	}
@@ -83,4 +83,13 @@ class ModelSpecieRepository implements IDependentSBaseRepository
 		return $query;
 	}
 
+    public function add($object): void
+    {
+        // TODO: Implement add() method.
+    }
+
+    public function remove($object): void
+    {
+        // TODO: Implement remove() method.
+    }
 }

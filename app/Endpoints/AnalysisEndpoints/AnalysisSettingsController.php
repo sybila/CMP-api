@@ -4,6 +4,7 @@
 namespace App\Controllers;
 
 
+use App\Entity\AnalysisMethod;
 use App\Entity\AnalysisSettings;
 use App\Entity\IdentifiedObject;
 use App\Entity\Repositories\AnalysisSettingsRepository;
@@ -88,6 +89,6 @@ class AnalysisSettingsController extends ParentedRepositoryController
 
     protected function getParentObjectInfo(): ParentObjectInfo
     {
-        return new ParentObjectInfo('meth-id', 'analysisMethod');
+        return new ParentObjectInfo('meth-id', AnalysisMethod::class);
     }
 }

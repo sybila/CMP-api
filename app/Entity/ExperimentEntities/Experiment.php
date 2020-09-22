@@ -116,13 +116,13 @@ class Experiment implements IdentifiedObject
 	 */
 	private $devices;
 
-    /**
-     * @var ArrayCollection
-     * @ORM\ManyToMany(targetEntity="Bioquantity", inversedBy="experiments")
-     * @ORM\JoinTable(name="bioquantity_to_experiment", joinColumns={@ORM\JoinColumn(name="exp_id", referencedColumnName="id")},
-     * inverseJoinColumns={@ORM\JoinColumn(name="bionum_id", referencedColumnName="id")})
-     */
-    private $bioquantities;
+//    /**
+//     * @var ArrayCollection
+//     * @ORM\ManyToMany(targetEntity="Bioquantity", inversedBy="experiments")
+//     * @ORM\JoinTable(name="bioquantity_to_experiment", joinColumns={@ORM\JoinColumn(name="exp_id", referencedColumnName="id")},
+//     * inverseJoinColumns={@ORM\JoinColumn(name="bionum_id", referencedColumnName="id")})
+//     */
+//    private $bioquantities;
 
 
     public function __construct()
@@ -130,7 +130,7 @@ class Experiment implements IdentifiedObject
         $this->inserted = new DateTimeJson;
         $this->started = new DateTimeJson;
         $this->devices = new ArrayCollection();
-        $this->bioquantities = new ArrayCollection();
+        //$this->bioquantities = new ArrayCollection();
     }
 
 	/**
@@ -252,29 +252,29 @@ class Experiment implements IdentifiedObject
 	}*/
 
 
-    /**
-     * @param Bioquantity $bioquantity
-     */
-    public function addBioquantity(Bioquantity $bioquantity)
-    {
-        if ($this->bioquantities->contains($bioquantity)) {
-            return;
-        }
-        $this->bioquantities->add($bioquantity);
-        $bioquantity->addExperiment($this);
-    }
+//    /**
+//     * @param Bioquantity $bioquantity
+//     */
+//    public function addBioquantity(Bioquantity $bioquantity)
+//    {
+//        if ($this->bioquantities->contains($bioquantity)) {
+//            return;
+//        }
+//        $this->bioquantities->add($bioquantity);
+//        $bioquantity->addExperiment($this);
+//    }
 
-    /**
-     * @param Bioquantity $bioquantity
-     */
-    public function removeBioquantity(Bioquantity $bioquantity)
-    {
-        if (!$this->bioquantities->contains($bioquantity)) {
-            return;
-        }
-        $this->bioquantities->removeElement($bioquantity);
-        $bioquantity->removeExperiment($this);
-    }
+//    /**
+//     * @param Bioquantity $bioquantity
+//     */
+//    public function removeBioquantity(Bioquantity $bioquantity)
+//    {
+//        if (!$this->bioquantities->contains($bioquantity)) {
+//            return;
+//        }
+//        $this->bioquantities->removeElement($bioquantity);
+//        $bioquantity->removeExperiment($this);
+//    }
 
 
     /**

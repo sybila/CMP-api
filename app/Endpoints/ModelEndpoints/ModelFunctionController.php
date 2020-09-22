@@ -2,15 +2,15 @@
 
 namespace App\Controllers;
 
-use App\Entity\{
-	IdentifiedObject,
-	ModelFunction,
-	Repositories\IEndpointRepository,
-	Repositories\ModelFunctionRepository,
-	Repositories\ModelReactionRepository
-};
+use App\Exceptions\MissingRequiredKeyException;
+use App\Exceptions\WrongParentException;
+use App\Entity\{IdentifiedObject,
+    ModelFunction,
+    ModelReaction,
+    Repositories\IEndpointRepository,
+    Repositories\ModelFunctionRepository,
+    Repositories\ModelReactionRepository};
 use App\Helpers\ArgumentParser;
-use Slim\Container;
 use Slim\Http\{
 	Request, Response
 };
@@ -20,16 +20,10 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @property-read ModelReactionRepository $repository
  * @method ModelFunction getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
-final class ModelFunctionController extends ParentedSBaseController
+final class ModelFunctionController extends ParentedRepositoryController
 {
-	/** @var FunctionRepository */
-	private $functionRepository;
 
-	public function __construct(Container $c)
-	{
-		parent::__construct($c);
-		$this->functionRepository = $c->get(ModelFunctionRepository::class);
-	}
+    use \SBaseController;
 
     protected static function getAlias(): string
     {
@@ -54,7 +48,7 @@ final class ModelFunctionController extends ParentedSBaseController
 	protected function setData(IdentifiedObject $function, ArgumentParser $data): void
 	{
 		/** @var ModelFunction $function */
-		$function->getReactionId() ?: $function->setReactionId($this->repository->getParent());
+		$function->getReactionId() ?: $function->setReactionId($this->repository->getParent()->getId());
 		!$data->hasKey('name') ? $function->setName($data->getString('sbmlId')) : $function->setName($data->getString('name'));
 		!$data->hasKey('formula') ?: $function->setFormula($data->getString('formula'));
 	}
@@ -101,15 +95,14 @@ final class ModelFunctionController extends ParentedSBaseController
 		return ModelFunctionRepository::class;
 	}
 
-	protected static function getParentRepositoryClassName(): string
+	protected function getParentObjectInfo(): ParentObjectInfo
 	{
-		return ModelReactionRepository::class;
+	    return new ParentObjectInfo('reaction-id', ModelReaction::class);
 	}
 
-	protected function getParentObjectInfo(): array
-	{
-		return ['reaction-id', 'reaction'];
-	}
-
+    protected function checkParentValidity(IdentifiedObject $parent, IdentifiedObject $child)
+    {
+        // TODO: Implement checkParentValidity() method.
+    }
 }
 

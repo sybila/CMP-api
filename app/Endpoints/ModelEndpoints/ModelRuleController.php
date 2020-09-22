@@ -2,20 +2,15 @@
 
 namespace App\Controllers;
 
-use App\Entity\
-{
-	Entity,
-	IdentifiedObject,
-	ModelRule,
-	Repositories\IEndpointRepository,
-	Repositories\ModelRepository,
-	Repositories\ModelRuleRepository
-};
-use App\Exceptions\
-{
-	InvalidArgumentException,
-	MissingRequiredKeyException
-};
+use App\Entity\{Entity,
+    IdentifiedObject,
+    Model,
+    ModelParameter,
+    ModelRule,
+    Repositories\IEndpointRepository,
+    Repositories\ModelRepository,
+    Repositories\ModelRuleRepository};
+use App\Exceptions\{InvalidArgumentException, MissingRequiredKeyException, WrongParentException};
 use App\Helpers\ArgumentParser;
 use Slim\Container;
 use Slim\Http\{
@@ -27,17 +22,10 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @property-read ModelRuleRepository $repository
  * @method Entity getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
-abstract class ModelRuleController extends ParentedSBaseController
+abstract class ModelRuleController extends ParentedRepositoryController
 {
 
-	/** @var ModelRuleRepository */
-	private $modelRuleRepository;
-
-	public function __construct(Container $c)
-	{
-		parent::__construct($c);
-		$this->modelRuleRepository = $c->get(ModelRuleRepository::class);
-	}
+    use \SBaseController;
 
     protected static function getAlias(): string
     {
@@ -52,7 +40,7 @@ abstract class ModelRuleController extends ParentedSBaseController
 	protected function getData(IdentifiedObject $rule): array
 	{
 		/** @var ModelRule $rule */
-		$sBaseData = parent::getData($rule);
+		$sBaseData = $this->getSBaseData($rule);
 		return array_merge($sBaseData, [
 			'modelId' => $rule->getModelId(),
 		]);
@@ -99,20 +87,15 @@ abstract class ModelRuleController extends ParentedSBaseController
 final class ModelParentedRuleController extends ModelRuleController
 {
 
-	protected static function getParentRepositoryClassName(): string
+	protected function getParentObjectInfo(): ParentObjectInfo
 	{
-		return ModelRepository::class;
-	}
-
-	protected function getParentObjectInfo(): array
-	{
-		return ['model-id', 'model'];
+	    return new ParentObjectInfo('model-id', Model::class);
 	}
 
 	protected function setData(IdentifiedObject $rule, ArgumentParser $data): void
 	{
-		/** @var Rule $rule */
-		parent::setData($rule, $data);
+		/** @var ModelRule $rule */
+        $this->setSBaseData($rule, $data);
 		$rule->setModelId($this->repository->getParent()->getId());
 		!$data->hasKey('equation') ?: $rule->setEquation($data->getString('equation'));
 		!$data->hasKey('type') ?: $rule->setType($data->getString('type'));
@@ -120,7 +103,7 @@ final class ModelParentedRuleController extends ModelRuleController
 
 	protected function checkInsertObject(IdentifiedObject $rule): void
 	{
-		/** @var ModelParameter $parameter */
+		/** @var ModelRule $rule */
 		if ($rule->getType() === null)
 			throw new MissingRequiredKeyException('modelId');
 	}
@@ -129,4 +112,9 @@ final class ModelParentedRuleController extends ModelRuleController
 	{
 		return new ModelRule;
 	}
+
+    protected function checkParentValidity(IdentifiedObject $parent, IdentifiedObject $child)
+    {
+        // TODO: Implement checkParentValidity() method.
+    }
 }

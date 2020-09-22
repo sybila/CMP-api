@@ -2,7 +2,7 @@
 
 namespace App\Controllers;
 
-use App\Entity\{BioquantityVariable,
+use App\Entity\{Experiment,
     ExperimentVariable,
     ExperimentValues,
     ExperimentNote,
@@ -56,9 +56,9 @@ final class ExperimentVariableController extends ParentedRepositoryController
 			'values' => $variable->getValues()->map(function (ExperimentValues $val) {
 				return ['id' => $val->getId(), 'time' => $val->getTime(), 'value' => $val->getValue()];
 			})->toArray(),
-            'bioquantityVariables' => $variable->getBioquantities()->map(function(BioquantityVariable $bio){
-                return['varName'=> $bio->getName(), 'timeFrom' => $bio->getTimeFrom(), 'timeTo' => $bio->getTimeTo()];
-            })
+//            'bioquantityVariables' => $variable->getBioquantities()->map(function(BioquantityVariable $bio){
+//                return['varName'=> $bio->getName(), 'timeFrom' => $bio->getTimeFrom(), 'timeTo' => $bio->getTimeTo()];
+//            })
 		];
 	}
 
@@ -122,7 +122,7 @@ final class ExperimentVariableController extends ParentedRepositoryController
 
 	protected function getParentObjectInfo(): ParentObjectInfo
 	{
-	    return new ParentObjectInfo('experiment-id','experiment');
+	    return new ParentObjectInfo('experiment-id',Experiment::class);
 	}
 
     protected static function getAlias(): string

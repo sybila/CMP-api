@@ -100,7 +100,7 @@ final class ExperimentVariableNoteController extends ParentedRepositoryControlle
 
 	protected function getParentObjectInfo(): ParentObjectInfo
 	{
-	    return new ParentObjectInfo('variable-id', 'variable');
+	    return new ParentObjectInfo('variable-id', ExperimentVariable::class);
 	}
 
     protected static function getAlias(): string

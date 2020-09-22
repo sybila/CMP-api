@@ -2,19 +2,13 @@
 
 namespace App\Controllers;
 
-use App\Entity\{
-	ModelFunctionDefinition,
-	IdentifiedObject,
-	Repositories\IEndpointRepository,
-	Repositories\ModelRepository,
-	Repositories\ModelFunctionDefinitionRepository
-};
-use App\Exceptions\
-{
-	MissingRequiredKeyException
-};
+use App\Entity\{Model,
+    ModelFunctionDefinition,
+    IdentifiedObject,
+    Repositories\IEndpointRepository,
+    Repositories\ModelFunctionDefinitionRepository};
+use App\Exceptions\{MissingRequiredKeyException, WrongParentException};
 use App\Helpers\ArgumentParser;
-use Slim\Container;
 use Slim\Http\{
 	Request, Response
 };
@@ -24,16 +18,10 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @property-read ModelFunctionDefinitionRepository $repository
  * @method ModelFunctionDefinition getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
-final class ModelFunctionDefinitionController extends ParentedSBaseController
+final class ModelFunctionDefinitionController extends ParentedRepositoryController
 {
-	/** @var ModelFunctionDefinitionRepository */
-	private $functionDefinitionRepository;
 
-	public function __construct(Container $c)
-	{
-		parent::__construct($c);
-		$this->functionDefinitionRepository = $c->get(ModelFunctionDefinitionRepository::class);
-	}
+    use \SBaseController;
 
 	protected static function getAlias(): string
     {
@@ -48,7 +36,7 @@ final class ModelFunctionDefinitionController extends ParentedSBaseController
 	protected function getData(IdentifiedObject $functionDefinition): array
 	{
 		/** @var ModelFunctionDefinition $functionDefinition */
-		$sBaseData = parent::getData($functionDefinition);
+		$sBaseData = $this->getSBaseData($functionDefinition);
 		return array_merge($sBaseData, [
 			'formula' => $functionDefinition->getFormula(),
 		]);
@@ -57,8 +45,8 @@ final class ModelFunctionDefinitionController extends ParentedSBaseController
 	protected function setData(IdentifiedObject $functionDefinition, ArgumentParser $data): void
 	{
 		/** @var ModelFunctionDefinition $functionDefinition */
-		parent::setData($functionDefinition, $data);
-		$functionDefinition->getModelId() ?: $functionDefinition->setModelId($this->repository->getParent());
+        $this->setSBaseData($functionDefinition, $data);
+		$functionDefinition->getModelId() ?: $functionDefinition->setModelId($this->repository->getParent()->getId());
 		!$data->hasKey('formula') ?: $functionDefinition->setFormula($data->getString('formula'));
 	}
 
@@ -81,7 +69,7 @@ final class ModelFunctionDefinitionController extends ParentedSBaseController
 
 	protected function getValidator(): Assert\Collection
 	{
-		$validatorArray = parent::getValidatorArray();
+		$validatorArray = $this->getSBaseValidator();
 		return new Assert\Collection(array_merge($validatorArray, [
 			'formula' => new Assert\Type(['type' => 'string'])
 		]));
@@ -97,13 +85,13 @@ final class ModelFunctionDefinitionController extends ParentedSBaseController
 		return ModelFunctionDefinitionRepository::Class;
 	}
 
-	protected static function getParentRepositoryClassName(): string
+	protected function getParentObjectInfo(): ParentObjectInfo
 	{
-		return ModelRepository::class;
+	    return new ParentObjectInfo('model-id', Model::class);
 	}
 
-	protected function getParentObjectInfo(): array
-	{
-		return ['model-id', 'model'];
-	}
+    protected function checkParentValidity(IdentifiedObject $parent, IdentifiedObject $child)
+    {
+        // TODO: Implement checkParentValidity() method.
+    }
 }

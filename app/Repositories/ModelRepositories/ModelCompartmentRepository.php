@@ -9,12 +9,12 @@ use App\Helpers\QueryRepositoryHelper;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 
-class ModelCompartmentRepository implements IDependentSBaseRepository
+class ModelCompartmentRepository implements IDependentEndpointRepository
 {
 	/** @var EntityManager * */
 	protected $em;
 
-	/** @var \Doctrine\ORM\CompartmentRepository */
+	/** @var \Doctrine\ORM\EntityRepository */
 	private $repository;
 
 	/** @var Model */
@@ -24,11 +24,6 @@ class ModelCompartmentRepository implements IDependentSBaseRepository
 	{
 		$this->em = $em;
 		$this->repository = $em->getRepository(ModelCompartment::class);
-	}
-
-	protected static function getParentClassName(): string
-	{
-		return Model::class;
 	}
 
 	public function get(int $id)
@@ -53,19 +48,6 @@ class ModelCompartmentRepository implements IDependentSBaseRepository
         return $query->getQuery()->getArrayResult();
 	}
 
-	public function getParent(): IdentifiedObject
-	{
-		return $this->model;
-	}
-
-	public function setParent(IdentifiedObject $object): void
-	{
-		$className = static::getParentClassName();
-		if (!($object instanceof $className))
-			throw new \Exception('Parent of compartment must be ' . $className);
-		$this->model = $object;
-	}
-
 	private function buildListQuery(array $filter): QueryBuilder
 	{
 		$query = $this->em->createQueryBuilder()
@@ -75,4 +57,27 @@ class ModelCompartmentRepository implements IDependentSBaseRepository
         $query = QueryRepositoryHelper::addFilterDql($query, $filter);
 		return $query;
 	}
+
+    public function getParent(): IdentifiedObject
+    {
+        return $this->model;
+    }
+
+    public function setParent(IdentifiedObject $object): void
+    {
+        $className = Model::class;
+        if (!($object instanceof $className))
+            throw new \Exception('Parent of compartment must be ' . $className);
+        $this->model = $object;
+    }
+
+    public function add($object): void
+    {
+        // TODO: Implement add() method.
+    }
+
+    public function remove($object): void
+    {
+        // TODO: Implement remove() method.
+    }
 }

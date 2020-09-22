@@ -9,13 +9,13 @@ use App\Helpers\QueryRepositoryHelper;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 
-class ModelReactionRepository implements IDependentSBaseRepository
+class ModelReactionRepository implements IDependentEndpointRepository
 {
 
 	/** @var EntityManager * */
 	protected $em;
 
-	/** @var \Doctrine\ORM\ReactionRepository */
+	/** @var \Doctrine\ORM\EntityRepository */
 	private $repository;
 
 	/** @var Model */
@@ -76,4 +76,14 @@ class ModelReactionRepository implements IDependentSBaseRepository
         $query = QueryRepositoryHelper::addFilterDql($query, $filter);
 		return $query;
 	}
+
+    public function add($object): void
+    {
+        // TODO: Implement add() method.
+    }
+
+    public function remove($object): void
+    {
+        // TODO: Implement remove() method.
+    }
 }

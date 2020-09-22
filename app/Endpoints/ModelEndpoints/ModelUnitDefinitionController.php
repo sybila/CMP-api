@@ -2,19 +2,15 @@
 
 namespace App\Controllers;
 
-use App\Entity\{
-	ModelCompartment,
-	ModelUnit,
-	ModelUnitDefinition,
-	IdentifiedObject,
-	Repositories\IEndpointRepository,
-	Repositories\ModelRepository,
-	Repositories\ModelUnitDefinitionRepository
-};
-use App\Exceptions\
-{
-	MissingRequiredKeyException
-};
+use App\Entity\{Model,
+    ModelCompartment,
+    ModelUnit,
+    ModelUnitDefinition,
+    IdentifiedObject,
+    Repositories\IEndpointRepository,
+    Repositories\ModelRepository,
+    Repositories\ModelUnitDefinitionRepository};
+use App\Exceptions\{MissingRequiredKeyException, WrongParentException};
 use App\Helpers\ArgumentParser;
 use Slim\Container;
 use Slim\Http\{
@@ -26,17 +22,10 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @property-read ModelUnitDefinitionRepository $repository
  * @method ModelUnitDefinition getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
-final class ModelUnitDefinitionController extends ParentedSBaseController
+final class ModelUnitDefinitionController extends ParentedRepositoryController
 {
 
-	/** @var ModelUnitDefinitionRepository */
-	private $unitDefinitionRepository;
-
-	public function __construct(Container $c)
-	{
-		parent::__construct($c);
-		$this->unitDefinitionRepository = $c->get(ModelUnitDefinitionRepository::class);
-	}
+    use \SBaseController;
 
     protected static function getAlias(): string
     {
@@ -50,7 +39,7 @@ final class ModelUnitDefinitionController extends ParentedSBaseController
 	protected function getData(IdentifiedObject $unitDefinition): array
 	{
 		/** @var ModelUnitDefinition $unitDefinition */
-		$sBaseData = parent::getData($unitDefinition);
+		$sBaseData = $this->getSBaseData($unitDefinition);
 		return array_merge($sBaseData, [
 			'symbol' => $unitDefinition->getSymbol(),
 			'compartmentId' => $unitDefinition->getCompartmentId() ? $unitDefinition->getCompartmentId()->getId() : null,
@@ -63,7 +52,7 @@ final class ModelUnitDefinitionController extends ParentedSBaseController
 	protected function setData(IdentifiedObject $unitDefinition, ArgumentParser $data): void
 	{
 		/** @var ModelUnitDefinition $unitDefinition */
-		parent::setData($unitDefinition, $data);
+        $this->setSBaseData($unitDefinition, $data);
 		$unitDefinition->getModelId() ?: $unitDefinition->setModelId($this->repository->getParent());
 		!$data->hasKey('name') ?: $unitDefinition->setName($data->getString('name'));
 	}
@@ -87,7 +76,7 @@ final class ModelUnitDefinitionController extends ParentedSBaseController
 
 	protected function getValidator(): Assert\Collection
 	{
-		$validatorArray = parent::getValidatorArray();
+		$validatorArray = $this->getSBaseValidator();
 		return new Assert\Collection(array_merge($validatorArray, [
 			'modelId' => new Assert\Type(['type' => 'integer']),
 		]));
@@ -103,13 +92,14 @@ final class ModelUnitDefinitionController extends ParentedSBaseController
 		return ModelUnitDefinitionRepository::Class;
 	}
 
-	protected static function getParentRepositoryClassName(): string
+
+	protected function getParentObjectInfo(): ParentObjectInfo
 	{
-		return ModelRepository::class;
+	    return new ParentObjectInfo('model-id', Model::class);
 	}
 
-	protected function getParentObjectInfo(): array
-	{
-		return ['model-id', 'model'];
-	}
+    protected function checkParentValidity(IdentifiedObject $parent, IdentifiedObject $child)
+    {
+        // TODO: Implement checkParentValidity() method.
+    }
 }

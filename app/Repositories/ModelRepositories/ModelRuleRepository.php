@@ -9,12 +9,12 @@ use App\Helpers\QueryRepositoryHelper;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 
-class ModelRuleRepository implements IDependentSBaseRepository
+class ModelRuleRepository implements IDependentEndpointRepository
 {
 	/** @var EntityManager * */
 	protected $em;
 
-	/** @var \Doctrine\ORM\ModelRuleRepository */
+	/** @var \Doctrine\ORM\EntityRepository */
 	private $repository;
 
 	/** @var IdentifiedObject */
@@ -77,4 +77,14 @@ class ModelRuleRepository implements IDependentSBaseRepository
 	{
 		return $this->object;
 	}
+
+    public function add($object): void
+    {
+        // TODO: Implement add() method.
+    }
+
+    public function remove($object): void
+    {
+        // TODO: Implement remove() method.
+    }
 }

@@ -108,6 +108,13 @@ class AnalysisTaskController extends ParentedRepositoryController
 
     //--- THIS IS A PARENTAL GUIDANCE MOMENT PLEASE STEP OUT
 
+    /**
+     * A task cannot have defined parentEntity class name in ParentObjectInfo object, since
+     * AnalysisTask can be parented by different entity classes (Model, Experiment).
+     * Instead, this entity class can be obtained via argument obtained from the SLIM route,
+     * defined as 'obj-type' in the SLIM route.
+     * @return ParentObjectInfo
+     */
     protected function getParentObjectInfo(): ParentObjectInfo
     {
         return new ParentObjectInfo('obj-id', 'obj-type');
@@ -123,12 +130,13 @@ class AnalysisTaskController extends ParentedRepositoryController
     {
         $info = $this->getParentObjectInfo();
         try {
-            $type = $args->get($info->parentEntityName);
+            $entType = $args->get($info->parentEntityClass);
             $id = $args->get($info->parentIdRoutePlaceholder);
+            $entClassName = 'App\Entity\\' . ucfirst($entType);
         } catch (Exception $e) {
             throw new MissingRequiredKeyException($e->getMessage());
         }
-        return $this->getObjectViaORM($type, $id);
+        return $this->getObjectViaORM($entClassName, $id);
     }
 
     protected function checkParentValidity(IdentifiedObject $parent, IdentifiedObject $data): void

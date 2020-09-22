@@ -141,7 +141,6 @@ abstract class RepositoryController extends AbstractController
      */
 	public function readIdentified(Request $request, Response $response, ArgumentParser $args): Response
 	{
-
 		$this->runEvents($this->beforeRequest, $request, $response, $args);
         $data = [];
 		foreach ($this->getReadIds($args) as $id) {
@@ -169,7 +168,6 @@ abstract class RepositoryController extends AbstractController
 	 */
 	protected function getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
 	{
-		
 		if (!$repository)
 			$repository = $this->repository;
 		if (!$objectName)
@@ -186,16 +184,16 @@ abstract class RepositoryController extends AbstractController
 	}
 
     /**
-     * @param string                $entityName
-     * @param int                   $id
+     * @param string $entityClassName
+     * @param int $id
      * @return IdentifiedObject
      * @throws NonExistingObjectException
      */
-	protected function getObjectViaORM(string $entityName, int $id){
+	protected function getObjectViaORM(string $entityClassName, int $id){
         /** @var  IdentifiedObject $object */
-        $object = $this->orm->getRepository('App\Entity\\' . ucfirst($entityName))->find($id);
+        $object = $this->orm->getRepository($entityClassName)->find($id);
         if (!$object)
-            throw new NonExistingObjectException($id, $entityName);
+            throw new NonExistingObjectException($id, $entityClassName);
         return $object;
     }
 

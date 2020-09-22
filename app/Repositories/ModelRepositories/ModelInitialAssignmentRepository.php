@@ -9,13 +9,16 @@ use App\Helpers\QueryRepositoryHelper;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 
-class ModelInitialAssignmentRepository implements IDependentSBaseRepository
+class ModelInitialAssignmentRepository implements IDependentEndpointRepository
 {
 	/** @var EntityManager * */
 	protected $em;
 
-	/** @var \Doctrine\ORM\ModelInitialAssignmentRepository */
+	/** @var \Doctrine\ORM\EntityRepository */
 	private $repository;
+
+    /** @var IdentifiedObject */
+    private $object;
 
 	public function __construct(EntityManager $em)
 	{
@@ -72,4 +75,14 @@ class ModelInitialAssignmentRepository implements IDependentSBaseRepository
         $query = QueryRepositoryHelper::addFilterDql($query, $filter);
 		return $query;
 	}
+
+    public function add($object): void
+    {
+        // TODO: Implement add() method.
+    }
+
+    public function remove($object): void
+    {
+        // TODO: Implement remove() method.
+    }
 }

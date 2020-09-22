@@ -7,6 +7,7 @@ use App\Entity\IdentifiedObject;
 use App\Entity\Repositories\BcsNoteRepository;
 use App\Entity\Repositories\RuleNoteRepository;
 use App\Entity\Repositories\RuleRepository;
+use App\Entity\Rule;
 use App\Entity\RuleNote;
 use App\Exceptions\MissingRequiredKeyException;
 use App\Exceptions\WrongParentException;
@@ -66,7 +67,7 @@ class RuleNoteController extends ParentedRepositoryController
 
 	protected function getParentObjectInfo(): ParentObjectInfo
 	{
-	    return new ParentObjectInfo('rule-id', 'rule');
+	    return new ParentObjectInfo('rule-id', Rule::class);
 	}
 
 	protected function getValidator(): Assert\Collection

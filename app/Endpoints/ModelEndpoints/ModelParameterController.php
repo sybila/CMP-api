@@ -2,50 +2,35 @@
 
 namespace App\Controllers;
 
-use App\Entity\{
-	ModelRule,
-	ModelReaction,
-	ModelReactionItem,
-	ModelParameter,
-	IdentifiedObject,
-	Repositories\ModelRepository,
-	Repositories\IEndpointRepository,
-	Repositories\ModelParameterRepository,
-	Repositories\ModelReactionRepository
-};
-use App\Exceptions\
-{
-	CompartmentLocationException,
-	InvalidArgumentException,
-	MissingRequiredKeyException,
-	NonExistingObjectException,
-	UniqueKeyViolationException
-};
+use App\Entity\{Model,
+    ModelRule,
+    ModelReaction,
+    ModelReactionItem,
+    ModelParameter,
+    IdentifiedObject,
+    Repositories\IEndpointRepository,
+    Repositories\ModelParameterRepository};
+use App\Exceptions\{CompartmentLocationException,
+    InvalidArgumentException,
+    MissingRequiredKeyException,
+    NonExistingObjectException,
+    UniqueKeyViolationException,
+    WrongParentException};
 use App\Helpers\ArgumentParser;
-use Doctrine\ORM\EntityManager;
-use Slim\Container;
 use Slim\Http\{
 	Request, Response
 };
+use SBaseController;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @property-read ModelParameterRepository $repository
  * @method ModelParameter getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
-abstract class ModelParameterController extends ParentedSBaseController
+abstract class ModelParameterController extends ParentedRepositoryController
 {
-	/** @var ModelParameterRepository */
-	private $parameterRepository;
 
-	/** @var EntityManager * */
-	protected $em;
-
-	public function __construct(Container $c)
-	{
-		parent::__construct($c);
-		$this->parameterRepository = $c->get(ModelParameterRepository::class);
-	}
+    use SBaseController;
 
     protected static function getAlias(): string
     {
@@ -69,7 +54,7 @@ abstract class ModelParameterController extends ParentedSBaseController
 	protected function getData(IdentifiedObject $parameter): array
 	{
 		/** @var ModelParameter $parameter */
-		$sBaseData = parent::getData($parameter);
+		$sBaseData = $this->getSBaseData($parameter);
 		return array_merge($sBaseData, [
 			'value' => $parameter->getValue(),
 			'isConstant' => $parameter->getValue(),
@@ -85,7 +70,7 @@ abstract class ModelParameterController extends ParentedSBaseController
 	protected function setData(IdentifiedObject $parameter, ArgumentParser $data): void
 	{
 		/** @var ModelParameter $parameter */
-		parent::setData($parameter, $data);
+        $this->setSBaseData($parameter, $data);
 		!$data->hasKey('value') ?: $parameter->setValue($data->getString('value'));
 		!$data->hasKey('isConstant') ?: $parameter->setIsConstant($data->getString('isConstant'));
 	}
@@ -97,7 +82,7 @@ abstract class ModelParameterController extends ParentedSBaseController
 
 	protected function getValidator(): Assert\Collection
 	{
-		$validatorArray = parent::getValidatorArray();
+		$validatorArray = $this->getSBaseValidator();
 		return new Assert\Collection(array_merge($validatorArray, [
 			'value' => new Assert\Type(['type' => 'float']),
 			'isConstant' => new Assert\Type(['type' => 'integer']),
@@ -119,26 +104,21 @@ abstract class ModelParameterController extends ParentedSBaseController
 final class ModelParentedParameterController extends ModelParameterController
 {
 
-	protected static function getParentRepositoryClassName(): string
+	protected function getParentObjectInfo(): ParentObjectInfo
 	{
-		return ModelRepository::class;
-	}
-
-	protected function getParentObjectInfo(): array
-	{
-		return ['model-id', 'model'];
+	    return new ParentObjectInfo('model-id', Model::class);
 	}
 
 	protected function setData(IdentifiedObject $parameter, ArgumentParser $data): void
 	{
 		/** @var ModelParameter $parameter */
-		$parameter->getModelId() ?: $parameter->setModelId($this->repository->getParent());
+		$parameter->getModelId() ?: $parameter->setModelId($this->repository->getParent()->getId());
 		if ($data->hasKey('reactionId')) {
 			$reaction = $this->repository->getEntityManager()->find(ModelReaction::class, $data->getInt('reactionId'));
 			if ($reaction === null) {
 				throw new NonExistingObjectException($data->getInt('reactionId'), 'reaction');
 			}
-			$parameter->setReactionId($reaction);
+			$parameter->setReactionId($reaction->getId());
 		}
 		parent::setData($parameter, $data);
 	}
@@ -160,19 +140,23 @@ final class ModelParentedParameterController extends ModelParameterController
 			throw new MissingRequiredKeyException('sbmlId');
 		return new ModelParameter;
 	}
+
+    protected function checkParentValidity(IdentifiedObject $parent, IdentifiedObject $child)
+    {
+        /** @var ModelParameter $child */
+        if ($parent->getId() != $child->getModelId()) {
+            throw new WrongParentException($this->getParentObjectInfo()->parentEntityClass, $parent->getId(),
+                self::getObjectName(), $child->getId());
+        }
+    }
 }
 
 final class ReactionItemParentedParameterController extends ModelParameterController
 {
 
-	protected static function getParentRepositoryClassName(): string
+	protected function getParentObjectInfo(): ParentObjectInfo
 	{
-		return ModelReactionRepository::class;
-	}
-
-	protected function getParentObjectInfo(): array
-	{
-		return ['reactionItem-id', 'reactionItem'];
+	    return new ParentObjectInfo('reactionItem-id', ModelReaction::class);
 	}
 
 	protected function checkInsertObject(IdentifiedObject $parameter): void
@@ -188,4 +172,13 @@ final class ReactionItemParentedParameterController extends ModelParameterContro
 			throw new MissingRequiredKeyException('sbmlId');
 		return new ModelParameter;
 	}
+
+    protected function checkParentValidity(IdentifiedObject $parent, IdentifiedObject $child)
+    {
+        /** @var ModelParameter $child */
+        if ($parent->getId() != $child->getReactionId()) {
+            throw new WrongParentException($this->getParentObjectInfo()->parentEntityClass, $parent->getId(),
+                self::getObjectName(), $child->getId());
+        }
+    }
 }

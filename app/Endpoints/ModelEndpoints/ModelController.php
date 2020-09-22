@@ -18,7 +18,6 @@ use App\Entity\{Authorization\User,
     Repositories\ModelRepository};
 use App\Exceptions\{DependentResourcesBoundException, InvalidRoleException, MissingRequiredKeyException};
 use App\Helpers\ArgumentParser;
-use Slim\Container;
 use Slim\Http\{
 	Request, Response
 };
@@ -28,20 +27,18 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @property-read ModelRepository $repository
  * @method Model getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
-final class ModelController extends SBaseController
+final class ModelController extends WritableRepositoryController
 {
-	/** @var ModelRepository */
-	private $modelRepository;
+    use \SBaseController;
 
-	public function __construct(Container $c)
-	{
-		parent::__construct($c);
-		$this->modelRepository = $c->get(ModelRepository::class);
-	}
-
-    protected static function getAlias(): string
+    protected static function getRepositoryClassName(): string
     {
-        return 'm';
+        return ModelRepository::class;
+    }
+
+    protected static function getObjectName(): string
+    {
+        return 'model';
     }
 
 	protected static function getAllowedSort(): array
@@ -52,7 +49,7 @@ final class ModelController extends SBaseController
 	protected function getData(IdentifiedObject $model): array
 	{
 		/** @var Model $model */
-		$sBaseData = parent::getData($model);
+		$sBaseData = $this->getSBaseData($model);
 		return array_merge($sBaseData, [
 			'userId' => $model->getUserId(),
 			'groupId' => $model->getGroupId(),
@@ -93,7 +90,7 @@ final class ModelController extends SBaseController
 	protected function setData(IdentifiedObject $model, ArgumentParser $data): void
 	{
 		/** @var Model $model */
-		parent::setData($model, $data);
+		$this->setSBaseData($model, $data);
 		$model->setUserId($this->user_permissions['user_id']);
         !$data->hasKey('groupId') ?: $model->setGroupId($data->getString('groupId'));
 		!$data->hasKey('approvedId') ?: $model->setApprovedId($data->getString('approvedId'));
@@ -111,6 +108,10 @@ final class ModelController extends SBaseController
 		return new Model;
 	}
 
+    /**
+     * @inheritDoc
+     * @throws InvalidRoleException
+     */
 	protected function checkInsertObject(IdentifiedObject $model): void
 	{
 		/** @var Model $model */
@@ -151,7 +152,7 @@ final class ModelController extends SBaseController
 
 	protected function getValidator(): Assert\Collection
 	{
-		$validatorArray = parent::getValidatorArray();
+		$validatorArray = $this->getSBaseValidator();
 		return new Assert\Collection(array_merge($validatorArray, [
 		    'groupId' => new Assert\Type(['type' => 'integer']),
 			'userId' => new Assert\Type(['type' => 'integer']),
@@ -161,19 +162,9 @@ final class ModelController extends SBaseController
 		]));
 	}
 
-	protected static function getObjectName(): string
-	{
-		return 'model';
-	}
-
-	protected static function getRepositoryClassName(): string
-	{
-		return ModelRepository::Class;
-	}
-
-	protected function getSub($entity)
-	{
-		echo $entity;
-	}
+    protected static function getAlias(): string
+    {
+        return 'm';
+    }
 
 }

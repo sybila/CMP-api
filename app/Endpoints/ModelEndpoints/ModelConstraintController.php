@@ -2,19 +2,14 @@
 
 namespace App\Controllers;
 
-use App\Entity\{
-	ModelConstraint,
-	IdentifiedObject,
-	Repositories\IEndpointRepository,
-	Repositories\ModelRepository,
-	Repositories\ModelConstraintRepository
-};
-use App\Exceptions\
-{
-	MissingRequiredKeyException
-};
+use App\Entity\{Model,
+    ModelConstraint,
+    IdentifiedObject,
+    Repositories\IEndpointRepository,
+    Repositories\ModelRepository,
+    Repositories\ModelConstraintRepository};
+use App\Exceptions\{MissingRequiredKeyException, WrongParentException};
 use App\Helpers\ArgumentParser;
-use Slim\Container;
 use Slim\Http\{
 	Request, Response
 };
@@ -22,18 +17,11 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @property-read ModelConstraintRepository $repository
- * @method Constraint getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
+ * @method ModelConstraint getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
-final class ModelConstraintController extends ParentedSBaseController
+final class ModelConstraintController extends ParentedRepositoryController
 {
-	/** @varModelConstraintRepository */
-	private $constraintRepository;
-
-	public function __construct(Container $c)
-	{
-		parent::__construct($c);
-		$this->constraintRepository = $c->get(ModelConstraintRepository::class);
-	}
+    use \SBaseController;
 
     protected static function getAlias(): string
     {
@@ -48,7 +36,7 @@ final class ModelConstraintController extends ParentedSBaseController
 	protected function getData(IdentifiedObject $constraint): array
 	{
 		/** @var ModelConstraint $constraint */
-		$sBaseData = parent::getData($constraint);
+		$sBaseData = $this->getSBaseData($constraint);
 		return array_merge($sBaseData, [
 			'message' => $constraint->getMessage(),
 			'formula' => $constraint->getFormula(),
@@ -58,8 +46,8 @@ final class ModelConstraintController extends ParentedSBaseController
 	protected function setData(IdentifiedObject $constraint, ArgumentParser $data): void
 	{
 		/** @var ModelConstraint $constraint */
-		parent::setData($constraint, $data);
-		$constraint->getModelId() ?: $constraint->setModelId($this->repository->getParent());
+		$this->setSBaseData($constraint, $data);
+		$constraint->getModelId() ?: $constraint->setModelId($this->repository->getParent()->getId());
 		!$data->hasKey('message') ?: $constraint->setMessage($data->getString('message'));
 		!$data->hasKey('formula') ?: $constraint->setFormula($data->getString('formula'));
 	}
@@ -85,7 +73,7 @@ final class ModelConstraintController extends ParentedSBaseController
 
 	protected function getValidator(): Assert\Collection
 	{
-		$validatorArray = parent::getValidatorArray();
+		$validatorArray = $this->getSBaseValidator();
 		return new Assert\Collection(array_merge($validatorArray, [
 			'modelId' => new Assert\Type(['type' => 'integer']),
 			'message' => new Assert\Type(['type' => 'string']),
@@ -103,13 +91,13 @@ final class ModelConstraintController extends ParentedSBaseController
 		return ModelConstraintRepository::Class;
 	}
 
-	protected static function getParentRepositoryClassName(): string
+	protected function getParentObjectInfo(): ParentObjectInfo
 	{
-		return ModelRepository::class;
+	    return new ParentObjectInfo('model-id', Model::class);
 	}
 
-	protected function getParentObjectInfo(): array
-	{
-		return ['model-id', 'model'];
-	}
+    protected function checkParentValidity(IdentifiedObject $parent, IdentifiedObject $child)
+    {
+        // TODO: Implement checkParentValidity() method.
+    }
 }

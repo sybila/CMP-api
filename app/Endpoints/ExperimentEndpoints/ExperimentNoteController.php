@@ -97,7 +97,7 @@ final class ExperimentNoteController extends ParentedRepositoryController
 
 	protected function getParentObjectInfo(): ParentObjectInfo
 	{
-	    return new ParentObjectInfo('experiment-id', 'experiment');
+	    return new ParentObjectInfo('experiment-id', Experiment::class);
 	}
 
     protected static function getAlias(): string

@@ -3,14 +3,12 @@
 namespace App\Controllers;
 
 use App\Entity\{Authorization\User,
-    Bioquantity,
     Experiment,
     IdentifiedObject,
     ExperimentVariable,
     ExperimentNote,
     Device,
     Model,
-    Repositories\BioquantityRepository,
     Repositories\DeviceRepository,
     Repositories\ExperimentVariableRepository,
     Repositories\IEndpointRepository,
@@ -40,7 +38,7 @@ final class ExperimentController extends WritableRepositoryController
     private $organismRepository;
     private $modelRepository;
     private $deviceRepository;
-    private $bioquantityRepository;
+    //private $bioquantityRepository;
 
     public function __construct(Container $c)
 	{
@@ -48,7 +46,7 @@ final class ExperimentController extends WritableRepositoryController
 		$this->experimentRepository = $c->get(ExperimentRepository::class);
         $this->organismRepository = $c->get(OrganismRepository::class);
         $this->modelRepository = $c->get(ModelRepository::class);
-        $this->bioquantityRepository = $c->get(BioquantityRepository::class);
+        //$this->bioquantityRepository = $c->get(BioquantityRepository::class);
         $this->deviceRepository = $c->get(DeviceRepository::class);
 	}
 
@@ -88,9 +86,9 @@ final class ExperimentController extends WritableRepositoryController
                 'models' => $experiment->getExperimentModels()->map(function (Model $model) {
                     return [ 'id' => $model->getId(), 'name' => $model->getName()];
                 })->toArray(),
-                'bioquantities' => $experiment->getBioquantities()->map(function (Bioquantity $bioquantity) {
-                    return ['id' => $bioquantity->getId(), 'name' => $bioquantity->getName(), 'description' => $bioquantity->getDescription()];
-                })->toArray(),
+//                'bioquantities' => $experiment->getBioquantities()->map(function (Bioquantity $bioquantity) {
+//                    return ['id' => $bioquantity->getId(), 'name' => $bioquantity->getName(), 'description' => $bioquantity->getDescription()];
+//                })->toArray(),
                 'devices' => $experiment->getDevices()->map(function (Device $device) {
                       return ['id' => $device->getId(), 'name' => $device->getName()];
                 })->toArray(),
@@ -111,8 +109,8 @@ final class ExperimentController extends WritableRepositoryController
         !$data->hasKey('removeRelatedExperimentId') ?: $experiment->removeExperiment($this->experimentRepository->get($data->getInt('removeRelatedExperimentId')));
         !$data->hasKey('addRelatedModelId') ?: $experiment->addModel($this->modelRepository->get($data->getInt('addRelatedModelId')));
         !$data->hasKey('removeRelatedModelId') ?: $experiment->removeModel($this->modelRepository->get($data->getInt('removeRelatedModelId')));
-        !$data->hasKey('addRelatedBioquantityId') ?: $experiment->addBioquantity($this->bioquantityRepository->get($data->getInt('addRelatedBioquantityId')));
-        !$data->hasKey('removeRelatedBioquantityId') ?: $experiment->removeBioquantity($this->bioquantityRepository->get($data->getInt('removeRelatedBioquantityId')));
+        //!$data->hasKey('addRelatedBioquantityId') ?: $experiment->addBioquantity($this->bioquantityRepository->get($data->getInt('addRelatedBioquantityId')));
+        //!$data->hasKey('removeRelatedBioquantityId') ?: $experiment->removeBioquantity($this->bioquantityRepository->get($data->getInt('removeRelatedBioquantityId')));
         !$data->hasKey('addRelatedDeviceId') ?: $experiment->addDevice($this->deviceRepository->get($data->getInt('addRelatedDeviceId')));
         !$data->hasKey('removeRelatedDeviceId') ?: $experiment->removeDevice($this->deviceRepository->get($data->getInt('removeRelatedDeviceId')));
         !$data->hasKey('groupId') ?: $this->checkGroups($data->getInt('groupId')) || $experiment->setGroupId($data->getInt('groupId'));

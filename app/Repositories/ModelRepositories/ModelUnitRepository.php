@@ -7,12 +7,12 @@ use App\Helpers\QueryRepositoryHelper;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 
-class ModelUnitRepository implements ISBaseRepository
+class ModelUnitRepository implements IEndpointRepository
 {
 	/** @var EntityManager * */
 	protected $em;
 
-	/** @var \Doctrine\ORM\ModelUnitRepository */
+	/** @var \Doctrine\ORM\EntityRepository */
 	private $repository;
 
 	public function __construct(EntityManager $em)

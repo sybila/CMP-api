@@ -2,22 +2,15 @@
 
 namespace App\Controllers;
 
-use App\Entity\{
-	ModelEvent,
-	ModelEventAssignment,
-	IdentifiedObject,
-	Repositories\IEndpointRepository,
-	Repositories\ModelRepository,
-	Repositories\ModelCompartmentRepository,
-	Repositories\ModelEventRepository
-};
-use App\Exceptions\
-{
-	DependentResourcesBoundException,
-	MissingRequiredKeyException
-};
+use App\Entity\{Model,
+    ModelEvent,
+    ModelEventAssignment,
+    IdentifiedObject,
+    Repositories\IEndpointRepository,
+    Repositories\ModelRepository,
+    Repositories\ModelEventRepository};
+use App\Exceptions\{DependentResourcesBoundException, MissingRequiredKeyException, WrongParentException};
 use App\Helpers\ArgumentParser;
-use Slim\Container;
 use Slim\Http\{
 	Request, Response
 };
@@ -25,19 +18,11 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @property-read ModelEventRepository $repository
- * @method Event getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
+ * @method ModelEvent getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
-final class ModelEventController extends ParentedSBaseController
+final class ModelEventController extends ParentedRepositoryController
 {
-
-	/** @var ModelEventRepository */
-	private $eventRepository;
-
-	public function __construct(Container $c)
-	{
-		parent::__construct($c);
-		$this->eventRepository = $c->get(ModelCompartmentRepository::class);
-	}
+    use \SBaseController;
 
 	protected static function getAlias(): string
     {
@@ -52,7 +37,7 @@ final class ModelEventController extends ParentedSBaseController
 	protected function getData(IdentifiedObject $event): array
 	{
 		/** @var ModelEvent $event */
-		$sBaseData = parent::getData($event);
+		$sBaseData = $this->getSBaseData($event);
 		return array_merge($sBaseData, [
 			'delay' => $event->getDelay(),
 			'trigger' => $event->getTrigger(),
@@ -67,8 +52,8 @@ final class ModelEventController extends ParentedSBaseController
 	protected function setData(IdentifiedObject $event, ArgumentParser $data): void
 	{
 		/** @var ModelEvent $event */
-		parent::setData($event, $data);
-		$event->getModelId() ?: $event->setModelId($this->repository->getParent());
+		$this->setSBaseData($event, $data);
+		$event->getModelId() ?: $event->setModelId($this->repository->getParent()->getId());
 		!$data->hasKey('delay') ?: $event->setDelay($data->getString('delay'));
 		!$data->hasKey('trigger') ?: $event->setTrigger($data->getString('trigger'));
 		!$data->hasKey('priority') ?: $event->setPriority($data->getString('priority'));
@@ -101,7 +86,7 @@ final class ModelEventController extends ParentedSBaseController
 
 	protected function getValidator(): Assert\Collection
 	{
-		$validatorArray = parent::getValidatorArray();
+		$validatorArray = $this->getSBaseValidator();
 		return new Assert\Collection(array_merge($validatorArray, [
 			'modelId' => new Assert\Type(['type' => 'integer']),
 			'evaluateOnTrigger' => new Assert\Type(['type' => 'integer']),
@@ -121,13 +106,13 @@ final class ModelEventController extends ParentedSBaseController
 		return ModelEventRepository::Class;
 	}
 
-	protected static function getParentRepositoryClassName(): string
+	protected function getParentObjectInfo(): ParentObjectInfo
 	{
-		return ModelRepository::class;
+	    return new ParentObjectInfo('model-id', Model::class);
 	}
 
-	protected function getParentObjectInfo(): array
-	{
-		return ['model-id', 'model'];
-	}
+    protected function checkParentValidity(IdentifiedObject $parent, IdentifiedObject $child)
+    {
+        // TODO: Implement checkParentValidity() method.
+    }
 }

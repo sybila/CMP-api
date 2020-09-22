@@ -2,20 +2,15 @@
 
 namespace App\Controllers;
 
-use App\Entity\{
-	ModelReactionItem,
-	ModelSpecie,
-	ModelRule,
-	IdentifiedObject,
-	Repositories\ModelSpecieRepository,
-	Repositories\IEndpointRepository,
-	Repositories\ModelCompartmentRepository
-};
-use App\Exceptions\
-{
-	MissingRequiredKeyException,
-	DependentResourcesBoundException
-};
+use App\Entity\{ModelCompartment,
+    ModelReactionItem,
+    ModelSpecie,
+    ModelRule,
+    IdentifiedObject,
+    Repositories\ModelSpecieRepository,
+    Repositories\IEndpointRepository,
+    Repositories\ModelCompartmentRepository};
+use App\Exceptions\{MissingRequiredKeyException, DependentResourcesBoundException, WrongParentException};
 use App\Helpers\ArgumentParser;
 use Slim\Container;
 use Slim\Http\{
@@ -27,17 +22,9 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @property-read ModelSpecieRepository $repository
  * @method ModelSpecie getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
-final class ModelSpecieController extends ParentedSBaseController
+final class ModelSpecieController extends ParentedRepositoryController
 {
-
-	/** @var ModelSpecieRepository */
-	private $specieRepository;
-
-	public function __construct(Container $c)
-	{
-		parent::__construct($c);
-		$this->specieRepository = $c->get(ModelSpecieRepository::class);
-	}
+    use \SBaseController;
 
     protected static function getAlias(): string
     {
@@ -61,7 +48,7 @@ final class ModelSpecieController extends ParentedSBaseController
 	protected function getData(IdentifiedObject $specie): array
 	{
 		/** @var ModelSpecie $specie */
-		$sBaseData = parent::getData($specie);
+		$sBaseData = $this->getSBaseData($specie);
 		return array_merge($sBaseData, [
 			'initialExpression' => $specie->getInitialExpression(),
 			'hasOnlySubstanceUnits' => $specie->getHasOnlySubstanceUnits(),
@@ -79,7 +66,7 @@ final class ModelSpecieController extends ParentedSBaseController
 	protected function setData(IdentifiedObject $specie, ArgumentParser $data): void
 	{
 		/** @var ModelSpecie $specie */
-		parent::setData($specie, $data);
+		$this->setSBaseData($specie, $data);
 		$specie->setModelId($this->repository->getParent()->getModelId()->getId());
 		$specie->getCompartmentId() ?: $specie->setCompartmentId($this->repository->getParent());
 		!$data->hasKey('initialExpression') ?: $specie->setInitialExpression($data->getString('initialExpression'));
@@ -122,7 +109,7 @@ final class ModelSpecieController extends ParentedSBaseController
 
 	protected function getValidator(): Assert\Collection
 	{
-		$validatorArray = parent::getValidatorArray();
+		$validatorArray = $this->getSBaseValidator();
 		return new Assert\Collection(array_merge($validatorArray, [
 			'equationType' => new Assert\Type(['type' => 'string']),
 			'initialExpression' => new Assert\Type(['type' => 'string']),
@@ -147,8 +134,13 @@ final class ModelSpecieController extends ParentedSBaseController
 		return ModelCompartmentRepository::class;
 	}
 
-	protected function getParentObjectInfo(): array
+	protected function getParentObjectInfo(): ParentObjectInfo
 	{
-		return ['compartment-id', 'compartment'];
+	    return new ParentObjectInfo('compartment-id', ModelCompartment::class);
 	}
+
+    protected function checkParentValidity(IdentifiedObject $parent, IdentifiedObject $child)
+    {
+        // TODO: Implement checkParentValidity() method.
+    }
 }

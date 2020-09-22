@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Entity\BcsNote;
+use App\Entity\Entity;
 use App\Entity\EntityNote;
 use App\Entity\IdentifiedObject;
 use App\Entity\Repositories\BcsNoteRepository;
@@ -66,7 +67,7 @@ class EntityNoteController extends ParentedRepositoryController
 
 	protected function getParentObjectInfo(): ParentObjectInfo
 	{
-	    return new ParentObjectInfo('entity-id', 'entity');
+	    return new ParentObjectInfo('entity-id', Entity::class);
 	}
 
 	protected function getValidator(): Assert\Collection

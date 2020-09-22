@@ -9,15 +9,18 @@ use App\Helpers\QueryRepositoryHelper;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 
-class ModelEventRepository implements IDependentSBaseRepository
+class ModelEventRepository implements IDependentEndpointRepository
 {
 	/** @var EntityManager * */
 	protected $em;
 
-	/** @var \Doctrine\ORM\EventRepository */
+	/** @var \Doctrine\ORM\EntityRepository */
 	private $repository;
 
-	public function __construct(EntityManager $em)
+    /** @var IdentifiedObject */
+    private $object;
+
+    public function __construct(EntityManager $em)
 	{
 		$this->em = $em;
 		$this->repository = $em->getRepository(ModelEvent::class);
@@ -73,4 +76,13 @@ class ModelEventRepository implements IDependentSBaseRepository
 		return $query;
 	}
 
+    public function add($object): void
+    {
+        // TODO: Implement add() method.
+    }
+
+    public function remove($object): void
+    {
+        // TODO: Implement remove() method.
+    }
 }

@@ -10,13 +10,13 @@ use App\Helpers\QueryRepositoryHelper;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 
-class ModelParameterRepository implements IDependentSBaseRepository
+class ModelParameterRepository implements IDependentEndpointRepository
 {
 
 	/** @var EntityManager * */
 	protected $em;
 
-	/** @var \Doctrine\ORM\ModelParameterRepository */
+	/** @var \Doctrine\ORM\EntityRepository */
 	private $repository;
 
 	/** @var Model */
@@ -28,7 +28,7 @@ class ModelParameterRepository implements IDependentSBaseRepository
 		$this->repository = $em->getRepository(ModelParameter::class);
 	}
 
-	public function getBySbmlId(string $sbmlId): ?ModelParameter
+	public function getBySbmlId(string $sbmlId)
 	{
 		return $this->repository->findOneBy(['sbmlId' => $sbmlId]);
 	}
@@ -105,4 +105,14 @@ class ModelParameterRepository implements IDependentSBaseRepository
         $query = QueryRepositoryHelper::addFilterDql($query, $filter);
 		return $query;
 	}
+
+    public function add($object): void
+    {
+        // TODO: Implement add() method.
+    }
+
+    public function remove($object): void
+    {
+        // TODO: Implement remove() method.
+    }
 }

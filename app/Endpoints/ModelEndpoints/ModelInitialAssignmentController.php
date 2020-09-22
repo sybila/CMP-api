@@ -2,19 +2,13 @@
 
 namespace App\Controllers;
 
-use App\Entity\{
-	ModelInitialAssignment,
-	IdentifiedObject,
-	Repositories\IEndpointRepository,
-	Repositories\ModelRepository,
-	Repositories\ModelInitialAssignmentRepository
-};
-use App\Exceptions\
-{
-	MissingRequiredKeyException
-};
+use App\Entity\{Model,
+    ModelInitialAssignment,
+    IdentifiedObject,
+    Repositories\IEndpointRepository,
+    Repositories\ModelInitialAssignmentRepository};
+use App\Exceptions\{MissingRequiredKeyException, WrongParentException};
 use App\Helpers\ArgumentParser;
-use Slim\Container;
 use Slim\Http\{
 	Request, Response
 };
@@ -24,16 +18,10 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @property-read ModelInitialAssignmentRepository $repository
  * @method ModelInitialAssignment getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
-final class ModelInitialAssignmentController extends ParentedSBaseController
+final class ModelInitialAssignmentController extends ParentedRepositoryController
 {
-	/** @var ModelInitialAssignmentRepository */
-	private $initialAssignmentRepository;
 
-	public function __construct(Container $c)
-	{
-		parent::__construct($c);
-		$this->initialAssignmentRepository = $c->get(ModelInitialAssignmentRepository::class);
-	}
+    use \SBaseController;
 
     protected static function getAlias(): string
     {
@@ -48,7 +36,7 @@ final class ModelInitialAssignmentController extends ParentedSBaseController
 	protected function getData(IdentifiedObject $initialAssignment): array
 	{
 		/** @var ModelInitialAssignment $initialAssignment */
-		$sBaseData = parent::getData($initialAssignment);
+		$sBaseData = $this->getSBaseData($initialAssignment);
 		return array_merge($sBaseData, [
 			'id' => $initialAssignment->getId(),
 			'formula' => $initialAssignment->getFormula(),
@@ -58,8 +46,8 @@ final class ModelInitialAssignmentController extends ParentedSBaseController
 	protected function setData(IdentifiedObject $initialAssignment, ArgumentParser $data): void
 	{
 		/** @var ModelInitialAssignment $initialAssignment */
-		parent::setData($initialAssignment, $data);
-		$initialAssignment->getModelId() ?: $initialAssignment->setModelId($this->repository->getParent());
+		$this->setSBaseData($initialAssignment, $data);
+		$initialAssignment->getModelId() ?: $initialAssignment->setModelId($this->repository->getParent()->getId());
 		!$data->hasKey('formula') ?: $initialAssignment->setFormula($data->getString('formula'));
 	}
 
@@ -84,7 +72,7 @@ final class ModelInitialAssignmentController extends ParentedSBaseController
 
 	protected function getValidator(): Assert\Collection
 	{
-		$validatorArray = parent::getValidatorArray();
+		$validatorArray = $this->getSBaseValidator();
 		return new Assert\Collection(array_merge($validatorArray, [
 			'modelId' => new Assert\Type(['type' => 'integer']),
 			'formula' => new Assert\Type(['type' => 'string'])
@@ -101,13 +89,13 @@ final class ModelInitialAssignmentController extends ParentedSBaseController
 		return ModelInitialAssignmentRepository::Class;
 	}
 
-	protected static function getParentRepositoryClassName(): string
+	protected function getParentObjectInfo(): ParentObjectInfo
 	{
-		return ModelRepository::class;
+	    return new ParentObjectInfo('model-id', Model::class);
 	}
 
-	protected function getParentObjectInfo(): array
-	{
-		return ['model-id', 'model'];
-	}
+    protected function checkParentValidity(IdentifiedObject $parent, IdentifiedObject $child)
+    {
+        // TODO: Implement checkParentValidity() method.
+    }
 }
