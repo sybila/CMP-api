@@ -2,16 +2,24 @@
 
 namespace App\Controllers;
 
-use App\Entity\Repositories\ExperimentRepository;
 use App\Exceptions\InvalidArgumentException;
+use App\Exceptions\InvalidTypeException;
+use App\Exceptions\MalformedInputException;
 use App\Helpers\ArgumentParser;
-use PhpParser\Error;
 use Symfony\Component\Validator\Constraints as Assert;
 
 trait PageableController
 {
 	use ValidatedController;
 
+    /**
+     * Parses the relevant settings for the pagination from the URL arguments,
+     * returns them in associative array; keys are 'limit', 'offset', 'pages'.
+     * @param ArgumentParser $args
+     * @param int $resultCount
+     * @return array
+     * @throws InvalidArgumentException|InvalidTypeException|MalformedInputException
+     */
 	protected static function getPaginationData(ArgumentParser $args, int $resultCount): array
 	{
 		self::validate($args, self::getPaginationValidator());
@@ -61,24 +69,26 @@ trait PageableController
     /**
      * If paging arguments are missing and detail for the class is not allowed this returns $data_response
      * @param ArgumentParser $args
-     * @param array $data_response
+     * @param array $dataResponse
      * @return array
+     * @throws InvalidArgumentException
+     * @throws MalformedInputException
      */
-	protected static function getPaginationOnDetail(ArgumentParser $args, array $data_response): array
+	protected static function getPaginationOnDetail(ArgumentParser $args, array $dataResponse): array
     {
         self::validate($args, self::getPaginationValidator());
         $paging = static::getAllowedPagingVar();
         if ($args->hasKey('perPage') && $args->hasKey('page') && !is_null($paging)){
             $i = 0;
             $numResult = 0;
-            foreach ($data_response[$paging['parent']] as $p_var) {
-                $paginated_data = $p_var[$paging['attr']];
-                $numResult = count($paginated_data) > $numResult ? count($paginated_data) :  $numResult;
-                $data_response[$paging['parent']][$i][$paging['attr']] = array_slice($paginated_data,
+            foreach ($dataResponse[$paging['parent']] as $parent) {
+                $paginatedData = $parent[$paging['attr']];
+                $numResult = count($paginatedData) > $numResult ? count($paginatedData) :  $numResult;
+                $dataResponse[$paging['parent']][$i][$paging['attr']] = array_slice($paginatedData,
                     ($args['page'] - 1) * $args['perPage'], $args['perPage']);
                 $i = $i + 1;
             }
-            $data[] = $data_response;
+            $data[] = $dataResponse;
             $data['maxCount'] = $numResult;
 
             if(($args['perPage'] ? ceil($numResult / $args['perPage']) : 1)<$args['page']){
@@ -86,7 +96,7 @@ trait PageableController
             }
             return $data;
         }
-        return $data_response;
+        return $dataResponse;
     }
 
 	protected static function getPaginationValidator(): Assert\Collection

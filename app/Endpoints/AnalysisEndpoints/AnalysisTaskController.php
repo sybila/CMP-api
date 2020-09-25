@@ -3,11 +3,13 @@
 
 namespace App\Controllers;
 
+use AnalysisCommonableController;
 use App\Entity\AnalysisTask;
 use App\Entity\Experiment;
 use App\Entity\IdentifiedObject;
 use App\Entity\Model;
 use App\Entity\Repositories\AnalysisTaskRepository;
+use App\Exceptions\InvalidAuthenticationException;
 use App\Exceptions\MissingRequiredKeyException;
 use App\Exceptions\NonExistingObjectException;
 use App\Exceptions\WrongParentException;
@@ -17,6 +19,8 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 class AnalysisTaskController extends ParentedRepositoryController
 {
+
+    use AnalysisCommonableController;
 
     protected static function getRepositoryClassName(): string
     {
@@ -30,18 +34,14 @@ class AnalysisTaskController extends ParentedRepositoryController
 
     /**
      * @inheritDoc
-     * @throws NonExistingObjectException
      */
     protected function getData(IdentifiedObject $task): array
     {
         /** @var AnalysisTask $task */
         /** @var Model|Experiment $analObj */
-        $analObj = $this->getObjectViaORM($task->getObjectType(), $task->getObjectId());
-        return [
-            'id' => $task->getId(),
-            'name' => $task->getName(),
-            'description' => $task->getDescription(),
-            'annotation' => $task->getAnnotation(),
+        $analObj = $this->repository->getParent();
+        $commonAnalysisData = $this->getCommonAnalysisData($task);
+        return array_merge($commonAnalysisData, [
             'notes' => $task->getNotes(),
             'user_id' => $task->getUserId(),
             'analyzed_object' =>
@@ -55,7 +55,7 @@ class AnalysisTaskController extends ParentedRepositoryController
             'dataset' => $task->getDataset(),
             'settings' => $task->getSettings(),
             'isPublic' => $task->isPublic()
-        ];
+        ]);
     }
 
     protected static function getAlias(): string
@@ -71,12 +71,7 @@ class AnalysisTaskController extends ParentedRepositoryController
     protected function setData(IdentifiedObject $task, ArgumentParser $body): void
     {
         /** @var AnalysisTask $task */
-        if ($body->hasKey('name'))
-            $task->setName($body->getString('name'));
-        if ($body->hasKey('description'))
-            $task->setDescription($body->getString('description'));
-        if ($body->hasKey('annotation'))
-            $task->setAnnotation($body->getString('annotation'));
+        $this->setCommonAnalysisData($task, $body);
     }
 
     protected function createObject(ArgumentParser $body): IdentifiedObject
@@ -98,11 +93,7 @@ class AnalysisTaskController extends ParentedRepositoryController
 
     protected function getValidator(): Assert\Collection
     {
-        return new Assert\Collection([
-            'name' => new Assert\Type(['Tool' => 'string']),
-            'description' => new Assert\Type(['Tool' => 'string']),
-            'annotation' => new Assert\Type(['Tool' => 'string']),
-        ]);
+        return new Assert\Collection($this->getCommonAnalysisDataValidator());
     }
 
 
@@ -148,5 +139,10 @@ class AnalysisTaskController extends ParentedRepositoryController
             throw new WrongParentException($data->getObjectType(), $parent->getId(),
                 self::getObjectName(), $data->getId());
         }
+    }
+
+    public function hasAccessToObject(array $userGroups): ?int
+    {
+        return parent::hasAccessToObject($userGroups);
     }
 }

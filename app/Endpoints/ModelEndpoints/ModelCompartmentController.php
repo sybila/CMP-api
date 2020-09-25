@@ -14,6 +14,7 @@ use App\Entity\{Model,
     Repositories\ModelCompartmentRepository};
 use App\Exceptions\{DependentResourcesBoundException, MissingRequiredKeyException, WrongParentException};
 use App\Helpers\ArgumentParser;
+use SBaseCommonableController;
 use Slim\Container;
 use Slim\Http\{
 	Request, Response
@@ -26,7 +27,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  */
 final class ModelCompartmentController extends ParentedRepositoryController
 {
-    use \SBaseController;
+    use SBaseCommonableController;
 
     protected static function getAlias(): string
     {

@@ -5,7 +5,7 @@ use App\Entity\SBase;
 use App\Helpers\ArgumentParser;
 use Symfony\Component\Validator\Constraints as Assert;
 
-trait SBaseController
+trait SBaseCommonableController
 {
     protected function getSBaseData(IdentifiedObject $object): array
     {

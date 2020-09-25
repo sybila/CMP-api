@@ -14,6 +14,7 @@ use App\Helpers\ArgumentParser;
 use Slim\Http\{
 	Request, Response
 };
+use SBaseCommonableController;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -22,7 +23,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  */
 final class ModelEventController extends ParentedRepositoryController
 {
-    use \SBaseController;
+    use SBaseCommonableController;
 
 	protected static function getAlias(): string
     {

@@ -4,6 +4,7 @@
 namespace App\Controllers;
 
 
+use AnalysisCommonableController;
 use App\Entity\AnalysisDataset;
 use App\Entity\IdentifiedObject;
 use App\Entity\Model;
@@ -15,6 +16,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 class AnalysisDatasetController extends ParentedRepositoryController
 {
+    use AnalysisCommonableController;
 
     protected static function getRepositoryClassName(): string
     {
@@ -29,14 +31,10 @@ class AnalysisDatasetController extends ParentedRepositoryController
     protected function getData(IdentifiedObject $object): array
     {
         /** @var AnalysisDataset $object */
-        return [
-            'id' => $object->getId(),
-            'name' => $object->getName(),
-            'description' => $object->getDescription(),
+        return array_merge($this->getCommonAnalysisData($object), [
             'modelId' => $object->getModelId(),
-            'modelDataset' => $object->getDatasetSettings(),
-            'annotation' => $object->getAnnotation()
-        ];
+            'modelDataset' => $object->getDatasetSettings()
+        ]);
     }
 
     protected static function getAllowedSort(): array
@@ -52,9 +50,7 @@ class AnalysisDatasetController extends ParentedRepositoryController
     protected function setData(IdentifiedObject $object, ArgumentParser $body): void
     {
         /** @var AnalysisDataset $object */
-        !$body->hasKey('name') ?: $object->setName($body->getString('name'));
-        !$body->hasKey('description') ?: $object->setDescription($body->getString('description'));
-        !$body->hasKey('annotation') ?: $object->setAnnotation($body->getString('annotation'));
+        $this->setCommonAnalysisData($object, $body);
         !$body->hasKey('datasetSettings') ?: $object->setDatasetSettings($body->getString('datasetSettings'));
         $object->getModelId() ?: $object->setModelId($this->repository->getParent()->getId());
     }
@@ -74,12 +70,10 @@ class AnalysisDatasetController extends ParentedRepositoryController
 
     protected function getValidator(): Assert\Collection
     {
-        return new Assert\Collection([
-            'name' => new Assert\Type(['type' => 'string']),
-            'datasetSettings' => new Assert\Json(),
-            'description' => new Assert\Type(['type' => 'string']),
-            'annotation' => new Assert\Type(['type' => 'string']),
-        ]);
+        return new Assert\Collection( array_merge(
+            $this->getCommonAnalysisDataValidator(), [
+            'datasetSettings' => new Assert\Json()
+            ]));
     }
 
     protected function checkParentValidity(IdentifiedObject $model, IdentifiedObject $child)

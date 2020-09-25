@@ -87,7 +87,7 @@ abstract class WritableRepositoryController extends RepositoryController
 	public function add(Request $request, Response $response, ArgumentParser $args): Response
 	{
 		$this->runEvents($this->beforeRequest, $request, $response, $args);
-        $this->validateAdd($this->getAccess($request));
+        $this->validateAdd($this->user_permissions);
 		$body = new ArgumentParser($request->getParsedBody());
 		$this->validate($body, $this->getValidator());
 		$object = $this->createObject($body);
@@ -108,7 +108,7 @@ abstract class WritableRepositoryController extends RepositoryController
 	{
 		$this->runEvents($this->beforeRequest, $request, $response, $args);
 		$object = $this->getObject($this->getModifyId($args));
-        $this->validateEdit($this->getAccess($request));
+        $this->validateEdit($this->user_permissions);
 		$body = new ArgumentParser($request->getParsedBody());
 		$this->validate($body, $this->getValidator());
 		$this->setData($object, $body);
@@ -125,7 +125,7 @@ abstract class WritableRepositoryController extends RepositoryController
 	{
 		$this->runEvents($this->beforeRequest, $request, $response, $args);
 		$entity = $this->getObject($this->getModifyId($args));
-        $this->validateDelete($this->getAccess($request));
+        $this->validateDelete($this->user_permissions);
 		$this->runEvents($this->beforeDelete, $entity);
 		$this->orm->remove($entity);
 		$this->data->needsFlush = true;
@@ -189,9 +189,11 @@ abstract class WritableRepositoryController extends RepositoryController
     /**
      * @param array $user_permissions
      * @return bool
+     * @throws InternalErrorException
      * @throws InvalidArgumentException
      * @throws InvalidAuthenticationException
      * @throws InvalidRoleException
+     * @throws NonExistingObjectException
      */
     public function validateEdit(array $user_permissions) : bool
     {
@@ -219,9 +221,11 @@ abstract class WritableRepositoryController extends RepositoryController
     /**
      * @param array $user_permissions
      * @return bool
+     * @throws InternalErrorException
      * @throws InvalidArgumentException
      * @throws InvalidAuthenticationException
      * @throws InvalidRoleException
+     * @throws NonExistingObjectException
      */
     public function validateDelete(array $user_permissions) : bool
     {

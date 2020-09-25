@@ -16,6 +16,7 @@ use App\Entity\{
 use App\Exceptions\{MissingRequiredKeyException, NonExistingObjectException, WrongParentException};
 use App\Helpers\ArgumentParser;
 use Doctrine\ORM\EntityManager;
+use SBaseCommonableController;
 use Slim\Container;
 use Slim\Http\{
 	Request, Response
@@ -29,7 +30,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 abstract class ModelReactionItemController extends ParentedRepositoryController
 {
 
-    use \SBaseController;
+    use SBaseCommonableController;
 
 	protected static function getAlias(): string
     {

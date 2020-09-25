@@ -20,7 +20,7 @@ use App\Helpers\ArgumentParser;
 use Slim\Http\{
 	Request, Response
 };
-use SBaseController;
+use SBaseCommonableController;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -30,7 +30,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 abstract class ModelParameterController extends ParentedRepositoryController
 {
 
-    use SBaseController;
+    use SBaseCommonableController;
 
     protected static function getAlias(): string
     {
@@ -44,6 +44,7 @@ abstract class ModelParameterController extends ParentedRepositoryController
 
 	public function readSbmlId(Request $request, Response $response, ArgumentParser $args)
 	{
+	    /** @var IdentifiedObject $parameter */
 		$parameter = $this->repository->getBySbmlId($args->getString('sbmlId'));
 		return self::formatOk(
 			$response,

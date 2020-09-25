@@ -5,17 +5,14 @@ namespace App\Controllers;
 use App\Entity\Authorization\UserGroupToUser;
 use App\Entity\Authorization\User;
 use App\Entity\IdentifiedObject;
-use App\Entity\Model;
 use App\Entity\Repositories\IEndpointRepository;
 use App\Exceptions\EmptySelectionException;
 use App\Exceptions\InternalErrorException;
 use App\Exceptions\InvalidArgumentException;
 use App\Exceptions\InvalidAuthenticationException;
-use App\Exceptions\InvalidRoleException;
 use App\Exceptions\InvalidTypeException;
 use App\Exceptions\NonExistingObjectException;
 use App\Helpers\ArgumentParser;
-use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\ORMException;
 use League\OAuth2\Server\Exception\OAuthServerException;
 use League\OAuth2\Server\ResourceServer;
@@ -37,8 +34,6 @@ abstract class RepositoryController extends AbstractController
 	 */
 	protected $beforeRequest = [];
 
-	/** @var ResourceServer */
-	protected $server;
 
     /** @var array */
 	protected $user_permissions;
@@ -91,34 +86,47 @@ abstract class RepositoryController extends AbstractController
 	{
 		parent::__construct($c);
 		$this->repository = $c->get(static::getRepositoryClassName());
-		$this->server = $c->get(ResourceServer::class);
+
+		$server = $c->get(ResourceServer::class);
+        $this->beforeRequest[] = function(Request $request, Response $response, ArgumentParser $args) use ($server)
+        {
+            $this->getAccess($request, $server);
+        };
 	}
 
     /**
      * @param Request $request needed for auth.
-     * @return array key 'group_wise' contains array of associative array of key 'groupId' => groupRoleId (tier),
+     //* @return array key 'group_wise' contains array of associative array of key 'groupId' => groupRoleId (tier),
      * key 'platform_wise' contains values from 0 to 4, (according to permissions on the platform)
+     * @param ResourceServer $server
      * @throws InvalidAuthenticationException
      */
-    public function getAccess(Request $request): array
+    public function getAccess(Request $request, ResourceServer $server) //: array
     {
         if ($request->getHeader('http_authorization')){
             try {
-                $request = $this->server->validateAuthenticatedRequest($request);
+                $request = $server->validateAuthenticatedRequest($request);
             } catch (OAuthServerException $e) {
                 throw new InvalidAuthenticationException($e->getMessage(), $e->getHint());
             }
             $this->user_permissions = $this->getUserPermissions($request->getAttribute('oauth_user_id'));
-            return $this->user_permissions;
         }
         $this->user_permissions = ["group_wise" => [1 => 10], "platform_wise" => 0,  "user_id" => 0];
-        return ["group_wise" => [1 => 10], "platform_wise" => 0,  "user_id" => 0];
     }
 
+    /**
+     * This function is responsible for GET action that returns list of objects (e.g. /models).
+     * @param Request $request
+     * @param Response $response
+     * @param ArgumentParser $args
+     * @return Response
+     * @throws mixed
+     */
 	public function read(Request $request, Response $response, ArgumentParser $args)
 	{
+        dump($request->getAttributes());exit;
 	    $this->runEvents($this->beforeRequest, $request, $response, $args);
-        $filter['accessFilter'] = $this->validateList($this->getAccess($request));
+        $filter['accessFilter'] = $this->validateList($this->user_permissions);
         $filter['argFilter'] = static::getFilter($args);
         $numResults = $this->repository->getNumResults($filter);
         static::validateFilter($numResults, $filter['argFilter']);
@@ -129,40 +137,37 @@ abstract class RepositoryController extends AbstractController
 	}
 
     /**
+     * This function is responsible for GET action that returns detail of an object (e.g. /models/20).
      * @param Request $request
      * @param Response $response
      * @param ArgumentParser $args
      * @return Response
-     * @throws InternalErrorException
-     * @throws InvalidArgumentException
-     * @throws InvalidAuthenticationException
-     * @throws InvalidTypeException
-     * @throws NonExistingObjectException
+     * @throws mixed
      */
 	public function readIdentified(Request $request, Response $response, ArgumentParser $args): Response
 	{
 		$this->runEvents($this->beforeRequest, $request, $response, $args);
-        $data = [];
-		foreach ($this->getReadIds($args) as $id) {
-            $ent = $this->getObject((int)$id);
-            $this->validateDetail($this->getAccess($request));
-		    $data = static::getPaginationOnDetail($args, $this->getData($ent));
-            if (array_key_exists('maxCount', $data)){
-                $maxCount = $data['maxCount'];
-                $response = $response->withHeader('X-MaxCount', $maxCount);
-                $response = $response->withHeader('X-Pages', $args['perPage'] ? ceil($maxCount / $args['perPage']) : 1);
-                unset($data['maxCount']);
-            }
+        $id = current($this->getReadIds($args));
+        $ent = $this->getObject((int)$id);
+        $this->validateDetail($this->user_permissions);
+        $data = static::getPaginationOnDetail($args, $this->getData($ent));
+        //FIXME move this to some other controller, pageable would be the best
+        if (array_key_exists('maxCount', $data)){
+            $maxCount = $data['maxCount'];
+            $response = $response->withHeader('X-MaxCount', $maxCount);
+            $response = $response->withHeader('X-Pages', $args['perPage'] ? ceil($maxCount / $args['perPage']) : 1);
+            unset($data['maxCount']);
         }
         return self::formatOk($response, $data);
 	}
 
 
 	/**
+     * Get an object from a repository, if repository is not provided it uses current repository.
 	 * @param int                      $id
 	 * @param IEndpointRepository|null $repository
 	 * @param string|null              $objectName
-	 * @return mixed
+	 * @return IdentifiedObject
 	 * @throws InternalErrorException
 	 * @throws NonExistingObjectException
 	 */
@@ -184,6 +189,7 @@ abstract class RepositoryController extends AbstractController
 	}
 
     /**
+     * Get an object via ID and its entity class name.
      * @param string $entityClassName
      * @param int $id
      * @return IdentifiedObject
@@ -207,26 +213,28 @@ abstract class RepositoryController extends AbstractController
 		};
 	}
 
+    /**
+     * @param $id
+     * @return array
+     */
     public function getUserPermissions($id)
     {
-        $auth_user = $this->orm->getRepository(\App\Entity\Authorization\User::class)->find($id);
-        $users_groups = $auth_user->getGroups()->map(function (UserGroupToUser $groupLink) {
+        $authUser = $this->orm->getRepository(User::class)->find($id);
+        $usersGroupRoles = $authUser->getGroups()->map(function (UserGroupToUser $groupLink) {
             $group = $groupLink->getUserGroupId();
-            return ['groupId' => $group->getId(), 'roleId' =>(int) $groupLink->getRoleId()];
-        });
-        $group_permissions = [];
-        foreach ($users_groups->toArray() as $group){
-            $group_permissions[$group['groupId']] = $group['roleId'];
-        }
-        return ["group_wise" => $group_permissions, "platform_wise" => $auth_user->getType(), "user_id" => $id];
+            return [$group->getId() => (int) $groupLink->getRoleId()];
+        })->toArray();
+        return ["group_wise" => $usersGroupRoles, "platform_wise" => $authUser->getType(), "user_id" => $id];
     }
 
     /**
      * @param array $user_permissions
      * @return array additional collection filter,
      * key (is group id of users groups) => value (is prepared for dql filter)
+     * @throws InternalErrorException
      * @throws InvalidArgumentException if user with non-existing role
      * @throws InvalidAuthenticationException
+     * @throws NonExistingObjectException
      */
     public function validateList(array $user_permissions) : ?array
     {
@@ -248,8 +256,10 @@ abstract class RepositoryController extends AbstractController
     /**
      * @param array $user_permissions
      * @return bool
+     * @throws InternalErrorException
      * @throws InvalidArgumentException
      * @throws InvalidAuthenticationException
+     * @throws NonExistingObjectException
      */
     public function validateDetail(array $user_permissions) : bool
     {

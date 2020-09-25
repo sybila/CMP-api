@@ -4,6 +4,7 @@
 namespace App\Controllers;
 
 
+use AnalysisCommonableController;
 use App\Entity\AnalysisMethod;
 use App\Entity\IdentifiedObject;
 use App\Entity\Repositories\AnalysisMethodRepository;
@@ -13,6 +14,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 class AnalysisMethodController extends WritableRepositoryController
 {
+    use AnalysisCommonableController;
 
     protected static function getRepositoryClassName(): string
     {
@@ -27,13 +29,9 @@ class AnalysisMethodController extends WritableRepositoryController
     protected function getData(IdentifiedObject $object): array
     {
         /** @var AnalysisMethod $object */
-        return [
-            'id' => $object->getId(),
-            'name' => $object->getName(),
-            'description' => $object->getDescription(),
-            'annotation' => $object->getAnnotation(),
+        return array_merge($this->getCommonAnalysisData($object), [
             'method_signature' => $object->getMethodSignature()
-        ];
+        ]);
     }
 
     protected static function getAlias(): string
@@ -48,15 +46,10 @@ class AnalysisMethodController extends WritableRepositoryController
 
     protected function setData(IdentifiedObject $object, ArgumentParser $body): void
     {
-        /** @var AnalysisMethod $analysisTool */
-        if ($body->hasKey('name'))
-            $analysisTool->setName($body->getString('name'));
-        if ($body->hasKey('description'))
-            $analysisTool->setDescription($body->getString('description'));
-        if ($body->hasKey('annotation'))
-            $analysisTool->setAnnotation($body->getString('annotation'));
+        /** @var AnalysisMethod $object */
+        $this->setCommonAnalysisData($object, $body);
         if ($body->hasKey('method_signature'))
-            $analysisTool->setMethodSignature($body->getString('method_signature'));
+            $object->setMethodSignature($body->getString('method_signature'));
     }
 
     protected function createObject(ArgumentParser $body): IdentifiedObject
@@ -77,11 +70,9 @@ class AnalysisMethodController extends WritableRepositoryController
 
     protected function getValidator(): Assert\Collection
     {
-        return new Assert\Collection([
-            'name' => new Assert\Type(['Tool' => 'string']),
-            'description' => new Assert\Type(['Tool' => 'string']),
-            'annotation' => new Assert\Type(['Tool' => 'string']),
+        return new Assert\Collection( array_merge(
+            $this->getCommonAnalysisDataValidator(), [
             'method_signature' => new Assert\Json(),
-        ]);
+        ]));
     }
 }

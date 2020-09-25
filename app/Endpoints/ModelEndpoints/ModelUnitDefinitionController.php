@@ -12,6 +12,7 @@ use App\Entity\{Model,
     Repositories\ModelUnitDefinitionRepository};
 use App\Exceptions\{MissingRequiredKeyException, WrongParentException};
 use App\Helpers\ArgumentParser;
+use SBaseCommonableController;
 use Slim\Container;
 use Slim\Http\{
 	Request, Response
@@ -25,7 +26,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 final class ModelUnitDefinitionController extends ParentedRepositoryController
 {
 
-    use \SBaseController;
+    use SBaseCommonableController;
 
     protected static function getAlias(): string
     {

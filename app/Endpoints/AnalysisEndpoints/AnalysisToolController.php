@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use AnalysisCommonableController;
 use App\Entity\AnalysisTool;
 use App\Entity\IdentifiedObject;
 use App\Entity\Repositories\AnalysisToolRepository;
@@ -16,6 +17,8 @@ use Symfony\Component\Validator\Constraints as Assert;
 class AnalysisToolController extends WritableRepositoryController
 {
 
+    use AnalysisCommonableController;
+
     protected static function getRepositoryClassName(): string
     {
         return AnalysisToolRepository::class;
@@ -28,14 +31,7 @@ class AnalysisToolController extends WritableRepositoryController
 
     protected function getData(IdentifiedObject $object): array
     {
-        /** @var AnalysisTool $object */
-        return [
-            'id' => $object->getId(),
-            'name' => $object->getName(),
-            'description' => $object->getDescription(),
-            'annotation' => $object->getAnnotation(),
-            //'location' => $object->getLocation()
-        ];
+        return $this->getCommonAnalysisData($object);
     }
 
     protected static function getAlias(): string
@@ -50,15 +46,7 @@ class AnalysisToolController extends WritableRepositoryController
 
     protected function setData(IdentifiedObject $object, ArgumentParser $body): void
     {
-        /** @var AnalysisTool $analysisTool */
-        if ($body->hasKey('name'))
-            $analysisTool->setName($body->getString('name'));
-        if ($body->hasKey('description'))
-            $analysisTool->setDescription($body->getString('description'));
-        if ($body->hasKey('annotation'))
-            $analysisTool->setAnnotation($body->getString('annotation'));
-        if ($body->hasKey('location'))
-            $analysisTool->setAnnotation($body->getString('annotation'));
+        $this->setCommonAnalysisData($object, $body);
     }
 
     protected function createObject(ArgumentParser $body): IdentifiedObject
@@ -81,10 +69,6 @@ class AnalysisToolController extends WritableRepositoryController
 
     protected function getValidator(): Assert\Collection
     {
-        return new Assert\Collection([
-            'name' => new Assert\Type(['Tool' => 'string']),
-            'description' => new Assert\Type(['Tool' => 'string']),
-            'annotation' => new Assert\Type(['Tool' => 'string']),
-        ]);
+        return new Assert\Collection($this->getCommonAnalysisDataValidator());
     }
 }

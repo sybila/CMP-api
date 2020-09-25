@@ -84,13 +84,11 @@ abstract class ParentedRepositoryController extends WritableRepositoryController
     public function readIdentified(Request $request, Response $response, ArgumentParser $args): Response
     {
         $this->runEvents($this->beforeRequest, $request, $response, $args);
-        $data = [];
-        foreach ($this->getReadIds($args) as $id) {
-            $ent = $this->getObject((int)$id);
-            $this->validateDetail($this->getAccess($request));
-            $data = $this->getData($ent);
-            $this->checkParentValidity($this->repository->getParent(), $ent);
-        }
+        $id = current($this->getReadIds($args));
+        $ent = $this->getObject((int)$id);
+        $this->validateDetail($this->user_permissions);
+        $data = $this->getData($ent);
+        $this->checkParentValidity($this->repository->getParent(), $ent);
         return self::formatOk($response, $data);
     }
 }
