@@ -119,6 +119,16 @@ return function(App $app) {
 	// User confirm registration
     $app->get('/users/{email}/{hash}', Ctl\UserController::class  . ':confirmRegistration');
 
+    // Currently logged user detail redirect
+    $srv = RouteHelper::$authMiddleware;
+    $app->get('/user', function (Request $request, Response $response) use ($srv){
+        /** @var ResourceServerMiddleware $srv */
+        $response = $srv($request, $response, function (Request $request, Response $response) {
+            return $response->withRedirect("users/{$request->getAttribute('oauth_user_id')}");
+        });
+        return $response;
+    });
+
 	// annotations
 	$app->get('/annotations/types', Ctl\AnnotationController::class . ':readTypes');
 	$app->get('/annotations/link/{type}', Ctl\AnnotationController::class . ':readLink');

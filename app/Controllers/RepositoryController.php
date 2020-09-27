@@ -124,7 +124,6 @@ abstract class RepositoryController extends AbstractController
      */
 	public function read(Request $request, Response $response, ArgumentParser $args)
 	{
-        dump($request->getAttributes());exit;
 	    $this->runEvents($this->beforeRequest, $request, $response, $args);
         $filter['accessFilter'] = $this->validateList($this->user_permissions);
         $filter['argFilter'] = static::getFilter($args);

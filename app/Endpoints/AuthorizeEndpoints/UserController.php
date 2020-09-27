@@ -8,6 +8,9 @@ use App\Entity\{
 	Authorization\UserGroupToUser,
 	IdentifiedObject
 };
+use League\OAuth2\Server\Exception\OAuthServerException;
+use League\OAuth2\Server\Middleware\ResourceServerMiddleware;
+use League\OAuth2\Server\ResourceServer;
 use Symfony\Component\Mailer\Exception\InvalidArgumentException;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\Mailer;
@@ -15,6 +18,7 @@ use App\Entity\Repositories\IEndpointRepository;
 use App\Repositories\Authorization\UserRepository;
 use App\Exceptions\{ActionConflictException,
     DependentResourcesBoundException,
+    InvalidAuthenticationException,
     InvalidRoleException,
     MissingRequiredKeyException,
     UniqueKeyViolationException};
