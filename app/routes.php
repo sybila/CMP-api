@@ -2,6 +2,8 @@
 
 use App\Controllers as Ctl;
 use App\Helpers;
+use App\Helpers\NonstrictResourceServerMiddleware;
+use Doctrine\ORM\EntityManager;
 use League\OAuth2\Server\Middleware\ResourceServerMiddleware;
 use League\OAuth2\Server\ResourceServer;
 use Slim\App;
@@ -103,7 +105,7 @@ class RouteHelper
 
 return function(App $app) {
 	RouteHelper::$app = $app;
-	RouteHelper::$authMiddleware = new ResourceServerMiddleware($app->getContainer()[ResourceServer::class]);
+	RouteHelper::$authMiddleware = new NonstrictResourceServerMiddleware($app->getContainer()[ResourceServer::class]);
 
 	// main
 	$app->get('/', function (Request $request, Response $response, Helpers\ArgumentParser $args) {
@@ -119,19 +121,19 @@ return function(App $app) {
 	// User confirm registration
     $app->get('/users/{email}/{hash}', Ctl\UserController::class  . ':confirmRegistration');
 
-    // Currently logged user detail redirect
-    $srv = RouteHelper::$authMiddleware;
-    $app->get('/user', function (Request $request, Response $response) use ($srv){
-        /** @var ResourceServerMiddleware $srv */
-        $response = $srv($request, $response, function (Request $request, Response $response) {
-            return $response->withRedirect("users/{$request->getAttribute('oauth_user_id')}");
-        });
-        return $response;
-    });
+    // Currently logged user routes
+    $app->get('/user', Ctl\LoggedInUserController::class . ':readIdentified')
+        ->add(new UserPermissionsControllerMiddleware($app->getContainer()))
+        ->add(RouteHelper::$authMiddleware);
+    $app->put('/user', Ctl\LoggedInUserController::class . ':edit')
+        ->add(RouteHelper::$authMiddleware);
+    $app->delete('/user', Ctl\LoggedInUserController::class . ':delete')
+        ->add(RouteHelper::$authMiddleware);
 
 	// annotations
 	$app->get('/annotations/types', Ctl\AnnotationController::class . ':readTypes');
 	$app->get('/annotations/link/{type}', Ctl\AnnotationController::class . ':readLink');
+
 
 	(new RouteHelper)
 		->setRoute(Ctl\ClassificationController::class, '/classifications')
@@ -160,74 +162,96 @@ return function(App $app) {
 		->register();
 	(new RouteHelper)
 		->setRoute(Ctl\ModelController::class, '/models')
+        ->setAuthMask(true)
 		->register();
 	(new RouteHelper)
 		->setRoute(Ctl\ModelCompartmentController::class, '/models/{model-id:\\d+}/compartments')
+        ->setAuthMask(true)
 		->register();
 	(new RouteHelper)
 		->setRoute(Ctl\ModelSpecieController::class, '/models/{model-id:\\d+}/compartments/{compartment-id:\\d+}/species')
+        ->setAuthMask(true)
 		->register();
 	(new RouteHelper)
 		->setRoute(Ctl\ModelReactionController::class, '/models/{model-id:\\d+}/reactions')
+        ->setAuthMask(true)
 		->register();
 	(new RouteHelper)
 		->setRoute(Ctl\ModelFunctionController::class, '/models/{model-id:\\d+}/reactions/{reaction-id:\\d+}/functions')
+        ->setAuthMask(true)
 		->register();
 	(new RouteHelper)
 		->setRoute(Ctl\ModelFunctionDefinitionController::class, '/models/{model-id:\\d+}/functionDefinitions')
+        ->setAuthMask(true)
 		->register();
 	(new RouteHelper)
 		->setRoute(Ctl\ReactionParentedReactionItemController::class, '/models/{model-id:\\d+}/reactions/{reaction-id:\\d+}/reactionItems')
+        ->setAuthMask(true)
 		->register();
 	(new RouteHelper)
 		->setRoute(Ctl\SpecieParentedReactionItemController::class, '/models/{model-id:\\d+}/compartments/{compartment-id:\\d+}/species/{specie-id:\\d+}/reactionItems')
-		->register();
+        ->setAuthMask(true)
+        ->register();
 	(new RouteHelper)
 		->setRoute(Ctl\ModelConstraintController::class, '/models/{model-id:\\d+}/constraints')
+        ->setAuthMask(true)
 		->register();
 	(new RouteHelper)
 		->setRoute(Ctl\ModelEventController::class, '/models/{model-id:\\d+}/events')
+        ->setAuthMask(true)
 		->register();
 	(new RouteHelper)
 		->setRoute(Ctl\ModelEventAssignmentController::class, '/models/{model-id:\\d+}/events/{event-id:\\d+}/eventAssignments')
+        ->setAuthMask(true)
 		->register();
 	(new RouteHelper)
 		->setRoute(Ctl\ModelUnitDefinitionController::class, '/models/{model-id:\\d+}/unitDefinitions')
+        ->setAuthMask(true)
 		->register();
 	(new RouteHelper)
 		->setRoute(Ctl\ModelUnitController::class, '/units')
 		->register();
 	(new RouteHelper)
 		->setRoute(Ctl\ModelInitialAssignmentController::class, '/models/{model-id:\\d+}/initialAssignments')
+        ->setAuthMask(true)
 		->register();
 	(new RouteHelper)
 		->setRoute(Ctl\ModelParentedParameterController::class, '/models/{model-id:\\d+}/parameters')
+        ->setAuthMask(true)
 		->register();
 	#FIXME ------ WTH is this endpoint? Makes no sense
 	(new RouteHelper)
 		->setRoute(Ctl\ReactionItemParentedParameterController::class, '/models/{model-id:\\d+}/reactions/{reactionItem-id:\\d+}/parameters')
+        ->setAuthMask(true)
 		->register();
 	// ------------
 	(new RouteHelper)
 		->setRoute(Ctl\ModelParentedRuleController::class, '/models/{model-id:\\d+}/rules')
+        ->setAuthMask(true)
 		->register();
 	(new RouteHelper)
 		->setRoute(Ctl\ExperimentController::class, '/experiments')
+        ->setAuthMask(true)
 		->register();
     (new RouteHelper)
         ->setRoute(Ctl\VariablesValuesController::class, '/experimentvalues')
+        ->setAuthMask(true)
         ->register();
 	(new RouteHelper)
         ->setRoute(Ctl\ExperimentVariableController::class, '/experiments/{experiment-id:\\d+}/variables')
+        ->setAuthMask(true)
 		->register();
 	(new RouteHelper)
 		->setRoute(Ctl\ExperimentValueController::class, '/experiments/{experiment-id:\\d+}/variables/{variable-id:\\d+}/values')
+        ->setAuthMask(true)
 		->register();
 	(new RouteHelper)
 		->setRoute(Ctl\ExperimentNoteController::class, '/experiments/{experiment-id:\\d+}/notes')
+        ->setAuthMask(true)
 		->register();
     (new RouteHelper)
         ->setRoute(Ctl\ExperimentVariableNoteController::class, '/experiments/{experiment-id:\\d+}/variables/{variable-id:\\d+}/notes')
+        ->setAuthMask(true)
         ->register();
     (new RouteHelper)
         ->setRoute(Ctl\DeviceController::class, '/devices')
@@ -249,15 +273,19 @@ return function(App $app) {
         ->register();
     (new RouteHelper())
         ->setRoute(Ctl\AnalysisDatasetController::class, '/models/{model-id:\\d+}/datasets')
+        ->setAuthMask(true)
         ->register();
     (new RouteHelper())
         ->setRoute(Ctl\AnalysisTaskController::class, '/{obj-type:experiment|model}s/{obj-id:\\d+}/tasks')
+        ->setAuthMask(true)
         ->register();
     (new RouteHelper())
         ->setRoute(Ctl\AnalysisTaskController::class, '/analysisTasks')
+        ->setAuthMask(true)
         ->register();
     (new RouteHelper())
         ->setRoute(Ctl\UserController::class, '/users')
+        ->setAuthMask(true)
         ->register();
 	(new RouteHelper)
 		->setRoute(Ctl\UserTypeController::class, '/userTypes')
@@ -265,6 +293,7 @@ return function(App $app) {
 		->register();
 	(new RouteHelper)
 		->setRoute(Ctl\UserGroupController::class, '/userGroups')
+        ->setAuthMask(true)
 		->register();
 	(new RouteHelper)
 		->setRoute(Ctl\UserGroupRoleController::class, '/userGroupRoles')

@@ -13,7 +13,6 @@ use App\Repositories\{
 final class UserGroupRoleController extends RepositoryController
 {
 
-
 	protected function getData(IdentifiedObject $userGroupRole): array
 	{
 		/** @var UserGroupRole $userGroupRole */

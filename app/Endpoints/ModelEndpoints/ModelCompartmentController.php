@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use IAuthWritableRepositoryController;
 use App\Entity\{Model,
     ModelCompartment,
     ModelSpecie,
@@ -14,7 +15,7 @@ use App\Entity\{Model,
     Repositories\ModelCompartmentRepository};
 use App\Exceptions\{DependentResourcesBoundException, MissingRequiredKeyException, WrongParentException};
 use App\Helpers\ArgumentParser;
-use SBaseCommonableController;
+use SBaseControllerCommonable;
 use Slim\Container;
 use Slim\Http\{
 	Request, Response
@@ -25,9 +26,9 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @property-read ModelCompartmentRepository $repository
  * @method ModelCompartment getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
-final class ModelCompartmentController extends ParentedRepositoryController
+final class ModelCompartmentController extends ParentedRepositoryController implements IAuthWritableRepositoryController
 {
-    use SBaseCommonableController;
+    use SBaseControllerCommonable;
 
     protected static function getAlias(): string
     {

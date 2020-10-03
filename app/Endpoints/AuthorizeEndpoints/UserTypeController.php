@@ -13,7 +13,6 @@ use App\Repositories\{
 final class UserTypeController extends RepositoryController
 {
 
-
 	protected function getData(IdentifiedObject $userType): array
 	{
 		/** @var UserType $userType */

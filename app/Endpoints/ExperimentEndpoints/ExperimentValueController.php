@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use ExperimentEndpointAccessible;
 use App\Entity\{
     ExperimentValues,
     ExperimentVariable,
@@ -13,6 +14,7 @@ use App\Entity\{
     Repositories\ExperimentValueRepository
 };
 
+use IAuthWritableRepositoryController;
 use App\Exceptions\
 {
 	MissingRequiredKeyException,
@@ -29,8 +31,10 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @property-read ExperimentValueRepository $repository
  * @method ExperimentValues getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
-final class ExperimentValueController extends ParentedRepositoryController
+final class ExperimentValueController extends ParentedRepositoryController implements IAuthWritableRepositoryController
 {
+
+    use ExperimentEndpointAccessible;
 
 	/** @var ExperimentValueRepository */
 	private $valueRepository;

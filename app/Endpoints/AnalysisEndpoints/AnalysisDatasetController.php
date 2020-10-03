@@ -4,7 +4,7 @@
 namespace App\Controllers;
 
 
-use AnalysisCommonableController;
+use AnalysisControllerCommonable;
 use App\Entity\AnalysisDataset;
 use App\Entity\IdentifiedObject;
 use App\Entity\Model;
@@ -16,7 +16,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 class AnalysisDatasetController extends ParentedRepositoryController
 {
-    use AnalysisCommonableController;
+    use AnalysisControllerCommonable;
 
     protected static function getRepositoryClassName(): string
     {

@@ -16,6 +16,8 @@ use App\Exceptions\
 	MissingRequiredKeyException
 };
 use App\Helpers\ArgumentParser;
+use ExperimentEndpointAccessible;
+use IAuthWritableRepositoryController;
 use Slim\Container;
 use Slim\Http\{
 	Request, Response
@@ -27,7 +29,11 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @method ExperimentVariable getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
 final class ExperimentVariableController extends ParentedRepositoryController
+    implements IAuthWritableRepositoryController
 {
+
+    use ExperimentEndpointAccessible;
+
 	/** @var ExperimentVariableRepository */
 	private $variableRepository;
 

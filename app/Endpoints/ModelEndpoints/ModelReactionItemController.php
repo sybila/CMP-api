@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use IAuthWritableRepositoryController;
 use App\Entity\{
 	ModelParameter,
 	ModelReaction,
@@ -16,7 +17,7 @@ use App\Entity\{
 use App\Exceptions\{MissingRequiredKeyException, NonExistingObjectException, WrongParentException};
 use App\Helpers\ArgumentParser;
 use Doctrine\ORM\EntityManager;
-use SBaseCommonableController;
+use SBaseControllerCommonable;
 use Slim\Container;
 use Slim\Http\{
 	Request, Response
@@ -27,10 +28,10 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @property-read ModelReactionItemRepository $repository
  * @method ModelReactionItem getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
-abstract class ModelReactionItemController extends ParentedRepositoryController
+abstract class ModelReactionItemController extends ParentedRepositoryController implements IAuthWritableRepositoryController
 {
 
-    use SBaseCommonableController;
+    use SBaseControllerCommonable;
 
 	protected static function getAlias(): string
     {

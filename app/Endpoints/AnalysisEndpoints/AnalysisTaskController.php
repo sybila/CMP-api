@@ -3,7 +3,7 @@
 
 namespace App\Controllers;
 
-use AnalysisCommonableController;
+use AnalysisControllerCommonable;
 use App\Entity\AnalysisTask;
 use App\Entity\Experiment;
 use App\Entity\IdentifiedObject;
@@ -20,7 +20,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 class AnalysisTaskController extends ParentedRepositoryController
 {
 
-    use AnalysisCommonableController;
+    use AnalysisControllerCommonable;
 
     protected static function getRepositoryClassName(): string
     {

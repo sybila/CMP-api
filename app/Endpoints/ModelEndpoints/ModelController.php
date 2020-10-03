@@ -16,21 +16,25 @@ use App\Entity\{Authorization\User,
     ModelUnitDefinition,
     Repositories\IEndpointRepository,
     Repositories\ModelRepository};
-use App\Exceptions\{DependentResourcesBoundException, InvalidRoleException, MissingRequiredKeyException};
+use App\Exceptions\{DependentResourcesBoundException,
+    InvalidAuthenticationException,
+    InvalidRoleException,
+    MissingRequiredKeyException};
 use App\Helpers\ArgumentParser;
+use IAuthWritableRepositoryController;
 use Slim\Http\{
 	Request, Response
 };
-use SBaseCommonableController;
+use SBaseControllerCommonable;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @property-read ModelRepository $repository
  * @method Model getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
-final class ModelController extends WritableRepositoryController
+final class ModelController extends WritableRepositoryController implements IAuthWritableRepositoryController
 {
-    use SBaseCommonableController;
+    use SBaseControllerCommonable;
 
     protected static function getRepositoryClassName(): string
     {
@@ -167,5 +171,4 @@ final class ModelController extends WritableRepositoryController
     {
         return 'm';
     }
-
 }

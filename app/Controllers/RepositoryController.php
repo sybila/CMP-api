@@ -2,28 +2,25 @@
 
 namespace App\Controllers;
 
-use App\Entity\Authorization\UserGroupToUser;
 use App\Entity\Authorization\User;
 use App\Entity\IdentifiedObject;
 use App\Entity\Repositories\IEndpointRepository;
-use App\Exceptions\EmptySelectionException;
 use App\Exceptions\InternalErrorException;
 use App\Exceptions\InvalidArgumentException;
-use App\Exceptions\InvalidAuthenticationException;
 use App\Exceptions\InvalidTypeException;
 use App\Exceptions\NonExistingObjectException;
 use App\Helpers\ArgumentParser;
+use Closure;
 use Doctrine\ORM\ORMException;
-use League\OAuth2\Server\Exception\OAuthServerException;
-use League\OAuth2\Server\ResourceServer;
+use IAuthRepositoryController;
 use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;
 
-abstract class RepositoryController extends AbstractController
+abstract class RepositoryController extends AbstractController implements IAuthRepositoryController
 {
 
-	use SortableController, PageableController, RepoAccessController, FilterableController;
+	use SortableController, PageableController, DefaultControllerAccessible, FilterableController;
 
 	/** @var IEndpointRepository */
 	protected $repository;
@@ -87,32 +84,11 @@ abstract class RepositoryController extends AbstractController
 		parent::__construct($c);
 		$this->repository = $c->get(static::getRepositoryClassName());
 
-		$server = $c->get(ResourceServer::class);
-        $this->beforeRequest[] = function(Request $request, Response $response, ArgumentParser $args) use ($server)
+        $this->beforeRequest[] = function(Request $request, Response $response, ArgumentParser $args)
         {
-            $this->getAccess($request, $server);
+            $this->setUserPermissions($request->getAttribute('oauth_user_id'));
         };
 	}
-
-    /**
-     * @param Request $request needed for auth.
-     //* @return array key 'group_wise' contains array of associative array of key 'groupId' => groupRoleId (tier),
-     * key 'platform_wise' contains values from 0 to 4, (according to permissions on the platform)
-     * @param ResourceServer $server
-     * @throws InvalidAuthenticationException
-     */
-    public function getAccess(Request $request, ResourceServer $server) //: array
-    {
-        if ($request->getHeader('http_authorization')){
-            try {
-                $request = $server->validateAuthenticatedRequest($request);
-            } catch (OAuthServerException $e) {
-                throw new InvalidAuthenticationException($e->getMessage(), $e->getHint());
-            }
-            $this->user_permissions = $this->getUserPermissions($request->getAttribute('oauth_user_id'));
-        }
-        $this->user_permissions = ["group_wise" => [1 => 10], "platform_wise" => 0,  "user_id" => 0];
-    }
 
     /**
      * This function is responsible for GET action that returns list of objects (e.g. /models).
@@ -205,7 +181,7 @@ abstract class RepositoryController extends AbstractController
 
 	// ============================================== HELPERS
 
-	protected static function identifierGetter(): \Closure
+	protected static function identifierGetter(): Closure
 	{
 		return function(IdentifiedObject $object) {
 			return $object->getId();
@@ -214,26 +190,28 @@ abstract class RepositoryController extends AbstractController
 
     /**
      * @param $id
-     * @return array
      */
-    public function getUserPermissions($id)
+    public function setUserPermissions($id)
     {
-        $authUser = $this->orm->getRepository(User::class)->find($id);
-        $usersGroupRoles = $authUser->getGroups()->map(function (UserGroupToUser $groupLink) {
-            $group = $groupLink->getUserGroupId();
-            return [$group->getId() => (int) $groupLink->getRoleId()];
-        })->toArray();
-        return ["group_wise" => $usersGroupRoles, "platform_wise" => $authUser->getType(), "user_id" => $id];
+        if (!is_null($id)) {
+            $authUser = $this->orm->getRepository(User::class)->find($id);
+            /** $usersGroupRoles is an array, where key = GroupId and the value = groupRole in that group */
+            $usersGroupRoles = [];
+            foreach ($authUser->getGroups()->getIterator() as $groupLink){
+                $usersGroupRoles[$groupLink->getuserGroupId()->getId()] = $groupLink->getRoleId();
+            }
+            $this->user_permissions = ["group_wise" => $usersGroupRoles, "platform_wise" => $authUser->getType(), "user_id" => $id];
+        }
+        else {
+            $this->user_permissions = ["group_wise" => [1 => 10], "platform_wise" => User::GUEST, "user_id" => null];
+        }
     }
 
     /**
      * @param array $user_permissions
      * @return array additional collection filter,
      * key (is group id of users groups) => value (is prepared for dql filter)
-     * @throws InternalErrorException
      * @throws InvalidArgumentException if user with non-existing role
-     * @throws InvalidAuthenticationException
-     * @throws NonExistingObjectException
      */
     public function validateList(array $user_permissions) : ?array
     {
@@ -255,10 +233,7 @@ abstract class RepositoryController extends AbstractController
     /**
      * @param array $user_permissions
      * @return bool
-     * @throws InternalErrorException
      * @throws InvalidArgumentException
-     * @throws InvalidAuthenticationException
-     * @throws NonExistingObjectException
      */
     public function validateDetail(array $user_permissions) : bool
     {

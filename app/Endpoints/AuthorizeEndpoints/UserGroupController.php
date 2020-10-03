@@ -10,11 +10,10 @@ use App\Entity\{
 };
 use App\Entity\Repositories\IEndpointRepository;
 use App\Repositories\Authorization\UserGroupRepository;
-use App\Exceptions\{
-	DependentResourcesBoundException,
-	MissingRequiredKeyException
-};
+use App\Exceptions\{DependentResourcesBoundException, InvalidAuthenticationException, MissingRequiredKeyException};
 use App\Helpers\ArgumentParser;
+use Doctrine\Common\Collections\Criteria;
+use IAuthWritableRepositoryController;
 use Slim\Container;
 use Slim\Http\{
 	Request,
@@ -24,21 +23,10 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @property-read UserGroupRepository $repository
- * @method Model getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
+ * @method IdentifiedObject getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
-final class UserGroupController extends WritableRepositoryController
+final class UserGroupController extends WritableRepositoryController implements IAuthWritableRepositoryController
 {
-
-	/** @var UserGroupRepository */
-	private $userGroupRepository;
-
-
-	public function __construct(Container $c)
-	{
-		parent::__construct($c);
-		$this->userGroupRepository = $c->get(UserGroupRepository::class);
-	}
-
 
 	protected static function getAllowedSort(): array
 	{
@@ -115,5 +103,58 @@ final class UserGroupController extends WritableRepositoryController
     protected static function getAlias(): string
     {
         return 'g';
+    }
+
+    public function hasAccessToObject(array $userGroups): ?int
+    {
+        $rootRouteParent = self::getRootParent();
+        //if there is no id, it means GET LIST was requested.
+        if (is_null($rootRouteParent['id'])) {
+            return null;
+        }
+        if ($rootRouteParent['type'] == 'userGroups') {
+            /** @var UserGroup $group */
+            $group = $this->getObjectViaORM(UserGroup::class, $rootRouteParent['id']);
+            if (array_key_exists($group->getId(), $userGroups['group_wise']) || $group->getIsPublic())
+            {
+                return $group->getId();
+            } else {
+                throw new InvalidAuthenticationException("You cannot access this resource.",
+                    "Not a member of the group.");
+            }
+        }
+        throw new InvalidAuthenticationException('','');
+    }
+
+    public function getAccessFilter(array $userGroups): ?array
+    {
+        $dql = static::getAlias() . ".id";
+        $accObj = $this->orm->getRepository(UserGroup::class)
+            ->matching(Criteria::create()->where(Criteria::expr()->eq('isPublic', true)))
+            ->map(function (UserGroup $group) { return $group->getId();})->toArray();
+        foreach (array_flip($accObj) as $id => $trash) {
+            $userGroups[$id] = $dql;
+        }
+        $quasiFilter = array_map(function () use ($dql) { return $dql; }, $userGroups);
+        unset($quasiFilter[UserGroup::PUBLIC_SPACE]);
+        return $quasiFilter;
+    }
+
+    public function canAdd(int $role, int $id): bool
+    {
+        return false;
+    }
+
+    public function canEdit(int $role, int $id): bool
+    {
+        if ($role != User::OWNER_ROLE) {
+            return false;
+        }
+        return true;
+    }
+
+    public function canDelete(int $role, int $id): bool
+    {
+        return $this->canEdit($role, $id);
     }
 }

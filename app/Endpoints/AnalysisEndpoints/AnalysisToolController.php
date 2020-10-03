@@ -2,7 +2,7 @@
 
 namespace App\Controllers;
 
-use AnalysisCommonableController;
+use AnalysisControllerCommonable;
 use App\Entity\AnalysisTool;
 use App\Entity\IdentifiedObject;
 use App\Entity\Repositories\AnalysisToolRepository;
@@ -17,7 +17,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 class AnalysisToolController extends WritableRepositoryController
 {
 
-    use AnalysisCommonableController;
+    use AnalysisControllerCommonable;
 
     protected static function getRepositoryClassName(): string
     {

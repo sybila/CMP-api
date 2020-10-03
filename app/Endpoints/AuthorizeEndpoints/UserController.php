@@ -8,6 +8,8 @@ use App\Entity\{
 	Authorization\UserGroupToUser,
 	IdentifiedObject
 };
+use Doctrine\Common\Collections\Criteria;
+use IAuthWritableRepositoryController;
 use League\OAuth2\Server\Exception\OAuthServerException;
 use League\OAuth2\Server\Middleware\ResourceServerMiddleware;
 use League\OAuth2\Server\ResourceServer;
@@ -36,11 +38,8 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @property-read UserRepository $repository
  * @method User getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
-final class UserController extends WritableRepositoryController
+class UserController extends WritableRepositoryController implements IAuthWritableRepositoryController
 {
-
-	/** @var UserRepository */
-	private $userRepository;
 
 	/** @var string */
 	private $mailer;
@@ -48,7 +47,6 @@ final class UserController extends WritableRepositoryController
 	public function __construct(Container $c)
 	{
 		parent::__construct($c);
-		$this->userRepository = $c->get(UserRepository::class);
 		$this->mailer = $c['mailer'];
 	}
 
@@ -173,6 +171,81 @@ final class UserController extends WritableRepositoryController
         return 'u';
     }
 
+    //----- RESOURCE PROTECTION ----//
+    public function hasAccessToObject(array $userGroups): ?int
+    {
+        $rootRouteParent = self::getRootParent();
+        //if there is no id, it means GET LIST was requested.
+        if (is_null($rootRouteParent['id'])) {
+            return null;
+        }
+        if ($rootRouteParent['type'] == 'users') {
+            /** @var User $user */
+            $user = $this->getObjectViaORM(User::class, $rootRouteParent['id']);
+            $groups = $userGroups['group_wise'];
+            $relation = $user->getGroups()->filter(function (UserGroupToUser $groupLink) use ($groups){
+                /** @var UserGroup $group */
+               $group = $groupLink->getUserGroupId();
+               return array_key_exists($group->getId(), $groups) && ($group->getId() != UserGroup::PUBLIC_SPACE);
+            })->toArray();
+            if (count($relation) || $user->getIsPublic()){
+                return $user->getId();
+            } else {
+                throw new InvalidAuthenticationException("You cannot access this resource.",
+                    "Not public or not a member of the same group.");
+            }
+        }
+        throw new InvalidAuthenticationException('','');
+    }
+
+    public function getAccessFilter(array $userGroups): ?array
+    {
+        $quasiFilter = [];
+        $dql = static::getAlias() . ".id";
+        foreach ($this->getVisibleUsersId($userGroups) as $user){
+            $quasiFilter[$user] = $dql;
+        }
+        return $quasiFilter;
+    }
+
+    public function getVisibleUsersId(array $fromGroups)
+    {
+        $publicUsers = $this->orm->getRepository(User::class)
+            ->matching(Criteria::create()->where(Criteria::expr()->eq('isPublic', true)))
+            ->map(function (User $user) { return $user->getId(); })->toArray();
+        $groupRepo = $this->orm->getRepository(UserGroup::class);
+        foreach ($fromGroups as $id => $role){
+            if($id != UserGroup::PUBLIC_SPACE){
+                $group = $groupRepo->find($id)->getUsers()->map(function (UserGroupToUser $groupLink) {
+                    $user = $groupLink->getUserId();
+                    return $user->getId();
+                })->toArray();
+                $publicUsers = array_merge($publicUsers, $group);
+            }
+        }
+        return array_unique($publicUsers);
+    }
+
+    public function canAdd(int $role, int $id): bool
+    {
+        return true;
+    }
+
+    public function canEdit(int $role, int $id): bool
+    {
+        $parent = self::getRootParent();
+        if ($id != $parent['id']){
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    public function canDelete(int $role, int $id): bool
+    {
+        return $this->canEdit($role, $id);
+    }
+
     //-----MAIL NOTIFICATION HELPERS
     //FIXME move me to some other place, once the platform notifications are implemented
 
@@ -223,5 +296,41 @@ final class UserController extends WritableRepositoryController
             ->text($message)
             ->html("<p>$message</p>");
         $mailer->send($email);
+    }
+}
+
+final class LoggedInUserController extends UserController
+{
+
+    public function readIdentified(Request $request, Response $response, ArgumentParser $args) : Response
+    {
+        $this->isAuthorized($request->getAttribute('oauth_user_id'));
+        return $response->withRedirect("users/{$request->getAttribute('oauth_user_id')}");
+    }
+
+    public function edit(Request $request, Response $response, ArgumentParser $args): Response
+    {
+        $this->isAuthorized($request->getAttribute('oauth_user_id'));
+        $myArgs = new ArgumentParser(['id' => $request->getAttribute('oauth_user_id')]);
+        return parent::edit($request, $response, $myArgs);
+    }
+
+    public function delete(Request $request, Response $response, ArgumentParser $args): Response
+    {
+        $this->isAuthorized($request->getAttribute('oauth_user_id'));
+        $myArgs = new ArgumentParser(['id' => $request->getAttribute('oauth_user_id')]);
+        return parent::delete($request, $response, $myArgs);
+    }
+
+    /**
+     * @param int|null $id
+     * @throws InvalidAuthenticationException
+     */
+    private function isAuthorized(?int $id)
+    {
+        if(is_null($id)) {
+            throw new InvalidAuthenticationException('User not authorized.',  'This endpoint is accessible' .
+            ' only with valid token.');
+        }
     }
 }

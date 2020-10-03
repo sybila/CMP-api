@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use IAuthWritableRepositoryController;
 use App\Entity\{Model,
     ModelInitialAssignment,
     IdentifiedObject,
@@ -12,7 +13,7 @@ use App\Helpers\ArgumentParser;
 use Slim\Http\{
 	Request, Response
 };
-use SBaseCommonableController;
+use SBaseControllerCommonable;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -20,9 +21,10 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @method ModelInitialAssignment getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
 final class ModelInitialAssignmentController extends ParentedRepositoryController
+    implements IAuthWritableRepositoryController
 {
 
-    use SBaseCommonableController;
+    use SBaseControllerCommonable;
 
     protected static function getAlias(): string
     {

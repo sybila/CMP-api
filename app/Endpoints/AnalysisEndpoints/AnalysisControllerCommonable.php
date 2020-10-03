@@ -5,7 +5,7 @@ use App\Entity\IdentifiedObject;
 use App\Helpers\ArgumentParser;
 use Symfony\Component\Validator\Constraints as Assert;
 
-trait AnalysisCommonableController
+trait AnalysisControllerCommonable
 {
     protected function getCommonAnalysisData(IdentifiedObject $object)
     {

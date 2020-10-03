@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use IAuthWritableRepositoryController;
 use App\Entity\{Model,
     ModelEvent,
     ModelEventAssignment,
@@ -14,16 +15,16 @@ use App\Helpers\ArgumentParser;
 use Slim\Http\{
 	Request, Response
 };
-use SBaseCommonableController;
+use SBaseControllerCommonable;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @property-read ModelEventRepository $repository
  * @method ModelEvent getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
-final class ModelEventController extends ParentedRepositoryController
+final class ModelEventController extends ParentedRepositoryController implements IAuthWritableRepositoryController
 {
-    use SBaseCommonableController;
+    use SBaseControllerCommonable;
 
 	protected static function getAlias(): string
     {

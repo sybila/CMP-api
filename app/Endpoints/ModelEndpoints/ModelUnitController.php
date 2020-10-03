@@ -21,7 +21,7 @@ use App\Exceptions\{
 };
 use App\Helpers\ArgumentParser;
 use App\Helpers\Validators;
-use SBaseCommonableController;
+use SBaseControllerCommonable;
 use Slim\Container;
 use Slim\Http\{
 	Request, Response
@@ -35,7 +35,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 final class ModelUnitController extends WritableRepositoryController
 {
 
-    use SBaseCommonableController;
+    use SBaseControllerCommonable;
 
 	protected static function getAlias(): string
     {

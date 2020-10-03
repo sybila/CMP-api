@@ -10,9 +10,10 @@ use App\Entity\{Entity,
     Repositories\IEndpointRepository,
     Repositories\ModelRepository,
     Repositories\ModelRuleRepository};
+use IAuthWritableRepositoryController;
 use App\Exceptions\{InvalidArgumentException, MissingRequiredKeyException, WrongParentException};
 use App\Helpers\ArgumentParser;
-use SBaseCommonableController;
+use SBaseControllerCommonable;
 use Slim\Container;
 use Slim\Http\{
 	Request, Response
@@ -23,10 +24,10 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @property-read ModelRuleRepository $repository
  * @method Entity getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
-abstract class ModelRuleController extends ParentedRepositoryController
+abstract class ModelRuleController extends ParentedRepositoryController implements IAuthWritableRepositoryController
 {
 
-    use SBaseCommonableController;
+    use SBaseControllerCommonable;
 
     protected static function getAlias(): string
     {

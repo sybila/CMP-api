@@ -9,8 +9,10 @@ use App\Exceptions\InvalidArgumentException;
 use App\Exceptions\InvalidAuthenticationException;
 use App\Exceptions\InvalidRoleException;
 use App\Exceptions\InvalidTypeException;
+use App\Exceptions\MalformedInputException;
 use App\Exceptions\NonExistingObjectException;
 use App\Helpers\ArgumentParser;
+use Doctrine\ORM\ORMException;
 use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;
@@ -103,7 +105,20 @@ abstract class WritableRepositoryController extends RepositoryController
 		return self::formatInsert($response, $object->getId());
 	}
 
-
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param ArgumentParser $args
+     * @return Response
+     * @throws InternalErrorException
+     * @throws InvalidArgumentException
+     * @throws InvalidAuthenticationException
+     * @throws InvalidRoleException
+     * @throws InvalidTypeException
+     * @throws NonExistingObjectException
+     * @throws ORMException
+     * @throws MalformedInputException
+     */
 	public function edit(Request $request, Response $response, ArgumentParser $args): Response
 	{
 		$this->runEvents($this->beforeRequest, $request, $response, $args);
@@ -120,7 +135,18 @@ abstract class WritableRepositoryController extends RepositoryController
 		return self::formatOk($response);
 	}
 
-
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param ArgumentParser $args
+     * @return Response
+     * @throws InternalErrorException
+     * @throws InvalidArgumentException
+     * @throws InvalidAuthenticationException
+     * @throws InvalidRoleException
+     * @throws NonExistingObjectException
+     * @throws ORMException
+     */
 	public function delete(Request $request, Response $response, ArgumentParser $args): Response
 	{
 		$this->runEvents($this->beforeRequest, $request, $response, $args);
@@ -203,8 +229,8 @@ abstract class WritableRepositoryController extends RepositoryController
             case User::POWER:
             case User::REGISTERED:
                 $user_group = $this->hasAccessToObject($user_permissions['group_wise']);
-                if (!$this->canManipulate($user_permissions['group_wise'][$user_group],
-                    $user_permissions['user_id'], User::CAN_EDIT)) {
+                if (!$this->canEdit($user_permissions['group_wise'][$user_group],
+                    $user_permissions['user_id'])) {
                     throw new InvalidRoleException('edit', 'PUT',
                         $_SERVER['REDIRECT_URL']);
                 }
@@ -235,8 +261,8 @@ abstract class WritableRepositoryController extends RepositoryController
             case User::POWER:
             case User::REGISTERED:
                 $user_group = $this->hasAccessToObject($user_permissions['group_wise']);
-                if (!$this->canManipulate($user_permissions['group_wise'][$user_group],
-                    $user_permissions['user_id'], User::CAN_DELETE)) {
+                if (!$this->canDelete($user_permissions['group_wise'][$user_group],
+                    $user_permissions['user_id'])) {
                     throw new InvalidRoleException('delete', 'DELETE',
                         $_SERVER['REDIRECT_URL']);
                 }

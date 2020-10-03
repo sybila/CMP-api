@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use IAuthWritableRepositoryController;
 use App\Entity\{ModelCompartment,
     ModelReactionItem,
     ModelSpecie,
@@ -12,7 +13,7 @@ use App\Entity\{ModelCompartment,
     Repositories\ModelCompartmentRepository};
 use App\Exceptions\{MissingRequiredKeyException, DependentResourcesBoundException, WrongParentException};
 use App\Helpers\ArgumentParser;
-use SBaseCommonableController;
+use SBaseControllerCommonable;
 use Slim\Container;
 use Slim\Http\{
 	Request, Response
@@ -23,9 +24,9 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @property-read ModelSpecieRepository $repository
  * @method ModelSpecie getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
-final class ModelSpecieController extends ParentedRepositoryController
+final class ModelSpecieController extends ParentedRepositoryController implements IAuthWritableRepositoryController
 {
-    use SBaseCommonableController;
+    use SBaseControllerCommonable;
 
     protected static function getAlias(): string
     {
