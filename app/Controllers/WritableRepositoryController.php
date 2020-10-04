@@ -13,6 +13,7 @@ use App\Exceptions\MalformedInputException;
 use App\Exceptions\NonExistingObjectException;
 use App\Helpers\ArgumentParser;
 use Doctrine\ORM\ORMException;
+use IRoleAuthWritableController;
 use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;
@@ -20,7 +21,7 @@ use stdClass;
 use Symfony\Component\Validator\Constraints as Assert;
 use App\Exceptions\MissingRequiredKeyException;
 
-abstract class WritableRepositoryController extends RepositoryController
+abstract class WritableRepositoryController extends RepositoryController implements IRoleAuthWritableController
 {
 
 	use ValidatedController;
@@ -89,7 +90,7 @@ abstract class WritableRepositoryController extends RepositoryController
 	public function add(Request $request, Response $response, ArgumentParser $args): Response
 	{
 		$this->runEvents($this->beforeRequest, $request, $response, $args);
-        $this->validateAdd($this->user_permissions);
+        $this->validateAdd();
 		$body = new ArgumentParser($request->getParsedBody());
 		$this->validate($body, $this->getValidator());
 		$object = $this->createObject($body);
@@ -112,7 +113,6 @@ abstract class WritableRepositoryController extends RepositoryController
      * @return Response
      * @throws InternalErrorException
      * @throws InvalidArgumentException
-     * @throws InvalidAuthenticationException
      * @throws InvalidRoleException
      * @throws InvalidTypeException
      * @throws NonExistingObjectException
@@ -123,7 +123,7 @@ abstract class WritableRepositoryController extends RepositoryController
 	{
 		$this->runEvents($this->beforeRequest, $request, $response, $args);
 		$object = $this->getObject($this->getModifyId($args));
-        $this->validateEdit($this->user_permissions);
+        $this->validateEdit();
 		$body = new ArgumentParser($request->getParsedBody());
 		$this->validate($body, $this->getValidator());
 		$this->setData($object, $body);
@@ -142,7 +142,6 @@ abstract class WritableRepositoryController extends RepositoryController
      * @return Response
      * @throws InternalErrorException
      * @throws InvalidArgumentException
-     * @throws InvalidAuthenticationException
      * @throws InvalidRoleException
      * @throws NonExistingObjectException
      * @throws ORMException
@@ -151,7 +150,7 @@ abstract class WritableRepositoryController extends RepositoryController
 	{
 		$this->runEvents($this->beforeRequest, $request, $response, $args);
 		$entity = $this->getObject($this->getModifyId($args));
-        $this->validateDelete($this->user_permissions);
+        $this->validateDelete();
 		$this->runEvents($this->beforeDelete, $entity);
 		$this->orm->remove($entity);
 		$this->data->needsFlush = true;
@@ -179,23 +178,20 @@ abstract class WritableRepositoryController extends RepositoryController
 	abstract protected function getValidator(): Assert\Collection;
 
     /**
-     * @param array $user_permissions
      * @return bool
-     * @throws InvalidArgumentException|InvalidAuthenticationException
-     * @throws InvalidRoleException|NonExistingObjectException
-     * @throws InternalErrorException
+     * @throws InvalidArgumentException
+     * @throws InvalidRoleException
      */
-    public function validateAdd(array $user_permissions) : bool
+    public function validateAdd(): bool
     {
-        switch ($user_permissions['platform_wise']) {
+        switch ($this->userPermissions['platform_wise']) {
             case User::ADMIN:
                 return true;
             case User::POWER:
             case User::REGISTERED:
-                $user_group = $this->hasAccessToObject($user_permissions['group_wise']);
-                dump('penis');
+                $user_group = $this->hasAccessToObject($this->userPermissions['group_wise']);
                 if(!is_null($user_group) &&
-                    !$this->canAdd($user_permissions['group_wise'][$user_group], $user_permissions['user_id']))
+                    !$this->canAdd($this->userPermissions['group_wise'][$user_group], $this->userPermissions['user_id']))
                 {
                     throw new InvalidRoleException("add $user_group", 'POST',
                         $_SERVER['REQUEST_URI']);
@@ -203,34 +199,30 @@ abstract class WritableRepositoryController extends RepositoryController
                 return true;
             case User::TEMPORARY:
             case User::GUEST:
-                if(!$this->canAdd($user_permissions['group_wise'][1], $user_permissions['user_id']))
+                if(!$this->canAdd($this->userPermissions['group_wise'][1], $this->userPermissions['user_id']))
                     throw new InvalidRoleException('add', 'POST', $_SERVER['REQUEST_URI']);
                 return true;
             default:
-                throw new InvalidArgumentException('user_type', $user_permissions['user_type'],
+                throw new InvalidArgumentException('user_type', $this->userPermissions['user_type'],
                     'This user type does not exist on the platform');
         }
     }
 
     /**
-     * @param array $user_permissions
      * @return bool
-     * @throws InternalErrorException
      * @throws InvalidArgumentException
-     * @throws InvalidAuthenticationException
      * @throws InvalidRoleException
-     * @throws NonExistingObjectException
      */
-    public function validateEdit(array $user_permissions) : bool
+    public function validateEdit(): bool
     {
-        switch ($user_permissions['platform_wise']) {
+        switch ($this->userPermissions['platform_wise']) {
             case User::ADMIN:
                 return true;
             case User::POWER:
             case User::REGISTERED:
-                $user_group = $this->hasAccessToObject($user_permissions['group_wise']);
-                if (!$this->canEdit($user_permissions['group_wise'][$user_group],
-                    $user_permissions['user_id'])) {
+                $user_group = $this->hasAccessToObject($this->userPermissions['group_wise']);
+                if (!$this->canEdit($this->userPermissions['group_wise'][$user_group],
+                    $this->userPermissions['user_id'])) {
                     throw new InvalidRoleException('edit', 'PUT',
                         $_SERVER['REDIRECT_URL']);
                 }
@@ -239,30 +231,26 @@ abstract class WritableRepositoryController extends RepositoryController
             case User::GUEST:
                 throw new InvalidRoleException('edit', 'PUT', $_SERVER['REDIRECT_URL']);
             default:
-                throw new InvalidArgumentException('user_type', $user_permissions['user_type'],
+                throw new InvalidArgumentException('user_type', $this->userPermissions['user_type'],
                     'This user type does not exist on the platform');
         }
     }
 
     /**
-     * @param array $user_permissions
      * @return bool
-     * @throws InternalErrorException
      * @throws InvalidArgumentException
-     * @throws InvalidAuthenticationException
      * @throws InvalidRoleException
-     * @throws NonExistingObjectException
      */
-    public function validateDelete(array $user_permissions) : bool
+    public function validateDelete(): bool
     {
-        switch ($user_permissions['platform_wise']) {
+        switch ($this->userPermissions['platform_wise']) {
             case User::ADMIN:
                 return true;
             case User::POWER:
             case User::REGISTERED:
-                $user_group = $this->hasAccessToObject($user_permissions['group_wise']);
-                if (!$this->canDelete($user_permissions['group_wise'][$user_group],
-                    $user_permissions['user_id'])) {
+                $user_group = $this->hasAccessToObject($this->userPermissions['group_wise']);
+                if (!$this->canDelete($this->userPermissions['group_wise'][$user_group],
+                    $this->userPermissions['user_id'])) {
                     throw new InvalidRoleException('delete', 'DELETE',
                         $_SERVER['REDIRECT_URL']);
                 }
@@ -271,7 +259,7 @@ abstract class WritableRepositoryController extends RepositoryController
             case User::GUEST:
                 throw new InvalidRoleException('delete', 'DELETE', $_SERVER['REDIRECT_URL']);
             default:
-                throw new InvalidArgumentException('user_type', $user_permissions['user_type'],
+                throw new InvalidArgumentException('user_type', $this->userPermissions['user_type'],
                     'This user type does not exist on the platform');
         }
     }

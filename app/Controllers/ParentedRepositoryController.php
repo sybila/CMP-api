@@ -86,7 +86,7 @@ abstract class ParentedRepositoryController extends WritableRepositoryController
         $this->runEvents($this->beforeRequest, $request, $response, $args);
         $id = current($this->getReadIds($args));
         $ent = $this->getObject((int)$id);
-        $this->validateDetail($this->user_permissions);
+        $this->validateDetail();
         $data = $this->getData($ent);
         $this->checkParentValidity($this->repository->getParent(), $ent);
         return self::formatOk($response, $data);

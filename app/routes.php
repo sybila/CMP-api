@@ -123,7 +123,7 @@ return function(App $app) {
 
     // Currently logged user routes
     $app->get('/user', Ctl\LoggedInUserController::class . ':readIdentified')
-        ->add(new UserPermissionsControllerMiddleware($app->getContainer()))
+        //->add(new UserPermissionsControllerMiddleware($app->getContainer()[EntityManager::class]))
         ->add(RouteHelper::$authMiddleware);
     $app->put('/user', Ctl\LoggedInUserController::class . ':edit')
         ->add(RouteHelper::$authMiddleware);
@@ -160,6 +160,8 @@ return function(App $app) {
 	(new RouteHelper)
 		->setRoute(Ctl\RuleNoteController::class, '/rules/{rule-id:\\d+}/notes')
 		->register();
+
+	// models module
 	(new RouteHelper)
 		->setRoute(Ctl\ModelController::class, '/models')
         ->setAuthMask(true)
@@ -229,6 +231,8 @@ return function(App $app) {
 		->setRoute(Ctl\ModelParentedRuleController::class, '/models/{model-id:\\d+}/rules')
         ->setAuthMask(true)
 		->register();
+
+	// experiments module
 	(new RouteHelper)
 		->setRoute(Ctl\ExperimentController::class, '/experiments')
         ->setAuthMask(true)
@@ -256,6 +260,8 @@ return function(App $app) {
     (new RouteHelper)
         ->setRoute(Ctl\DeviceController::class, '/devices')
         ->register();
+
+    //analysis module
     (new RouteHelper())
         ->setRoute(Ctl\AnalysisTypeController::class, '/analysisTypes')
         ->setMask(RouteHelper::LIST | RouteHelper::DETAIL)
@@ -283,6 +289,8 @@ return function(App $app) {
         ->setRoute(Ctl\AnalysisTaskController::class, '/analysisTasks')
         ->setAuthMask(true)
         ->register();
+
+    // authorize module
     (new RouteHelper())
         ->setRoute(Ctl\UserController::class, '/users')
         ->setAuthMask(true)

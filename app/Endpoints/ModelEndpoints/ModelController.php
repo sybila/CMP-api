@@ -96,7 +96,7 @@ final class ModelController extends WritableRepositoryController implements IAut
 	{
 		/** @var Model $model */
 		$this->setSBaseData($model, $data);
-		$model->setUserId($this->user_permissions['user_id']);
+		$model->setUserId($this->userPermissions['user_id']);
         !$data->hasKey('groupId') ?: $model->setGroupId($data->getString('groupId'));
 		!$data->hasKey('approvedId') ?: $model->setApprovedId($data->getString('approvedId'));
 		!$data->hasKey('description') ?: $model->setDescription($data->getString('description'));
@@ -124,8 +124,8 @@ final class ModelController extends WritableRepositoryController implements IAut
 			throw new MissingRequiredKeyException('userId');
         if ($model->getGroupId() === null)
             throw new MissingRequiredKeyException('groupId');
-        if ($this->user_permissions['platform_wise'] != User::ADMIN &&
-            !in_array($this->user_permissions['group_wise'][$model->getGroupId()],User::CAN_ADD))
+        if ($this->userPermissions['platform_wise'] != User::ADMIN &&
+            !in_array($this->userPermissions['group_wise'][$model->getGroupId()],User::CAN_ADD))
             throw new InvalidRoleException("assign group ID = {$model->getGroupId()} to this ",
                 'POST',$_SERVER['REQUEST_URI']);
 	}

@@ -97,7 +97,7 @@ class UserController extends WritableRepositoryController implements IAuthWritab
     }
 
     protected function adminCheck() {
-	    if ($this->user_permissions['platform_wise'] != User::ADMIN) {
+	    if ($this->userPermissions['platform_wise'] != User::ADMIN) {
 	        throw new InvalidRoleException('Admin permissions are needed. Cannot change user type ',
                 'PUT', $_SERVER['REQUEST_URI']);
         }

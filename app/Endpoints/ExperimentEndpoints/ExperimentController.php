@@ -122,7 +122,7 @@ final class ExperimentController extends WritableRepositoryController implements
 	}
 
 	protected function checkGroups($id) {
-        if (!array_key_exists($id, $this->user_permissions['group_wise'])){
+        if (!array_key_exists($id, $this->userPermissions['group_wise'])){
             throw new AccessDeniedException("Not a member of the group");
         }
     }
@@ -133,7 +133,7 @@ final class ExperimentController extends WritableRepositoryController implements
         if (!$body->hasKey('status'))
             throw new MissingRequiredKeyException('status');
         if (!$body->hasKey('groupId'))
-            throw new MissingRequiredKeyException('groupId' . serialize($this->user_permissions));
+            throw new MissingRequiredKeyException('groupId' . serialize($this->userPermissions));
         return new Experiment;
 	}
 

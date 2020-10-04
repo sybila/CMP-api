@@ -13,11 +13,13 @@ use App\Helpers\ArgumentParser;
 use Closure;
 use Doctrine\ORM\ORMException;
 use IAuthRepositoryController;
+use IRoleAuthController;
 use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;
 
-abstract class RepositoryController extends AbstractController implements IAuthRepositoryController
+abstract class RepositoryController extends AbstractController
+    implements IAuthRepositoryController, IRoleAuthController
 {
 
 	use SortableController, PageableController, DefaultControllerAccessible, FilterableController;
@@ -33,7 +35,7 @@ abstract class RepositoryController extends AbstractController implements IAuthR
 
 
     /** @var array */
-	protected $user_permissions;
+	protected $userPermissions;
 
     /**
      * Returns full class name of entity REPOSITORY that is related to this controller
@@ -101,7 +103,7 @@ abstract class RepositoryController extends AbstractController implements IAuthR
 	public function read(Request $request, Response $response, ArgumentParser $args)
 	{
 	    $this->runEvents($this->beforeRequest, $request, $response, $args);
-        $filter['accessFilter'] = $this->validateList($this->user_permissions);
+        $filter['accessFilter'] = $this->validateList();
         $filter['argFilter'] = static::getFilter($args);
         $numResults = $this->repository->getNumResults($filter);
         static::validateFilter($numResults, $filter['argFilter']);
@@ -124,7 +126,7 @@ abstract class RepositoryController extends AbstractController implements IAuthR
 		$this->runEvents($this->beforeRequest, $request, $response, $args);
         $id = current($this->getReadIds($args));
         $ent = $this->getObject((int)$id);
-        $this->validateDetail($this->user_permissions);
+        $this->validateDetail();
         $data = static::getPaginationOnDetail($args, $this->getData($ent));
         //FIXME move this to some other controller, pageable would be the best
         if (array_key_exists('maxCount', $data)){
@@ -200,54 +202,52 @@ abstract class RepositoryController extends AbstractController implements IAuthR
             foreach ($authUser->getGroups()->getIterator() as $groupLink){
                 $usersGroupRoles[$groupLink->getuserGroupId()->getId()] = $groupLink->getRoleId();
             }
-            $this->user_permissions = ["group_wise" => $usersGroupRoles, "platform_wise" => $authUser->getType(), "user_id" => $id];
+            $this->userPermissions = ["group_wise" => $usersGroupRoles, "platform_wise" => $authUser->getType(), "user_id" => $id];
         }
         else {
-            $this->user_permissions = ["group_wise" => [1 => 10], "platform_wise" => User::GUEST, "user_id" => null];
+            $this->userPermissions = ["group_wise" => [1 => 10], "platform_wise" => User::GUEST, "user_id" => null];
         }
     }
 
     /**
-     * @param array $user_permissions
      * @return array additional collection filter,
      * key (is group id of users groups) => value (is prepared for dql filter)
      * @throws InvalidArgumentException if user with non-existing role
      */
-    public function validateList(array $user_permissions) : ?array
+    public function validateList(): ?array
     {
-        switch ($user_permissions['platform_wise']){
+        switch ($this->userPermissions['platform_wise']){
             case User::ADMIN:
                 return [];
             case User::POWER:
             case User::REGISTERED:
             case User::TEMPORARY:
             case User::GUEST:
-                $this->hasAccessToObject($user_permissions['group_wise']);
-                return $this->getAccessFilter($user_permissions['group_wise']);
+                $this->hasAccessToObject($this->userPermissions['group_wise']);
+                return $this->getAccessFilter($this->userPermissions['group_wise']);
             default:
-                throw new InvalidArgumentException('user_type', $user_permissions['platform_wise'],
+                throw new InvalidArgumentException('user_type', $this->userPermissions['platform_wise'],
                     'This user type does not exist on the platform');
         }
     }
 
     /**
-     * @param array $user_permissions
      * @return bool
      * @throws InvalidArgumentException
      */
-    public function validateDetail(array $user_permissions) : bool
+    public function validateDetail(): bool
     {
-        switch ($user_permissions['platform_wise']){
+        switch ($this->userPermissions['platform_wise']){
             case User::ADMIN:
                 return true;
             case User::POWER:
             case User::REGISTERED:
             case User::TEMPORARY:
             case User::GUEST:
-                $this->hasAccessToObject($user_permissions['group_wise']);
+                $this->hasAccessToObject($this->userPermissions['group_wise']);
                 return true;
             default:
-                throw new InvalidArgumentException('user_type', $user_permissions['user_type'],
+                throw new InvalidArgumentException('user_type', $this->userPermissions['user_type'],
                     'This user type does not exist on the platform');
         }
     }

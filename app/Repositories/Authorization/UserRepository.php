@@ -11,6 +11,7 @@ use App\Entity\Repositories\IEndpointRepository;
 use App\Exceptions\InvalidAuthenticationException;
 use App\Helpers\QueryRepositoryHelper;
 use Doctrine\Common\Collections\Criteria;
+use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Common\Persistence\ObjectRepository;
 use Doctrine\ORM\EntityManager;
@@ -24,7 +25,7 @@ class UserRepository implements UserRepositoryInterface, IEndpointRepository
 	/** @var EntityManager */
 	private $em;
 
-	/** @var ObjectRepository */
+	/** @var EntityRepository  */
 	private $userRepository;
 
 
@@ -35,9 +36,11 @@ class UserRepository implements UserRepositoryInterface, IEndpointRepository
 	}
 
 
-	public function getById(int $id): ?User
-	{
-		return $this->userRepository->find($id);
+	public function getById(int $id): User
+    {
+        /** @var User $usr */
+        $usr = $this->userRepository->find($id);
+		return $usr;
 	}
 
 
