@@ -20,6 +20,7 @@ use App\Entity\Repositories\IEndpointRepository;
 use App\Repositories\Authorization\UserRepository;
 use App\Exceptions\{ActionConflictException,
     DependentResourcesBoundException,
+    InternalErrorException,
     InvalidAuthenticationException,
     InvalidRoleException,
     MissingRequiredKeyException,
@@ -226,7 +227,7 @@ class UserController extends WritableRepositoryController implements IAuthWritab
         return array_unique($publicUsers);
     }
 
-    public function canAdd(int $role, int $id): bool
+    public function canAdd(int $role, ?int $id): bool
     {
         return true;
     }
@@ -276,13 +277,34 @@ class UserController extends WritableRepositoryController implements IAuthWritab
     {
         $users = $this->orm->getRepository(User::class)->findBy(['email' => $args['email']]);
         //there should be only one, because of uniqueCheck.
-        foreach ($users as $user)
-            if ($user->getType() <= User::REGISTERED)
-                throw new ActionConflictException("This user has already confirmed the registration");
-            !sha1($user->getEmail() . $this->mailer['salt']) === $args['hash'] ?: $user->setType(3);
-        $this->orm->persist($user);
-        $this->orm->flush();
-        return self::formatOk($response, ['Registration confirmed.']);
+        /** @var User $user */
+        $user = current($users);
+        if ($user->getType() <= User::REGISTERED)
+            throw new ActionConflictException("This user has already confirmed the registration");
+        if ( sha1($user->getEmail() . $this->mailer['salt']) === $args['hash']) {
+            $user->setType(User::REGISTERED);
+            $this->orm->persist($user);
+            $this->setDefaultUserSpaceGroup($user);
+            $this->orm->flush();
+            return self::formatOk($response, ['Registration confirmed.']);
+        }
+        else throw new ActionConflictException('Confirmation link is malformed');
+    }
+
+    protected function setDefaultUserSpaceGroup(User $user)
+    {
+        $mySpace = new UserGroup();
+        $mySpace->setName("Private space of user {$user->getName()}");
+        $mySpace->setType(4);
+        $mySpace->setDescription('This is your own sandbox to create and modify models, experiments.' .
+        'Link them to BCS to unlock the full potential of CMP.');
+        $mySpace->setIsPublic((int)false);
+        $linkToMySpace = new UserGroupToUser();
+        $linkToMySpace->setUserId($user);
+        $linkToMySpace->setUserGroupId($mySpace);
+        $linkToMySpace->setRoleId(User::OWNER_ROLE);
+        $this->orm->persist($mySpace);
+        $this->orm->persist($linkToMySpace);
     }
 
     protected function sendNotificationEmail($message, $receiver){

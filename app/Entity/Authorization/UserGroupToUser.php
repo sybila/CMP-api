@@ -60,9 +60,29 @@ class UserGroupToUser implements IdentifiedObject
 		return $this->roleId;
 	}
 
-    public function getGroupId()
+
+    /**
+     * @param mixed $userId
+     */
+    public function setUserId($userId): void
     {
-        return $this->groupId;
+        $this->userId = $userId;
+    }
+
+    /**
+     * @param mixed $userGroupId
+     */
+    public function setUserGroupId($userGroupId): void
+    {
+        $this->userGroupId = $userGroupId;
+    }
+
+    /**
+     * @param int $roleId
+     */
+    public function setRoleId(int $roleId): void
+    {
+        $this->roleId = $roleId;
     }
 
 
