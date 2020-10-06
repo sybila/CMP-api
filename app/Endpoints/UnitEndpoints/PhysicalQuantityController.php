@@ -32,6 +32,7 @@ use Slim\Http\{
 };
 use Symfony\Component\Finder\Exception\AccessDeniedException;
 use Symfony\Component\Validator\Constraints as Assert;
+use UnitEndpointAuthorizable;
 
 /**
  * @property-read Repository $repository
@@ -39,6 +40,9 @@ use Symfony\Component\Validator\Constraints as Assert;
  */
 final class PhysicalQuantityController extends WritableRepositoryController
 {
+
+    use UnitEndpointAuthorizable;
+
 	/** @var PhysicalQuantityRepository */
 	private $physicalQuantityRepository;
 

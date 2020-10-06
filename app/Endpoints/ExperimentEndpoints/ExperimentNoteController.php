@@ -14,7 +14,7 @@ use App\Exceptions\
 	MissingRequiredKeyException
 };
 use App\Helpers\ArgumentParser;
-use ExperimentEndpointAccessible;
+use ExperimentEndpointAuthorizable;
 use IAuthWritableRepositoryController;
 use Slim\Container;
 use Slim\Http\{
@@ -29,7 +29,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 final class ExperimentNoteController extends ParentedRepositoryController implements IAuthWritableRepositoryController
 {
 
-    use ExperimentEndpointAccessible;
+    use ExperimentEndpointAuthorizable;
 
 	/** @var ExperimentNoteRepository */
 	private $noteRepository;

@@ -20,7 +20,7 @@ use App\Exceptions\{
 	MissingRequiredKeyException
 };
 use App\Helpers\ArgumentParser;
-use ExperimentEndpointAccessible;
+use ExperimentEndpointAuthorizable;
 use Slim\Container;
 use Slim\Http\{
 	Request, Response
@@ -34,7 +34,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 final class VariablesValuesController extends RepositoryController
 {
 
-    use ExperimentEndpointAccessible;
+    use ExperimentEndpointAuthorizable;
 
 	/** @var ExperimentRepository */
 	private $experimentRepository;

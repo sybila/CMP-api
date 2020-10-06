@@ -2,7 +2,7 @@
 
 namespace App\Controllers;
 
-use ExperimentEndpointAccessible;
+use ExperimentEndpointAuthorizable;
 use App\Entity\{
     ExperimentValues,
     ExperimentVariable,
@@ -34,7 +34,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 final class ExperimentValueController extends ParentedRepositoryController implements IAuthWritableRepositoryController
 {
 
-    use ExperimentEndpointAccessible;
+    use ExperimentEndpointAuthorizable;
 
 	/** @var ExperimentValueRepository */
 	private $valueRepository;

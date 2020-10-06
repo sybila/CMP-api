@@ -16,7 +16,7 @@ use App\Exceptions\
 	MissingRequiredKeyException
 };
 use App\Helpers\ArgumentParser;
-use ExperimentEndpointAccessible;
+use ExperimentEndpointAuthorizable;
 use IAuthWritableRepositoryController;
 use Slim\Container;
 use Slim\Http\{
@@ -32,7 +32,7 @@ final class ExperimentVariableController extends ParentedRepositoryController
     implements IAuthWritableRepositoryController
 {
 
-    use ExperimentEndpointAccessible;
+    use ExperimentEndpointAuthorizable;
 
 	/** @var ExperimentVariableRepository */
 	private $variableRepository;

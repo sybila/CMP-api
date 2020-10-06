@@ -307,6 +307,8 @@ return function(App $app) {
 		->setRoute(Ctl\UserGroupRoleController::class, '/userGroupRoles')
         ->setMask(RouteHelper::LIST | RouteHelper::DETAIL)
         ->register();
+
+	// Units module
     (new RouteHelper)
         ->setRoute(Ctl\PhysicalQuantityController::class, '/physicalQuantities')
         ->register();

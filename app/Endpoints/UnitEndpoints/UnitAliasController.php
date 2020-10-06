@@ -9,16 +9,14 @@ use App\Entity\{IdentifiedObject,
     Repositories\UnitRepository,
     Unit,
     UnitAlias};
-use App\Exceptions\
-{
-	MissingRequiredKeyException
-};
+use App\Exceptions\{MissingRequiredKeyException, WrongParentException};
 use App\Helpers\ArgumentParser;
 use Slim\Container;
 use Slim\Http\{
 	Request, Response
 };
 use Symfony\Component\Validator\Constraints as Assert;
+use UnitEndpointAuthorizable;
 
 /**
  * @property-read UnitAliasRepository $repository
@@ -26,6 +24,11 @@ use Symfony\Component\Validator\Constraints as Assert;
  */
 final class UnitAliasController extends ParentedRepositoryController
 {
+
+
+
+    use UnitEndpointAuthorizable;
+
 	/** @var UnitAliasRepository */
 	private $unitAliasRepository;
 
@@ -107,5 +110,10 @@ final class UnitAliasController extends ParentedRepositoryController
     protected static function getAlias(): string
     {
         return 'a';
+    }
+
+    protected function checkParentValidity(IdentifiedObject $parent, IdentifiedObject $child)
+    {
+        // TODO: Implement checkParentValidity() method.
     }
 }

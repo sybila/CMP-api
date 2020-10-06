@@ -11,16 +11,14 @@ use App\Entity\{Attribute,
     Repositories\UnitRepository,
     Unit};
 use Doctrine\Common\Collections\ArrayCollection;
-use App\Exceptions\
-{
-	MissingRequiredKeyException
-};
+use App\Exceptions\{MissingRequiredKeyException, WrongParentException};
 use App\Helpers\ArgumentParser;
 use Slim\Container;
 use Slim\Http\{
 	Request, Response
 };
 use Symfony\Component\Validator\Constraints as Assert;
+use UnitEndpointAuthorizable;
 use function Composer\Autoload\includeFile;
 
 /**
@@ -29,6 +27,9 @@ use function Composer\Autoload\includeFile;
  */
 final class AttributeController extends ParentedRepositoryController
 {
+
+    use UnitEndpointAuthorizable;
+
 	/** @var AttributeRepository */
 	private $attributeRepository;
     private $unitRepository;
@@ -135,5 +136,10 @@ final class AttributeController extends ParentedRepositoryController
     protected static function getAlias(): string
     {
         return 'a';
+    }
+
+    protected function checkParentValidity(IdentifiedObject $parent, IdentifiedObject $child)
+    {
+        // TODO: Implement checkParentValidity() method.
     }
 }

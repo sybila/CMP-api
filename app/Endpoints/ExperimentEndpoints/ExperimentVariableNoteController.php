@@ -2,7 +2,7 @@
 
 namespace App\Controllers;
 
-use ExperimentEndpointAccessible;
+use ExperimentEndpointAuthorizable;
 use App\Entity\{ExperimentNote,
     ExperimentVariable,
     IdentifiedObject,
@@ -33,7 +33,7 @@ final class ExperimentVariableNoteController extends ParentedRepositoryControlle
     implements IAuthWritableRepositoryController
 {
 
-    use ExperimentEndpointAccessible;
+    use ExperimentEndpointAuthorizable;
 
 	/** @var $noteRepository*/
 	private $noteRepository;

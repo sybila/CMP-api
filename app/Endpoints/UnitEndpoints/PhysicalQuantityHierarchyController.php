@@ -7,16 +7,14 @@ use App\Entity\{IdentifiedObject,
     Repositories\IEndpointRepository,
     Repositories\PhysicalQuantityHierarchyRepository,
     Repositories\PhysicalQuantityRepository};
-use App\Exceptions\
-{
-	MissingRequiredKeyException
-};
+use App\Exceptions\{MissingRequiredKeyException, WrongParentException};
 use App\Helpers\ArgumentParser;
 use Slim\Container;
 use Slim\Http\{
 	Request, Response
 };
 use Symfony\Component\Validator\Constraints as Assert;
+use UnitEndpointAuthorizable;
 
 /**
  * @property-read PhysicalQuantityHierarchyRepository $repository
@@ -24,6 +22,9 @@ use Symfony\Component\Validator\Constraints as Assert;
  */
 final class PhysicalQuantityHierarchyController extends ParentedRepositoryController
 {
+
+    use UnitEndpointAuthorizable;
+
 	/** @var PhysicalQuantityHierarchyRepository */
 	private $physicalQuantityHierarchyRepository;
 
@@ -105,5 +106,10 @@ final class PhysicalQuantityHierarchyController extends ParentedRepositoryContro
     protected static function getAlias(): string
     {
         return 'h';
+    }
+
+    protected function checkParentValidity(IdentifiedObject $parent, IdentifiedObject $child)
+    {
+        // TODO: Implement checkParentValidity() method.
     }
 }

@@ -5,7 +5,7 @@ use App\Entity\Experiment;
 use App\Exceptions\InvalidAuthenticationException;
 use App\Exceptions\WrongParentException;
 
-trait ExperimentEndpointAccessible
+trait ExperimentEndpointAuthorizable
 {
     /**
      * Gets the eldest parent (root of the SLIM route) and checks whether this object
