@@ -183,15 +183,15 @@ class UserController extends WritableRepositoryController implements IAuthWritab
         if ($rootRouteParent['type'] == 'users') {
             /** @var User $user */
             $user = $this->getObjectViaORM(User::class, $rootRouteParent['id']);
-            $groups = $userGroups['group_wise'];
-            $relation = $user->getGroups()->filter(function (UserGroupToUser $groupLink) use ($groups){
+            $relation = $user->getGroups()->filter(function (UserGroupToUser $groupLink) use ($userGroups){
                 /** @var UserGroup $group */
                $group = $groupLink->getUserGroupId();
-               return array_key_exists($group->getId(), $groups) && ($group->getId() != UserGroup::PUBLIC_SPACE);
+               return key_exists($group->getId(), $userGroups) && ($group->getId() != UserGroup::PUBLIC_SPACE);
             })->toArray();
             if (count($relation) || $user->getIsPublic()){
                 return $user->getId();
-            } else {
+            }
+            else {
                 throw new InvalidAuthenticationException("You cannot access this resource.",
                     "Not public or not a member of the same group.");
             }
