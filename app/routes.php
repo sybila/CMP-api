@@ -307,6 +307,30 @@ return function(App $app) {
 		->setRoute(Ctl\UserGroupRoleController::class, '/userGroupRoles')
         ->setMask(RouteHelper::LIST | RouteHelper::DETAIL)
         ->register();
+    (new RouteHelper)
+        ->setRoute(Ctl\PhysicalQuantityController::class, '/physicalQuantities')
+        ->register();
+    (new RouteHelper)
+        ->setRoute(Ctl\UnitController::class, '/physicalQuantities/{physicalQuantity-id:\\d+}/units')
+        ->register();
+    (new RouteHelper)
+        ->setRoute(Ctl\UnitAliasController::class, '/physicalQuantities/{physicalQuantity-id:\\d+}/units/{unit-id:\\d+}/aliases')
+        ->register();
+    (new RouteHelper)
+        ->setRoute(Ctl\AttributeController::class, '/physicalQuantities/{physicalQuantity-id:\\d+}/attributes')
+        ->register();
+    (new RouteHelper)
+        ->setRoute(Ctl\PhysicalQuantityHierarchyController::class, '/physicalQuantities/{physicalQuantity-id:\\d+}/hierarchy')
+        ->register();
+    (new RouteHelper)
+        ->setRoute(Ctl\UnitsAllController::class, '/unitsall')
+        ->setMask(RouteHelper::LIST | RouteHelper::DETAIL)
+        ->register();
+    (new RouteHelper)
+        ->setRoute(Ctl\UnitsAliasesAllController::class, '/unitsAliasesAll')
+        ->setMask(RouteHelper::LIST | RouteHelper::DETAIL)
+        ->register();
+    $app->get('/unitConvert/{unitFrom:\\s+}/{unitTo:\\s+}', Ctl\ConvertUnitsController::class . ':convertUnit');
 
 	// model species
 	$app->get('/models/{model-id:\\d+}/species/{sbmlId}', Ctl\ModelSpecieController::class . ':readSbmlId');

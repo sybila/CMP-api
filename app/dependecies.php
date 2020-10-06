@@ -282,6 +282,34 @@ $c[EntityRepo\AnalysisDatasetRepository::class] = function (Container $c) {
     return new EntityRepo\AnalysisDatasetRepository($c[EntityManager::class]);
 };
 
+$c[EntityRepo\PhysicalQuantityRepository::class] = function (Container $c) {
+    return new EntityRepo\PhysicalQuantityRepository($c[EntityManager::class]);
+};
+
+$c[EntityRepo\UnitRepository::class] = function (Container $c) {
+    return new EntityRepo\UnitRepository($c[EntityManager::class]);
+};
+
+$c[EntityRepo\UnitAliasRepository::class] = function (Container $c) {
+    return new EntityRepo\UnitAliasRepository($c[EntityManager::class]);
+};
+
+$c[EntityRepo\PhysicalQuantityHierarchyRepository::class] = function (Container $c) {
+    return new EntityRepo\PhysicalQuantityHierarchyRepository($c[EntityManager::class]);
+};
+
+$c[EntityRepo\AttributeRepository::class] = function (Container $c) {
+    return new EntityRepo\AttributeRepository($c[EntityManager::class]);
+};
+
+$c[EntityRepo\UnitsAllRepository::class] = function (Container $c) {
+    return new EntityRepo\UnitsAllRepository($c[EntityManager::class]);
+};
+
+$c[EntityRepo\UnitsAliasesAllRepository::class] = function (Container $c) {
+    return new EntityRepo\UnitsAliasesAllRepository($c[EntityManager::class]);
+};
+
 $c[AuthorizationServer::class] = function (Container $c) {
 	$srv = new AuthorizationServer(
 		$c[AuthRepo\ClientRepository::class],

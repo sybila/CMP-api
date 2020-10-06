@@ -2,44 +2,45 @@
 
 namespace App\Entity\Repositories;
 
-use App\Entity\Experiment;
-use App\Entity\ExperimentNote;
 use App\Entity\IdentifiedObject;
+use App\Entity\PhysicalQuantity;
+use App\Entity\Unit;
+use App\Entity\UnitAlias;
 use App\Helpers\QueryRepositoryHelper;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 
-class ExperimentNoteRepository implements IDependentSBaseRepository
+class UnitAliasRepository implements IDependentSBaseRepository
 {
 	/** @var EntityManager * */
 	protected $em;
 
-	/** @var \Doctrine\ORM\NoteRepository */
+	/** @var \Doctrine\ORM\UnitAliasRepository */
 	private $repository;
 
-	/** @var Experiment */
-	private $experiment;
+	/** @var Unit */
+	private $unit;
 
 	public function __construct(EntityManager $em)
 	{
 		$this->em = $em;
-		$this->repository = $em->getRepository(ExperimentNote::class);
+		$this->repository = $em->getRepository(UnitAlias::class);
 	}
 
 	protected static function getParentClassName(): string
 	{
-		return Experiment::class;
+		return Unit::class;
 	}
 
 	public function get(int $id)
 	{
-		return $this->em->find(ExperimentNote::class, $id);
+		return $this->em->find(UnitAlias::class, $id);
 	}
 
 	public function getNumResults(array $filter): int
 	{
 		return ((int)$this->buildListQuery($filter)
-			->select('COUNT(n)')
+			->select('COUNT(a)')
 			->getQuery()
 			->getScalarResult());
 	}
@@ -47,14 +48,14 @@ class ExperimentNoteRepository implements IDependentSBaseRepository
 	public function getList(array $filter, array $sort, array $limit): array
 	{
 		$query = $this->buildListQuery($filter)
-			->select('n.id, n.time, n.note, n.imgLink');
+			->select('a.id, a.alternative_name');
         $query = QueryRepositoryHelper::addPaginationSortDql($query, $sort, $limit);
 		return $query->getQuery()->getArrayResult();
 	}
 
 	public function getParent(): IdentifiedObject
 	{
-		return $this->experiment;
+		return $this->unit;
 	}
 
 	public function setParent(IdentifiedObject $object): void
@@ -62,15 +63,15 @@ class ExperimentNoteRepository implements IDependentSBaseRepository
 		$className = static::getParentClassName();
 		if (!($object instanceof $className))
 			throw new \Exception('Parent of note must be ' . $className);
-		$this->experiment = $object;
+		$this->unit = $object;
 	}
 
 	private function buildListQuery(array $filter): QueryBuilder
 	{
 		$query = $this->em->createQueryBuilder()
-			->from(ExperimentNote::class, 'n')
-			->where('n.experimentId = :experimentId')
-			->setParameter('experimentId', $this->experiment->getId());
+			->from(UnitAlias::class, 'a')
+			->where('a.unitId = :unitId')
+			->setParameter('unitId', $this->unit->getId());
         $query = QueryRepositoryHelper::addFilterDql($query, $filter);
 		return $query;
 	}
