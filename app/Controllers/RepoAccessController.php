@@ -153,6 +153,7 @@ trait RepoAccessController
         if ($parent['id']) {
             switch ($parent['type']) {
                 case 'models':
+                case 'physicalQuantity':
                 case 'experiments':
                     if (!in_array($role, User::CAN_ADD)){
                         return false;
@@ -166,6 +167,8 @@ trait RepoAccessController
             switch ($parent['type']) {
                 case 'users':
                 case 'experiments':
+                case 'physicalQuantities':
+                    return true;
                 default:
                     return false;
             }
