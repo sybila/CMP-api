@@ -17,7 +17,7 @@ class UserType implements IdentifiedObject
 
 	/**
 	 * @var int
-	 * @ORM\Column
+	 * @ORM\Column(type="integer")
 	 */
 	private $tier;
 

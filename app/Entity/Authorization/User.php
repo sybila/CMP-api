@@ -67,7 +67,7 @@ class User implements UserEntityInterface, IdentifiedObject
 
 	/**
 	 * @var int
-	 * @ORM\Column(type="integer")
+	 * @ORM\Column
 	 */
 	private $type;
 
