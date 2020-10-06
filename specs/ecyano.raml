@@ -884,7 +884,7 @@ resourceTypes:
   post:
     is: [Insert: {type: AuthorizationCodeRequest}]
 /users:
-  description: User endpoint
+  description: Users endpoint
   get:
     is: [Collection: {type: User}]
   post:
@@ -894,6 +894,11 @@ resourceTypes:
       id:
         UrlIdentifierList
     type: {_object: {type: User}}
+/user:
+  description: Returns detail on user depending on the Bearer access token
+  type: {_object: {type: User}}
+
+
 /userTypes:
   description: Types of user group roles endpoint
   get:

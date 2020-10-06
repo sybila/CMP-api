@@ -126,7 +126,8 @@ class UserController extends WritableRepositoryController implements IAuthWritab
             throw new MissingRequiredKeyException('isPublic');
         //FIXME following lines should not be here
         $user->setType(User::TEMPORARY);
-        $this->sendConfirmationMail($user->getEmail());
+        //$this->sendConfirmationMail($user->getEmail());
+        $this->setDefaultUserSpaceGroup($user);
 
     }
 
@@ -179,6 +180,10 @@ class UserController extends WritableRepositoryController implements IAuthWritab
         //if there is no id, it means GET LIST was requested.
         if (is_null($rootRouteParent['id'])) {
             return null;
+        }
+        //user can always access himself
+        if ($this->userPermissions['user_id'] == $rootRouteParent['id']) {
+            return $this->userPermissions['user_id'];
         }
         if ($rootRouteParent['type'] == 'users') {
             /** @var User $user */
@@ -324,12 +329,21 @@ class UserController extends WritableRepositoryController implements IAuthWritab
 final class LoggedInUserController extends UserController
 {
 
+    /**
+     * @inheritDoc
+     * @throws InvalidAuthenticationException
+     */
     public function readIdentified(Request $request, Response $response, ArgumentParser $args) : Response
     {
         $this->isAuthorized($request->getAttribute('oauth_user_id'));
-        return $response->withRedirect("users/{$request->getAttribute('oauth_user_id')}");
+        $myArgs = new ArgumentParser(['id' => $request->getAttribute('oauth_user_id')]);
+        return parent::readIdentified($request, $response, $myArgs);
     }
 
+    /**
+     * @inheritDoc
+     * @throws InvalidAuthenticationException
+     */
     public function edit(Request $request, Response $response, ArgumentParser $args): Response
     {
         $this->isAuthorized($request->getAttribute('oauth_user_id'));
@@ -337,6 +351,10 @@ final class LoggedInUserController extends UserController
         return parent::edit($request, $response, $myArgs);
     }
 
+    /**
+     * @inheritDoc
+     * @throws InvalidAuthenticationException
+     */
     public function delete(Request $request, Response $response, ArgumentParser $args): Response
     {
         $this->isAuthorized($request->getAttribute('oauth_user_id'));
