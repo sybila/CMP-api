@@ -14,11 +14,11 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Experiment implements IdentifiedObject
 {
-
     const STATUS_PUBLIC = 'public';
     const STATUS_PRIVATE = 'private';
 
-	use EBase;
+    use EBase;
+
     /**
      * @ORM\Id
      * @ORM\Column(type="integer", name="id")
@@ -26,47 +26,47 @@ class Experiment implements IdentifiedObject
      */
     private $id;
 
-	/**
-	 * @var string
-	 * @ORM\Column(type="string", name="name")
-	 */
-	private $name;
+    /**
+     * @var string
+     * @ORM\Column(type="string", name="name")
+     */
+    private $name;
 
-	/**
-	 * @var string
-	 * @ORM\Column(type="string", name="description")
-	 */
-	private $description;
+    /**
+     * @var string
+     * @ORM\Column(type="string", name="description")
+     */
+    private $description;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="App\Entity\Organism", inversedBy="experiments", fetch="EAGER")
-	 * @ORM\JoinColumn(name="organism_id", referencedColumnName="id")
-	 */
-	private $organismId;
+    /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\Organism", inversedBy="experiments", fetch="EAGER")
+     * @ORM\JoinColumn(name="organism_id", referencedColumnName="id")
+     */
+    private $organismId;
 
-	/**
-	 * @var string
-	 * @ORM\Column(type="string", name="protocol")
-	 */
-	private $protocol;
+    /**
+     * @var string
+     * @ORM\Column(type="string", name="protocol")
+     */
+    private $protocol;
 
-	/**
-	 * @var DateTimeJson
-	 * @ORM\Column(type="datetime", name="started")
-	 */
-	private $started;
+    /**
+     * @var DateTimeJson
+     * @ORM\Column(type="datetime", name="started")
+     */
+    private $started;
 
-	/**
-	 * @var DateTimeJson
-	 * @ORM\Column(type="datetime", name="inserted")
-	 */
-	private $inserted;
+    /**
+     * @var DateTimeJson
+     * @ORM\Column(type="datetime", name="inserted")
+     */
+    private $inserted;
 
-	/**User neexistuje
-	 * @ORM\ManyToOne(targetEntity="...", inversedBy="...")
-	 * @ORM\JoinColumn(name="user_id", referencedColumnName="id")
-	 */
-	//private $userId;
+    /**User neexistuje
+     * @ORM\ManyToOne(targetEntity="...", inversedBy="...")
+     * @ORM\JoinColumn(name="user_id", referencedColumnName="id")
+     */
+    //private $userId;
 
     /**
      * @var int
@@ -74,23 +74,23 @@ class Experiment implements IdentifiedObject
      */
     private $groupId;
 
-	/**
-	 * @var string
+    /**
+     * @var string
      * @ORM\Column(type="string", columnDefinition="ENUM('private', 'public')")
-	 */
-	private $status;
+     */
+    private $status;
 
-	/**
-	 * @var ArrayCollection
-	 * @ORM\OneToMany(targetEntity="ExperimentVariable", mappedBy="experimentId", orphanRemoval=true)
-	 */
-	private $variables;
+    /**
+     * @var ArrayCollection
+     * @ORM\OneToMany(targetEntity="ExperimentVariable", mappedBy="experimentId", orphanRemoval=true)
+     */
+    private $variables;
 
-	/**
-	 * @var ArrayCollection
-	 * @ORM\OneToMany(targetEntity="ExperimentNote", mappedBy="experimentId", orphanRemoval=true)
-	 */
-	private $notes;
+    /**
+     * @var ArrayCollection
+     * @ORM\OneToMany(targetEntity="ExperimentNote", mappedBy="experimentId", orphanRemoval=true)
+     */
+    private $notes;
 
     /**
      * @var ArrayCollection
@@ -109,12 +109,12 @@ class Experiment implements IdentifiedObject
     private $experimentModels;
 
     /**
-	 * @var ArrayCollection
+     * @var ArrayCollection
      * @ORM\ManyToMany(targetEntity="Device", inversedBy="experiments")
      * @ORM\JoinTable(name="experiment_to_device", joinColumns={@ORM\JoinColumn(name="exp_id", referencedColumnName="id")},
      * inverseJoinColumns={@ORM\JoinColumn(name="dev_id", referencedColumnName="id")})
-	 */
-	private $devices;
+     */
+    private $devices;
 
 //    /**
 //     * @var ArrayCollection
@@ -133,123 +133,123 @@ class Experiment implements IdentifiedObject
         //$this->bioquantities = new ArrayCollection();
     }
 
-	/**
-	 * Get name
-	 * @return string
-	 */
-	public function getName(): ?string
-	{
-		return $this->name;
-	}
+    /**
+     * Get name
+     * @return string
+     */
+    public function getName(): ?string
+    {
+        return $this->name;
+    }
 
-	/**
-	 * Set name
-	 * @param string $name
-	 * @return Experiment
-	 */
-	public function setName($name): Experiment
-	{
-		$this->name = $name;
-		return $this;
-	}
+    /**
+     * Set name
+     * @param string $name
+     * @return Experiment
+     */
+    public function setName($name): Experiment
+    {
+        $this->name = $name;
+        return $this;
+    }
 
-	/**
-	 * Get description
-	 * @return string
-	 */
-	public function getDescription(): ?string
-	{
-		return $this->description;
-	}
+    /**
+     * Get description
+     * @return string
+     */
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
 
-	/**
-	 * Set description
-	 * @param integer $description
-	 * @return Experiment
-	 */
-	public function setDescription($description): Experiment
-	{
-		$this->description = $description;
-		return $this;
-	}
+    /**
+     * Set description
+     * @param integer $description
+     * @return Experiment
+     */
+    public function setDescription($description): Experiment
+    {
+        $this->description = $description;
+        return $this;
+    }
 
-	/**
-	 * Set organismId
-	 * @param Organism $organismId
-	 * @return Experiment
-	 */
-	public function setOrganismId($organismId): Experiment
-	{
-		$this->organismId = $organismId;
-		return $this;
-	}
+    /**
+     * Set organismId
+     * @param Organism $organismId
+     * @return Experiment
+     */
+    public function setOrganismId($organismId): Experiment
+    {
+        $this->organismId = $organismId;
+        return $this;
+    }
 
-	/**
-	 * Get organismId
-	 * @return Organism
-	 */
-	public function getOrganismId(): ?Organism
-	{
-		return $this->organismId;
-	}
-	/**
-	 * Get protocol
-	 * @return string|null
-	 */
-	public function getProtocol(): ?string
-	{
-		return $this->protocol;
-	}
+    /**
+     * Get organismId
+     * @return Organism
+     */
+    public function getOrganismId(): ?Organism
+    {
+        return $this->organismId;
+    }
+    /**
+     * Get protocol
+     * @return string|null
+     */
+    public function getProtocol(): ?string
+    {
+        return $this->protocol;
+    }
 
-	/**
-	 * Set protocol
-	 * @param string $protocol
-	 * @return Experiment
-	 */
-	public function setProtocol($protocol): Experiment
-	{
-		$this->protocol = $protocol;
-		return $this;
-	}
+    /**
+     * Set protocol
+     * @param string $protocol
+     * @return Experiment
+     */
+    public function setProtocol($protocol): Experiment
+    {
+        $this->protocol = $protocol;
+        return $this;
+    }
 
-	/**
-	 * Get started
-	 * @return DateTimeJson
-	 */
-	public function getStarted(): DateTimeJson
-	{
-		return $this->started;
-	}
+    /**
+     * Get started
+     * @return DateTimeJson
+     */
+    public function getStarted(): DateTimeJson
+    {
+        return $this->started;
+    }
 
     /**
      * Set started
      * @param string $started
      * @return Experiment
      */
-	public function setStarted(string $started): Experiment
-	{
-		$this->started = date_create_from_format('d/m/Y:H:i:s', $started);
-		return $this;
-	}
+    public function setStarted(string $started): Experiment
+    {
+        $this->started = date_create_from_format('d/m/Y:H:i:s', $started);
+        return $this;
+    }
 
-	/**
-	 * Get inserted
-	 * @return DateTimeJson|null
-	 */
-	public function getInserted(): ?DateTimeJson
-	{
-		return $this->inserted;
-	}
+    /**
+     * Get inserted
+     * @return DateTimeJson|null
+     */
+    public function getInserted(): ?DateTimeJson
+    {
+        return $this->inserted;
+    }
 
-	/*/**
-	 * Set inserted
-	 * @return Experiment
-	 */
-	/*public function setInserted(): Experiment
-	{
-		$this->inserted = new DateTimeJson();
-		return $this;
-	}*/
+    /*/**
+     * Set inserted
+     * @return Experiment
+     */
+    /*public function setInserted(): Experiment
+    {
+        $this->inserted = new DateTimeJson();
+        return $this;
+    }*/
 
 
 //    /**
@@ -349,56 +349,56 @@ class Experiment implements IdentifiedObject
         }
     }
 
-	/**
-	 * Get userId
-	 * @return integer
-	 */
-	public function getUserId(): ?int
-	{
-		return $this->userId;
-	}
+    /**
+     * Get userId
+     * @return integer
+     */
+    public function getUserId(): ?int
+    {
+        return $this->userId;
+    }
 
-	/**
-	 * Set userId
-	 * @param int $userId
-	 * @return Experiment
-	 */
-	public function setUserId($userId): Experiment
-	{
-		$this->userId = $userId;
-		return $this;
-	}
+    /**
+     * Set userId
+     * @param int $userId
+     * @return Experiment
+     */
+    public function setUserId($userId): Experiment
+    {
+        $this->userId = $userId;
+        return $this;
+    }
 
-	/**
-	 * Get status
-	 * @return string
-	 */
-	public function getStatus(): string
-	{
-		return $this->status;
-	}
+    /**
+     * Get status
+     * @return string
+     */
+    public function getStatus(): string
+    {
+        return $this->status;
+    }
 
-	/**
-	 * Set status
-	 * @param string $status
-	 * @return Experiment
-	 */
-	public function setStatus($status): Experiment
-	{
+    /**
+     * Set status
+     * @param string $status
+     * @return Experiment
+     */
+    public function setStatus($status): Experiment
+    {
         if (!in_array($status, array(self::STATUS_PUBLIC, self::STATUS_PRIVATE))) {
             throw new \InvalidArgumentException("Invalid status");
         }
         $this->status = $status;
         return $this;
-	}
+    }
 
-	/**
-	 * @return ExperimentVariable[]|Collection
-	 */
-	public function getVariables(): Collection
-	{
-		return $this->variables;
-	}
+    /**
+     * @return ExperimentVariable[]|Collection
+     */
+    public function getVariables(): Collection
+    {
+        return $this->variables;
+    }
 
     /**
      * @return Bioquantity[]|Collection
@@ -416,13 +416,13 @@ class Experiment implements IdentifiedObject
         return $this->devices;
     }
 
-	/**
-	 * @return ExperimentNote[]|Collection
-	 */
-	public function getNote(): Collection
-	{
-		return $this->notes;
-	}
+    /**
+     * @return ExperimentNote[]|Collection
+     */
+    public function getNote(): Collection
+    {
+        return $this->notes;
+    }
 
     /**
      * @return Experiment[]|Collection
