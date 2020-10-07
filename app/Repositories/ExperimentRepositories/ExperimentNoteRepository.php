@@ -9,7 +9,7 @@ use App\Helpers\QueryRepositoryHelper;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 
-class ExperimentNoteRepository implements IDependentSBaseRepository
+class ExperimentNoteRepository implements IDependentEndpointRepository
 {
 	/** @var EntityManager * */
 	protected $em;
