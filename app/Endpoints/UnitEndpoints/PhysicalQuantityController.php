@@ -21,10 +21,10 @@ use App\Entity\{Attribute,
     Repositories\OrganismRepository,
     Repositories\PhysicalQuantityRepository,
     Unit};
-use App\Exceptions\{
-	DependentResourcesBoundException,
-	MissingRequiredKeyException
-};
+use App\Exceptions\{DependentResourcesBoundException,
+    InvalidArgumentException,
+    InvalidAuthenticationException,
+    MissingRequiredKeyException};
 use App\Helpers\ArgumentParser;
 use Slim\Container;
 use Slim\Http\{
@@ -126,4 +126,5 @@ final class PhysicalQuantityController extends WritableRepositoryController
 	{
 		return PhysicalQuantityRepository::Class;
 	}
+
 }

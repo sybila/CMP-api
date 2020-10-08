@@ -10,7 +10,7 @@ use App\Helpers\QueryRepositoryHelper;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 
-class ExperimentValueRepository implements IDependentSBaseRepository
+class ExperimentValueRepository implements IDependentEndpointRepository
 {
 	/** @var EntityManager * */
 	private $em;
