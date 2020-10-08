@@ -2,7 +2,7 @@
 
 use App\Exceptions\InvalidRoleException;
 
-interface IRoleAuthController
+interface IGroupRoleAuthController
 {
 
     /**

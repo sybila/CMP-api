@@ -13,13 +13,13 @@ use App\Helpers\ArgumentParser;
 use Closure;
 use Doctrine\ORM\ORMException;
 use IAuthRepositoryController;
-use IRoleAuthController;
+use IGroupRoleAuthController;
 use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;
 
 abstract class RepositoryController extends AbstractController
-    implements IAuthRepositoryController, IRoleAuthController
+    implements IAuthRepositoryController, IGroupRoleAuthController
 {
 
 	use SortableController, PageableController, DefaultControllerAccessible, FilterableController;

@@ -2,7 +2,7 @@
 
 use App\Exceptions\InvalidRoleException;
 
-interface IRoleAuthWritableController extends IRoleAuthController
+interface IGroupRoleAuthWritableController extends IGroupRoleAuthController
 {
     /**
      * Returns TRUE if the user can request

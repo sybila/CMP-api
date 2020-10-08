@@ -126,7 +126,7 @@ class UserController extends WritableRepositoryController implements IAuthWritab
             throw new MissingRequiredKeyException('isPublic');
         //FIXME following lines should not be here
         $user->setType(User::TEMPORARY);
-        //$this->sendConfirmationMail($user->getEmail());
+        $this->sendConfirmationMail($user->getEmail());
         $this->setDefaultUserSpaceGroup($user);
 
     }

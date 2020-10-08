@@ -13,7 +13,7 @@ use App\Exceptions\MalformedInputException;
 use App\Exceptions\NonExistingObjectException;
 use App\Helpers\ArgumentParser;
 use Doctrine\ORM\ORMException;
-use IRoleAuthWritableController;
+use IGroupRoleAuthWritableController;
 use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;
@@ -21,7 +21,7 @@ use stdClass;
 use Symfony\Component\Validator\Constraints as Assert;
 use App\Exceptions\MissingRequiredKeyException;
 
-abstract class WritableRepositoryController extends RepositoryController implements IRoleAuthWritableController
+abstract class WritableRepositoryController extends RepositoryController implements IGroupRoleAuthWritableController
 {
 
 	use ValidatedController;
