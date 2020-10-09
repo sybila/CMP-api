@@ -186,7 +186,7 @@ class UserController extends WritableRepositoryController implements IAuthWritab
             $mail = $body->getString('email');
             /** @var User $usr */
             $usr = $this->orm->getRepository(User::class)->findOneBy(['email' => $mail]);
-            if (!$usr){
+            if ($usr){
                 $hash = sha1($this->mailer['salt'] . $mail);
                 $url = $_SERVER['REQUEST_SCHEME'] . '://' . $this->mailer['client_srv_redirect'] . '/pswRenew/' . $mail . '/' . $hash;
                 $this->sendNotificationEmail("Hello {$usr->getUsername()}. To generate new password click on this link <a href=$url>this link</a>." .
