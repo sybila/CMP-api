@@ -264,7 +264,7 @@ class UserController extends WritableRepositoryController implements IAuthWritab
             throw new MissingRequiredKeyException('dsn is not set up properly.');
         }
         $hash = sha1($receiver . $this->mailer['salt']);
-        $url = $_SERVER['REQUEST_SCHEME'] . '://' . $this->mailer['client_srv_redirect'] . '/users/' . $receiver . '/' . $hash;
+        $url = $_SERVER['REQUEST_SCHEME'] . '://' . $this->mailer['client_srv_redirect'] . '/' . $receiver . '/' . $hash;
         $mailer = new Mailer($transport);
         $email = (new Email())
             ->from('ecyano@fi.muni.cz')
