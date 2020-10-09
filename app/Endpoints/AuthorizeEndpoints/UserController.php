@@ -25,6 +25,7 @@ use App\Exceptions\{ActionConflictException,
     InvalidAuthenticationException,
     InvalidRoleException,
     MissingRequiredKeyException,
+    NonExistingObjectException,
     UniqueKeyViolationException};
 use App\Helpers\ArgumentParser;
 use Slim\Container;
@@ -190,8 +191,11 @@ class UserController extends WritableRepositoryController implements IAuthWritab
                 $url = $_SERVER['REQUEST_SCHEME'] . '://' . $this->mailer['client_srv_redirect'] . '/pswRenew/' . $mail . '/' . $hash;
                 $this->sendNotificationEmail("Hello {$usr->getUsername()}. To generate new password click on this link <a href=$url>this link</a>." .
                     "Ignore this e-mail if you did not ask for a new password generation.", $mail);
+                return self::formatOk($response, ['Renewal email sent.']);
             }
+            else throw new NonExistingObjectException(0, $mail);
         }
+        else throw new MissingRequiredKeyException('email');
     }
 
     public function generateNewPsw (Request $request, Response $response, ArgumentParser $args): Response
@@ -211,8 +215,7 @@ class UserController extends WritableRepositoryController implements IAuthWritab
                 $this->orm->flush();
                 return self::formatOk($response, ['Password changed.']);
             }
-            else throw new MissingRequiredKeyException('email');
-
+            else throw new MissingRequiredKeyException('password');
         }
         else throw new ActionConflictException('Renewal link is malformed');
     }
