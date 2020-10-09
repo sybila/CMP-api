@@ -5,12 +5,14 @@ namespace App\Repositories\Authorization;
 use App\Entity\Authorization\User;
 use App\Entity\Authorization\UserGroup;
 use App\Entity\Authorization\UserGroupToUser;
+use App\Entity\Authorization\UserType;
 use App\Entity\Experiment;
 use App\Entity\Model;
 use App\Entity\Repositories\IEndpointRepository;
 use App\Exceptions\InvalidAuthenticationException;
 use App\Helpers\QueryRepositoryHelper;
 use Doctrine\Common\Collections\Criteria;
+use Doctrine\Common\Collections\Expr\Expression;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Common\Persistence\ObjectRepository;
@@ -68,26 +70,51 @@ class UserRepository implements UserRepositoryInterface, IEndpointRepository
 
 	public function getList(array $filter, array $sort, array $limit): array
 	{
-		$query = $this->buildListQuery($filter)
-			->select('u.id, u.username, u.type, u.name, u.surname, u.email, u.phone');
-		return $query->getQuery()->getArrayResult();
+        return $this->userRepository
+            ->matching($this->createQueryCriteria($filter, $limit, $sort))
+            ->map(function (User $user) {
+                return [
+                'id' => $user->getId(),
+                'username' => $user->getUsername(),
+                'name' => $user->getName(),
+                'surname' => $user->getSurname(),
+                'type' => [
+                    'id' => $user->getType()->getId(),
+                    'tier' => $user->getType()->getTier(),
+                    'name' => $user->getType()->getName()],
+                'email' => $user->getEmail(),
+                'phone' => $user->getPhone()];
+            })->toArray();
 	}
+
+    /**
+     * @param array $filter
+     * @param array|null $limit
+     * @param array|null $sort
+     * @return Criteria
+     */
+    public function createQueryCriteria(array $filter, array $limit = null, array $sort = null): Criteria
+    {
+        unset($sort['fullSortQuery']);
+
+        $criteria = Criteria::create()->where(Criteria::expr()->in('id', $filter['accessFilter']['id']));
+        foreach ($filter['argFilter'] as $by => $expr){
+            //FIXME we need to change how the filtering works, alias is lame
+            $by = explode('.',$by)[1];
+            //
+            $criteria = $criteria->andWhere(Criteria::expr()->contains($by, $expr));
+        }
+        return $criteria->setMaxResults($limit['limit'] ? $limit['limit'] : null)
+            ->setFirstResult($limit['offset'] ? $limit['offset'] : null)
+            ->orderBy($sort ? $sort : []);
+    }
 
 
 	public function getNumResults(array $filter): int
 	{
-		return ((int) $this->buildListQuery($filter)
-				->select('COUNT(u)')
-				->getQuery()
-				->getScalarResult());
-	}
-
-
-	private function buildListQuery(array $filter): QueryBuilder
-	{
-		$query = $this->em->createQueryBuilder()
-			->from(User::class, 'u');
-		return QueryRepositoryHelper::addFilterDql($query, $filter);
+        return $this->userRepository
+            ->matching($this->createQueryCriteria($filter))
+            ->count();
 	}
 
 }

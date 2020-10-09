@@ -894,6 +894,28 @@ resourceTypes:
       id:
         UrlIdentifierList
     type: {_object: {type: User}}
+  /passwordRenewal:
+    description: Ask API for psw renewal. Define acc email where the renewal link will be sent.
+    post:
+      body:
+        application/json:
+            properties:
+              email: string
+            example: |
+              {
+              "email" : "example@provide.org"
+              }
+  /{email}/pswRenew/{hash}:
+    description: If the hash matches with internal hash, change the password according to body json and its content.
+    put:
+      body:
+        application/json:
+            properties:
+              password: string
+            example: |
+              {
+              "password" : "ultrasuperhard"
+              }
 /user:
   description: Returns detail on user depending on the Bearer access token
   type: {_object: {type: User}}
@@ -901,6 +923,9 @@ resourceTypes:
     description: Resends account confirmation email depending on the Bearer access token, or according to the content in field "email" in POST body.
     put:
       description: Can leave the body empty {} to resend the email or change it to set the user email and resend anew.
+      headers:
+        Authorization:
+          enum: [Bearer]
       body:
         application/json:
             properties:

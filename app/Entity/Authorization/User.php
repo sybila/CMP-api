@@ -65,10 +65,10 @@ class User implements UserEntityInterface, IdentifiedObject
 	 */
 	private $accessTokens;
 
-	/**
-	 * @var int
-	 * @ORM\Column
-	 */
+    /**
+     * @ORM\OneToOne(targetEntity="UserType")
+     * @ORM\JoinColumn(name="type")
+     */
 	private $type;
 
 	/**

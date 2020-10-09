@@ -202,7 +202,7 @@ abstract class RepositoryController extends AbstractController
             foreach ($authUser->getGroups()->getIterator() as $groupLink){
                 $usersGroupRoles[$groupLink->getuserGroupId()->getId()] = $groupLink->getRoleId();
             }
-            $this->userPermissions = ["group_wise" => $usersGroupRoles, "platform_wise" => $authUser->getType(), "user_id" => $id];
+            $this->userPermissions = ["group_wise" => $usersGroupRoles, "platform_wise" => $authUser->getType()->getTier(), "user_id" => $id];
         }
         else {
             $this->userPermissions = ["group_wise" => [1 => 10], "platform_wise" => User::GUEST, "user_id" => null];

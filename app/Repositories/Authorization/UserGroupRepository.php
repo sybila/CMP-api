@@ -3,6 +3,7 @@
 namespace App\Repositories\Authorization;
 
 use App\Entity\Authorization\UserGroup;
+use App\Entity\Authorization\UserType;
 use App\Entity\Repositories\IEndpointRepository;
 use App\Helpers\QueryRepositoryHelper;
 use Doctrine\ORM\QueryBuilder;
@@ -47,6 +48,7 @@ class UserGroupRepository implements IEndpointRepository
 		$query = $this->buildListQuery($filter)
 			->select('g.id, g.name, g.type, g.description');
 		return $query->getQuery()->getArrayResult();
+
 	}
 
 

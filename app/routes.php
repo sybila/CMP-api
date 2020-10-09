@@ -131,6 +131,9 @@ return function(App $app) {
         ->add(RouteHelper::$authMiddleware);
     $app->put('/user/resendConfirmation', Ctl\LoggedInUserController::class . ':resendCnfEmail')
         ->add(RouteHelper::$authMiddleware);
+    $app->post('/users/passwordRenewal', Ctl\LoggedInUserController::class . ':getNewPsw');
+    $app->put('/users/{email}/pswRenew/{hash}', Ctl\LoggedInUserController::class . ':generateNewPsw');
+
 
 	// annotations
 	$app->get('/annotations/types', Ctl\AnnotationController::class . ':readTypes');

@@ -55,7 +55,7 @@ class UserController extends WritableRepositoryController implements IAuthWritab
 
 	protected static function getAllowedSort(): array
 	{
-		return ['id, name'];
+		return ['id', 'name'];
 	}
 
 
@@ -67,7 +67,10 @@ class UserController extends WritableRepositoryController implements IAuthWritab
 			'username' => $user->getUsername(),
 			'name' => $user->getName(),
 			'surname' => $user->getSurname(),
-			'type' => (int) $user->getType(),
+			'type' => [
+			    'id' => $user->getType()->getId(),
+                'tier' => $user->getType()->getTier(),
+                'name' => $user->getType()->getName()],
 			'groups' => $user->getGroups()->map(function (UserGroupToUser $groupLink) {
 					$group = $groupLink->getUserGroupId();
 					return ['id' => $group->getId(), 'role' => (int) $groupLink->getRoleId(), 'name' => $group->getName()];
@@ -174,6 +177,46 @@ class UserController extends WritableRepositoryController implements IAuthWritab
         return 'u';
     }
 
+    public function getNewPsw (Request $request, Response $response, ArgumentParser $args): Response
+    {
+        $body = new ArgumentParser($request->getParsedBody());
+        if ($body->hasKey('email')){
+            $this->validate($body, $this->getValidator());
+            $mail = $body->getString('email');
+            /** @var User $usr */
+            $usr = $this->orm->getRepository(User::class)->findOneBy(['email' => $mail]);
+            if (!$usr){
+                $hash = sha1($this->mailer['salt'] . $mail);
+                $url = $_SERVER['REQUEST_SCHEME'] . '://' . $this->mailer['client_srv_redirect'] . '/pswRenew/' . $mail . '/' . $hash;
+                $this->sendNotificationEmail("Hello {$usr->getUsername()}. To generate new password click on this link <a href=$url>this link</a>." .
+                    "Ignore this e-mail if you did not ask for a new password generation.", $mail);
+            }
+        }
+    }
+
+    public function generateNewPsw (Request $request, Response $response, ArgumentParser $args): Response
+    {
+        $body = new ArgumentParser($request->getParsedBody());
+        $users = $this->orm->getRepository(User::class)->findBy(['email' => $args['email']]);
+        //there should be only one, because of uniqueCheck.
+        /** @var User $user */
+        $user = current($users);
+        if ($user === false)
+            throw new InvalidAuthenticationException("User registered under this email does not exist.",
+                "Try signing up");
+        if ( sha1($this->mailer['salt'] . $user->getEmail()) === $args['hash']) {
+            if ($body->hasKey('password')){
+                $user->setPasswordHash($user->hashPassword($body->getString('password')));
+                $this->orm->persist($user);
+                $this->orm->flush();
+                return self::formatOk($response, ['Password changed.']);
+            }
+            else throw new MissingRequiredKeyException('email');
+
+        }
+        else throw new ActionConflictException('Renewal link is malformed');
+    }
+
     //----- RESOURCE PROTECTION ----//
     public function hasAccessToObject(array $userGroups): ?int
     {
@@ -207,12 +250,7 @@ class UserController extends WritableRepositoryController implements IAuthWritab
 
     public function getAccessFilter(array $userGroups): ?array
     {
-        $quasiFilter = [];
-        $dql = static::getAlias() . ".id";
-        foreach ($this->getVisibleUsersId($userGroups) as $user){
-            $quasiFilter[$user] = $dql;
-        }
-        return $quasiFilter;
+        return ['id' => $this->getVisibleUsersId($userGroups)];
     }
 
     public function getVisibleUsersId(array $fromGroups)
@@ -279,6 +317,27 @@ class UserController extends WritableRepositoryController implements IAuthWritab
         }
     }
 
+    protected function sendNotificationEmail($message, $receiver){
+        try {
+            $transport = Transport::fromDsn($this->mailer['dsn']);
+        }
+        catch (InvalidArgumentException $e) {
+            throw new MissingRequiredKeyException('dsn is not set up properly.');
+        }
+        $mailer = new Mailer($transport);
+        $email = (new Email())
+            ->from('TODO@mail.muni.cz')
+            ->to($receiver)
+            ->subject('CMP: Account notification.')
+            ->html("<p>$message</p>");
+        try {
+            $mailer->send($email);
+        }
+        catch (TransportExceptionInterface $e){
+            throw new MissingRequiredKeyException($e->getMessage() . $e->getDebug());
+        }
+    }
+
     public function confirmRegistration(Request $request, Response $response, ArgumentParser $args): Response
     {
         $users = $this->orm->getRepository(User::class)->findBy(['email' => $args['email']]);
@@ -316,18 +375,6 @@ class UserController extends WritableRepositoryController implements IAuthWritab
         $this->orm->persist($linkToMySpace);
     }
 
-    protected function sendNotificationEmail($message, $receiver){
-        $transport = Transport::fromDsn($this->mailer['dsn']);
-        $mailer = new Mailer($transport);
-        $link = str_shuffle(md5($receiver));
-        $email = (new Email())
-            ->from('TODO@mail.muni.cz')
-            ->to($receiver)
-            ->subject('CMP: Account notification.')
-            ->text($message)
-            ->html("<p>$message</p>");
-        $mailer->send($email);
-    }
 }
 
 final class LoggedInUserController extends UserController
@@ -371,14 +418,7 @@ final class LoggedInUserController extends UserController
      * @param Response $response
      * @param ArgumentParser $args
      * @return Response
-     * @throws InvalidAuthenticationException
-     * @throws MissingRequiredKeyException
-     * @throws UniqueKeyViolationException
-     * @throws \App\Exceptions\InvalidTypeException
-     * @throws \App\Exceptions\MalformedInputException
-     * @throws \App\Exceptions\NonExistingObjectException
-     * @throws \Doctrine\ORM\ORMException
-     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws mixed
      */
     public function resendCnfEmail(Request $request, Response $response, ArgumentParser $args): Response
     {
@@ -398,6 +438,7 @@ final class LoggedInUserController extends UserController
         $this->orm->flush();
         return self::formatOk($response, ['receiver' => $mail]);
     }
+
 
     /**
      * @param int|null $id
