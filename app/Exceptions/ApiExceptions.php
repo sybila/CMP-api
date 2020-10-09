@@ -302,6 +302,11 @@ class InvalidAuthenticationException extends ApiException
         parent::__construct($previous)
             ->setMessage('%s %s.', $field, $hint);
     }
+
+    public function getHttpCode(): int
+    {
+        return self::CODE;
+    }
 }
 
 class InvalidRoleException extends ApiException
@@ -313,6 +318,11 @@ class InvalidRoleException extends ApiException
         parent::__construct($previous)
             ->setMessage('Denied. Cannot %s resources on this uri: %s via %s method', $action, $uri, $api_action);
     }
+
+    public function getHttpCode(): int
+    {
+        return self::CODE;
+    }
 }
 
 class ActionConflictException extends ApiException
@@ -322,6 +332,11 @@ class ActionConflictException extends ApiException
     {
         parent::__construct($previous)
             ->setMessage('Conflict. %s', $message);
+    }
+
+    public function getHttpCode(): int
+    {
+        return self::CODE;
     }
 }
 
@@ -333,6 +348,11 @@ class WrongParentException extends ApiException
     {
         parent::__construct($previous)
         ->setMessage('Cannot access %s with id %s from %s of id %s.', $child, $chId, $parent, $pId);
+    }
+
+    public function getHttpCode(): int
+    {
+        return self::CODE;
     }
 }
 

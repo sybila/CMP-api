@@ -13,6 +13,7 @@ use IAuthWritableRepositoryController;
 use League\OAuth2\Server\Exception\OAuthServerException;
 use League\OAuth2\Server\Middleware\ResourceServerMiddleware;
 use League\OAuth2\Server\ResourceServer;
+use stdClass;
 use Symfony\Component\Mailer\Exception\InvalidArgumentException;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\Mailer;
@@ -263,7 +264,7 @@ class UserController extends WritableRepositoryController implements IAuthWritab
             throw new MissingRequiredKeyException('dsn is not set up properly.');
         }
         $hash = sha1($receiver . $this->mailer['salt']);
-        $url = $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST'] . '/users/' . $receiver . '/' . $hash;
+        $url = $_SERVER['REQUEST_SCHEME'] . '://' . $this->mailer['client_srv_redirect'] . '/users/' . $receiver . '/' . $hash;
         $mailer = new Mailer($transport);
         $email = (new Email())
             ->from('ecyano@fi.muni.cz')
@@ -284,6 +285,9 @@ class UserController extends WritableRepositoryController implements IAuthWritab
         //there should be only one, because of uniqueCheck.
         /** @var User $user */
         $user = current($users);
+        if ($user === false)
+            throw new InvalidAuthenticationException("User registered under this email does not exist.",
+                "Try signing up");
         if ($user->getType() <= User::REGISTERED)
             throw new ActionConflictException("This user has already confirmed the registration");
         if ( sha1($user->getEmail() . $this->mailer['salt']) === $args['hash']) {
@@ -360,6 +364,39 @@ final class LoggedInUserController extends UserController
         $this->isAuthorized($request->getAttribute('oauth_user_id'));
         $myArgs = new ArgumentParser(['id' => $request->getAttribute('oauth_user_id')]);
         return parent::delete($request, $response, $myArgs);
+    }
+
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param ArgumentParser $args
+     * @return Response
+     * @throws InvalidAuthenticationException
+     * @throws MissingRequiredKeyException
+     * @throws UniqueKeyViolationException
+     * @throws \App\Exceptions\InvalidTypeException
+     * @throws \App\Exceptions\MalformedInputException
+     * @throws \App\Exceptions\NonExistingObjectException
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    public function resendCnfEmail(Request $request, Response $response, ArgumentParser $args): Response
+    {
+        $this->isAuthorized($request->getAttribute('oauth_user_id'));
+        /** @var User $authUser */
+        $authUser = $this->getObjectViaORM(User::class, $request->getAttribute('oauth_user_id'));
+        $mail = $authUser->getEmail();
+        $body = new ArgumentParser($request->getParsedBody());
+        if ($body->hasKey('email')){
+            $this->validate($body, $this->getValidator());
+            $mail = $body->getString('email');
+            $this->uniqueCheck('email', $mail);
+            $authUser->setEmail($mail);
+        }
+        $this->sendConfirmationMail($authUser->getEmail());
+        $this->orm->persist($authUser);
+        $this->orm->flush();
+        return self::formatOk($response, ['receiver' => $mail]);
     }
 
     /**

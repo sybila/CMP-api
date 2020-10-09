@@ -129,6 +129,8 @@ return function(App $app) {
         ->add(RouteHelper::$authMiddleware);
     $app->delete('/user', Ctl\LoggedInUserController::class . ':delete')
         ->add(RouteHelper::$authMiddleware);
+    $app->put('/user/resendConfirmation', Ctl\LoggedInUserController::class . ':resendCnfEmail')
+        ->add(RouteHelper::$authMiddleware);
 
 	// annotations
 	$app->get('/annotations/types', Ctl\AnnotationController::class . ':readTypes');

@@ -897,7 +897,35 @@ resourceTypes:
 /user:
   description: Returns detail on user depending on the Bearer access token
   type: {_object: {type: User}}
-
+  /resendConfirmation:
+    description: Resends account confirmation email depending on the Bearer access token, or according to the content in field "email" in POST body.
+    put:
+      description: Can leave the body empty {} to resend the email or change it to set the user email and resend anew.
+      body:
+        application/json:
+            properties:
+              email?: string
+            example: |
+              {
+              "email" : "example@provide.org"
+              }
+      responses:
+        200:
+          body:
+            application/json:
+              type: object
+              properties:
+                status: ResponseStatus
+                code: ResponseCode
+                data:
+                  properties:
+                    receiver: string
+        400:
+          description: when the json is malformed, or the email format is wrong.
+        401:
+          description: when Bearer token cannot be authorized
+        409:
+          description: when trying to change the email to email that is already registered on the platform.
 
 /userTypes:
   description: Types of user group roles endpoint

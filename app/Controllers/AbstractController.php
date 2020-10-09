@@ -36,7 +36,7 @@ abstract class AbstractController
 
 	protected static function formatError(Response $response, int $code, string $message, ...$args): Response
 	{
-		return $response->withStatus(400)->withJson([
+		return $response->withStatus($code)->withJson([
 			'status' => 'error',
 			'message' => sprintf($message, ...$args),
 			'code' => $code,
