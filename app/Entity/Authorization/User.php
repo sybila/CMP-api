@@ -66,7 +66,7 @@ class User implements UserEntityInterface, IdentifiedObject
 	private $accessTokens;
 
     /**
-     * @ORM\OneToOne(targetEntity="UserType")
+     * @ORM\OneToOne(targetEntity="UserType", mappedBy="tier")
      * @ORM\JoinColumn(name="type")
      */
 	private $type;
@@ -188,8 +188,9 @@ class User implements UserEntityInterface, IdentifiedObject
 	}
 
 
-	public function setType(int $type)
+	public function setType(UserType $type)
 	{
+
 		$this->type = $type;
 		return $this;
 	}

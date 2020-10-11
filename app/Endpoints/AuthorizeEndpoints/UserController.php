@@ -2,12 +2,11 @@
 
 namespace App\Controllers;
 
-use App\Entity\{
-	Authorization\User,
-	Authorization\UserGroup,
-	Authorization\UserGroupToUser,
-	IdentifiedObject
-};
+use App\Entity\{Authorization\User,
+    Authorization\UserGroup,
+    Authorization\UserGroupToUser,
+    Authorization\UserType,
+    IdentifiedObject};
 use Doctrine\Common\Collections\Criteria;
 use IAuthWritableRepositoryController;
 use League\OAuth2\Server\Exception\OAuthServerException;
@@ -88,7 +87,8 @@ class UserController extends WritableRepositoryController implements IAuthWritab
 		!$body->hasKey('password') ?: $user->setPasswordHash($user->hashPassword($body->getString('password')));
 		!$body->hasKey('name') ?: $user->setName($body->getString('name'));
 		!$body->hasKey('surname') ?: $user->setSurname($body->getString('surname'));
-		!$body->hasKey('type') ?: $this->adminCheck() && $user->setType($body->getString('type'));
+		!$body->hasKey('type') ?: $this->adminCheck() &&
+            $user->setType($this->getUserType($body->getString('type')));
 		!$body->hasKey('email') ?:  $this->uniqueCheck('email', $body->getString('email')) &&
             $user->setEmail($body->getString('email'));
 		!$body->hasKey('phone') ?: $user->setPhone($body->getString('phone'));
@@ -130,10 +130,17 @@ class UserController extends WritableRepositoryController implements IAuthWritab
         if ($user->getIsPublic() === null)
             throw new MissingRequiredKeyException('isPublic');
         //FIXME following lines should not be here
-        $user->setType(User::TEMPORARY);
+        $user->setType($this->getUserType(User::TEMPORARY));
         $this->sendConfirmationMail($user->getEmail());
         $this->setDefaultUserSpaceGroup($user);
 
+    }
+
+    protected function getUserType(int $tier)
+    {
+        /** @var UserType $ut */
+        $ut = $this->orm->getRepository(UserType::class)->findOneBy(['tier' => $tier]);
+	    return $ut;
     }
 
 
@@ -353,7 +360,7 @@ class UserController extends WritableRepositoryController implements IAuthWritab
         if ($user->getType() <= User::REGISTERED)
             throw new ActionConflictException("This user has already confirmed the registration");
         if ( sha1($user->getEmail() . $this->mailer['salt']) === $args['hash']) {
-            $user->setType(User::REGISTERED);
+            $user->setType($this->getUserType(User::REGISTERED));
             $this->orm->persist($user);
             $this->setDefaultUserSpaceGroup($user);
             $this->orm->flush();
