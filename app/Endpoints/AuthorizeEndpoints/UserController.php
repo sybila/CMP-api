@@ -357,7 +357,7 @@ class UserController extends WritableRepositoryController implements IAuthWritab
         if ($user === false)
             throw new InvalidAuthenticationException("User registered under this email does not exist.",
                 "Try signing up");
-        if ($user->getType() <= User::REGISTERED)
+        if ($user->getType()->getTier() <= User::REGISTERED)
             throw new ActionConflictException("This user has already confirmed the registration");
         if ( sha1($user->getEmail() . $this->mailer['salt']) === $args['hash']) {
             $user->setType($this->getUserType(User::REGISTERED));
