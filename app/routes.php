@@ -99,6 +99,7 @@ class RouteHelper
 			if ($this->authMask & self::LIST)
 				$route->add(self::$authMiddleware);
 		}
+
 	}
 
 }
@@ -352,4 +353,5 @@ return function(App $app) {
 
 	// classifications
 	$app->get('/classifications[/{type}]', Ctl\ClassificationController::class . ':read');
+
 };
