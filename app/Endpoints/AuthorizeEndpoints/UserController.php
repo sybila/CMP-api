@@ -67,6 +67,7 @@ class UserController extends WritableRepositoryController implements IAuthWritab
 			'username' => $user->getUsername(),
 			'name' => $user->getName(),
 			'surname' => $user->getSurname(),
+            'email' => $user->getEmail(),
 			'type' => [
 			    'id' => $user->getType()->getId(),
                 'tier' => $user->getType()->getTier(),
