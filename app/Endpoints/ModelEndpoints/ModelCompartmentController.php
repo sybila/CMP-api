@@ -2,7 +2,7 @@
 
 namespace App\Controllers;
 
-use IAuthWritableRepositoryController;
+use IGroupRoleAuthWritableController;
 use App\Entity\{Model,
     ModelCompartment,
     ModelSpecie,
@@ -26,7 +26,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @property-read ModelCompartmentRepository $repository
  * @method ModelCompartment getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
-final class ModelCompartmentController extends ParentedRepositoryController implements IAuthWritableRepositoryController
+final class ModelCompartmentController extends ParentedRepositoryController implements IGroupRoleAuthWritableController
 {
     use SBaseControllerCommonable;
 

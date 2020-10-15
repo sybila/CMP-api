@@ -4,7 +4,7 @@ namespace App\Controllers;
 
 use App\Exceptions\MissingRequiredKeyException;
 use App\Exceptions\WrongParentException;
-use IAuthWritableRepositoryController;
+use IGroupRoleAuthWritableController;
 use App\Entity\{IdentifiedObject,
     ModelFunction,
     ModelReaction,
@@ -22,7 +22,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @property-read ModelReactionRepository $repository
  * @method ModelFunction getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
-final class ModelFunctionController extends ParentedRepositoryController implements IAuthWritableRepositoryController
+final class ModelFunctionController extends ParentedRepositoryController implements IGroupRoleAuthWritableController
 {
 
     use SBaseControllerCommonable;

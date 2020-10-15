@@ -1,33 +1,32 @@
 <?php
 
-use App\Exceptions\InvalidRoleException;
-
 interface IGroupRoleAuthWritableController extends IGroupRoleAuthController
 {
-    /**
-     * Returns TRUE if the user can request
-     * the POST (../entities} method.
-     * THROWS InvalidRoleException otherwise.
-     * @return bool
-     * @throws InvalidRoleException
-     */
-    public function validateAdd(): bool;
 
     /**
-     * Returns TRUE if the user can request
-     * the DELETE (../entities/$ID} method.
-     * THROWS InvalidRoleException otherwise.
+     * Returns true if this user can POST on these endpoints.
+     * False otherwise
+     * @param int $role
+     * @param int $id
      * @return bool
-     * @throws InvalidRoleException
      */
-    public function validateDelete(): bool;
+    public function canAdd(int $role, int $id): bool;
 
     /**
-     * Returns TRUE if the user can request
-     * the PUT (../entities/$ID} method.
-     * THROWS InvalidRoleException otherwise.
+     * Returns true if this user can PUT on these endpoints.
+     * False otherwise
+     * @param int $role
+     * @param int $id
      * @return bool
-     * @throws InvalidRoleException
      */
-    public function validateEdit(): bool;
+    public function canEdit(int $role, int $id): bool;
+
+    /**
+     * Returns true if this user can DELETE these endpoints.
+     * False otherwise
+     * @param int $role
+     * @param int $id
+     * @return bool
+     */
+    public function canDelete(int $role, int $id): bool;
 }

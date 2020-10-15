@@ -13,7 +13,7 @@ use App\Repositories\Authorization\UserGroupRepository;
 use App\Exceptions\{DependentResourcesBoundException, InvalidAuthenticationException, MissingRequiredKeyException};
 use App\Helpers\ArgumentParser;
 use Doctrine\Common\Collections\Criteria;
-use IAuthWritableRepositoryController;
+use IGroupRoleAuthWritableController;
 use Slim\Container;
 use Slim\Http\{
 	Request,
@@ -25,7 +25,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @property-read UserGroupRepository $repository
  * @method IdentifiedObject getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
-final class UserGroupController extends WritableRepositoryController implements IAuthWritableRepositoryController
+final class UserGroupController extends WritableRepositoryController implements IGroupRoleAuthWritableController
 {
 
 	protected static function getAllowedSort(): array

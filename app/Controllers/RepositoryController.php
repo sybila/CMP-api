@@ -7,19 +7,20 @@ use App\Entity\IdentifiedObject;
 use App\Entity\Repositories\IEndpointRepository;
 use App\Exceptions\InternalErrorException;
 use App\Exceptions\InvalidArgumentException;
+use App\Exceptions\InvalidRoleException;
 use App\Exceptions\InvalidTypeException;
 use App\Exceptions\NonExistingObjectException;
 use App\Helpers\ArgumentParser;
 use Closure;
 use Doctrine\ORM\ORMException;
-use IAuthRepositoryController;
 use IGroupRoleAuthController;
+use IPlatformRoleAuthController;
 use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;
 
 abstract class RepositoryController extends AbstractController
-    implements IAuthRepositoryController, IGroupRoleAuthController
+    implements IGroupRoleAuthController, IPlatformRoleAuthController
 {
 
 	use SortableController, PageableController, DefaultControllerAccessible, FilterableController;
@@ -103,7 +104,8 @@ abstract class RepositoryController extends AbstractController
 	public function read(Request $request, Response $response, ArgumentParser $args)
 	{
 	    $this->runEvents($this->beforeRequest, $request, $response, $args);
-        $filter['accessFilter'] = $this->validateList();
+	    $this->permitUser([$this, 'validateList'], [$this, 'canList']);
+        $filter['accessFilter'] = $this->getAccessFilter($this->userPermissions['group_wise']);
         $filter['argFilter'] = static::getFilter($args);
         $numResults = $this->repository->getNumResults($filter);
         static::validateFilter($numResults, $filter['argFilter']);
@@ -124,9 +126,9 @@ abstract class RepositoryController extends AbstractController
 	public function readIdentified(Request $request, Response $response, ArgumentParser $args): Response
 	{
 		$this->runEvents($this->beforeRequest, $request, $response, $args);
+        $this->permitUser([$this, 'validateDetail'], [$this, 'canDetail']);
         $id = current($this->getReadIds($args));
         $ent = $this->getObject((int)$id);
-        $this->validateDetail();
         $data = static::getPaginationOnDetail($args, $this->getData($ent));
         //FIXME move this to some other controller, pageable would be the best
         if (array_key_exists('maxCount', $data)){
@@ -210,21 +212,46 @@ abstract class RepositoryController extends AbstractController
     }
 
     /**
-     * @return array additional collection filter,
+     * @param callable $authPlatformRoleCheck
+     * @param callable $authGroupRoleCheck
+     * @throws InvalidRoleException
+     */
+    protected function permitUser(callable $authPlatformRoleCheck, callable $authGroupRoleCheck): void
+    {
+        //Platform role is above the all of the permissions
+        if (call_user_func($authPlatformRoleCheck)){
+            return;
+        }
+        //But if platform role is not enought, check if the resource is not available via group
+        $groupId = $this->hasAccessToObject($this->userPermissions['group_wise']);
+        //If no group ID is returned, the resource is public
+        if ($groupId === null){
+            return;
+        }
+        //If the group ID is returned, check if the user has the group permission to perform the action
+        if (call_user_func($authGroupRoleCheck,
+            $this->userPermissions['group_wise'][$groupId], $this->userPermissions['user_id'])){
+            return;
+        }
+        throw new InvalidRoleException(debug_backtrace()[1]['function'],
+            $_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_URI']);
+    }
+
+    /**
+     * @return bool additional collection filter,
      * key (is group id of users groups) => value (is prepared for dql filter)
      * @throws InvalidArgumentException if user with non-existing role
      */
-    public function validateList(): ?array
+    public function validateList(): bool
     {
         switch ($this->userPermissions['platform_wise']){
             case User::ADMIN:
-                return [];
+                return true;
             case User::POWER:
             case User::REGISTERED:
             case User::TEMPORARY:
             case User::GUEST:
-                $this->hasAccessToObject($this->userPermissions['group_wise']);
-                return $this->getAccessFilter($this->userPermissions['group_wise']);
+                return false;
             default:
                 throw new InvalidArgumentException('user_type', $this->userPermissions['platform_wise'],
                     'This user type does not exist on the platform');
@@ -244,8 +271,7 @@ abstract class RepositoryController extends AbstractController
             case User::REGISTERED:
             case User::TEMPORARY:
             case User::GUEST:
-                $this->hasAccessToObject($this->userPermissions['group_wise']);
-                return true;
+                return false;
             default:
                 throw new InvalidArgumentException('user_type', $this->userPermissions['user_type'],
                     'This user type does not exist on the platform');

@@ -8,7 +8,7 @@ use App\Entity\{Authorization\User,
     Authorization\UserType,
     IdentifiedObject};
 use Doctrine\Common\Collections\Criteria;
-use IAuthWritableRepositoryController;
+use IGroupRoleAuthWritableController;
 use League\OAuth2\Server\Exception\OAuthServerException;
 use League\OAuth2\Server\Middleware\ResourceServerMiddleware;
 use League\OAuth2\Server\ResourceServer;
@@ -40,7 +40,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @property-read UserRepository $repository
  * @method User getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
-class UserController extends WritableRepositoryController implements IAuthWritableRepositoryController
+class UserController extends WritableRepositoryController implements IGroupRoleAuthWritableController
 {
 
 	/** @var string */

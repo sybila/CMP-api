@@ -15,7 +15,7 @@ use App\Exceptions\
 };
 use App\Helpers\ArgumentParser;
 use ExperimentEndpointAuthorizable;
-use IAuthWritableRepositoryController;
+use IGroupRoleAuthWritableController;
 use Slim\Container;
 use Slim\Http\{
 	Request, Response
@@ -26,7 +26,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @property-read ExperimentNoteRepository $repository
  * @method ExperimentNote getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
-final class ExperimentNoteController extends ParentedRepositoryController implements IAuthWritableRepositoryController
+final class ExperimentNoteController extends ParentedRepositoryController implements IGroupRoleAuthWritableController
 {
 
     use ExperimentEndpointAuthorizable;

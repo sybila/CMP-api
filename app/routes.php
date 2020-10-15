@@ -317,6 +317,7 @@ return function(App $app) {
 	// Units module
     (new RouteHelper)
         ->setRoute(Ctl\PhysicalQuantityController::class, '/physicalQuantities')
+        ->setAuthMask(true)
         ->register();
     (new RouteHelper)
         ->setRoute(Ctl\UnitController::class, '/physicalQuantities/{physicalQuantity-id:\\d+}/units')

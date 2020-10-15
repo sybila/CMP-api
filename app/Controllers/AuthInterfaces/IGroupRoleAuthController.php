@@ -1,26 +1,25 @@
 <?php
 
-use App\Exceptions\InvalidRoleException;
-
 interface IGroupRoleAuthController
 {
 
+    public function canList(int $role, int $id): bool;
+
+    public function canDetail(int $role, int $id): bool;
+
     /**
-     * Returns the array for filter.
-     * THROWS InvalidRoleException if user with non-existing role
+     * Check whether the user has access to the endpoint object. Check if user groups
+     * matches with the groups defined on the object on the root of the slim ROUTE.
+     * @param array $userGroups
+     * @return int|null
+     */
+    public function hasAccessToObject(array $userGroups): ?int;
+
+    /**
+     * Returns array with prepared DQL filter depending on access method applied on the resources.
+     * Applied when GET collection is triggered.
+     * @param array $userGroups
      * @return array|null
-     * @throws InvalidRoleException
      */
-    public function validateList(): ?array;
-
-    /**
-     * Returns TRUE if the user can request
-     * the GET (../entities/$ID} method.
-     * THROWS InvalidRoleException otherwise.
-     * @return bool
-     * @throws InvalidRoleException
-     */
-    public function validateDetail(): bool;
-
-
+    public function getAccessFilter(array $userGroups): ?array;
 }

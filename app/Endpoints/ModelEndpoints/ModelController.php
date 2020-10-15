@@ -21,7 +21,7 @@ use App\Exceptions\{DependentResourcesBoundException,
     InvalidRoleException,
     MissingRequiredKeyException};
 use App\Helpers\ArgumentParser;
-use IAuthWritableRepositoryController;
+use IGroupRoleAuthWritableController;
 use Slim\Http\{
 	Request, Response
 };
@@ -32,7 +32,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @property-read ModelRepository $repository
  * @method Model getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
-final class ModelController extends WritableRepositoryController implements IAuthWritableRepositoryController
+final class ModelController extends WritableRepositoryController implements IGroupRoleAuthWritableController
 {
     use SBaseControllerCommonable;
 

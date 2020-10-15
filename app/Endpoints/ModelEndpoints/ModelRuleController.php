@@ -10,7 +10,7 @@ use App\Entity\{Entity,
     Repositories\IEndpointRepository,
     Repositories\ModelRepository,
     Repositories\ModelRuleRepository};
-use IAuthWritableRepositoryController;
+use IGroupRoleAuthWritableController;
 use App\Exceptions\{InvalidArgumentException, MissingRequiredKeyException, WrongParentException};
 use App\Helpers\ArgumentParser;
 use SBaseControllerCommonable;
@@ -24,7 +24,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @property-read ModelRuleRepository $repository
  * @method Entity getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
-abstract class ModelRuleController extends ParentedRepositoryController implements IAuthWritableRepositoryController
+abstract class ModelRuleController extends ParentedRepositoryController implements IGroupRoleAuthWritableController
 {
 
     use SBaseControllerCommonable;

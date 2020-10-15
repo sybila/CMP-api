@@ -4,16 +4,12 @@ namespace App\Controllers;
 
 use App\Entity\Authorization\User;
 use App\Entity\IdentifiedObject;
-use App\Exceptions\InternalErrorException;
 use App\Exceptions\InvalidArgumentException;
-use App\Exceptions\InvalidAuthenticationException;
 use App\Exceptions\InvalidRoleException;
 use App\Exceptions\InvalidTypeException;
-use App\Exceptions\MalformedInputException;
-use App\Exceptions\NonExistingObjectException;
 use App\Helpers\ArgumentParser;
-use Doctrine\ORM\ORMException;
 use IGroupRoleAuthWritableController;
+use IPlatformRoleAuthWritableController;
 use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;
@@ -21,7 +17,8 @@ use stdClass;
 use Symfony\Component\Validator\Constraints as Assert;
 use App\Exceptions\MissingRequiredKeyException;
 
-abstract class WritableRepositoryController extends RepositoryController implements IGroupRoleAuthWritableController
+abstract class WritableRepositoryController extends RepositoryController
+    implements IGroupRoleAuthWritableController, IPlatformRoleAuthWritableController
 {
 
 	use ValidatedController;
@@ -80,16 +77,27 @@ abstract class WritableRepositoryController extends RepositoryController impleme
 	 */
 	abstract protected function checkInsertObject(IdentifiedObject $object): void;
 
-
+    /**
+     * @param ArgumentParser $args
+     * @return int
+     * @throws InvalidTypeException
+     */
 	protected function getModifyId(ArgumentParser $args): int
 	{
 		return $args->getInt('id');
 	}
 
-
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param ArgumentParser $args
+     * @return Response
+     * @throws mixed
+     */
 	public function add(Request $request, Response $response, ArgumentParser $args): Response
 	{
 		$this->runEvents($this->beforeRequest, $request, $response, $args);
+		$this->permitUser([$this, 'validateAdd'], [$this, 'canAdd']);
         $this->validateAdd();
 		$body = new ArgumentParser($request->getParsedBody());
 		$this->validate($body, $this->getValidator());
@@ -111,17 +119,12 @@ abstract class WritableRepositoryController extends RepositoryController impleme
      * @param Response $response
      * @param ArgumentParser $args
      * @return Response
-     * @throws InternalErrorException
-     * @throws InvalidArgumentException
-     * @throws InvalidRoleException
-     * @throws InvalidTypeException
-     * @throws NonExistingObjectException
-     * @throws ORMException
-     * @throws MalformedInputException
+     * @throws mixed
      */
 	public function edit(Request $request, Response $response, ArgumentParser $args): Response
 	{
 		$this->runEvents($this->beforeRequest, $request, $response, $args);
+        $this->permitUser([$this, 'validateEdit'], [$this, 'canEdit']);
 		$object = $this->getObject($this->getModifyId($args));
         $this->validateEdit();
 		$body = new ArgumentParser($request->getParsedBody());
@@ -140,15 +143,12 @@ abstract class WritableRepositoryController extends RepositoryController impleme
      * @param Response $response
      * @param ArgumentParser $args
      * @return Response
-     * @throws InternalErrorException
-     * @throws InvalidArgumentException
-     * @throws InvalidRoleException
-     * @throws NonExistingObjectException
-     * @throws ORMException
+     * @throws mixed
      */
 	public function delete(Request $request, Response $response, ArgumentParser $args): Response
 	{
 		$this->runEvents($this->beforeRequest, $request, $response, $args);
+        $this->permitUser([$this, 'validateDelete'], [$this, 'canDelete']);
 		$entity = $this->getObject($this->getModifyId($args));
         $this->validateDelete();
 		$this->runEvents($this->beforeDelete, $entity);
@@ -189,19 +189,10 @@ abstract class WritableRepositoryController extends RepositoryController impleme
                 return true;
             case User::POWER:
             case User::REGISTERED:
-                $user_group = $this->hasAccessToObject($this->userPermissions['group_wise']);
-                if(!is_null($user_group) &&
-                    !$this->canAdd($this->userPermissions['group_wise'][$user_group], $this->userPermissions['user_id']))
-                {
-                    throw new InvalidRoleException("add $user_group", 'POST',
-                        $_SERVER['REQUEST_URI']);
-                }
-                return true;
+                return false;
             case User::TEMPORARY:
             case User::GUEST:
-                if(!$this->canAdd($this->userPermissions['group_wise'][1], $this->userPermissions['user_id']))
-                    throw new InvalidRoleException('add', 'POST', $_SERVER['REQUEST_URI']);
-                return true;
+                throw new InvalidRoleException('add', 'POST', $_SERVER['REDIRECT_URL']);
             default:
                 throw new InvalidArgumentException('user_type', $this->userPermissions['user_type'],
                     'This user type does not exist on the platform');
@@ -220,13 +211,7 @@ abstract class WritableRepositoryController extends RepositoryController impleme
                 return true;
             case User::POWER:
             case User::REGISTERED:
-                $user_group = $this->hasAccessToObject($this->userPermissions['group_wise']);
-                if (!$this->canEdit($this->userPermissions['group_wise'][$user_group],
-                    $this->userPermissions['user_id'])) {
-                    throw new InvalidRoleException('edit', 'PUT',
-                        $_SERVER['REDIRECT_URL']);
-                }
-                return true;
+                return false;
             case User::TEMPORARY:
             case User::GUEST:
                 throw new InvalidRoleException('edit', 'PUT', $_SERVER['REDIRECT_URL']);
@@ -248,13 +233,7 @@ abstract class WritableRepositoryController extends RepositoryController impleme
                 return true;
             case User::POWER:
             case User::REGISTERED:
-                $user_group = $this->hasAccessToObject($this->userPermissions['group_wise']);
-                if (!$this->canDelete($this->userPermissions['group_wise'][$user_group],
-                    $this->userPermissions['user_id'])) {
-                    throw new InvalidRoleException('delete', 'DELETE',
-                        $_SERVER['REDIRECT_URL']);
-                }
-                return true;
+                return false;
             case User::TEMPORARY:
             case User::GUEST:
                 throw new InvalidRoleException('delete', 'DELETE', $_SERVER['REDIRECT_URL']);

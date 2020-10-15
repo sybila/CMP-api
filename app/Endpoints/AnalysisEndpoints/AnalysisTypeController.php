@@ -37,7 +37,7 @@ class AnalysisTypeController extends WritableRepositoryController
 
     protected static function getAlias(): string
     {
-        return 'at';
+        return self::getRepositoryClassName();
     }
 
     protected static function getAllowedSort(): array

@@ -20,6 +20,7 @@ trait FilterableController
      */
     protected static function getFilter(ArgumentParser $args): array
     {
+        static::getRepositoryClassName();
         $filter = [];
         $alias = static::getAlias();
         if ($args->hasKey('filter'))
