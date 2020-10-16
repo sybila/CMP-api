@@ -2,7 +2,7 @@
 
 namespace App\Controllers;
 
-use App\Entity\{Bioquantity,
+use App\Entity\{
     Device,
     Experiment,
     IdentifiedObject,
@@ -21,7 +21,7 @@ use Slim\Http\{
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * @property-read Repository $repository
+ * @property-read DeviceRepository $repository
  * @method Device getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
 final class DeviceController extends WritableRepositoryController
@@ -56,6 +56,7 @@ final class DeviceController extends WritableRepositoryController
                 })->toArray(),
             ];
         }
+        else return [];
     }
 
     protected function setData(IdentifiedObject $device, ArgumentParser $data): void
@@ -84,7 +85,6 @@ final class DeviceController extends WritableRepositoryController
 
     public function delete(Request $request, Response $response, ArgumentParser $args): Response
     {
-        /** @var Device $device */
         $device = $this->getObject($args->getInt('id'));
         if (!$device->getExperiments()->isEmpty())
             throw new DependentResourcesBoundException('experiments');

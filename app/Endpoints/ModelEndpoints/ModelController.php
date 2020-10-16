@@ -17,7 +17,6 @@ use App\Entity\{Authorization\User,
     Repositories\IEndpointRepository,
     Repositories\ModelRepository};
 use App\Exceptions\{DependentResourcesBoundException,
-    InvalidAuthenticationException,
     InvalidRoleException,
     MissingRequiredKeyException};
 use App\Helpers\ArgumentParser;
@@ -132,7 +131,6 @@ final class ModelController extends WritableRepositoryController implements IGro
 
 	public function delete(Request $request, Response $response, ArgumentParser $args): Response
 	{
-		/** @var Model $model */
 		$model = $this->getObject($args->getInt('id'));
 		if (!$model->getCompartments()->isEmpty())
 			throw new DependentResourcesBoundException('compartment');

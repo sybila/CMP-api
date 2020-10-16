@@ -10,11 +10,10 @@ use App\Entity\{
 };
 use App\Entity\Repositories\IEndpointRepository;
 use App\Repositories\Authorization\UserGroupRepository;
-use App\Exceptions\{DependentResourcesBoundException, InvalidAuthenticationException, MissingRequiredKeyException};
+use App\Exceptions\{InvalidAuthenticationException, NonExistingObjectException};
 use App\Helpers\ArgumentParser;
 use Doctrine\Common\Collections\Criteria;
 use IGroupRoleAuthWritableController;
-use Slim\Container;
 use Slim\Http\{
 	Request,
 	Response
@@ -105,6 +104,12 @@ final class UserGroupController extends WritableRepositoryController implements 
         return 'g';
     }
 
+    /**
+     * @param array $userGroups
+     * @return int|null
+     * @throws InvalidAuthenticationException
+     * @throws NonExistingObjectException
+     */
     public function hasAccessToObject(array $userGroups): ?int
     {
         $rootRouteParent = self::getRootParent();

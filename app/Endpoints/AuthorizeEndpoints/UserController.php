@@ -8,19 +8,15 @@ use App\Entity\{Authorization\User,
     Authorization\UserType,
     IdentifiedObject};
 use Doctrine\Common\Collections\Criteria;
+use Doctrine\ORM\ORMException;
 use IGroupRoleAuthWritableController;
-use League\OAuth2\Server\Exception\OAuthServerException;
-use League\OAuth2\Server\Middleware\ResourceServerMiddleware;
-use League\OAuth2\Server\ResourceServer;
-use stdClass;
+use IPlatformRoleAuthWritableController;
 use Symfony\Component\Mailer\Exception\InvalidArgumentException;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\Mailer;
 use App\Entity\Repositories\IEndpointRepository;
 use App\Repositories\Authorization\UserRepository;
 use App\Exceptions\{ActionConflictException,
-    DependentResourcesBoundException,
-    InternalErrorException,
     InvalidAuthenticationException,
     InvalidRoleException,
     MissingRequiredKeyException,
@@ -40,7 +36,8 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @property-read UserRepository $repository
  * @method User getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
-class UserController extends WritableRepositoryController implements IGroupRoleAuthWritableController
+class UserController extends WritableRepositoryController
+    implements IPlatformRoleAuthWritableController, IGroupRoleAuthWritableController
 {
 
 	/** @var string */
@@ -79,7 +76,11 @@ class UserController extends WritableRepositoryController implements IGroupRoleA
 		];
 	}
 
-
+    /**
+     * @inheritDoc
+     * @throws InvalidRoleException
+     * @throws UniqueKeyViolationException
+     */
 	protected function setData(IdentifiedObject $user, ArgumentParser $body): void
 	{
 		/** @var User $user */
@@ -97,13 +98,27 @@ class UserController extends WritableRepositoryController implements IGroupRoleA
         //!$body->hasKey('groups') ?: $user->setGroups($body->getString('groups'));
 	}
 
-	protected function uniqueCheck(string $attribute, string $value) {
+    /**
+     * Check if the $attribute with $value is not already used by another user.
+     * @param string $attribute
+     * @param string $value
+     * @return bool
+     * @throws UniqueKeyViolationException
+     */
+	protected function uniqueCheck(string $attribute, string $value): bool
+    {
         if (!$this->orm->getRepository(User::class)->findBy([$attribute => $value]) == null)
             throw new UniqueKeyViolationException($attribute,null, 'user');
         return true;
     }
 
-    protected function adminCheck() {
+    /**
+     * Some attributes of the user can be changed only by admin user.
+     * @return bool
+     * @throws InvalidRoleException
+     */
+    protected function adminCheck(): bool
+    {
 	    if ($this->userPermissions['platform_wise'] != User::ADMIN) {
 	        throw new InvalidRoleException('Admin permissions are needed. Cannot change user type ',
                 'PUT', $_SERVER['REQUEST_URI']);
@@ -186,6 +201,14 @@ class UserController extends WritableRepositoryController implements IGroupRoleA
         return 'u';
     }
 
+    /**
+     * ROUTE: Start the mechanism to change the password.
+     * @param Request $request
+     * @param Response $response
+     * @param ArgumentParser $args
+     * @return Response
+     * @throws mixed
+     */
     public function getNewPsw (Request $request, Response $response, ArgumentParser $args): Response
     {
         $body = new ArgumentParser($request->getParsedBody());
@@ -206,6 +229,14 @@ class UserController extends WritableRepositoryController implements IGroupRoleA
         else throw new MissingRequiredKeyException('email');
     }
 
+    /**
+     * ROUTE: Generate new password.
+     * @param Request $request
+     * @param Response $response
+     * @param ArgumentParser $args
+     * @return Response
+     * @throws mixed
+     */
     public function generateNewPsw (Request $request, Response $response, ArgumentParser $args): Response
     {
         $body = new ArgumentParser($request->getParsedBody());
@@ -349,6 +380,14 @@ class UserController extends WritableRepositoryController implements IGroupRoleA
         }
     }
 
+    /**
+     * ROUTE: Confirm user, basically change the type from 4 to 3. And create own group for the user.
+     * @param Request $request
+     * @param Response $response
+     * @param ArgumentParser $args
+     * @return Response
+     * @throws mixed
+     */
     public function confirmRegistration(Request $request, Response $response, ArgumentParser $args): Response
     {
         $users = $this->orm->getRepository(User::class)->findBy(['email' => $args['email']]);
@@ -370,6 +409,10 @@ class UserController extends WritableRepositoryController implements IGroupRoleA
         else throw new ActionConflictException('Confirmation link is malformed');
     }
 
+    /**
+     * @param User $user
+     * @throws ORMException
+     */
     protected function setDefaultUserSpaceGroup(User $user)
     {
         $mySpace = new UserGroup();
@@ -386,6 +429,20 @@ class UserController extends WritableRepositoryController implements IGroupRoleA
         $this->orm->persist($linkToMySpace);
     }
 
+    public function validateAdd(): bool
+    {
+        switch ($this->userPermissions['platform_wise']) {
+            case User::ADMIN:
+            case User::POWER:
+            case User::REGISTERED:
+            case User::TEMPORARY:
+            case User::GUEST:
+                return true;
+            default:
+                throw new \App\Exceptions\InvalidArgumentException('user_type', $this->userPermissions['user_type'],
+                    'This user type does not exist on the platform');
+        }
+    }
 }
 
 final class LoggedInUserController extends UserController
@@ -425,6 +482,7 @@ final class LoggedInUserController extends UserController
     }
 
     /**
+     * ROUTE: If user did not get the first confirmation mail.
      * @param Request $request
      * @param Response $response
      * @param ArgumentParser $args
@@ -449,7 +507,6 @@ final class LoggedInUserController extends UserController
         $this->orm->flush();
         return self::formatOk($response, ['receiver' => $mail]);
     }
-
 
     /**
      * @param int|null $id

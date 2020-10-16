@@ -6,11 +6,9 @@ use App\Entity\{Experiment,
     ExperimentNote,
     IdentifiedObject,
     Repositories\IEndpointRepository,
-    Repositories\ExperimentRepository,
     Repositories\ExperimentNoteRepository};
 use App\Exceptions\
 {
-	DependentResourcesBoundException,
 	MissingRequiredKeyException
 };
 use App\Helpers\ArgumentParser;
@@ -78,7 +76,6 @@ final class ExperimentNoteController extends ParentedRepositoryController implem
 
 	public function delete(Request $request, Response $response, ArgumentParser $args): Response
 	{
-		/** @var ExperimentNote $note */
 		$note = $this->getObject($args->getInt('id'));
 		return parent::delete($request, $response, $args);
 	}

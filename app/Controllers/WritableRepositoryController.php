@@ -177,7 +177,11 @@ abstract class WritableRepositoryController extends RepositoryController
 
 	abstract protected function getValidator(): Assert\Collection;
 
+
     /**
+     * Return TRUE if platform role can do this action without any restrictions.
+     * Return FALSE if other authorization is needed (group, group roles...)
+     * Throw InvalidRoleException if this action is PROHIBITED for the user with his current platform roles.
      * @return bool
      * @throws InvalidArgumentException
      * @throws InvalidRoleException

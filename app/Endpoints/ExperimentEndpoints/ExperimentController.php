@@ -2,7 +2,7 @@
 
 namespace App\Controllers;
 
-use App\Entity\{Authorization\User,
+use App\Entity\{
     Experiment,
     IdentifiedObject,
     ExperimentVariable,
@@ -10,15 +10,14 @@ use App\Entity\{Authorization\User,
     Device,
     Model,
     Repositories\DeviceRepository,
-    Repositories\ExperimentVariableRepository,
     Repositories\IEndpointRepository,
     Repositories\ExperimentRepository,
     Repositories\ModelRepository,
     Repositories\OrganismRepository};
-use App\Exceptions\{
-	DependentResourcesBoundException,
-	MissingRequiredKeyException
-};
+use App\Exceptions\{InternalErrorException,
+    InvalidTypeException,
+    MissingRequiredKeyException,
+    NonExistingObjectException};
 use App\Helpers\ArgumentParser;
 use ExperimentEndpointAuthorizable;
 use IGroupRoleAuthWritableController;
@@ -30,7 +29,7 @@ use Symfony\Component\Finder\Exception\AccessDeniedException;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * @property-read Repository $repository
+ * @property-read ExperimentRepository $repository
  * @method Experiment getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
 final class ExperimentController extends WritableRepositoryController implements IGroupRoleAuthWritableController
@@ -78,6 +77,7 @@ final class ExperimentController extends WritableRepositoryController implements
                 'inserted' => $experiment->getInserted(),
                 'started' => $experiment->getStarted(),
                 'status' => (string)$experiment->getStatus(),
+                //FIXME
                 'organism' => $experiment->getOrganismId()!= null ? OrganismController::getData($experiment->getOrganismId()):null,
                 'variables' => $experiment->getVariables()->map(function (ExperimentVariable $variable) {
                     return ['id' => $variable->getId(), 'name' => $variable->getName(), 'code' => $variable->getCode(), 'type' => $variable->getType()];
@@ -99,6 +99,7 @@ final class ExperimentController extends WritableRepositoryController implements
                 })->toArray(),
             ];
         }
+		else return [];
 	}
 
 	protected function setData(IdentifiedObject $experiment, ArgumentParser $data): void
@@ -148,7 +149,6 @@ final class ExperimentController extends WritableRepositoryController implements
 
 	public function delete(Request $request, Response $response, ArgumentParser $args): Response
 	{
-		/** @var Experiment $experiment */
 		$experiment = $this->getObject($args->getInt('id'));
 		if (!$experiment->getVariables()->isEmpty())
 		    $experiment->getVariables()->clear();
@@ -157,9 +157,17 @@ final class ExperimentController extends WritableRepositoryController implements
 		return parent::delete($request, $response, $args);
 	}
 
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param ArgumentParser $args
+     * @return Response
+     * @throws InternalErrorException
+     * @throws InvalidTypeException
+     * @throws NonExistingObjectException
+     */
     public function deleteData(Request $request, Response $response, ArgumentParser $args): Response
     {
-        /** @var Experiment $experiment */
         $experiment = $this->getObject($args->getInt('exp-id'));
         $vars = array();
         if (!$experiment->getVariables()->isEmpty())

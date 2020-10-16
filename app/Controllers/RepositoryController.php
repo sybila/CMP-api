@@ -7,6 +7,7 @@ use App\Entity\IdentifiedObject;
 use App\Entity\Repositories\IEndpointRepository;
 use App\Exceptions\InternalErrorException;
 use App\Exceptions\InvalidArgumentException;
+use App\Exceptions\InvalidAuthenticationException;
 use App\Exceptions\InvalidRoleException;
 use App\Exceptions\InvalidTypeException;
 use App\Exceptions\NonExistingObjectException;
@@ -212,9 +213,13 @@ abstract class RepositoryController extends AbstractController
     }
 
     /**
+     * Return (void) if permission is granted.
+     * Throw an exception otherwise.
      * @param callable $authPlatformRoleCheck
      * @param callable $authGroupRoleCheck
      * @throws InvalidRoleException
+     * @throws NonExistingObjectException
+     * @throws InvalidAuthenticationException
      */
     protected function permitUser(callable $authPlatformRoleCheck, callable $authGroupRoleCheck): void
     {

@@ -29,12 +29,12 @@ trait DefaultControllerAccessible
         return null;
     }
 
-    public function canList(int $role, int $id): bool
+    public function canList(?int $role, ?int $id): bool
     {
         return true;
     }
 
-    public function canDetail(int $role, int $id): bool
+    public function canDetail(?int $role, ?int $id): bool
     {
         return true;
     }

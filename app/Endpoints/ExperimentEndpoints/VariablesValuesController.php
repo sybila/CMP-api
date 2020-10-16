@@ -3,32 +3,19 @@
 namespace App\Controllers;
 
 use App\Entity\{Experiment,
-    ExperimentModels,
+    //ExperimentModels,
     ExperimentValues,
     IdentifiedObject,
     ExperimentVariable,
-    ExperimentRelation,
-    ExperimentDevice,
-    ExperimentNote,
-    Device,
-    Organism,
+    //ExperimentRelation,
+    //ExperimentDevice,
     Repositories\IEndpointRepository,
-    Repositories\ExperimentRepository,
-    Repositories\ModelRepository};
-use App\Exceptions\{
-	DependentResourcesBoundException,
-	MissingRequiredKeyException
-};
-use App\Helpers\ArgumentParser;
+    Repositories\ExperimentRepository};
 use ExperimentEndpointAuthorizable;
 use Slim\Container;
-use Slim\Http\{
-	Request, Response
-};
-use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * @property-read Repository $repository
+ * @property-read ExperimentRepository $repository
  * @method Experiment getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
 final class VariablesValuesController extends RepositoryController
@@ -71,6 +58,7 @@ final class VariablesValuesController extends RepositoryController
                 })->toArray(),
             ];
         }
+		return [];
 	}
 
 	protected static function getObjectName(): string
