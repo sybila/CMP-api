@@ -102,10 +102,6 @@ final class ExperimentNoteController extends ParentedRepositoryController implem
 	    return new ParentObjectInfo('experiment-id', Experiment::class);
 	}
 
-    protected static function getAlias(): string
-    {
-        return 'n';
-    }
 
     protected function checkParentValidity(IdentifiedObject $parent, IdentifiedObject $child)
     {

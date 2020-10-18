@@ -9,6 +9,7 @@ use Doctrine\ORM\QueryBuilder;
 
 class ModelRepository implements IEndpointRepository
 {
+    use QueryRepositoryHelper;
 
 	/** @var EntityManager * */
 	protected $em;
@@ -27,6 +28,11 @@ class ModelRepository implements IEndpointRepository
 		return $this->em->find(Model::class, $id);
 	}
 
+    protected static function alias(): string
+    {
+        return 'm';
+    }
+
 	public function getNumResults(array $filter): int
 	{
 		return ((int)$this->buildListQuery($filter)
@@ -39,8 +45,8 @@ class ModelRepository implements IEndpointRepository
 	{
 		$query = $this->buildListQuery($filter)
 			->select('m.id, m.name, m.sbmlId, m.sboTerm, m.notes, m.annotation, m.userId, m.approvedId, m.status');
-        $query = QueryRepositoryHelper::addPaginationSortDql($query, $sort, $limit);
-
+        $query = $this->addPagingDql($query, $limit);
+        $query = $this->addSortDql($query, $sort);
 		return $query->getQuery()->getArrayResult();
 	}
 
@@ -48,7 +54,7 @@ class ModelRepository implements IEndpointRepository
 	{
 		$query = $this->em->createQueryBuilder()
 			->from(Model::class, 'm');
-		$query = QueryRepositoryHelper::addFilterDql($query, $filter);
+		$query = $this->addFilterDql($query, $filter);
 		return $query;
 	}
 

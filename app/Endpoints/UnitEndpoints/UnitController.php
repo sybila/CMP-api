@@ -129,11 +129,6 @@ final class UnitController extends ParentedRepositoryController
 		return ['physicalQuantity-id', 'physicalQuantity'];
 	}
 
-    protected static function getAlias(): string
-    {
-        return 'u';
-    }
-
     protected function checkParentValidity(IdentifiedObject $parent, IdentifiedObject $child)
     {
         // TODO: Implement checkParentValidity() method.

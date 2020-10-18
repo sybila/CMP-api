@@ -43,7 +43,10 @@ trait ExperimentEndpointAuthorizable
 
     public function getAccessFilter(array $userGroups): ?array
     {
-        $dql = static::getAlias() . ".groupId";
+        if ($this->userPermissions['platform_wise'] == User::ADMIN){
+            return [];
+        }
+        $dql = "e.groupId";
         return array_map(function () use ($dql) { return $dql; }, $userGroups);
     }
 

@@ -34,10 +34,6 @@ class AnalysisMethodController extends WritableRepositoryController
         ]);
     }
 
-    protected static function getAlias(): string
-    {
-        return 'at';
-    }
 
     protected static function getAllowedSort(): array
     {

@@ -11,6 +11,8 @@ use Doctrine\ORM\QueryBuilder;
 
 class ModelRuleRepository implements IDependentEndpointRepository
 {
+    use QueryRepositoryHelper;
+
 	/** @var EntityManager * */
 	protected $em;
 
@@ -36,6 +38,11 @@ class ModelRuleRepository implements IDependentEndpointRepository
 		return $this->em->find(ModelRule::class, $id);
 	}
 
+    protected static function alias(): string
+    {
+        return 'r';
+    }
+
 	public function getNumResults(array $filter): int
 	{
 		return ((int)$this->buildListQuery($filter)
@@ -48,8 +55,8 @@ class ModelRuleRepository implements IDependentEndpointRepository
 	{
 		$query = $this->buildListQuery($filter)
 			->select('r.id, r.modelId');
-        $query = QueryRepositoryHelper::addPaginationSortDql($query, $sort, $limit);
-
+        $query = $this->addPagingDql($query, $limit);
+        $query = $this->addSortDql($query, $sort);
 		return $query->getQuery()->getArrayResult();
 	}
 
@@ -69,7 +76,7 @@ class ModelRuleRepository implements IDependentEndpointRepository
 			->from(ModelRule::class, 'r')
 			->where('r.modelId = :modelId')
 			->setParameter('modelId', $this->object->getId());
-        $query = QueryRepositoryHelper::addFilterDql($query, $filter);
+        $query = $this->addFilterDql($query, $filter);
 		return $query;
 	}
 

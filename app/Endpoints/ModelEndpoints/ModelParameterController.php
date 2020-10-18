@@ -34,11 +34,6 @@ abstract class ModelParameterController extends ParentedRepositoryController
 
     use SBaseControllerCommonable;
 
-    protected static function getAlias(): string
-    {
-        return 'p';
-    }
-
 	protected static function getAllowedSort(): array
 	{
 		return ['id, name'];

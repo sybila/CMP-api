@@ -52,10 +52,6 @@ final class PhysicalQuantityController extends WritableRepositoryController
 		$this->physicalQuantityRepository = $c->get(PhysicalQuantityRepository::class);
 	}
 
-    protected static function getAlias(): string
-    {
-        return 'q';
-    }
 
 	protected static function getAllowedSort(): array
 	{

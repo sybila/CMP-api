@@ -109,9 +109,4 @@ class BionumberController extends WritableRepositoryController
 	}
 
 
-	protected static function getAlias(): string
-	{
-		return 'b';
-	}
-
 }

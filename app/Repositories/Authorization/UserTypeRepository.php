@@ -4,6 +4,7 @@ namespace App\Repositories\Authorization;
 
 use App\Entity\Authorization\UserType;
 use App\Entity\Repositories\IEndpointRepository;
+use App\Helpers\QueryRepositoryHelper;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Common\Persistence\ObjectRepository;
 use Doctrine\ORM\EntityManager;
@@ -11,6 +12,7 @@ use League\OAuth2\Server\Entities\ClientEntityInterface;
 
 class UserTypeRepository implements IEndpointRepository
 {
+    use QueryRepositoryHelper;
 
 	/** @var EntityManager */
 	private $em;
@@ -28,6 +30,10 @@ class UserTypeRepository implements IEndpointRepository
 		$this->userTypeRepository = $em->getRepository(UserType::class);
 	}
 
+    protected static function alias(): string
+    {
+        return 'ut';
+    }
 
 	public function getById(int $id): ?UserType
 	{
@@ -45,6 +51,8 @@ class UserTypeRepository implements IEndpointRepository
 	{
 		$query = $this->buildListQuery($filter)
 			->select('ut.id, ut.tier, ut.name');
+        $query = $this->addPagingDql($query, $limit);
+        $query = $this->addSortDql($query, $sort);
 		return $query->getQuery()->getArrayResult();
 	}
 

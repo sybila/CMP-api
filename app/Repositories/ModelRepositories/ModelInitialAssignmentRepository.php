@@ -11,6 +11,8 @@ use Doctrine\ORM\QueryBuilder;
 
 class ModelInitialAssignmentRepository implements IDependentEndpointRepository
 {
+    use QueryRepositoryHelper;
+
 	/** @var EntityManager * */
 	protected $em;
 
@@ -36,6 +38,11 @@ class ModelInitialAssignmentRepository implements IDependentEndpointRepository
 		return $this->em->find(ModelInitialAssignment::class, $id);
 	}
 
+    protected static function alias(): string
+    {
+        return 'i';
+    }
+
 	public function getNumResults(array $filter): int
 	{
 		return ((int)$this->buildListQuery($filter)
@@ -48,8 +55,8 @@ class ModelInitialAssignmentRepository implements IDependentEndpointRepository
 	{
 		$query = $this->buildListQuery($filter)
 			->select('i.id, i.name, i.sbmlId, i.sboTerm, i.notes, i.annotation, i.formula');
-        $query = QueryRepositoryHelper::addPaginationSortDql($query, $sort, $limit);
-
+        $query = $this->addPagingDql($query, $limit);
+        $query = $this->addSortDql($query, $sort);
 		return $query->getQuery()->getArrayResult();
 	}
 
@@ -72,7 +79,7 @@ class ModelInitialAssignmentRepository implements IDependentEndpointRepository
 			->from(ModelInitialAssignment::class, 'i')
 			->where('i.modelId = :modelId')
 			->setParameter('modelId', $this->object->getId());
-        $query = QueryRepositoryHelper::addFilterDql($query, $filter);
+        $query = $this->addFilterDql($query, $filter);
 		return $query;
 	}
 

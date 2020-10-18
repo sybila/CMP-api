@@ -58,11 +58,6 @@ class AnalysisTaskController extends ParentedRepositoryController
         ]);
     }
 
-    protected static function getAlias(): string
-    {
-        return 'at';
-    }
-
     protected static function getAllowedSort(): array
     {
         return ['id', 'name'];

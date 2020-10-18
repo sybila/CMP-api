@@ -16,6 +16,9 @@ use Doctrine\ORM\QueryBuilder;
 
 class AnalysisTaskRepository implements IDependentEndpointRepository
 {
+
+    use QueryRepositoryHelper;
+
     /** @var EntityManager * */
     protected $em;
 
@@ -29,6 +32,11 @@ class AnalysisTaskRepository implements IDependentEndpointRepository
     {
         $this->em = $em;
         $this->repository = $em->getRepository(AnalysisTask::class);
+    }
+
+    protected static function alias(): string
+    {
+        return 'at';
     }
 
     public function get(int $id)
@@ -50,7 +58,8 @@ class AnalysisTaskRepository implements IDependentEndpointRepository
             ->select('at.id, at.name, at.description, at.annotation, 
             at.userId, at.objectType, at.objectId, IDENTITY(at.method) as methodId'
             );
-        $query = QueryRepositoryHelper::addPaginationSortDql($query, $sort, $limit);
+        $query = $this->addPagingDql($query, $limit);
+        $query = $this->addSortDql($query, $sort);
         return $query->getQuery()->getArrayResult();
     }
 
@@ -64,7 +73,7 @@ class AnalysisTaskRepository implements IDependentEndpointRepository
                 new Parameter('objectId', $this->parentObject->getId()),
                 new Parameter('type',$this->getParentType())
             ]));
-        $query = QueryRepositoryHelper::addFilterDql($query, $filter);
+        $query = $this->addFilterDql($query, $filter);
         return $query;
     }
 

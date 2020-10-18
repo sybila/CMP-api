@@ -11,6 +11,8 @@ use Doctrine\ORM\QueryBuilder;
 
 class UnitRepository implements IDependentSBaseRepository
 {
+    use QueryRepositoryHelper;
+
 	/** @var EntityManager * */
 	protected $em;
 
@@ -36,6 +38,11 @@ class UnitRepository implements IDependentSBaseRepository
 		return $this->em->find(Unit::class, $id);
 	}
 
+    protected static function alias(): string
+    {
+        return 'u';
+    }
+
 	public function getNumResults(array $filter): int
 	{
 		return ((int)$this->buildListQuery($filter)
@@ -48,7 +55,8 @@ class UnitRepository implements IDependentSBaseRepository
 	{
 		$query = $this->buildListQuery($filter)
 			->select('u.id, u.preferred_name, u.coefficient, u.sbmlId');
-        $query = QueryRepositoryHelper::addPaginationSortDql($query, $sort, $limit);
+        $query = $this->addPagingDql($query, $limit);
+        $query = $this->addSortDql($query, $sort);
 		return $query->getQuery()->getArrayResult();
 	}
 
@@ -71,7 +79,7 @@ class UnitRepository implements IDependentSBaseRepository
 			->from(Unit::class, 'u')
 			->where('u.quantityId = :quantityId')
 			->setParameter('quantityId', $this->physicalQuantity->getId());
-        $query = QueryRepositoryHelper::addFilterDql($query, $filter);
+        $query = $this->addFilterDql($query, $filter);
 		return $query;
 	}
 

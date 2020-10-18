@@ -133,10 +133,6 @@ final class AttributeController extends ParentedRepositoryController
 		return ['physicalQuantity-id', 'physicalQuantity'];
 	}
 
-    protected static function getAlias(): string
-    {
-        return 'a';
-    }
 
     protected function checkParentValidity(IdentifiedObject $parent, IdentifiedObject $child)
     {

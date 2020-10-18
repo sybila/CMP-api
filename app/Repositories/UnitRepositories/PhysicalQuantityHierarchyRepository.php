@@ -12,6 +12,8 @@ use Doctrine\ORM\QueryBuilder;
 
 class PhysicalQuantityHierarchyRepository implements IDependentSBaseRepository
 {
+    use QueryRepositoryHelper;
+
 	/** @var EntityManager * */
 	protected $em;
 
@@ -37,6 +39,11 @@ class PhysicalQuantityHierarchyRepository implements IDependentSBaseRepository
 		return $this->em->find(PhysicalQuantityHierarchy::class, $id);
 	}
 
+    protected static function alias(): string
+    {
+        return 'h';
+    }
+
 	public function getNumResults(array $filter): int
 	{
 		return ((int)$this->buildListQuery($filter)
@@ -49,7 +56,8 @@ class PhysicalQuantityHierarchyRepository implements IDependentSBaseRepository
 	{
 		$query = $this->buildListQuery($filter)
 			->select('h.function');
-        $query = QueryRepositoryHelper::addPaginationSortDql($query, $sort, $limit);
+        $query = $this->addPagingDql($query, $limit);
+        $query = $this->addSortDql($query, $sort);
 		return $query->getQuery()->getArrayResult();
 	}
 
@@ -72,7 +80,7 @@ class PhysicalQuantityHierarchyRepository implements IDependentSBaseRepository
 			->from(PhysicalQuantityHierarchy::class, 'h')
 			->where('h.quantityId = :quantityId')
 			->setParameter('quantityId', $this->physicalQuantity->getId());
-        $query = QueryRepositoryHelper::addFilterDql($query, $filter);
+        $query = $this->addFilterDql($query, $filter);
 		return $query;
 	}
 

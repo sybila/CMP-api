@@ -12,6 +12,8 @@ use Doctrine\ORM\QueryBuilder;
 
 class ModelReactionItemRepository implements IDependentEndpointRepository
 {
+    use QueryRepositoryHelper;
+
 	/** @var EntityManager * */
 	protected $em;
 
@@ -42,6 +44,11 @@ class ModelReactionItemRepository implements IDependentEndpointRepository
 		return $this->em->find(ModelReactionItem::class, $id);
 	}
 
+    protected static function alias(): string
+    {
+        return 'r';
+    }
+
 	public function getNumResults(array $filter): int
 	{
 		return ((int)$this->buildListQuery($filter)
@@ -54,8 +61,8 @@ class ModelReactionItemRepository implements IDependentEndpointRepository
 	{
 		$query = $this->buildListQuery($filter)
 			->select('r.id, r.name, r.sbmlId, r.sboTerm, r.notes, r.annotation, r.type, r.value, r.stoichiometry');
-        $query = QueryRepositoryHelper::addPaginationSortDql($query, $sort, $limit);
-
+        $query = $this->addPagingDql($query, $limit);
+        $query = $this->addSortDql($query, $sort);
 		return $query->getQuery()->getArrayResult();
 	}
 
@@ -96,7 +103,7 @@ class ModelReactionItemRepository implements IDependentEndpointRepository
 				->where('r.reactionId = :reactionId')
 				->setParameter('reactionId', $this->parent->getId());
 		}
-        $query = QueryRepositoryHelper::addFilterDql($query, $filter);
+        $query = $this->addFilterDql($query, $filter);
 		return $query;
 	}
 

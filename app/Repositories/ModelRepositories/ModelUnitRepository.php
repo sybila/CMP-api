@@ -7,8 +7,11 @@ use App\Helpers\QueryRepositoryHelper;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 
+//FIXME so are THESE units DEPRECATED?
 class ModelUnitRepository implements IEndpointRepository
 {
+    use QueryRepositoryHelper;
+
 	/** @var EntityManager * */
 	protected $em;
 
@@ -26,6 +29,11 @@ class ModelUnitRepository implements IEndpointRepository
 		return $this->em->find(ModelUnit::class, $id);
 	}
 
+    protected static function alias(): string
+    {
+        return 'u';
+    }
+
 	public function getNumResults(array $filter): int
 	{
 		return ((int)$this->buildListQuery($filter)
@@ -38,8 +46,8 @@ class ModelUnitRepository implements IEndpointRepository
 	{
 		$query = $this->buildListQuery($filter)
 			->select('u.id, (u.baseUnitId) as baseUnitId, u.name, u.sbmlId, u.sboTerm, u.notes, u.annotation, u.symbol, u.exponent, u.multiplier');
-        $query = QueryRepositoryHelper::addPaginationSortDql($query, $sort, $limit);
-
+        $query = $this->addPagingDql($query, $limit);
+        $query = $this->addSortDql($query, $sort);
 		return $query->getQuery()->getArrayResult();
 	}
 
@@ -47,7 +55,7 @@ class ModelUnitRepository implements IEndpointRepository
 	{
 		$query = $this->em->createQueryBuilder()
 			->from(ModelUnit::class, 'u');
-        $query = QueryRepositoryHelper::addFilterDql($query, $filter);
+        $query = $this->addFilterDql($query, $filter);
 		return $query;
 	}
 

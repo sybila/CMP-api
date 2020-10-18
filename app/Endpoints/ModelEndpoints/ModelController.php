@@ -165,8 +165,4 @@ final class ModelController extends WritableRepositoryController implements IGro
 		]));
 	}
 
-    protected static function getAlias(): string
-    {
-        return 'm';
-    }
 }

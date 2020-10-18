@@ -11,6 +11,8 @@ use Doctrine\ORM\QueryBuilder;
 
 class ExperimentNoteRepository implements IDependentEndpointRepository
 {
+    use QueryRepositoryHelper;
+
 	/** @var EntityManager * */
 	protected $em;
 
@@ -31,6 +33,11 @@ class ExperimentNoteRepository implements IDependentEndpointRepository
 		return Experiment::class;
 	}
 
+    protected static function alias(): string
+    {
+        return 'n';
+    }
+
 	public function get(int $id)
 	{
 		return $this->em->find(ExperimentNote::class, $id);
@@ -48,7 +55,8 @@ class ExperimentNoteRepository implements IDependentEndpointRepository
 	{
 		$query = $this->buildListQuery($filter)
 			->select('n.id, n.time, n.note, n.imgLink');
-        $query = QueryRepositoryHelper::addPaginationSortDql($query, $sort, $limit);
+        $query = $this->addPagingDql($query, $limit);
+        $query = $this->addSortDql($query, $sort);
 		return $query->getQuery()->getArrayResult();
 	}
 

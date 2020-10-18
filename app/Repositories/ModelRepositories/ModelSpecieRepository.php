@@ -11,6 +11,8 @@ use Doctrine\ORM\QueryBuilder;
 
 class ModelSpecieRepository implements IDependentEndpointRepository
 {
+    use QueryRepositoryHelper;
+
 	/** @var EntityManager * */
 	protected $em;
 
@@ -41,6 +43,11 @@ class ModelSpecieRepository implements IDependentEndpointRepository
 		return $this->em->find(ModelSpecie::class, $id);
 	}
 
+    protected static function alias(): string
+    {
+        return 's';
+    }
+
 	public function getNumResults(array $filter): int
 	{
 		return ((int)$this->buildListQuery($filter)
@@ -53,8 +60,8 @@ class ModelSpecieRepository implements IDependentEndpointRepository
 	{
 		$query = $this->buildListQuery($filter)
 			->select('s.id, s.name, s.sbmlId, s.sboTerm, s.notes, s.annotation, s.initialExpression, s.hasOnlySubstanceUnits, s.isConstant, s.boundaryCondition');
-        $query = QueryRepositoryHelper::addPaginationSortDql($query, $sort, $limit);
-
+        $query = $this->addPagingDql($query, $limit);
+        $query = $this->addSortDql($query, $sort);
 		return $query->getQuery()->getArrayResult();
 	}
 
@@ -79,7 +86,7 @@ class ModelSpecieRepository implements IDependentEndpointRepository
 			->setParameters([
 				'compartmentId' => $this->compartment->getId()
 			]);
-        $query = QueryRepositoryHelper::addFilterDql($query, $filter);
+        $query = $this->addFilterDql($query, $filter);
 		return $query;
 	}
 

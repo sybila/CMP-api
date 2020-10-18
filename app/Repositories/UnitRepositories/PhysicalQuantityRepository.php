@@ -9,6 +9,7 @@ use Doctrine\ORM\QueryBuilder;
 
 class PhysicalQuantityRepository implements IEndpointRepository
 {
+    use QueryRepositoryHelper;
 
 	/** @var EntityManager * */
 	protected $em;
@@ -27,6 +28,11 @@ class PhysicalQuantityRepository implements IEndpointRepository
 		return $this->em->find(PhysicalQuantity::class, $id);
 	}
 
+    protected static function alias(): string
+    {
+        return 'q';
+    }
+
 	public function getNumResults(array $filter): int
 	{
 		return ((int)$this->buildListQuery($filter)
@@ -39,7 +45,8 @@ class PhysicalQuantityRepository implements IEndpointRepository
 	{
 		$query = $this->buildListQuery($filter)
 			->select('q.id, q.name');
-        $query = QueryRepositoryHelper::addPaginationSortDql($query, $sort, $limit);
+        $query = $this->addPagingDql($query, $limit);
+        $query = $this->addSortDql($query, $sort);
 		return $query->getQuery()->getArrayResult();
 	}
 
@@ -47,7 +54,7 @@ class PhysicalQuantityRepository implements IEndpointRepository
 	{
 		$query = $this->em->createQueryBuilder()
 			->from(PhysicalQuantity::class, 'q');
-        $query = QueryRepositoryHelper::addFilterDql($query, $filter);
+        $query = $this->addFilterDql($query, $filter);
 		return $query;
 	}
 }

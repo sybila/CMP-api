@@ -11,6 +11,8 @@ use Doctrine\ORM\QueryBuilder;
 
 class ModelFunctionDefinitionRepository implements IDependentEndpointRepository
 {
+    use QueryRepositoryHelper;
+
 	/** @var EntityManager * */
 	protected $em;
 
@@ -36,6 +38,11 @@ class ModelFunctionDefinitionRepository implements IDependentEndpointRepository
 		return $this->em->find(ModelFunctionDefinition::class, $id);
 	}
 
+    protected static function alias(): string
+    {
+        return 'f';
+    }
+
 	public function getNumResults(array $filter): int
 	{
 		return ((int)$this->buildListQuery($filter)
@@ -48,8 +55,8 @@ class ModelFunctionDefinitionRepository implements IDependentEndpointRepository
 	{
 		$query = $this->buildListQuery($filter)
 			->select('f.id, f.name, f.sbmlId, f.sboTerm, f.notes, f.annotation, f.formula');
-        $query = QueryRepositoryHelper::addPaginationSortDql($query, $sort, $limit);
-
+        $query = $this->addPagingDql($query, $limit);
+        $query = $this->addSortDql($query, $sort);
 		return $query->getQuery()->getArrayResult();
 	}
 
@@ -72,7 +79,7 @@ class ModelFunctionDefinitionRepository implements IDependentEndpointRepository
 			->from(ModelFunctionDefinition::class, 'f')
 			->where('f.modelId = :modelId')
 			->setParameter('modelId', $this->model->getId());
-        $query = QueryRepositoryHelper::addFilterDql($query, $filter);
+        $query = $this->addFilterDql($query, $filter);
 		return $query;
 	}
 

@@ -28,11 +28,6 @@ final class ModelSpecieController extends ParentedRepositoryController implement
 {
     use SBaseControllerCommonable;
 
-    protected static function getAlias(): string
-    {
-        return 's';
-    }
-
 	protected static function getAllowedSort(): array
 	{
 		return ['id', 'name'];

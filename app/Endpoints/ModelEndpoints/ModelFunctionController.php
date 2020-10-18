@@ -27,11 +27,6 @@ final class ModelFunctionController extends ParentedRepositoryController impleme
 
     use SBaseControllerCommonable;
 
-    protected static function getAlias(): string
-    {
-        return 'f';
-    }
-
 	protected static function getAllowedSort(): array
 	{
 		return ['id', 'name'];

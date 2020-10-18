@@ -7,7 +7,7 @@ use App\Helpers\ArgumentParser;
 use Symfony\Component\Validator\Validation;
 use Symfony\Component\Validator\Constraints as Assert;
 
-trait ValidatedController
+trait ControllerValidated
 {
 	protected static function validate(ArgumentParser $data, ?Assert\Collection $rules): void
 	{

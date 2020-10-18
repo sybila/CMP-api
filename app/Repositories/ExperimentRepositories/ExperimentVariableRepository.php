@@ -12,6 +12,8 @@ use Doctrine\ORM\QueryBuilder;
 
 class ExperimentVariableRepository implements IDependentEndpointRepository
 {
+    use QueryRepositoryHelper;
+
 	/** @var EntityManager * */
 	private $em;
 
@@ -32,6 +34,11 @@ class ExperimentVariableRepository implements IDependentEndpointRepository
 		return Experiment::class;
 	}
 
+    protected static function alias(): string
+    {
+        return 'v';
+    }
+
 	public function get(int $id)
 	{
 		return $this->em->find(ExperimentVariable::class, $id);
@@ -49,7 +56,8 @@ class ExperimentVariableRepository implements IDependentEndpointRepository
 	{
 		$query = $this->buildListQuery($filter)
 			->select('v.id, v.name, v.code, v.type');
-        $query = QueryRepositoryHelper::addPaginationSortDql($query, $sort, $limit);
+        $query = $this->addPagingDql($query, $limit);
+        $query = $this->addSortDql($query, $sort);
         return $query->getQuery()->getArrayResult();
 	}
 

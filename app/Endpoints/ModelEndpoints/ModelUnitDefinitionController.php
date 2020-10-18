@@ -28,10 +28,6 @@ final class ModelUnitDefinitionController extends ParentedRepositoryController
 
     use SBaseControllerCommonable;
 
-    protected static function getAlias(): string
-    {
-        return 'u';
-    }
 	protected static function getAllowedSort(): array
 	{
 		return ['id', 'name', 'symbol'];

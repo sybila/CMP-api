@@ -54,10 +54,6 @@ final class ExperimentController extends WritableRepositoryController implements
         $this->deviceRepository = $c->get(DeviceRepository::class);
 	}
 
-    protected static function getAlias(): string
-    {
-        return 'e';
-    }
 
 	protected static function getAllowedSort(): array
 	{

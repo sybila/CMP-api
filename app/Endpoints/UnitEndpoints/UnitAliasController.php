@@ -107,11 +107,6 @@ final class UnitAliasController extends ParentedRepositoryController
 		return ['unit-id', 'unit'];
 	}
 
-    protected static function getAlias(): string
-    {
-        return 'a';
-    }
-
     protected function checkParentValidity(IdentifiedObject $parent, IdentifiedObject $child)
     {
         // TODO: Implement checkParentValidity() method.

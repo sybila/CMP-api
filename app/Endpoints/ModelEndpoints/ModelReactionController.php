@@ -30,10 +30,6 @@ final class ModelReactionController extends ParentedRepositoryController impleme
 
     use SBaseControllerCommonable;
 
-    protected static function getAlias(): string
-    {
-        return 'r';
-    }
 
 	protected static function getAllowedSort(): array
 	{

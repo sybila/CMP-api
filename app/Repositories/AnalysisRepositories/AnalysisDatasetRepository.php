@@ -13,6 +13,8 @@ use Doctrine\ORM\QueryBuilder;
 
 class AnalysisDatasetRepository implements IDependentEndpointRepository
 {
+    use QueryRepositoryHelper;
+
     /** @var EntityManager * */
     protected $em;
 
@@ -26,6 +28,11 @@ class AnalysisDatasetRepository implements IDependentEndpointRepository
     {
         $this->em = $em;
         $this->repository = $em->getRepository(AnalysisDataset::class);
+    }
+
+    protected static function alias(): string
+    {
+        return 'd';
     }
 
     public function get(int $id)
@@ -45,7 +52,8 @@ class AnalysisDatasetRepository implements IDependentEndpointRepository
     {
         $query = $this->buildListQuery($filter)
             ->select('d.id, d.name, d.description, d.annotation');
-        $query = QueryRepositoryHelper::addPaginationSortDql($query, $sort, $limit);
+        $query = $this->addPagingDql($query, $limit);
+        $query = $this->addSortDql($query, $sort);
         return $query->getQuery()->getArrayResult();
     }
 
@@ -55,7 +63,7 @@ class AnalysisDatasetRepository implements IDependentEndpointRepository
             ->from(AnalysisDataset::class, 'd')
             ->where('d.modelId = :modelId')
             ->setParameter('modelId', $this->getParent()->getId());
-        $query = QueryRepositoryHelper::addFilterDql($query, $filter);
+        $query = $this->addFilterDql($query, $filter);
         return $query;
     }
 

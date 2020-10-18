@@ -9,6 +9,7 @@ use Doctrine\ORM\QueryBuilder;
 
 class UnitsAliasesAllRepository implements IEndpointRepository
 {
+    use QueryRepositoryHelper;
 
 	/** @var EntityManager * */
 	protected $em;
@@ -27,6 +28,11 @@ class UnitsAliasesAllRepository implements IEndpointRepository
 		return $this->em->find(UnitAlias::class, $id);
 	}
 
+    protected static function alias(): string
+    {
+        return 'a';
+    }
+
 	public function getNumResults(array $filter): int
 	{
 		return ((int)$this->buildListQuery($filter)
@@ -39,7 +45,8 @@ class UnitsAliasesAllRepository implements IEndpointRepository
 	{
 		$query = $this->buildListQuery($filter)
 			->select('a.id, IDENTITY(a.unitId) AS unit_id, a.alternative_name');
-        $query = QueryRepositoryHelper::addPaginationSortDql($query, $sort, $limit);
+        $query = $this->addPagingDql($query, $limit);
+        $query = $this->addSortDql($query, $sort);
 		return $query->getQuery()->getArrayResult();
 	}
 
@@ -47,7 +54,7 @@ class UnitsAliasesAllRepository implements IEndpointRepository
 	{
 		$query = $this->em->createQueryBuilder()
 			->from(UnitAlias::class, 'a');
-        $query = QueryRepositoryHelper::addFilterDql($query, $filter);
+        $query = $this->addFilterDql($query, $filter);
 		return $query;
 	}
 }

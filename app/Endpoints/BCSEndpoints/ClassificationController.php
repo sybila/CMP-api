@@ -79,8 +79,4 @@ final class ClassificationController extends WritableRepositoryController
 			throw new MissingRequiredKeyException('name');
 	}
 
-    protected static function getAlias(): string
-    {
-        return 'c';
-    }
 }

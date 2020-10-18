@@ -131,10 +131,6 @@ final class ExperimentVariableController extends ParentedRepositoryController
 	    return new ParentObjectInfo('experiment-id',Experiment::class);
 	}
 
-    protected static function getAlias(): string
-    {
-        return 'v';
-    }
 
     protected function checkParentValidity(IdentifiedObject $parent, IdentifiedObject $child)
     {

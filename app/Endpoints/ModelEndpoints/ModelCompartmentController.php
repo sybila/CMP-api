@@ -29,10 +29,6 @@ final class ModelCompartmentController extends ParentedRepositoryController impl
 {
     use SBaseControllerCommonable;
 
-    protected static function getAlias(): string
-    {
-        return 'c';
-    }
 
 	protected static function getAllowedSort(): array
 	{

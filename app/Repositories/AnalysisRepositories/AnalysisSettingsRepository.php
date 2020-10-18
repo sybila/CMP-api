@@ -14,6 +14,9 @@ use Doctrine\ORM\QueryBuilder;
 
 class AnalysisSettingsRepository implements IDependentEndpointRepository
 {
+
+    use QueryRepositoryHelper;
+
     /** @var EntityManager * */
     protected $em;
 
@@ -35,7 +38,10 @@ class AnalysisSettingsRepository implements IDependentEndpointRepository
         return $this->em->find(AnalysisSettings::class, $id);
     }
 
-
+    protected static function alias(): string
+    {
+        return 's';
+    }
 
     public function getNumResults(array $filter): int
     {
@@ -49,8 +55,8 @@ class AnalysisSettingsRepository implements IDependentEndpointRepository
     {
         $query = $this->buildListQuery($filter)
             ->select('s.id, s.name, s.methodId');
-        $query = QueryRepositoryHelper::addPaginationSortDql($query, $sort, $limit);
-
+        $query = $this->addPagingDql($query, $limit);
+        $query = $this->addSortDql($query, $sort);
         return $query->getQuery()->getArrayResult();
     }
 
@@ -60,7 +66,7 @@ class AnalysisSettingsRepository implements IDependentEndpointRepository
             ->from(AnalysisSettings::class, 's')
             ->where('s.methodId = :methodId')
             ->setParameter('methodId', $this->method->getId());
-        $query = QueryRepositoryHelper::addFilterDql($query, $filter);
+        $query = $this->addFilterDql($query, $filter);
         return $query;
     }
 

@@ -9,6 +9,9 @@ use Doctrine\ORM\QueryBuilder;
 
 class AnalysisToolRepository implements IEndpointRepository
 {
+
+    use QueryRepositoryHelper;
+
     /** @var EntityManager * */
     protected $em;
 
@@ -26,6 +29,11 @@ class AnalysisToolRepository implements IEndpointRepository
         return $this->em->find(AnalysisTask::class, $id);
     }
 
+    protected static function alias(): string
+    {
+        return 'at';
+    }
+
     public function getNumResults(array $filter): int
     {
         return $this->buildListQuery($filter)
@@ -38,8 +46,8 @@ class AnalysisToolRepository implements IEndpointRepository
     {
         $query = $this->buildListQuery($filter)
             ->select('at.id, at.name, at.description, at.annotation, at.location');
-        $query = QueryRepositoryHelper::addPaginationSortDql($query, $sort, $limit);
-
+        $query = $this->addPagingDql($query, $limit);
+        $query = $this->addSortDql($query, $sort);
         return $query->getQuery()->getArrayResult();
     }
 
@@ -47,7 +55,7 @@ class AnalysisToolRepository implements IEndpointRepository
     {
         $query = $this->em->createQueryBuilder()
             ->from(AnalysisTask::class, 'at');
-        $query = QueryRepositoryHelper::addFilterDql($query, $filter);
+        $query = $this->addFilterDql($query, $filter);
         return $query;
     }
 }

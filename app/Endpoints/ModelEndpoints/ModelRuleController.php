@@ -29,11 +29,6 @@ abstract class ModelRuleController extends ParentedRepositoryController implemen
 
     use SBaseControllerCommonable;
 
-    protected static function getAlias(): string
-    {
-        return 'r';
-    }
-
 	protected static function getAllowedSort(): array
 	{
 		return ['id'];

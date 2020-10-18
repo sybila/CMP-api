@@ -11,6 +11,8 @@ use Doctrine\ORM\QueryBuilder;
 
 class ModelConstraintRepository implements IDependentEndpointRepository
 {
+    use QueryRepositoryHelper;
+
 	/** @var EntityManager * */
 	protected $em;
 
@@ -36,6 +38,11 @@ class ModelConstraintRepository implements IDependentEndpointRepository
 		return $this->em->find(ModelConstraint::class, $id);
 	}
 
+    protected static function alias(): string
+    {
+        return 'c';
+    }
+
 	public function getNumResults(array $filter): int
 	{
 		return ((int)$this->buildListQuery($filter)
@@ -48,8 +55,8 @@ class ModelConstraintRepository implements IDependentEndpointRepository
 	{
 		$query = $this->buildListQuery($filter)
 			->select('c.id, c.name, c.sbmlId, c.sboTerm, c.notes, c.annotation, c.message, c.formula');
-        $query = QueryRepositoryHelper::addPaginationSortDql($query, $sort, $limit);
-
+        $query = $this->addPagingDql($query, $limit);
+        $query = $this->addSortDql($query, $sort);
 		return $query->getQuery()->getArrayResult();
 	}
 
@@ -72,7 +79,7 @@ class ModelConstraintRepository implements IDependentEndpointRepository
 			->from(ModelConstraint::class, 'c')
 			->where('c.modelId = :modelId')
 			->setParameter('modelId', $this->object->getId());
-        $query = QueryRepositoryHelper::addFilterDql($query, $filter);
+        $query = $this->addFilterDql($query, $filter);
 		return $query;
 	}
 

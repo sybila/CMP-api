@@ -111,10 +111,6 @@ class EntityBcsAnnotationsController extends BcsAnnotationsController
 	    return new ParentObjectInfo('entity-id', Entity::class);
 	}
 
-    protected static function getAlias(): string
-    {
-        // TODO: Implement getAlias() method.
-    }
 
     protected function checkParentValidity(IdentifiedObject $parent, IdentifiedObject $child)
     {
@@ -147,10 +143,6 @@ class RuleBcsAnnotationsController extends BcsAnnotationsController
 	    return new ParentObjectInfo('rule-id', Rule::class);
 	}
 
-    protected static function getAlias(): string
-    {
-        // TODO: Implement getAlias() method.
-    }
 
     protected function checkParentValidity(IdentifiedObject $parent, IdentifiedObject $child)
     {

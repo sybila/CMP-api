@@ -21,7 +21,7 @@ abstract class WritableRepositoryController extends RepositoryController
     implements IGroupRoleAuthWritableController, IPlatformRoleAuthWritableController
 {
 
-	use ValidatedController;
+	use ControllerValidated;
 
 	/** @var stdClass */
 	private $data;

@@ -84,10 +84,6 @@ class EntityNoteController extends ParentedRepositoryController
 			throw new MissingRequiredKeyException('text');
 	}
 
-    protected static function getAlias(): string
-    {
-        return 'n';
-    }
 
     protected function checkParentValidity(IdentifiedObject $parent, IdentifiedObject $child)
     {

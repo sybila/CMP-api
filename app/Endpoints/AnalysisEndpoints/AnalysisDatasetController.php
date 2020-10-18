@@ -42,11 +42,6 @@ class AnalysisDatasetController extends ParentedRepositoryController
         return ['id', 'name', 'modelId'];
     }
 
-    protected static function getAlias(): string
-    {
-        return 'd';
-    }
-
     protected function setData(IdentifiedObject $object, ArgumentParser $body): void
     {
         /** @var AnalysisDataset $object */

@@ -122,10 +122,6 @@ final class ExperimentValueController extends ParentedRepositoryController imple
 	    return new ParentObjectInfo('variable-id', ExperimentVariable::class);
 	}
 
-    protected static function getAlias(): string
-    {
-        return 'v';
-    }
 
     protected function checkParentValidity(IdentifiedObject $parent, IdentifiedObject $child)
     {

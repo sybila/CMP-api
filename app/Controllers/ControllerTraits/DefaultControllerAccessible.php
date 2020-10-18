@@ -5,6 +5,8 @@ namespace App\Controllers;
 
 
 
+use App\Entity\Authorization\User;
+
 trait DefaultControllerAccessible
 {
 
@@ -25,7 +27,9 @@ trait DefaultControllerAccessible
 
     public function getAccessFilter(array $userGroups): ?array
     {
-        //FIXME if admin
+        if ($this->userPermissions['platform_wise'] == User::ADMIN){
+            return [];
+        }
         return null;
     }
 

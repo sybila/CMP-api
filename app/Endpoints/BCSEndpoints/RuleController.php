@@ -145,8 +145,4 @@ final class RuleController extends WritableRepositoryController
 			throw new MissingRequiredKeyException('equation');
 	}
 
-    protected static function getAlias(): string
-    {
-        return 'r';
-    }
 }

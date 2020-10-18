@@ -51,11 +51,6 @@ final class UnitsAllController extends WritableRepositoryController
 		$this->unitsAllRepository = $c->get(UnitsAllRepository::class);
 	}
 
-    protected static function getAlias(): string
-    {
-        return 'u';
-    }
-
 	protected static function getAllowedSort(): array
 	{
 		return ['id', 'preferred_name'];

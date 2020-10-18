@@ -4,6 +4,8 @@ namespace App\Repositories\Authorization;
 
 use App\Entity\Authorization\UserGroupRole;
 use App\Entity\Repositories\IEndpointRepository;
+use App\Helpers\QueryRepositoryHelper;
+use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Common\Persistence\ObjectRepository;
 use Doctrine\ORM\EntityManager;
@@ -11,11 +13,12 @@ use League\OAuth2\Server\Entities\ClientEntityInterface;
 
 class UserGroupRoleRepository implements IEndpointRepository
 {
+    use QueryRepositoryHelper;
 
 	/** @var EntityManager */
 	private $em;
 
-	/** @var ObjectRepository */
+	/** @var EntityRepository */
 	private $userGroupRoleRepository;
 
 	/** @var UserGroupRole */
@@ -28,6 +31,10 @@ class UserGroupRoleRepository implements IEndpointRepository
 		$this->userGroupRoleRepository = $em->getRepository(UserGroupRole::class);
 	}
 
+    protected static function alias(): string
+    {
+        return 'gr';
+    }
 
 	public function getById(int $id): ?UserGroupRole
 	{
@@ -45,6 +52,8 @@ class UserGroupRoleRepository implements IEndpointRepository
 	{
 		$query = $this->buildListQuery($filter)
 			->select('gr.id, gr.tier, gr.name');
+        $query = $this->addPagingDql($query, $limit);
+        $query = $this->addSortDql($query, $sort);
 		return $query->getQuery()->getArrayResult();
 	}
 

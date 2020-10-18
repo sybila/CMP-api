@@ -9,8 +9,11 @@ use App\Helpers\QueryRepositoryHelper;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 
+//FIXME so are THESE units DEPRECATED?
 class ModelUnitDefinitionRepository implements IDependentEndpointRepository
 {
+    use QueryRepositoryHelper;
+
 	/** @var EntityManager * */
 	protected $em;
 
@@ -36,6 +39,11 @@ class ModelUnitDefinitionRepository implements IDependentEndpointRepository
 		return $this->em->find(ModelUnitDefinition::class, $id);
 	}
 
+    protected static function alias(): string
+    {
+        return 'u';
+    }
+
 	public function getNumResults(array $filter): int
 	{
 		return ((int)$this->buildListQuery($filter)
@@ -48,8 +56,8 @@ class ModelUnitDefinitionRepository implements IDependentEndpointRepository
 	{
 		$query = $this->buildListQuery($filter)
 			->select('u.id, u.name, u.sbmlId, u.sboTerm, u.notes, u.annotation, u.symbol, (u.compartmentId) as compartmentId' /*(u.localParameterId) as localParameterId,(u.parameterId) as parameterId'*/);
-        $query = QueryRepositoryHelper::addPaginationSortDql($query, $sort, $limit);
-
+        $query = $this->addPagingDql($query, $limit);
+        $query = $this->addSortDql($query, $sort);
 		return $query->getQuery()->getArrayResult();
 	}
 
@@ -72,7 +80,7 @@ class ModelUnitDefinitionRepository implements IDependentEndpointRepository
 			->from(ModelUnitDefinition::class, 'u')
 			->where('u.modelId = :modelId')
 			->setParameter('modelId', $this->object->getId());
-        $query = QueryRepositoryHelper::addFilterDql($query, $filter);
+        $query = $this->addFilterDql($query, $filter);
 		return $query;
 	}
 

@@ -42,11 +42,6 @@ class AnalysisSettingsController extends ParentedRepositoryController
         return ['id', 'name', 'methodId'];
     }
 
-    protected static function getAlias(): string
-    {
-        return 's';
-    }
-
     protected function setData(IdentifiedObject $object, ArgumentParser $body): void
     {
         /** @var AnalysisSettings $object */

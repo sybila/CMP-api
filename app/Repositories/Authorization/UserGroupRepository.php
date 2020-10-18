@@ -4,6 +4,8 @@ namespace App\Repositories\Authorization;
 
 use App\Entity\Authorization\UserGroup;
 use App\Entity\Authorization\UserType;
+use App\Entity\EntityRepository;
+use App\Entity\IdentifiedObject;
 use App\Entity\Repositories\IEndpointRepository;
 use App\Helpers\QueryRepositoryHelper;
 use Doctrine\ORM\QueryBuilder;
@@ -14,10 +16,12 @@ use League\OAuth2\Server\Entities\ClientEntityInterface;
 class UserGroupRepository implements IEndpointRepository
 {
 
+    use QueryRepositoryHelper;
+
 	/** @var EntityManager */
 	private $em;
 
-	/** @var ObjectRepository */
+	/** @var EntityRepository */
 	private $userGroupRepository;
 
 	/** @var UserGroup */
@@ -30,8 +34,12 @@ class UserGroupRepository implements IEndpointRepository
 		$this->userGroupRepository = $em->getRepository(UserGroup::class);
 	}
 
+    protected static function alias(): string
+    {
+        return 'g';
+    }
 
-	public function getById(int $id): ?UserGroup
+	public function getById(int $id)
 	{
 		return $this->userGroupRepository->find($id);
 	}
@@ -47,8 +55,9 @@ class UserGroupRepository implements IEndpointRepository
 	{
 		$query = $this->buildListQuery($filter)
 			->select('g.id, g.name, g.type, g.description');
+        $query = $this->addPagingDql($query, $limit);
+        $query = $this->addSortDql($query, $sort);
 		return $query->getQuery()->getArrayResult();
-
 	}
 
 
@@ -65,7 +74,7 @@ class UserGroupRepository implements IEndpointRepository
 	{
 		$query = $this->em->createQueryBuilder()
 			->from(UserGroup::class, 'g');
-		return QueryRepositoryHelper::addFilterDql($query, $filter);
+		return $this->addFilterDql($query, $filter);
 	}
 
 }

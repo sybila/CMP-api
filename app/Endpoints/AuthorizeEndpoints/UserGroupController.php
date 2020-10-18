@@ -99,11 +99,6 @@ final class UserGroupController extends WritableRepositoryController implements 
 		return UserGroupRepository::Class;
 	}
 
-    protected static function getAlias(): string
-    {
-        return 'g';
-    }
-
     /**
      * @param array $userGroups
      * @return int|null
@@ -133,7 +128,10 @@ final class UserGroupController extends WritableRepositoryController implements 
 
     public function getAccessFilter(array $userGroups): ?array
     {
-        $dql = static::getAlias() . ".id";
+        if ($this->userPermissions['platform_wise'] == User::ADMIN){
+            return [];
+        }
+        $dql = "g.id";
         $accObj = $this->orm->getRepository(UserGroup::class)
             ->matching(Criteria::create()->where(Criteria::expr()->eq('isPublic', true)))
             ->map(function (UserGroup $group) { return $group->getId();})->toArray();

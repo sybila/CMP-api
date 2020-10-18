@@ -402,8 +402,4 @@ final class EntityController extends WritableRepositoryController
 			throw new MissingRequiredKeyException('name');
 	}
 
-    protected static function getAlias(): string
-    {
-        return 'e';
-    }
 }

@@ -33,10 +33,6 @@ abstract class ModelReactionItemController extends ParentedRepositoryController 
 
     use SBaseControllerCommonable;
 
-	protected static function getAlias(): string
-    {
-        return 'r';
-    }
 
 	protected static function getAllowedSort(): array
 	{

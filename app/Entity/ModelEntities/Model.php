@@ -114,9 +114,6 @@ class Model implements IdentifiedObject
      */
     private $experiments;
 
-    public function getAlias(){
-        return 'm';
-    }
 
 	/**
 	 * Get userId

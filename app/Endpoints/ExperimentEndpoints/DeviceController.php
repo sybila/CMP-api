@@ -108,8 +108,4 @@ final class DeviceController extends WritableRepositoryController
         return DeviceRepository::Class;
     }
 
-    protected static function getAlias(): string
-    {
-        return 'd';
-    }
 }

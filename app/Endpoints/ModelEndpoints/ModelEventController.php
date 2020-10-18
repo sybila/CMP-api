@@ -26,11 +26,6 @@ final class ModelEventController extends ParentedRepositoryController implements
 {
     use SBaseControllerCommonable;
 
-	protected static function getAlias(): string
-    {
-        return 'e';
-    }
-
 	protected static function getAllowedSort(): array
 	{
 		return ['id', 'name'];

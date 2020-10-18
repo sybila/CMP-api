@@ -76,8 +76,4 @@ final class OrganismController extends WritableRepositoryController
 			throw new MissingRequiredKeyException('code');
 	}
 
-    protected static function getAlias(): string
-    {
-        return 'o';
-    }
 }

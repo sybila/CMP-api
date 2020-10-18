@@ -5,14 +5,11 @@ namespace App\Controllers;
 use App\Exceptions\InvalidSortFieldException;
 use App\Helpers\ArgumentParser;
 
-trait SortableController
+trait ControllerSortable
 {
 	protected static function getSort(ArgumentParser $args): array
 	{
 		$order = [];
-		$fullSortQuery = '';
-		$alias = static::getAlias();
-
 		if ($args->hasKey('sort'))
 		{
 			foreach ($args->getArray('sort') as $by => $how)
@@ -29,19 +26,9 @@ trait SortableController
 					throw new InvalidSortFieldException($by);
 
                 $order[$by] = $how;
-
-				if ($fullSortQuery != null){
-				    $fullSortQuery .= ', ';
-                }
-				$fullSortQuery .= $alias . ".{$by} {$how}";
-			}
-			if (!empty($order)){
-			    $order['fullSortQuery'] = $fullSortQuery;
 			}
         }
-
 		return $order;
 	}
     abstract protected static function getAllowedSort(): array;
-	abstract protected static function getAlias(): string;
 }

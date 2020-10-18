@@ -24,7 +24,7 @@ abstract class RepositoryController extends AbstractController
     implements IGroupRoleAuthController, IPlatformRoleAuthController
 {
 
-	use SortableController, PageableController, DefaultControllerAccessible, FilterableController;
+	use ControllerSortable, ControllerPageable, DefaultControllerAccessible, ControllerFilterable;
 
 	/** @var IEndpointRepository */
 	protected $repository;

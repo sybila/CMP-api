@@ -25,11 +25,6 @@ final class ModelConstraintController extends ParentedRepositoryController imple
 {
     use SBaseControllerCommonable;
 
-    protected static function getAlias(): string
-    {
-        return 'c';
-    }
-
 	protected static function getAllowedSort(): array
 	{
 		return ['id', 'name'];

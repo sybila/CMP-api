@@ -9,11 +9,12 @@ use Doctrine\ORM\QueryBuilder;
 
 class UnitsAllRepository implements IEndpointRepository
 {
+    use QueryRepositoryHelper;
 
 	/** @var EntityManager * */
 	protected $em;
 
-	/** @var \Doctrine\ORM\UnitsAllRepository */
+	/** @var EntityRepository*/
 	private $repository;
 
 	public function __construct(EntityManager $em)
@@ -27,6 +28,11 @@ class UnitsAllRepository implements IEndpointRepository
 		return $this->em->find(Unit::class, $id);
 	}
 
+    protected static function alias(): string
+    {
+        return 'u';
+    }
+
 	public function getNumResults(array $filter): int
 	{
 		return ((int)$this->buildListQuery($filter)
@@ -39,7 +45,8 @@ class UnitsAllRepository implements IEndpointRepository
 	{
 		$query = $this->buildListQuery($filter)
 			->select('u.id, u.preferred_name, u.coefficient');
-        $query = QueryRepositoryHelper::addPaginationSortDql($query, $sort, $limit);
+        $query = $this->addPagingDql($query, $limit);
+        $query = $this->addSortDql($query, $sort);
 		return $query->getQuery()->getArrayResult();
 	}
 
@@ -47,7 +54,7 @@ class UnitsAllRepository implements IEndpointRepository
 	{
 		$query = $this->em->createQueryBuilder()
 			->from(Unit::class, 'u');
-        $query = QueryRepositoryHelper::addFilterDql($query, $filter);
+        $query = $this->addFilterDql($query, $filter);
 		return $query;
 	}
 }

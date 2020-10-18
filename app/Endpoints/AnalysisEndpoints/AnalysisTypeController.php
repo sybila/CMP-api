@@ -35,11 +35,6 @@ class AnalysisTypeController extends WritableRepositoryController
         return $this->getCommonAnalysisData($object);
     }
 
-    protected static function getAlias(): string
-    {
-        return self::getRepositoryClassName();
-    }
-
     protected static function getAllowedSort(): array
     {
         return ['id', 'name'];

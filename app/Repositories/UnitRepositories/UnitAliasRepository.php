@@ -12,6 +12,8 @@ use Doctrine\ORM\QueryBuilder;
 
 class UnitAliasRepository implements IDependentSBaseRepository
 {
+    use QueryRepositoryHelper;
+
 	/** @var EntityManager * */
 	protected $em;
 
@@ -37,6 +39,11 @@ class UnitAliasRepository implements IDependentSBaseRepository
 		return $this->em->find(UnitAlias::class, $id);
 	}
 
+    protected static function alias(): string
+    {
+        return 'a';
+    }
+
 	public function getNumResults(array $filter): int
 	{
 		return ((int)$this->buildListQuery($filter)
@@ -49,7 +56,8 @@ class UnitAliasRepository implements IDependentSBaseRepository
 	{
 		$query = $this->buildListQuery($filter)
 			->select('a.id, a.alternative_name');
-        $query = QueryRepositoryHelper::addPaginationSortDql($query, $sort, $limit);
+        $query = $this->addPagingDql($query, $limit);
+        $query = $this->addSortDql($query, $sort);
 		return $query->getQuery()->getArrayResult();
 	}
 
@@ -72,7 +80,7 @@ class UnitAliasRepository implements IDependentSBaseRepository
 			->from(UnitAlias::class, 'a')
 			->where('a.unitId = :unitId')
 			->setParameter('unitId', $this->unit->getId());
-        $query = QueryRepositoryHelper::addFilterDql($query, $filter);
+        $query = $this->addFilterDql($query, $filter);
 		return $query;
 	}
 

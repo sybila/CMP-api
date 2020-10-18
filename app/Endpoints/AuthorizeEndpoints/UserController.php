@@ -196,10 +196,6 @@ class UserController extends WritableRepositoryController
 		return UserRepository::Class;
 	}
 
-    protected static function getAlias(): string
-    {
-        return 'u';
-    }
 
     /**
      * ROUTE: Start the mechanism to change the password.
@@ -292,6 +288,9 @@ class UserController extends WritableRepositoryController
 
     public function getAccessFilter(array $userGroups): ?array
     {
+        if ($this->userPermissions['platform_wise'] == User::ADMIN){
+            return [];
+        }
         return ['id' => $this->getVisibleUsersId($userGroups)];
     }
 

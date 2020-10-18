@@ -11,6 +11,8 @@ use Doctrine\ORM\QueryBuilder;
 
 class ModelEventRepository implements IDependentEndpointRepository
 {
+    use QueryRepositoryHelper;
+
 	/** @var EntityManager * */
 	protected $em;
 
@@ -36,6 +38,11 @@ class ModelEventRepository implements IDependentEndpointRepository
 		return $this->em->find(ModelEvent::class, $id);
 	}
 
+    protected static function alias(): string
+    {
+        return 'e';
+    }
+
 	public function getNumResults(array $filter): int
 	{
 		return ((int)$this->buildListQuery($filter)
@@ -48,8 +55,8 @@ class ModelEventRepository implements IDependentEndpointRepository
 	{
 		$query = $this->buildListQuery($filter)
 			->select('e.id, e.name, e.sbmlId, e.sboTerm, e.notes, e.annotation, e.delay, e.trigger, e.priority');
-        $query = QueryRepositoryHelper::addPaginationSortDql($query, $sort, $limit);
-
+        $query = $this->addPagingDql($query, $limit);
+        $query = $this->addSortDql($query, $sort);
 		return $query->getQuery()->getArrayResult();
 	}
 
@@ -72,7 +79,7 @@ class ModelEventRepository implements IDependentEndpointRepository
 			->from(ModelEvent::class, 'e')
 			->where('e.modelId = :modelId')
 			->setParameter('modelId', $this->object->getId());
-        $query = QueryRepositoryHelper::addFilterDql($query, $filter);
+        $query = $this->addFilterDql($query, $filter);
 		return $query;
 	}
 

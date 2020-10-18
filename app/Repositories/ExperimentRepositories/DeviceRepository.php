@@ -10,6 +10,7 @@ use Doctrine\ORM\QueryBuilder;
 
 class DeviceRepository implements IEndpointRepository
 {
+    use QueryRepositoryHelper;
 
     /** @var EntityManager * */
     protected $em;
@@ -28,6 +29,11 @@ class DeviceRepository implements IEndpointRepository
         return $this->em->find(Device::class, $id);
     }
 
+    protected static function alias(): string
+    {
+        return 'd';
+    }
+
     public function getNumResults(array $filter): int
     {
         return ((int)$this->buildListQuery($filter)
@@ -40,7 +46,8 @@ class DeviceRepository implements IEndpointRepository
     {
         $query = $this->buildListQuery($filter)
             ->select('d.id, d.name, d.type, d.annotation');
-        $query = QueryRepositoryHelper::addPaginationSortDql($query, $sort, $limit);
+        $query = $this->addPagingDql($query, $limit);
+        $query = $this->addSortDql($query, $sort);
         return $query->getQuery()->getArrayResult();
     }
 

@@ -103,10 +103,6 @@ final class PhysicalQuantityHierarchyController extends ParentedRepositoryContro
 		return ['physicalQuantity-id', 'physicalQuantity'];
 	}
 
-    protected static function getAlias(): string
-    {
-        return 'h';
-    }
 
     protected function checkParentValidity(IdentifiedObject $parent, IdentifiedObject $child)
     {

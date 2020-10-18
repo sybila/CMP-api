@@ -8,9 +8,9 @@ use App\Exceptions\MalformedInputException;
 use App\Helpers\ArgumentParser;
 use Symfony\Component\Validator\Constraints as Assert;
 
-trait PageableController
+trait ControllerPageable
 {
-	use ValidatedController;
+	use ControllerValidated;
 
     /**
      * Parses the relevant settings for the pagination from the URL arguments,

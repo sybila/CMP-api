@@ -11,6 +11,8 @@ use Doctrine\ORM\QueryBuilder;
 
 class ModelCompartmentRepository implements IDependentEndpointRepository
 {
+    use QueryRepositoryHelper;
+
 	/** @var EntityManager * */
 	protected $em;
 
@@ -31,6 +33,11 @@ class ModelCompartmentRepository implements IDependentEndpointRepository
 		return $this->em->find(ModelCompartment::class, $id);
 	}
 
+    protected static function alias(): string
+    {
+        return 'c';
+    }
+
 	public function getNumResults(array $filter): int
 	{
 		return ((int)$this->buildListQuery($filter)
@@ -43,8 +50,8 @@ class ModelCompartmentRepository implements IDependentEndpointRepository
 	{
 		$query = $this->buildListQuery($filter)
 			->select('c.id, c.name, c.sbmlId, c.sboTerm, c.notes, c.annotation, c.spatialDimensions, c.size, c.isConstant');
-        $query = QueryRepositoryHelper::addPaginationSortDql($query, $sort, $limit);
-
+        $query = $this->addPagingDql($query, $limit);
+        $query = $this->addSortDql($query, $sort);
         return $query->getQuery()->getArrayResult();
 	}
 
@@ -54,7 +61,7 @@ class ModelCompartmentRepository implements IDependentEndpointRepository
 			->from(ModelCompartment::class, 'c')
 			->where('c.modelId = :modelId')
 			->setParameter('modelId', $this->model->getId());
-        $query = QueryRepositoryHelper::addFilterDql($query, $filter);
+        $query = $this->addFilterDql($query, $filter);
 		return $query;
 	}
 
