@@ -55,7 +55,7 @@ class DeviceRepository implements IEndpointRepository
     {
         $query = $this->em->createQueryBuilder()
             ->from(Device::class, 'd');
-        $query = QueryRepositoryHelper::addFilterDql($query, $filter);
+        $query = $this->addFilterDql($query, $filter);
         return $query;
     }
 

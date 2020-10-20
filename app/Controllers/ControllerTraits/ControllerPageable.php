@@ -48,57 +48,6 @@ trait ControllerPageable
 		}
 	}
 
-    /**
-     * @return array with attr 'attr' that shows on what attribute can the paging be performed on
-     * and with 'parent' that defines the parent attribute in array while calling detail (readIdentified).
-     * TODO need to solve paging on deeper lvl (maybe useless?)
-     */
-    protected static function getAllowedPagingVar(): ?array
-    {
-        $pagingConditions = null;
-        switch (get_called_class()){
-            case VariablesValuesController::class:
-                $pagingConditions = ['attr' => 'values', 'parent' => 'variables'];
-                break;
-            default:
-                break;
-        }
-        return $pagingConditions;
-    }
-
-    /**
-     * If paging arguments are missing and detail for the class is not allowed this returns $data_response
-     * @param ArgumentParser $args
-     * @param array $dataResponse
-     * @return array
-     * @throws InvalidArgumentException
-     * @throws MalformedInputException
-     */
-	protected static function getPaginationOnDetail(ArgumentParser $args, array $dataResponse): array
-    {
-        self::validate($args, self::getPaginationValidator());
-        $paging = static::getAllowedPagingVar();
-        if ($args->hasKey('perPage') && $args->hasKey('page') && !is_null($paging)){
-            $i = 0;
-            $numResult = 0;
-            foreach ($dataResponse[$paging['parent']] as $parent) {
-                $paginatedData = $parent[$paging['attr']];
-                $numResult = count($paginatedData) > $numResult ? count($paginatedData) :  $numResult;
-                $dataResponse[$paging['parent']][$i][$paging['attr']] = array_slice($paginatedData,
-                    ($args['page'] - 1) * $args['perPage'], $args['perPage']);
-                $i = $i + 1;
-            }
-            $data[] = $dataResponse;
-            $data['maxCount'] = $numResult;
-
-            if(($args['perPage'] ? ceil($numResult / $args['perPage']) : 1)<$args['page']){
-                throw new InvalidArgumentException('page', $args['page'], 'page out of range');
-            }
-            return $data;
-        }
-        return $dataResponse;
-    }
-
 	protected static function getPaginationValidator(): Assert\Collection
 	{
 		return new Assert\Collection([

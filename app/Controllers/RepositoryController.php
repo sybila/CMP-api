@@ -130,14 +130,7 @@ abstract class RepositoryController extends AbstractController
         $this->permitUser([$this, 'validateDetail'], [$this, 'canDetail']);
         $id = current($this->getReadIds($args));
         $ent = $this->getObject((int)$id);
-        $data = static::getPaginationOnDetail($args, $this->getData($ent));
-        //FIXME move this to some other controller, pageable would be the best
-        if (array_key_exists('maxCount', $data)){
-            $maxCount = $data['maxCount'];
-            $response = $response->withHeader('X-MaxCount', $maxCount);
-            $response = $response->withHeader('X-Pages', $args['perPage'] ? ceil($maxCount / $args['perPage']) : 1);
-            unset($data['maxCount']);
-        }
+        $data = $this->getData($ent);
         return self::formatOk($response, $data);
 	}
 

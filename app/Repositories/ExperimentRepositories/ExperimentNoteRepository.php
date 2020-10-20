@@ -79,7 +79,7 @@ class ExperimentNoteRepository implements IDependentEndpointRepository
 			->from(ExperimentNote::class, 'n')
 			->where('n.experimentId = :experimentId')
 			->setParameter('experimentId', $this->experiment->getId());
-        $query = QueryRepositoryHelper::addFilterDql($query, $filter);
+        $query = $this->addFilterDql($query, $filter);
 		return $query;
 	}
 

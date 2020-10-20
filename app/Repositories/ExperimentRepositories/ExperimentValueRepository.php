@@ -82,7 +82,7 @@ class ExperimentValueRepository implements IDependentEndpointRepository
             ->setParameters([
                 'variableId' => $this->experimentVariable->getId()
             ]);
-        $query = QueryRepositoryHelper::addFilterDql($query, $filter);
+        $query = $this->addFilterDql($query, $filter);
 		return $query;
 	}
 

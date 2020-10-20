@@ -80,7 +80,7 @@ class ExperimentVariableRepository implements IDependentEndpointRepository
 			->from(ExperimentVariable::class, 'v')
 			->where('v.experimentId = :experimentId')
 			->setParameter('experimentId', $this->experiment->getId());
-        $query = QueryRepositoryHelper::addFilterDql($query, $filter);
+        $query = $this->addFilterDql($query, $filter);
 		return $query;
 	}
 

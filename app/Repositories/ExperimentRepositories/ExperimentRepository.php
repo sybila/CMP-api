@@ -54,7 +54,7 @@ class ExperimentRepository implements IEndpointRepository
 	{
 		$query = $this->em->createQueryBuilder()
 			->from(Experiment::class, 'e');
-        $query = QueryRepositoryHelper::addFilterDql($query, $filter);
+        $query = $this->addFilterDql($query, $filter);
 		return $query;
 	}
 

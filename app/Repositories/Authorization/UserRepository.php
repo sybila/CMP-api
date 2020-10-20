@@ -95,13 +95,8 @@ class UserRepository implements UserRepositoryInterface, IEndpointRepository
      */
     public function createQueryCriteria(array $filter, array $limit = null, array $sort = null): Criteria
     {
-        unset($sort['fullSortQuery']);
-
         $criteria = Criteria::create()->where(Criteria::expr()->in('id', $filter['accessFilter']['id']));
         foreach ($filter['argFilter'] as $by => $expr){
-            //FIXME we need to change how the filtering works, alias is lame
-            $by = explode('.',$by)[1];
-            //
             $criteria = $criteria->andWhere(Criteria::expr()->contains($by, $expr));
         }
         return $criteria->setMaxResults($limit['limit'] ? $limit['limit'] : null)

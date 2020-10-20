@@ -80,7 +80,7 @@ class ExperimentVariableNoteRepository implements IDependentEndpointRepository
 			->from(ExperimentNote::class, 'n')
 			->where('n.variableId = :variableId')
 			->setParameter('variableId', $this->variable->getId());
-        $query = QueryRepositoryHelper::addFilterDql($query, $filter);
+        $query = $this->addFilterDql($query, $filter);
 		return $query;
 	}
 
