@@ -10,12 +10,10 @@ use App\Entity\{IdentifiedObject,
     ModelReactionItem,
     ModelFunction,
     Repositories\IEndpointRepository,
-    Repositories\ModelRepository,
     Repositories\ModelReactionRepository};
-use App\Exceptions\{MissingRequiredKeyException, WrongParentException};
+use App\Exceptions\{DependentResourcesBoundException, MissingRequiredKeyException, WrongParentException};
 use App\Helpers\ArgumentParser;
 use SBaseControllerCommonable;
-use Slim\Container;
 use Slim\Http\{
 	Request, Response
 };
@@ -119,6 +117,10 @@ final class ModelReactionController extends ParentedRepositoryController impleme
 
     protected function checkParentValidity(IdentifiedObject $parent, IdentifiedObject $child)
     {
-        // TODO: Implement checkParentValidity() method.
+        /** @var ModelReaction $child */
+        if ($parent->getId() != $child->getModelId()) {
+            throw new WrongParentException($this->getParentObjectInfo()->parentEntityClass, $parent->getId(),
+                self::getObjectName(), $child->getId());
+        }
     }
 }

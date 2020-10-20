@@ -95,7 +95,7 @@ class ModelSpecie implements IdentifiedObject
 
 	/**
 	 * Set compartmentId
-	 * @param integer $compartmentId
+	 * @param ModelCompartment $compartmentId
 	 * @return ModelSpecie
 	 */
 	public function setCompartmentId($compartmentId): ModelSpecie

@@ -9,6 +9,7 @@ use App\Entity\IdentifiedObject;
 use App\Helpers\QueryRepositoryHelper;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
+use Exception;
 
 class ModelParameterRepository implements IDependentEndpointRepository
 {
@@ -71,21 +72,25 @@ class ModelParameterRepository implements IDependentEndpointRepository
 		return $query->getQuery()->getArrayResult();
 	}
 
+    /**
+     * @param IdentifiedObject $object
+     * @throws Exception
+     */
 	public function setParent(IdentifiedObject $object): void
 	{
 		$classNames = static::getParentClassName();
 		$errorString = '';
 		$index = 0;
-		foreach ($classNames as $className) {
-			if ($object instanceof $className) {
+		foreach ($classNames as $clsName) {
+			if ($object instanceof $clsName) {
 				$this->parent = $object;
 				return;
 			}
 			$index == 0 ?: $errorString .= ' or ';
 			$index++;
-			$errorString .= $className;
+			$errorString .= $clsName;
 		}
-		throw new \Exception('Parent of parameter must be ' . $errorString);
+		throw new Exception('Parent of parameter must be ' . $errorString);
 	}
 
 	public function getEntityManager()

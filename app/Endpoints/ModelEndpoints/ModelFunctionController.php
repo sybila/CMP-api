@@ -97,9 +97,13 @@ final class ModelFunctionController extends ParentedRepositoryController impleme
 	    return new ParentObjectInfo('reaction-id', ModelReaction::class);
 	}
 
-    protected function checkParentValidity(IdentifiedObject $parent, IdentifiedObject $child)
+    protected function checkParentValidity(IdentifiedObject $reaction, IdentifiedObject $child)
     {
-        // TODO: Implement checkParentValidity() method.
+        /** @var ModelFunction $child */
+        if ($reaction->getId() != $child->getReactionId()) {
+            throw new WrongParentException($this->getParentObjectInfo()->parentEntityClass, $reaction->getId(),
+                self::getObjectName(), $child->getId());
+        }
     }
 }
 

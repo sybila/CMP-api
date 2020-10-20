@@ -9,6 +9,7 @@ use App\Entity\IdentifiedObject;
 use App\Helpers\QueryRepositoryHelper;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
+use Exception;
 
 class ModelReactionItemRepository implements IDependentEndpointRepository
 {
@@ -66,6 +67,10 @@ class ModelReactionItemRepository implements IDependentEndpointRepository
 		return $query->getQuery()->getArrayResult();
 	}
 
+    /**
+     * @param IdentifiedObject $object
+     * @throws Exception
+     */
 	public function setParent(IdentifiedObject $object): void
 	{
 		$classNames = static::getParentClassName();
@@ -80,7 +85,7 @@ class ModelReactionItemRepository implements IDependentEndpointRepository
 			$index++;
 			$errorString .= $className;
 		}
-		throw new \Exception('Parent of reaction item must be ' . $errorString);
+		throw new Exception('Parent of reaction item must be ' . $errorString);
 	}
 
 	public function getEntityManager()

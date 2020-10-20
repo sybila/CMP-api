@@ -5,10 +5,9 @@ namespace App\Repositories\Authorization;
 use App\Entity\Authorization\UserType;
 use App\Entity\Repositories\IEndpointRepository;
 use App\Helpers\QueryRepositoryHelper;
+use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\QueryBuilder;
-use Doctrine\Common\Persistence\ObjectRepository;
 use Doctrine\ORM\EntityManager;
-use League\OAuth2\Server\Entities\ClientEntityInterface;
 
 class UserTypeRepository implements IEndpointRepository
 {
@@ -17,7 +16,7 @@ class UserTypeRepository implements IEndpointRepository
 	/** @var EntityManager */
 	private $em;
 
-	/** @var ObjectRepository */
+	/** @var EntityRepository */
 	private $userTypeRepository;
 
 	/** @var UserType */
@@ -35,7 +34,7 @@ class UserTypeRepository implements IEndpointRepository
         return 'ut';
     }
 
-	public function getById(int $id): ?UserType
+	public function getById(int $id)
 	{
 		return $this->userTypeRepository->find($id);
 	}
@@ -68,9 +67,8 @@ class UserTypeRepository implements IEndpointRepository
 
 	private function buildListQuery(array $filter): QueryBuilder
 	{
-		$query = $this->em->createQueryBuilder()
-			->from(UserType::class, 'ut');
-		return $query;
+        return $this->em->createQueryBuilder()
+            ->from(UserType::class, 'ut');
 	}
 
 }

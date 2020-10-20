@@ -9,6 +9,12 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 trait ControllerValidated
 {
+    /**
+     * Check the arguments and their values in $data according to validator ($rules) defined in the respective controller
+     * @param ArgumentParser $data
+     * @param Assert\Collection|null $rules
+     * @throws MalformedInputException
+     */
 	protected static function validate(ArgumentParser $data, ?Assert\Collection $rules): void
 	{
 		if ($rules === null)

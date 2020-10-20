@@ -2,6 +2,7 @@
 
 use App\Entity\AnalysisBase;
 use App\Entity\IdentifiedObject;
+use App\Exceptions\InvalidTypeException;
 use App\Helpers\ArgumentParser;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -18,6 +19,11 @@ trait AnalysisControllerCommonable
         ];
     }
 
+    /**
+     * @param IdentifiedObject $object
+     * @param ArgumentParser $body
+     * @throws InvalidTypeException
+     */
     protected function setCommonAnalysisData(IdentifiedObject $object, ArgumentParser $body): void
     {
         /** @var AnalysisBase $object */

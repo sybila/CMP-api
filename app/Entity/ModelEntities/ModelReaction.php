@@ -21,7 +21,6 @@ class ModelReaction implements IdentifiedObject
 	protected $modelId;
 
 	/**
-	 * @var int
 	 * @ORM\ManyToOne(targetEntity="ModelCompartment", inversedBy="reactions")
 	 * @ORM\JoinColumn(name="model_compartment_id", referencedColumnName="id")
 	 */
@@ -58,8 +57,8 @@ class ModelReaction implements IdentifiedObject
 	protected $functions;
 
 	/**
-	 * Get modelId
-	 * @return integer
+	 * Get model
+	 * @return IdentifiedObject
 	 */
 	public function getModelId()
 	{
@@ -77,10 +76,10 @@ class ModelReaction implements IdentifiedObject
 		return $this;
 	}
 
-	/**
-	 * Get compartmentId
-	 * @return integer
-	 */
+    /**
+     * Get compartmentId
+     * @return IdentifiedObject
+     */
 	public function getCompartmentId()
 	{
 		return $this->compartmentId;

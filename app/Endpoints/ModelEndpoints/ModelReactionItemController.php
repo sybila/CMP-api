@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use Exception;
 use IGroupRoleAuthWritableController;
 use App\Entity\{
 	ModelParameter,
@@ -10,15 +11,14 @@ use App\Entity\{
 	ModelSpecie,
 	IdentifiedObject,
 	Repositories\IEndpointRepository,
-	Repositories\ModelReactionItemRepository,
-	Repositories\ModelSpecieRepository,
-	Repositories\ModelReactionRepository
+	Repositories\ModelReactionItemRepository
 };
-use App\Exceptions\{MissingRequiredKeyException, NonExistingObjectException, WrongParentException};
+use App\Exceptions\{
+    MissingRequiredKeyException,
+    NonExistingObjectException,
+    WrongParentException};
 use App\Helpers\ArgumentParser;
-use Doctrine\ORM\EntityManager;
 use SBaseControllerCommonable;
-use Slim\Container;
 use Slim\Http\{
 	Request, Response
 };
@@ -77,7 +77,7 @@ abstract class ModelReactionItemController extends ParentedRepositoryController 
 
 	protected function setData(IdentifiedObject $reactionItem, ArgumentParser $data): void
 	{
-		/** @var ModelReactionItem reactionItem */
+		/** @var ModelReactionItem $reactionItem */
         $this->setSBaseData($reactionItem, $data);
 		!$data->hasKey('type') ?: $reactionItem->setType($data->getString('type'));
 		!$data->hasKey('value') ?: $reactionItem->setValue($data->getInt('value'));
@@ -94,23 +94,32 @@ final class ReactionParentedReactionItemController extends ModelReactionItemCont
 	    return new ParentObjectInfo('reaction-id', ModelReaction::class);
 	}
 
+    /**
+     * @param IdentifiedObject $reactionItem
+     * @param ArgumentParser $data
+     * @throws NonExistingObjectException
+     * @throws mixed
+     */
 	protected function setData(IdentifiedObject $reactionItem, ArgumentParser $data): void
 	{
 		/** @var ModelReactionItem $reactionItem */
 		$reactionItem->getReactionId() ?: $reactionItem->setReactionId($this->repository->getParent()->getId());
 		if ($data->hasKey('specieId')) {
 			if ($data->hasKey('parameterId')) {
-				throw new \Exception('reaction item cannot refer to specie and parameter at the same time');
+				throw new Exception('reaction item cannot refer to specie and parameter at the same time');
 			}
-			$specie = $this->repository->getEntityManager()->find(ModelSpecie::class, $data->getInt('specieId'));
+
+			/** @var ModelSpecie $specie */
+			$specie = $this->getObjectViaORM(ModelSpecie::class, $data->getInt('specieId'));
 			if ($specie === null) {
 				throw new NonExistingObjectException($data->getInt('specieId'), 'specie');
 			}
 			$reactionItem->setParameterId(null);
 			$reactionItem->setSpecieId($specie);
 		} else {
-			$parameter = $this->repository->getEntityManager()->find(ModelParameter::class, $data->getInt('parameterId'));
 
+		    /** @var ModelParameter $parameter */
+		    $parameter = $this->getObjectViaORM(ModelParameter::class, $data->getInt('parameterId'));
 			if ($parameter === null) {
 				throw new NonExistingObjectException($data->getInt('parameterId'), 'parameter');
 			}
@@ -138,7 +147,11 @@ final class ReactionParentedReactionItemController extends ModelReactionItemCont
 
     protected function checkParentValidity(IdentifiedObject $parent, IdentifiedObject $child)
     {
-        // TODO: Implement checkParentValidity() method.
+        /** @var ModelReactionItem $child */
+        if ($parent->getId() != $child->getReactionId()) {
+            throw new WrongParentException($this->getParentObjectInfo()->parentEntityClass, $parent->getId(),
+                self::getObjectName(), $child->getId());
+        }
     }
 }
 
@@ -150,12 +163,20 @@ final class SpecieParentedReactionItemController extends ModelReactionItemContro
 	    return new ParentObjectInfo('specie-id', ModelSpecie::class);
 	}
 
+    /**
+     * @inheritDoc
+     * @throws mixed
+     */
 	protected function setData(IdentifiedObject $reactionItem, ArgumentParser $data): void
 	{
 		/** @var ModelReactionItem $reactionItem */
-		$reactionItem->getSpecieId() ?: $reactionItem->setSpecieId($this->repository->getParent()->getId());
+        if (!$reactionItem->getSpecieId()) {
+            /** @var ModelSpecie $specie */
+            $specie = $this->repository->getParent();
+            $reactionItem->setSpecieId($specie);
+        }
 		if ($data->hasKey('reactionId')) {
-			$reaction = $this->repository->getEntityManager()->find(ModelReaction::class, $data->getInt('reactionId'));
+		    $reaction = $this->getObjectViaORM(ModelReaction::class, $data->getInt('reactionId'));
 			if ($reaction === null) {
 				throw new NonExistingObjectException($data->getInt('reactionId'), 'reaction');
 			}
@@ -173,17 +194,26 @@ final class SpecieParentedReactionItemController extends ModelReactionItemContro
 			throw new MissingRequiredKeyException('specieId');
 	}
 
+    /**
+     * @param ArgumentParser $body
+     * @return IdentifiedObject
+     * @throws mixed
+     */
 	protected function createObject(ArgumentParser $body): IdentifiedObject
 	{
 		if (!$body->hasKey('reactionId'))
 			throw new MissingRequiredKeyException('reactionId');
 		if ($body->hasKey('parameterId'))
-			throw new \Exception('reaction item cannot refer to specie and parameter at the same time');
+			throw new Exception('reaction item cannot refer to specie and parameter at the same time');
 		return new ModelReactionItem;
 	}
 
     protected function checkParentValidity(IdentifiedObject $parent, IdentifiedObject $child)
     {
-        // TODO: Implement checkParentValidity() method.
+        /** @var ModelReactionItem $child */
+        if ($parent->getId() != $child->getSpecieId()) {
+            throw new WrongParentException($this->getParentObjectInfo()->parentEntityClass, $parent->getId(),
+                self::getObjectName(), $child->getId());
+        }
     }
 }

@@ -94,6 +94,10 @@ final class ModelInitialAssignmentController extends ParentedRepositoryControlle
 
     protected function checkParentValidity(IdentifiedObject $parent, IdentifiedObject $child)
     {
-        // TODO: Implement checkParentValidity() method.
+        /** @var ModelInitialAssignment $child */
+        if ($parent->getId() != $child->getModelId()) {
+            throw new WrongParentException($this->getParentObjectInfo()->parentEntityClass, $parent->getId(),
+                self::getObjectName(), $child->getId());
+        }
     }
 }

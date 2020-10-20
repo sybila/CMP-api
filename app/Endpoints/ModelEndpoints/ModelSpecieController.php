@@ -11,10 +11,12 @@ use App\Entity\{ModelCompartment,
     Repositories\ModelSpecieRepository,
     Repositories\IEndpointRepository,
     Repositories\ModelCompartmentRepository};
-use App\Exceptions\{MissingRequiredKeyException, DependentResourcesBoundException, WrongParentException};
+use App\Exceptions\{InvalidTypeException,
+    MissingRequiredKeyException,
+    DependentResourcesBoundException,
+    WrongParentException};
 use App\Helpers\ArgumentParser;
 use SBaseControllerCommonable;
-use Slim\Container;
 use Slim\Http\{
 	Request, Response
 };
@@ -33,8 +35,16 @@ final class ModelSpecieController extends ParentedRepositoryController implement
 		return ['id', 'name'];
 	}
 
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param ArgumentParser $args
+     * @return Response
+     * @throws InvalidTypeException
+     */
 	public function readSbmlId(Request $request, Response $response, ArgumentParser $args)
 	{
+	    /** @var ModelSpecie $specie */
 		$specie = $this->repository->getBySbmlId($args->getString('sbmlId'));
 		return self::formatOk(
 			$response,
@@ -65,7 +75,11 @@ final class ModelSpecieController extends ParentedRepositoryController implement
 		/** @var ModelSpecie $specie */
 		$this->setSBaseData($specie, $data);
 		$specie->setModelId($this->repository->getParent()->getModelId()->getId());
-		$specie->getCompartmentId() ?: $specie->setCompartmentId($this->repository->getParent());
+		if(!$specie->getCompartmentId()) {
+		    /** @var ModelCompartment $compartment */
+		    $compartment = $this->repository->getParent();
+            $specie->setCompartmentId($compartment);
+        }
 		!$data->hasKey('initialExpression') ?: $specie->setInitialExpression($data->getString('initialExpression'));
 		!$data->hasKey('boundaryCondition') ?: $specie->setBoundaryCondition($data->getInt('boundaryCondition'));
 		!$data->hasKey('hasOnlySubstanceUnits') ?: $specie->setHasOnlySubstanceUnits($data->getInt('hasOnlySubstanceUnits'));
@@ -97,7 +111,7 @@ final class ModelSpecieController extends ParentedRepositoryController implement
 	public function delete(Request $request, Response $response, ArgumentParser $args): Response
 	{
 		$specie = $this->getObject($args->getInt('id'));
-		if (!$specie->getRulesItems()->isEmpty())
+		if (!$specie->getRules()->isEmpty())
 			throw new DependentResourcesBoundException('rule');
 		if (!$specie->getReactionItems()->isEmpty())
 			throw new DependentResourcesBoundException('reactionItem');
@@ -138,6 +152,10 @@ final class ModelSpecieController extends ParentedRepositoryController implement
 
     protected function checkParentValidity(IdentifiedObject $parent, IdentifiedObject $child)
     {
-        // TODO: Implement checkParentValidity() method.
+        /** @var ModelSpecie $child */
+        if ($parent->getId() != $child->getCompartmentId()) {
+            throw new WrongParentException($this->getParentObjectInfo()->parentEntityClass, $parent->getId(),
+                self::getObjectName(), $child->getId());
+        }
     }
 }

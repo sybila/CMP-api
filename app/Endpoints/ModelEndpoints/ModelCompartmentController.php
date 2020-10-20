@@ -135,6 +135,10 @@ final class ModelCompartmentController extends ParentedRepositoryController impl
 
     protected function checkParentValidity(IdentifiedObject $parent, IdentifiedObject $child)
     {
-        // TODO: Implement checkParentValidity() method.
+        /** @var ModelCompartment $child */
+        if ($parent->getId() != $child->getModelId()) {
+            throw new WrongParentException($this->getParentObjectInfo()->parentEntityClass, $parent->getId(),
+                self::getObjectName(), $child->getId());
+        }
     }
 }

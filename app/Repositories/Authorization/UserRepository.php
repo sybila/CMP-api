@@ -3,19 +3,10 @@
 namespace App\Repositories\Authorization;
 
 use App\Entity\Authorization\User;
-use App\Entity\Authorization\UserGroup;
-use App\Entity\Authorization\UserGroupToUser;
-use App\Entity\Authorization\UserType;
-use App\Entity\Experiment;
-use App\Entity\Model;
 use App\Entity\Repositories\IEndpointRepository;
-use App\Exceptions\InvalidAuthenticationException;
-use App\Helpers\QueryRepositoryHelper;
 use Doctrine\Common\Collections\Criteria;
-use Doctrine\Common\Collections\Expr\Expression;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\QueryBuilder;
-use Doctrine\Common\Persistence\ObjectRepository;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Tools\AttachEntityListenersListener;
 use League\OAuth2\Server\Entities\ClientEntityInterface;

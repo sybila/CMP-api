@@ -95,6 +95,10 @@ final class ModelEventAssignmentController extends ParentedRepositoryController
 
     protected function checkParentValidity(IdentifiedObject $parent, IdentifiedObject $child)
     {
-        // TODO: Implement checkParentValidity() method.
+        /** @var ModelEventAssignment $child */
+        if ($parent->getId() != $child->getEventId()) {
+            throw new WrongParentException($this->getParentObjectInfo()->parentEntityClass, $parent->getId(),
+                self::getObjectName(), $child->getId());
+        }
     }
 }

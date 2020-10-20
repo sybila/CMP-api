@@ -8,6 +8,7 @@ use App\Entity\IdentifiedObject;
 use App\Helpers\QueryRepositoryHelper;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
+use Exception;
 
 class ModelCompartmentRepository implements IDependentEndpointRepository
 {
@@ -70,11 +71,15 @@ class ModelCompartmentRepository implements IDependentEndpointRepository
         return $this->model;
     }
 
+    /**
+     * @param IdentifiedObject $object
+     * @throws Exception
+     */
     public function setParent(IdentifiedObject $object): void
     {
         $className = Model::class;
         if (!($object instanceof $className))
-            throw new \Exception('Parent of compartment must be ' . $className);
+            throw new Exception('Parent of compartment must be ' . $className);
         $this->model = $object;
     }
 

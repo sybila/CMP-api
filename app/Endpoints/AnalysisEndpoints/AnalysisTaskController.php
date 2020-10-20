@@ -9,7 +9,6 @@ use App\Entity\Experiment;
 use App\Entity\IdentifiedObject;
 use App\Entity\Model;
 use App\Entity\Repositories\AnalysisTaskRepository;
-use App\Exceptions\InvalidAuthenticationException;
 use App\Exceptions\MissingRequiredKeyException;
 use App\Exceptions\NonExistingObjectException;
 use App\Exceptions\WrongParentException;

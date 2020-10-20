@@ -11,11 +11,9 @@ use App\Entity\{Model,
     IdentifiedObject,
     Repositories\IEndpointRepository,
     Repositories\ModelParameterRepository};
-use App\Exceptions\{CompartmentLocationException,
-    InvalidArgumentException,
+use App\Exceptions\{InvalidTypeException,
     MissingRequiredKeyException,
     NonExistingObjectException,
-    UniqueKeyViolationException,
     WrongParentException};
 use App\Helpers\ArgumentParser;
 use Slim\Http\{
@@ -39,6 +37,14 @@ abstract class ModelParameterController extends ParentedRepositoryController
 		return ['id, name'];
 	}
 
+
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param ArgumentParser $args
+     * @return Response
+     * @throws InvalidTypeException
+     */
 	public function readSbmlId(Request $request, Response $response, ArgumentParser $args)
 	{
 	    /** @var IdentifiedObject $parameter */
@@ -107,6 +113,13 @@ final class ModelParentedParameterController extends ModelParameterController
 	    return new ParentObjectInfo('model-id', Model::class);
 	}
 
+    /**
+     * @param IdentifiedObject $parameter
+     * @param ArgumentParser $data
+     * @throws InvalidTypeException
+     * @throws NonExistingObjectException
+     * @throws mixed ORMException
+     */
 	protected function setData(IdentifiedObject $parameter, ArgumentParser $data): void
 	{
 		/** @var ModelParameter $parameter */

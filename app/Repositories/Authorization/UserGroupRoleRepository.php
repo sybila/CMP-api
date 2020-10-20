@@ -7,7 +7,6 @@ use App\Entity\Repositories\IEndpointRepository;
 use App\Helpers\QueryRepositoryHelper;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\QueryBuilder;
-use Doctrine\Common\Persistence\ObjectRepository;
 use Doctrine\ORM\EntityManager;
 use League\OAuth2\Server\Entities\ClientEntityInterface;
 
@@ -36,7 +35,7 @@ class UserGroupRoleRepository implements IEndpointRepository
         return 'gr';
     }
 
-	public function getById(int $id): ?UserGroupRole
+	public function getById(int $id)
 	{
 		return $this->userGroupRoleRepository->find($id);
 	}
@@ -69,9 +68,8 @@ class UserGroupRoleRepository implements IEndpointRepository
 
 	private function buildListQuery(array $filter): QueryBuilder
 	{
-		$query = $this->em->createQueryBuilder()
-			->from(UserGroupRole::class, 'gr');
-		return $query;
+        return $this->em->createQueryBuilder()
+            ->from(UserGroupRole::class, 'gr');
 	}
 
 }

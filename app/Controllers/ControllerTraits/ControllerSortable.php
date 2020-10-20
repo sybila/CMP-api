@@ -3,10 +3,19 @@
 namespace App\Controllers;
 
 use App\Exceptions\InvalidSortFieldException;
+use App\Exceptions\InvalidTypeException;
 use App\Helpers\ArgumentParser;
 
 trait ControllerSortable
 {
+    /**
+     * Check & unite format of sort parameters. Returns array, where keys are the attributes that are to be sorted
+     * and the values is the manner (asc or desc) of this sorting.
+     * @param ArgumentParser $args
+     * @return array
+     * @throws InvalidSortFieldException
+     * @throws InvalidTypeException
+     */
 	protected static function getSort(ArgumentParser $args): array
 	{
 		$order = [];

@@ -8,7 +8,6 @@ use App\Entity\{Model,
     ModelEventAssignment,
     IdentifiedObject,
     Repositories\IEndpointRepository,
-    Repositories\ModelRepository,
     Repositories\ModelEventRepository};
 use App\Exceptions\{DependentResourcesBoundException, MissingRequiredKeyException, WrongParentException};
 use App\Helpers\ArgumentParser;
@@ -108,8 +107,12 @@ final class ModelEventController extends ParentedRepositoryController implements
 	    return new ParentObjectInfo('model-id', Model::class);
 	}
 
-    protected function checkParentValidity(IdentifiedObject $parent, IdentifiedObject $child)
+    protected function checkParentValidity(IdentifiedObject $model, IdentifiedObject $child)
     {
-        // TODO: Implement checkParentValidity() method.
+        /** @var ModelEvent $child */
+        if ($model->getId() != $child->getModelId()) {
+            throw new WrongParentException($this->getParentObjectInfo()->parentEntityClass, $model->getId(),
+                self::getObjectName(), $child->getId());
+        }
     }
 }

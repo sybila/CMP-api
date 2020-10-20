@@ -5,16 +5,14 @@ namespace App\Controllers;
 use App\Entity\{Entity,
     IdentifiedObject,
     Model,
-    ModelParameter,
     ModelRule,
     Repositories\IEndpointRepository,
-    Repositories\ModelRepository,
     Repositories\ModelRuleRepository};
+use Exception;
 use IGroupRoleAuthWritableController;
 use App\Exceptions\{InvalidArgumentException, MissingRequiredKeyException, WrongParentException};
 use App\Helpers\ArgumentParser;
 use SBaseControllerCommonable;
-use Slim\Container;
 use Slim\Http\{
 	Request, Response
 };
@@ -56,7 +54,7 @@ abstract class ModelRuleController extends ParentedRepositoryController implemen
 	{
 		try {
 			$a = parent::delete($request, $response, $args);
-		} catch (\Exception $e) {
+		} catch (Exception $e) {
 			throw new InvalidArgumentException('annotation', $args->getString('annotation'), 'must be in format term:id');
 		}
 		return $a;
@@ -112,6 +110,10 @@ final class ModelParentedRuleController extends ModelRuleController
 
     protected function checkParentValidity(IdentifiedObject $parent, IdentifiedObject $child)
     {
-        // TODO: Implement checkParentValidity() method.
+        /** @var ModelRule $child */
+        if ($parent->getId() != $child->getModelId()) {
+            throw new WrongParentException($this->getParentObjectInfo()->parentEntityClass, $parent->getId(),
+                self::getObjectName(), $child->getId());
+        }
     }
 }

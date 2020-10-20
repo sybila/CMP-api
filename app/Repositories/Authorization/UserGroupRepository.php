@@ -3,13 +3,10 @@
 namespace App\Repositories\Authorization;
 
 use App\Entity\Authorization\UserGroup;
-use App\Entity\Authorization\UserType;
 use App\Entity\EntityRepository;
-use App\Entity\IdentifiedObject;
 use App\Entity\Repositories\IEndpointRepository;
 use App\Helpers\QueryRepositoryHelper;
 use Doctrine\ORM\QueryBuilder;
-use Doctrine\Common\Persistence\ObjectRepository;
 use Doctrine\ORM\EntityManager;
 use League\OAuth2\Server\Entities\ClientEntityInterface;
 

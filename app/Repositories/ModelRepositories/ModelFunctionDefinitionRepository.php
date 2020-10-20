@@ -8,6 +8,7 @@ use App\Entity\IdentifiedObject;
 use App\Helpers\QueryRepositoryHelper;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
+use Exception;
 
 class ModelFunctionDefinitionRepository implements IDependentEndpointRepository
 {
@@ -65,11 +66,15 @@ class ModelFunctionDefinitionRepository implements IDependentEndpointRepository
 		return $this->model;
 	}
 
+    /**
+     * @param IdentifiedObject $object
+     * @throws Exception
+     */
 	public function setParent(IdentifiedObject $object): void
 	{
 		$className = static::getParentClassName();
 		if (!($object instanceof $className))
-			throw new \Exception('Parent of initial assignment must be ' . $className);
+			throw new Exception('Parent of initial assignment must be ' . $className);
 		$this->model = $object;
 	}
 

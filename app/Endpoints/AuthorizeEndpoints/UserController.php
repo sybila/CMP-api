@@ -335,6 +335,10 @@ class UserController extends WritableRepositoryController
     //-----MAIL NOTIFICATION HELPERS
     //FIXME move me to some other place, once the platform notifications are implemented
 
+    /**
+     * @param $receiver
+     * @throws MissingRequiredKeyException
+     */
     protected function sendConfirmationMail($receiver){
         try {
             $transport = Transport::fromDsn($this->mailer['dsn']);
@@ -358,6 +362,11 @@ class UserController extends WritableRepositoryController
         }
     }
 
+    /**
+     * @param $message
+     * @param $receiver
+     * @throws MissingRequiredKeyException
+     */
     protected function sendNotificationEmail($message, $receiver){
         try {
             $transport = Transport::fromDsn($this->mailer['dsn']);

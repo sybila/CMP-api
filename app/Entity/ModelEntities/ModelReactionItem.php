@@ -14,21 +14,18 @@ class ModelReactionItem implements IdentifiedObject
 	use SBase;
 
 	/**
-	 * @var int
 	 * @ORM\ManyToOne(targetEntity="ModelParameter", inversedBy="reactionItems")
 	 * @ORM\JoinColumn(name="model_parameter_id", referencedColumnName="id")
 	 */
 	protected $parameterId;
 
 	/**
-	 * @var int
 	 * @ORM\ManyToOne(targetEntity="ModelReaction", inversedBy="reactionItems")
 	 * @ORM\JoinColumn(name="model_reaction_id", referencedColumnName="id")
 	 */
 	protected $reactionId;
 
 	/**
-	 * @var int
 	 * @ORM\ManyToOne(targetEntity="ModelSpecie", inversedBy="reactionItems")
 	 * @ORM\JoinColumn(name="model_specie_id", referencedColumnName="id")
 	 */
@@ -54,7 +51,7 @@ class ModelReactionItem implements IdentifiedObject
 
 	/**
 	 * Get parameterId
-	 * @return integer
+	 * @return ModelParameter
 	 */
 	public function getParameterId()
 	{
@@ -63,7 +60,7 @@ class ModelReactionItem implements IdentifiedObject
 
 	/**
 	 * Set parameterId
-	 * @param integer $parameterId
+	 * @param ModelParameter $parameterId
 	 * @return ModelReactionItem
 	 */
 	public function setParameterId($parameterId): ModelReactionItem
@@ -72,10 +69,10 @@ class ModelReactionItem implements IdentifiedObject
 		return $this;
 	}
 
-	/**
-	 * Get reactionId
-	 * @return integer
-	 */
+    /**
+     * Get reactionId
+     * @return ModelReaction
+     */
 	public function getReactionId()
 	{
 		return $this->reactionId;
@@ -94,7 +91,7 @@ class ModelReactionItem implements IdentifiedObject
 
 	/**
 	 * Get specieId
-	 * @return integer
+	 * @return ModelSpecie
 	 */
 	public function getSpecieId()
 	{
@@ -103,7 +100,7 @@ class ModelReactionItem implements IdentifiedObject
 
 	/**
 	 * Set specieId
-	 * @param integer $specieId
+	 * @param ModelSpecie $specieId
 	 * @return ModelReactionItem
 	 */
 	public function setSpecieId($specieId): ModelReactionItem
@@ -121,13 +118,13 @@ class ModelReactionItem implements IdentifiedObject
 		return $this->type;
 	}
 
-	/**
-	 * Set type
-	 * @param string $type
-	 * @return ModelUnitToDefinition
-	 */
-	public function setType($type): ModelReactionItem
-	{
+    /**
+     * Set type
+     * @param string $type
+     * @return ModelReactionItem
+     */
+	public function setType(string $type)
+    {
 		$this->type = $type;
 		return $this;
 	}
