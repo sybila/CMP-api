@@ -2,20 +2,27 @@
 
 namespace App\Controllers;
 
-use App\Entity\{Attribute,
-    IdentifiedObject,
-    PhysicalQuantity,
-    Repositories\AttributeRepository,
-    Repositories\IEndpointRepository,
-    Repositories\PhysicalQuantityRepository,
-    Repositories\UnitRepository,
-    Unit};
+use App\Entity\{
+	Attribute,
+	Bioquantity,
+	IdentifiedObject,
+	PhysicalQuantity,
+	Repositories\AttributeRepository,
+	Repositories\IEndpointRepository,
+	Repositories\PhysicalQuantityRepository,
+	Repositories\UnitRepository,
+	Unit
+};
 use Doctrine\Common\Collections\ArrayCollection;
-use App\Exceptions\{MissingRequiredKeyException, WrongParentException};
+use App\Exceptions\{
+	MissingRequiredKeyException,
+	WrongParentException
+};
 use App\Helpers\ArgumentParser;
 use Slim\Container;
 use Slim\Http\{
-	Request, Response
+	Request,
+	Response
 };
 use Symfony\Component\Validator\Constraints as Assert;
 use UnitEndpointAuthorizable;
@@ -28,48 +35,58 @@ use function Composer\Autoload\includeFile;
 final class AttributeController extends ParentedRepositoryController
 {
 
-    use UnitEndpointAuthorizable;
+	use UnitEndpointAuthorizable;
 
 	/** @var AttributeRepository */
 	private $attributeRepository;
-    private $unitRepository;
-    private $quantityRepository;
+
+	private $unitRepository;
+
+	private $quantityRepository;
+
 
 	public function __construct(Container $v)
 	{
 		parent::__construct($v);
 		$this->attributeRepository = $v->get(AttributeRepository::class);
-        $this->unitRepository = $v->get(UnitRepository::class);
-        $this->quantityRepository = $v->get(PhysicalQuantityRepository::class);
+		$this->unitRepository = $v->get(UnitRepository::class);
+		$this->quantityRepository = $v->get(PhysicalQuantityRepository::class);
 	}
+
 
 	protected static function getAllowedSort(): array
 	{
 		return ['id', 'name', 'note'];
 	}
 
+
 	protected function getData(IdentifiedObject $attribute): array
 	{
 		/** @var Attribute $attribute */
-        $includeUnits = ($attribute->getQuantityId() !== null) ?
-            $this->quantityRepository->get($attribute->getQuantityId()->getId())->getUnits()->filter(function (Unit $unit) use($attribute){
-                return !$attribute->getExcludedUnits()->contains($unit);
-            }) : new ArrayCollection();
-        //dump($includeUnits); exit;
-        $includeUnits = $includeUnits->map(function (Unit $unit) {
-            return [
-                'id' => $unit->getId(),
-                'preferred_name' => $unit->getPreferredName(),
-                'coefficient' => $unit->getCoefficient(),
-                'sbmlId' => $unit->getSbmlId()];
-        })->toArray();
+		$includeUnits = ($attribute->getQuantityId() !== null) ?
+			$this->quantityRepository->get($attribute->getQuantityId()->getId())->getUnits()->filter(function (Unit $unit) use($attribute) {
+				return !$attribute->getExcludedUnits()->contains($unit);
+			}) : new ArrayCollection();
+		//dump($includeUnits); exit; // dump in deploy??
+		// Try to avoid redeclaring variables, $includeUnits becomes two different objects during the lifecycle of this function
+		$includeUnits = $includeUnits->map(function (Unit $unit) {
+				return [
+					'id' => $unit->getId(),
+					'preferred_name' => $unit->getPreferredName(),
+					'coefficient' => $unit->getCoefficient(),
+					'sbmlId' => $unit->getSbmlId()];
+			})->toArray();
 		return [
-		    'id' => $attribute->getId(),
+			'id' => $attribute->getId(),
 			'name' => $attribute->getName(),
-            'note' => $attribute->getNote(),
-            'units' => $includeUnits
-        ];
+			'note' => $attribute->getNote(),
+			'units' => $includeUnits,
+			'bioquantities' => $attribute->getBioquantities()->map(function (Bioquantity $bioquantities) {
+					return ['id' => $bioquantities->getId(), 'name' => $bioquantities->getName()];
+				})->toArray(),
+		];
 	}
+
 
 	protected function setData(IdentifiedObject $attribute, ArgumentParser $data): void
 	{
@@ -77,17 +94,19 @@ final class AttributeController extends ParentedRepositoryController
 		$attribute->getQuantityId() ?: $attribute->setQuantityId($this->repository->getParent());
 		!$data->hasKey('name') ?: $attribute->setName($data->getString('name'));
 		!$data->hasKey('note') ?: $attribute->setNote($data->getString('note'));
-        !$data->hasKey('excludeUnit') ?: $attribute->excludeUnit($this->unitRepository->get($data->getInt('excludeUnit')));
-        !$data->hasKey('includeUnit') ?: $attribute->includeUnit($this->unitRepository->get($data->getInt('includeUnit')));
+		!$data->hasKey('excludeUnit') ?: $attribute->excludeUnit($this->unitRepository->get($data->getInt('excludeUnit')));
+		!$data->hasKey('includeUnit') ?: $attribute->includeUnit($this->unitRepository->get($data->getInt('includeUnit')));
 	}
+
 
 	protected function createObject(ArgumentParser $body): IdentifiedObject
 	{
 		if (!$body->hasKey('name'))
 			throw new MissingRequiredKeyException('name');
-		
+
 		return new Attribute();
 	}
+
 
 	protected function checkInsertObject(IdentifiedObject $attribute): void
 	{
@@ -98,35 +117,41 @@ final class AttributeController extends ParentedRepositoryController
 			throw new MissingRequiredKeyException('name');
 	}
 
+
 	public function delete(Request $request, Response $response, ArgumentParser $args): Response
 	{
-        $attribute = $this->getObject($args->getInt('id'));
+		$attribute = $this->getObject($args->getInt('id'));
 		if (!$attribute->getExcludedUnits()->isEmpty())
-            $attribute->getExcludedUnits()->clear();
+			$attribute->getExcludedUnits()->clear();
 		return parent::delete($request, $response, $args);
 	}
 
+
 	protected function getValidator(): Assert\Collection
 	{
-		return new Assert\Collection( [
+		return new Assert\Collection([
 			'quantityId' => new Assert\Type(['type' => 'integer']),
 		]);
 	}
+
 
 	protected static function getObjectName(): string
 	{
 		return 'attribute';
 	}
 
+
 	protected static function getRepositoryClassName(): string
 	{
 		return AttributeRepository::Class;
 	}
 
+
 	protected static function getParentRepositoryClassName(): string
 	{
 		return PhysicalQuantityRepository::class;
 	}
+
 
 	protected function getParentObjectInfo(): array
 	{
@@ -134,8 +159,9 @@ final class AttributeController extends ParentedRepositoryController
 	}
 
 
-    protected function checkParentValidity(IdentifiedObject $parent, IdentifiedObject $child)
-    {
-        // TODO: Implement checkParentValidity() method.
-    }
+	protected function checkParentValidity(IdentifiedObject $parent, IdentifiedObject $child)
+	{
+		// TODO: Implement checkParentValidity() method.
+	}
+
 }

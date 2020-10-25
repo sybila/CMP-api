@@ -45,7 +45,15 @@ class Attribute implements IdentifiedObject
      * @ORM\JoinTable(name="unit_attribute_excluded_unit", joinColumns={@ORM\JoinColumn(name="att_id", referencedColumnName="id")},
      * inverseJoinColumns={@ORM\JoinColumn(name="unit_id", referencedColumnName="id")})
      */
-    private $excluded_units;
+    private $excluded_units; // I recommend using camelCase for variable naming conventions to maintain unity - Havlík
+
+    /**
+	 * @var ArrayCollection
+	 * @ORM\ManyToMany(targetEntity="Bioquantity", inversedBy="attributes")
+	 * @ORM\JoinTable(name="bioquantity_to_attribute", joinColumns={@ORM\JoinColumn(name="attributeId", referencedColumnName="id")},
+	 * inverseJoinColumns={@ORM\JoinColumn(name="bioquantityId", referencedColumnName="id")})
+     */
+    private $bioquantities;
 
     public function __construct()
     {
@@ -122,6 +130,14 @@ class Attribute implements IdentifiedObject
     public function getExcludedUnits(): Collection
     {
         return $this->excluded_units;
+    }
+
+    /**
+     * @return Bioquantities[]|Collection
+     */
+    public function getBioquantities(): Collection
+    {
+        return $this->bioquantities;
     }
 
     /**

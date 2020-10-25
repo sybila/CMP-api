@@ -489,7 +489,7 @@ types:
     type: ModelUnitDefinition
     properties:
       units: array
-      bionumbers:
+      biouquantities:
         type: IdentifierNameList
 
   Unit:
@@ -502,9 +502,9 @@ types:
   UnitDetail:
     type: Unit
 
-# Bionumber entities
+# Biouquanty entities
 
-  Bionumber:
+  Bioquantity:
     properties:
       id: Identifier
       name: string
@@ -519,8 +519,8 @@ types:
       valueFrom: number
       valueStep: number
 
-  BionumberDetail:
-    type: Bionumber
+  BioquantityDetail:
+    type: Bioquantity
     properties:
       modelUnits:
         type: IdentifierNameList
@@ -1186,7 +1186,7 @@ resourceTypes:
   /{id}:
     type: {_object: {type: UnitDetail}}
 
-/bionumber:
-  type: {_objectList: {type: Bionumber, "sortBy" : 'id'} }
+/bioquantity:
+  type: {_objectList: {type: Bioquantity, "sortBy" : 'id'} }
   /{id}:
-    type: {_object: {type: BionumberDetail}}
+    type: {_object: {type: BioquantityDetail}}
