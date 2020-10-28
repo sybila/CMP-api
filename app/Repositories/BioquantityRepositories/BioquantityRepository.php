@@ -14,6 +14,7 @@ use Doctrine\ORM\QueryBuilder;
  */
 class BioquantityRepository implements IEndpointRepository
 {
+	use QueryRepositoryHelper;
 
 	/** @var EntityManager * */
 	protected $em;
@@ -43,8 +44,8 @@ class BioquantityRepository implements IEndpointRepository
 		$query = $this->buildListQuery($filter)
 			->select('bq.id, bq.name, bq.organismId, bq.userId, bq.isValid, bq.value, bq.link, bq.timeFrom, bq.timeTo, bq.valueFrom, bq.valueTo, bq.valueStep');
 
-		/** FIX: Below statement should be used but is broken by @satanio commit 18/10/2020 */
-		//$query = QueryRepositoryHelper::addPaginationSortDql($query, $sort, $limit);
+		$query = $this->addPagingDql($query, $limit);
+		$query = $this->addSortDql($query, $sort);
 		return $query->getQuery()->getArrayResult();
 	}
 
@@ -62,8 +63,7 @@ class BioquantityRepository implements IEndpointRepository
 	{
 		$query = $this->em->createQueryBuilder()
 			->from(Bioquantity::class, 'bq');
-		/** FIX: Below statement should be used but is broken by @satanio commit 18/10/2020 */
-		//$query = QueryRepositoryHelper::addFilterDql($query, $filter);
+		$query =  $this->addFilterDql($query, $filter);
 		return $query;
 	}
 
