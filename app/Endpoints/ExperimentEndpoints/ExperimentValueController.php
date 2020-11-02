@@ -38,10 +38,12 @@ final class ExperimentValueController extends ParentedRepositoryController imple
 
 	/** @var ExperimentValueRepository */
 	private $valueRepository;
+	private $variableRepository;
 
 	public function __construct(Container $c)
 	{
 		parent::__construct($c);
+		$this->variableRepository = $c->get(ExperimentVariableRepository::class);
 		$this->valueRepository = $c->get(ExperimentValueRepository::class);
 	}
 
@@ -101,6 +103,23 @@ final class ExperimentValueController extends ParentedRepositoryController imple
 			//'time' => new Assert\Type(['type' => 'double']),
 		]);
 	}
+
+	public function createObjects(Request $request, Response $response)
+    {
+        foreach ($request->getParsedBody()['values'] as $val) {
+            $newValue = new ExperimentValues();
+            $newValue->setValue($val["value"]);
+            $newValue->setTime($val["time"]);
+            $variable = $this->variableRepository->get($val["variableId"]);
+            $newValue->setVariableId($variable);
+            $variable->addValue($newValue);
+            $this->orm->persist($newValue);
+            $this->orm->flush();
+            dump($newValue->getValue());
+        }
+        //exit;
+        return self::formatOk($response, []);
+    }
 
 	protected static function getObjectName(): string
 	{

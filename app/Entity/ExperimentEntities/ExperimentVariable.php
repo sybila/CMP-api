@@ -181,6 +181,11 @@ class ExperimentVariable implements IdentifiedObject
 		return $this->notes;
 	}
 
+
+	public function addValue($val)
+    {
+        $this->values[] = $val;
+    }
 //    /**
 //     * @return BioquantityVariable[]|Collection
 //     */

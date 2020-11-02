@@ -347,6 +347,7 @@ return function(App $app) {
 
 	//experiment
     $app->delete('/experiment/{exp-id}/data',  Ctl\ExperimentController::class . ':deleteData');
+    $app->post('/experiment/values', Ctl\ExperimentValueController::class . ':createObjects');
 
 	// entities
 	$app->post('/entities/{id:\\d+}/status', Ctl\EntityController::class . ':editStatus');
