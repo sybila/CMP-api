@@ -1,0 +1,120 @@
+#%RAML 1.0 Library
+types:
+  Identifier:
+    type: integer
+    minimum: 1
+    required: true
+    example: 15
+  IdentifierName:
+    properties:
+      id: Identifier
+      name: string
+  UrlIdentifierList:
+    description: Multiple Identifiers separated by comma
+    type: string
+    required: true
+    pattern: '[0-9,]+'
+    example: 1,18,2
+  IdentifierList:
+    type: array
+    items: integer
+    uniqueItems: true
+  IdentifierNameList:
+    type: array
+    items: IdentifierName
+    uniqueItems: true
+  OptionalIdentifier:
+    type: integer
+    minimum: 1
+    required: false
+    example: 15
+  ResponseStatus:
+    type: string
+    enum: ['ok', 'error']
+  ResponseCode:
+    type: integer
+    minimum: 1
+    required: false
+    description: Same as HTTP code or custom (700+, listed in /version/errors docs) when HTTP code is 400
+  AuthorizationCodeRequest:
+    properties:
+      grant_type:
+        description: Type of requested access token
+        type: string
+        enum:
+          - client_credentials
+          - authorization_code
+          - refresh_token
+        required: true
+      client_id:
+        type: string
+        required: true
+      client_secret:
+        type: string
+        required: true
+  RefreshCodeRequest:
+    type: AuthorizationCodeRequest
+    properties:
+      refresh_token:
+        type: string
+        required: true
+  PasswordCodeRequest:
+    type: AuthorizationCodeRequest
+    properties:
+      username:
+        type: string
+        required: true
+      password:
+        type: string
+        required: true
+  User:
+    properties:
+      id: Identifier
+      username:
+        type: string
+        required: true
+      name:
+        type: string
+        required: true
+      surname:
+        type: string
+        required: true
+      password:
+        type: string
+        required: true
+      type:
+        type: UserType
+      email: string
+      groups: array
+  UserType:
+    properties:
+      id: Identifier
+      tier:
+        type: integer
+        required: true
+      name:
+        type: string
+        required: true
+  UserGroup:
+    properties:
+      id: Identifier
+      name:
+        type: string
+        required: true
+      type:
+        type: integer
+        required: true
+      description:
+        type: string
+        required: true
+      users:
+        type: User[]
+  UserGroupRole:
+    properties:
+      id: Identifier
+      tier:
+        type: integer
+        required: true
+      name:
+        type: string
+        required: true

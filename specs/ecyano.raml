@@ -1,5 +1,9 @@
 #%RAML 1.0
 title: Ecyano API
+uses:
+  AuthModule: AuthModule.raml
+  MdlModule: ModelsModule.raml
+  ExModule: ExperimentsModule.raml
 version: 0.2
 baseUri: https://api.e-cyanobacterium.org
 mediaType: application/json
@@ -44,86 +48,6 @@ types:
     description: Same as HTTP code or custom (700+, listed in /version/errors docs) when HTTP code is 400
 
 ### User module types //needs revision
-  AuthorizationCodeRequest:
-    properties:
-      grant_type:
-        description: Type of requested access token
-        type: string
-        enum: ["client_credentials", "authorization_code", "refresh_token"]
-        required: true
-      client_id:
-        type: string
-        required: true
-      client_secret:
-        type: string
-        required: true
-  RefreshCodeRequest:
-    type: AuthorizationCodeRequest
-    properties:
-      refresh_token:
-        type: string
-        required: true
-  PasswordCodeRequest:
-    type: AuthorizationCodeRequest
-    properties:
-      username:
-        type: string
-        required: true
-      password:
-        type: string
-        required: true
-  User:
-    properties:
-      id: Identifier
-      username:
-        type: string
-        required: true
-      name:
-        type: string
-        required: true
-      surname:
-        type: string
-        required: true
-      password:
-        type: string
-        required: true
-      type:
-        type: UserType
-      email: string
-      groups: array
-  UserType:
-    properties:
-      id: Identifier
-      tier:
-        type: integer
-        required: true
-      name:
-        type: string
-        required: true
-  UserGroup:
-    properties:
-      id: Identifier
-      name:
-        type: string
-        required: true
-      type:
-        type: integer
-        required: true
-      description:
-        type: string
-        required: true
-      users:
-        type: User[]
-  UserGroupRole:
-    properties:
-      id: Identifier
-      tier:
-        type: integer
-        required: true
-      name:
-        type: string
-        required: true
-
 ### BCS types //needs revision
   Classification:
     properties:
@@ -264,236 +188,17 @@ types:
 
 ### Model types specification starts here
 ## First, common model types definitions
-  SbmlId:
-    type: string
-    description: String Identifier for SBML document
-  ModelStatus:
-    type: string
-    enum: ["new", "TBA", "active"]
-  Formula:
-    type: string
-    description: In MathML format
-  SBaseEntity:
-    properties:
-      id: Identifier
-      sbmlId:
-        type: string
-        description: String Identifier for SBML document
-      name:
-        type: string
-        required: true
-      metaId:
-        type: string
-        description: TBA
-      sboTerm:
-        type: string
-        description: TBA
-      annotation:
-        type: string
-        description: TBA
-      notes:
-        type: string
-        description: TBA
 ## Following types are more specific. They follow the pattern of a couple:
 #1. Entity - type definition - derived from {entity}Repository
 #2. EntityDetail - type definition - derived from {entity}Controller
-  Model:
-    type: SBaseEntity
-    properties:
-      userId: Identifier
-      approvedId: OptionalIdentifier
-      status: ModelStatus
-  ModelDetail:
-    type: Model
-    properties:
-      compartments:
-        type: IdentifierNameList
-      constraints:
-        type: array
-        items:
-          properties:
-            id: Identifier
-            formula: Formula
-      events:
-        type: IdentifierNameList
-      functionDefinitions:
-        type: IdentifierNameList
-      initialAssignments:
-        type: array
-        items:
-          properties:
-            id: Identifier
-            formula: Formula
-      parameters:
-        type: IdentifierNameList
-      reactions:
-        type: IdentifierNameList
-      rules:
-        type: array
-        items:
-          properties:
-            id: Identifier
-            equation: Formula
-      unitDefinitions:
-        type: IdentifierNameList
-
-  ModelCompartment:
-    type: SBaseEntity
-    properties:
-        spatialDimensions: integer
-        size: integer
-        isConstant: boolean
-  ModelCompartmentDetail:
-    type: ModelCompartment
-    properties:
-      species:
-        type: IdentifierNameList
-      reactions:
-        type: IdentifierNameList
-      rules:
-        type: array
-        items:
-          properties:
-            id: Identifier
-            equation: Formula
-      unitDefinitions:
-        type: IdentifierNameList
-
-  ModelSpecie:
-    type: SBaseEntity
-    properties:
-      initialExpression: string
-      hasOnlySubstanceUnits: boolean
-      isConstant: boolean
-      boundaryCondition: string
-  ModelSpecieDetail:
-    type: ModelSpecie
-    properties:
-      reactionItems:
-        type: IdentifierNameList
-      rules:
-        type: array
-        items:
-          properties:
-            id: Identifier
-            equation: Formula
-
-  ModelReactionItem:
-    type: SBaseEntity
-    properties:
-      type: string
-      value: number
-      stoichiometry: number
-  ModelReactionItemDetail:
-    type: ModelReactionItem
-    properties:
-      reactionId: Identifier
-      specieId: OptionalIdentifier
-      parameterId: OptionalIdentifier
-
-  ModelReaction:
-    type: SBaseEntity
-    properties:
-      isReversible: integer
-      rate: Formula
-  ModelReactionDetail:
-    type: ModelReaction
-    properties:
-      modelId: Identifier
-      compartmentId: Identifier
-      reactionItems:
-        type: IdentifierNameList
-      functions:
-        type: IdentifierNameList
-      parameters:
-        type: IdentifierNameList
-
-  ModelFunction:
-    properties:
-      id: Identifier
-      reactionId: Identifier
-      name: string
-      formula: string
-  ModelFunctionDetail:
-    type: ModelFunction
-
-  ModelRule:
-    properties:
-      id: Identifier
-      modelId: Identifier
-  ModelRuleDetail:
-    type: SBaseEntity
-    properties:
-      modelId: Identifier
       #specieId: OptionalIdentifier
       #compartmentId: OptionalIdentifier
       #parameterId: OptionalIdentifier
       #ruleType: string
       #equation: string
 
-  ModelConstraint:
-    type: SBaseEntity
-    properties:
-      modelId: Identifier
-      message: string
-      formula: string
-  ModelConstraintDetail:
-    type: ModelConstraint
-
-  ModelEvent:
-    type: SBaseEntity
-    properties:
-      modelId: Identifier
-      trigger: string
-      delay: string
-      priority: string
-  ModelEventDetail:
-    type: ModelEvent
-    properties:
-      evaluateOnTrigger: boolean
-      eventAssignments:
-        type: array
-        items:
-          properties:
-            id: Identifier
-            formula: Formula
-
-  ModelEventAssignment:
-    type: SBaseEntity
-    properties:
-      formula: string
-  ModelEventAssignmentDetail:
-    type: ModelEventAssignment
-
-  ModelInitialAssignment:
-    type: SBaseEntity
-    properties:
-      #modelId: Identifier
-      formula: string
-  ModelInitialAssignmentDetail:
-    type: ModelInitialAssignment
-
-  ModelFunctionDefinition:
-    properties:
-      modelId: Identifier
-      formula: string
-  ModelFunctionDefinitionDetail:
-    type: ModelFunctionDefinition
-
-  ModelUnitDefinition:
-    type: SBaseEntity
-    properties:
-      symbol: string
-      compartmentId: Identifier
-  ModelUnitDefinitionDetail:
-    type: ModelUnitDefinition
-    properties:
-      units: array
-      bionumbers:
-        type: IdentifierNameList
-
   Unit:
-    type: SBaseEntity
+    type: MdlModule.SBaseEntity
     properties:
       baseUnitId: OptionalIdentifier
       symbol: string
@@ -529,7 +234,7 @@ types:
       variableValues:
         type: IdentifierNameList
 
-
+  #Experiments
 
 traits:
   Collection:
@@ -882,18 +587,18 @@ resourceTypes:
 /authorize:
   description: Authorization endpoint
   post:
-    is: [Insert: {type: AuthorizationCodeRequest}]
+    is: [Insert: {type: AuthModule.AuthorizationCodeRequest}]
 /users:
   description: Users endpoint
   get:
-    is: [Collection: {type: User}]
+    is: [Collection: {type: AuthModule.User}]
   post:
-    is: [Insert: {type: User}]
+    is: [Insert: {type: AuthModule.User}]
   /{id}:
     uriParameters:
       id:
         UrlIdentifierList
-    type: {_object: {type: User}}
+    type: {_object: {type: AuthModule.User}}
   /passwordRenewal:
     description: Ask API for psw renewal. Define acc email where the renewal link will be sent.
     post:
@@ -918,7 +623,7 @@ resourceTypes:
               }
 /user:
   description: Returns detail on user depending on the Bearer access token
-  type: {_object: {type: User}}
+  type: {_object: {type: AuthModule.User}}
   /resendConfirmation:
     description: Resends account confirmation email depending on the Bearer access token, or according to the content in field "email" in POST body.
     put:
@@ -955,39 +660,39 @@ resourceTypes:
 /userTypes:
   description: Types of user group roles endpoint
   get:
-    is: [Collection: {type: UserType}]
+    is: [Collection: {type: AuthModule.UserType}]
   /{id}:
     uriParameters:
       id:
         UrlIdentifierList
     get:
-      is: [Retrieve: {type: UserType}]
+      is: [Retrieve: {type: AuthModule.UserType}]
 /userGroups:
   description: User group endpoint
   get:
-    is: [Collection: {type: UserGroup}]
+    is: [Collection: {type: AuthModule.UserGroup}]
   post:
-    is: [Insert: {type: UserGroup}]
+    is: [Insert: {type: AuthModule.UserGroup}]
   /{id}:
     uriParameters:
       id:
         UrlIdentifierList
     get:
-      is: [Retrieve: {type: UserGroup}]
+      is: [Retrieve: {type: AuthModule.UserGroup}]
     put:
-      is: [Update: {type: UserGroup}]
+      is: [Update: {type: AuthModule.UserGroup}]
     delete:
       is: [Delete]
 /userGroupRoles:
   description: Types of user group roles endpoint
   get:
-    is: [Collection: {type: UserGroupRole}]
+    is: [Collection: {type: AuthModule.UserGroupRole}]
   /{id}:
     uriParameters:
       id:
         UrlIdentifierList
     get:
-      is: [Retrieve: {type: UserGroupRole}]
+      is: [Retrieve: {type: AuthModule.UserGroupRole}]
 #BCS
 /annotations:
   /types:
@@ -1125,61 +830,61 @@ resourceTypes:
 # Models
 
 /models:
-  type: {_objectList: {type: Model, "sortBy" : "id, name, userId, approvedId, status"} }
+  type: {_objectList: {type: MdlModule.Model, "sortBy" : "id, name, userId, approvedId, status"} }
   /{id}:
-    type: {_object: {type: ModelDetail}}
+    type: {_object: {type: MdlModule.ModelDetail}}
     /compartments:
-      type: {_objectList: {type: ModelCompartment, "sortBy" : 'id, name, modelId'} }
+      type: {_objectList: {type: MdlModule.ModelCompartment, "sortBy" : 'id, name, modelId'} }
       /{id}:
-        type: {_object: {type: ModelCompartmentDetail}}
+        type: {_object: {type: MdlModule.ModelCompartmentDetail}}
         /species:
-          type: {_objectList: {type: ModelSpecie, "sortBy" : 'id, modelId'} }
+          type: {_objectList: {type: MdlModule.ModelSpecie, "sortBy" : 'id, modelId'} }
           /{id}:
-            type: {_object: {type: ModelSpecieDetail}}
+            type: {_object: {type: MdlModule.ModelSpecieDetail}}
             /reactionItems:
-              type: {_objectList: {type: ModelReactionItem, "sortBy" : 'id, name'} }
+              type: {_objectList: {type: MdlModule.ModelReactionItem, "sortBy" : 'id, name'} }
               /{id}:
-                type: {_object: {type: ModelReactionItemDetail}}
+                type: {_object: {type: MdlModule.ModelReactionItemDetail}}
     /reactions:
-      type: {_objectList: {type: ModelReaction, "sortBy" : 'id, name'} }
+      type: {_objectList: {type: MdlModule.ModelReaction, "sortBy" : 'id, name'} }
       /{id}:
-        type: {_object: {type: ModelReactionDetail}}
+        type: {_object: {type: MdlModule.ModelReactionDetail}}
         /reactionItems:
-          type: {_objectList: {type: ModelReactionItem, "sortBy" : 'id, name'} }
+          type: {_objectList: {type: MdlModule.ModelReactionItem, "sortBy" : 'id, name'} }
           /{id}:
-            type: {_object: {type: ModelReactionItemDetail}}
+            type: {_object: {type: MdlModule.ModelReactionItemDetail}}
         /functions:
-          type: {_objectList: {type: ModelFunction, "sortBy" : 'id, name'}}
+          type: {_objectList: {type: MdlModule.ModelFunction, "sortBy" : 'id, name'}}
           /{id}:
-            type: {_object: {type: ModelFunctionDetail}}
+            type: {_object: {type: MdlModule.ModelFunctionDetail}}
     /constraints:
-      type: {_objectList: {type: ModelConstraint, "sortBy" : 'id, name'} }
+      type: {_objectList: {type: MdlModule.ModelConstraint, "sortBy" : 'id, name'} }
       /{id}:
-        type: {_object: {type: ModelConstraintDetail}}
+        type: {_object: {type: MdlModule.ModelConstraintDetail}}
     /events:
-      type: {_objectList: {type: ModelEvent, "sortBy" : 'id, name'} }
+      type: {_objectList: {type: MdlModule.ModelEvent, "sortBy" : 'id, name'} }
       /{id}:
-        type: {_object: {type: ModelEventDetail}}
+        type: {_object: {type: MdlModule.ModelEventDetail}}
       /eventAssignments:
-        type: {_objectList: {type: ModelEventAssignment, "sortBy" : 'id, name, modelId'} }
+        type: {_objectList: {type: MdlModule.ModelEventAssignment, "sortBy" : 'id, name, modelId'} }
         /{id}:
-          type: {_object: {type: ModelEventAssignmentDetail}}
+          type: {_object: {type: MdlModule.ModelEventAssignmentDetail}}
     /initialAssignments:
-      type: {_objectList: {type: ModelInitialAssignment, "sortBy" : 'id, modelId'} }
+      type: {_objectList: {type: MdlModule.ModelInitialAssignment, "sortBy" : 'id, modelId'} }
       /{id}:
-        type: {_object: {type: ModelInitialAssignmentDetail}}
+        type: {_object: {type: MdlModule.ModelInitialAssignmentDetail}}
     /functionDefinitions:
-      type: {_objectList: {type: ModelFunctionDefinition, "sortBy" : 'id, modelId'} }
+      type: {_objectList: {type: MdlModule.ModelFunctionDefinition, "sortBy" : 'id, modelId'} }
       /{id}:
-        type: {_object: {type: ModelFunctionDefinitionDetail}}
+        type: {_object: {type: MdlModule.ModelFunctionDefinitionDetail}}
     /rules:
-      type: {_objectList: {type: ModelRule, "sortBy" : 'id, modelId'} }
+      type: {_objectList: {type: MdlModule.ModelRule, "sortBy" : 'id, modelId'} }
       /{id}:
-        type: {_object: {type: ModelRuleDetail}}
+        type: {_object: {type: MdlModule.ModelRuleDetail}}
     /unitDefinitions:
-      type: {_objectList: {type: ModelUnitDefinition, "sortBy" : 'id, modelId'} }
+      type: {_objectList: {type: MdlModule.ModelUnitDefinition, "sortBy" : 'id, modelId'} }
       /{id}:
-        type: {_object: {type: ModelUnitDefinitionDetail}}
+        type: {_object: {type: MdlModule.ModelUnitDefinitionDetail}}
 
 /units:
   type: {_objectList: {type: Unit, "sortBy" : 'id, name'} }
@@ -1190,3 +895,22 @@ resourceTypes:
   type: {_objectList: {type: Bionumber, "sortBy" : 'id'} }
   /{id}:
     type: {_object: {type: BionumberDetail}}
+
+
+/experiments:
+  type: { _objectList: {type: ExModule.Experiment, "sortBy" : 'id, name'} }
+  /{id}:
+    type:  { _object: {type : ExModule.ExperimentDetail}}
+    /values:
+      type: {_objectList: {type: ExModule.ExperimentValue, "sortBy" : 'id, name'} }
+/devices:
+  get:
+    responses:
+      200:
+        body:
+          application/json:
+            properties:
+              status: ResponseStatus
+              code: ResponseCode
+              data: array
+              items: ExModule.Devices

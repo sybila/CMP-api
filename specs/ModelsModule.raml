@@ -1,0 +1,247 @@
+#%RAML 1.0 Library
+types:
+  Identifier:
+    type: integer
+    minimum: 1
+    required: true
+    example: 15
+  IdentifierName:
+    properties:
+      id: Identifier
+      name: string
+  UrlIdentifierList:
+    description: Multiple Identifiers separated by comma
+    type: string
+    required: true
+    pattern: '[0-9,]+'
+    example: 1,18,2
+  IdentifierList:
+    type: array
+    items: integer
+    uniqueItems: true
+  IdentifierNameList:
+    type: array
+    items: IdentifierName
+    uniqueItems: true
+  OptionalIdentifier:
+    type: integer
+    minimum: 1
+    required: false
+    example: 15
+  ResponseStatus:
+    type: string
+    enum: ['ok', 'error']
+  ResponseCode:
+    type: integer
+    minimum: 1
+    required: false
+    description: Same as HTTP code or custom (700+, listed in /version/errors docs) when HTTP code is 400
+  SbmlId:
+    type: string
+    description: String Identifier for SBML document
+  ModelStatus:
+    type: string
+    enum:
+      - new
+      - TBA
+      - active
+  Formula:
+    type: string
+    description: In MathML format
+  SBaseEntity:
+    properties:
+      id: Identifier
+      sbmlId:
+        type: string
+        description: String Identifier for SBML document
+      name:
+        type: string
+        required: true
+      metaId:
+        type: string
+        description: TBA
+      sboTerm:
+        type: string
+        description: TBA
+      annotation:
+        type: string
+        description: TBA
+      notes:
+        type: string
+        description: TBA
+  Model:
+    type: SBaseEntity
+    properties:
+      userId: Identifier
+      approvedId: OptionalIdentifier
+      status: ModelStatus
+  ModelDetail:
+    type: Model
+    properties:
+      compartments:
+        type: IdentifierNameList
+      constraints:
+        type: array
+        items:
+          properties:
+            id: Identifier
+            formula: Formula
+      events:
+        type: IdentifierNameList
+      functionDefinitions:
+        type: IdentifierNameList
+      initialAssignments:
+        type: array
+        items:
+          properties:
+            id: Identifier
+            formula: Formula
+      parameters:
+        type: IdentifierNameList
+      reactions:
+        type: IdentifierNameList
+      rules:
+        type: array
+        items:
+          properties:
+            id: Identifier
+            equation: Formula
+      unitDefinitions:
+        type: IdentifierNameList
+  ModelCompartment:
+    type: SBaseEntity
+    properties:
+      spatialDimensions: integer
+      size: integer
+      isConstant: boolean
+  ModelCompartmentDetail:
+    type: ModelCompartment
+    properties:
+      species:
+        type: IdentifierNameList
+      reactions:
+        type: IdentifierNameList
+      rules:
+        type: array
+        items:
+          properties:
+            id: Identifier
+            equation: Formula
+      unitDefinitions:
+        type: IdentifierNameList
+  ModelSpecie:
+    type: SBaseEntity
+    properties:
+      initialExpression: string
+      hasOnlySubstanceUnits: boolean
+      isConstant: boolean
+      boundaryCondition: string
+  ModelSpecieDetail:
+    type: ModelSpecie
+    properties:
+      reactionItems:
+        type: IdentifierNameList
+      rules:
+        type: array
+        items:
+          properties:
+            id: Identifier
+            equation: Formula
+  ModelReactionItem:
+    type: SBaseEntity
+    properties:
+      type: string
+      value: number
+      stoichiometry: number
+  ModelReactionItemDetail:
+    type: ModelReactionItem
+    properties:
+      reactionId: Identifier
+      specieId: OptionalIdentifier
+      parameterId: OptionalIdentifier
+  ModelReaction:
+    type: SBaseEntity
+    properties:
+      isReversible: integer
+      rate: Formula
+  ModelReactionDetail:
+    type: ModelReaction
+    properties:
+      modelId: Identifier
+      compartmentId: Identifier
+      reactionItems:
+        type: IdentifierNameList
+      functions:
+        type: IdentifierNameList
+      parameters:
+        type: IdentifierNameList
+  ModelRule:
+    properties:
+      id: Identifier
+      modelId: Identifier
+  ModelRuleDetail:
+    type: SBaseEntity
+    properties:
+      modelId: Identifier
+  ModelConstraint:
+    type: SBaseEntity
+    properties:
+      modelId: Identifier
+      message: string
+      formula: string
+  ModelConstraintDetail:
+    type: ModelConstraint
+  ModelEvent:
+    type: SBaseEntity
+    properties:
+      modelId: Identifier
+      trigger: string
+      delay: string
+      priority: string
+  ModelEventDetail:
+    type: ModelEvent
+    properties:
+      evaluateOnTrigger: boolean
+      eventAssignments:
+        type: array
+        items:
+          properties:
+            id: Identifier
+            formula: Formula
+  ModelEventAssignment:
+    type: SBaseEntity
+    properties:
+      formula: string
+  ModelEventAssignmentDetail:
+    type: ModelEventAssignment
+  ModelFunction:
+    properties:
+      id: Identifier
+      reactionId: Identifier
+      name: string
+      formula: string
+  ModelFunctionDetail:
+    type: ModelFunction
+  ModelInitialAssignment:
+    type: SBaseEntity
+    properties:
+      formula: string
+  ModelInitialAssignmentDetail:
+    type: ModelInitialAssignment
+  ModelFunctionDefinition:
+    properties:
+      modelId: Identifier
+      formula: string
+  ModelFunctionDefinitionDetail:
+    type: ModelFunctionDefinition
+  ModelUnitDefinition:
+    type: SBaseEntity
+    properties:
+      symbol: string
+      compartmentId: Identifier
+  ModelUnitDefinitionDetail:
+    type: ModelUnitDefinition
+    properties:
+      units: array
+      bionumbers:
+        type: IdentifierNameList
