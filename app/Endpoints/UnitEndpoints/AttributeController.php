@@ -67,9 +67,7 @@ final class AttributeController extends ParentedRepositoryController
 			$this->quantityRepository->get($attribute->getQuantityId()->getId())->getUnits()->filter(function (Unit $unit) use($attribute) {
 				return !$attribute->getExcludedUnits()->contains($unit);
 			}) : new ArrayCollection();
-		//dump($includeUnits); exit; // dump in deploy??
-		// Try to avoid redeclaring variables, $includeUnits becomes two different objects during the lifecycle of this function
-		$includeUnits = $includeUnits->map(function (Unit $unit) {
+		$includeUnitsFormatted = $includeUnits->map(function (Unit $unit) {
 				return [
 					'id' => $unit->getId(),
 					'preferred_name' => $unit->getPreferredName(),
@@ -80,7 +78,7 @@ final class AttributeController extends ParentedRepositoryController
 			'id' => $attribute->getId(),
 			'name' => $attribute->getName(),
 			'note' => $attribute->getNote(),
-			'units' => $includeUnits,
+			'units' => $includeUnitsFormatted,
 			'bioquantities' => $attribute->getBioquantities()->map(function (Bioquantity $bioquantities) {
 					return ['id' => $bioquantities->getId(), 'name' => $bioquantities->getName()];
 				})->toArray(),
