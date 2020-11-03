@@ -45,7 +45,7 @@ class Attribute implements IdentifiedObject
      * @ORM\JoinTable(name="unit_attribute_excluded_unit", joinColumns={@ORM\JoinColumn(name="att_id", referencedColumnName="id")},
      * inverseJoinColumns={@ORM\JoinColumn(name="unit_id", referencedColumnName="id")})
      */
-    private $excluded_units; // I recommend using camelCase for variable naming conventions to maintain unity - Havlík
+    private $excludedUnits;
 
     /**
 	 * @var ArrayCollection
@@ -57,7 +57,7 @@ class Attribute implements IdentifiedObject
 
     public function __construct()
     {
-        $this->excluded_units = new ArrayCollection();
+        $this->excludedUnits = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -129,7 +129,7 @@ class Attribute implements IdentifiedObject
      */
     public function getExcludedUnits(): Collection
     {
-        return $this->excluded_units;
+        return $this->excludedUnits;
     }
 
     /**
@@ -145,10 +145,10 @@ class Attribute implements IdentifiedObject
      */
     public function excludeUnit(Unit $excludeUnit)
     {
-        if ($this->excluded_units->contains($excludeUnit)) {
+        if ($this->excludedUnits->contains($excludeUnit)) {
             return;
         }
-        $this->excluded_units->add($excludeUnit);
+        $this->excludedUnits->add($excludeUnit);
 
     }
 
@@ -157,8 +157,8 @@ class Attribute implements IdentifiedObject
      */
     public function includeUnit(Unit $includeUnit)
     {
-        if ($this->excluded_units->contains($includeUnit)) {
-            $this->excluded_units->remove($includeUnit);
+        if ($this->excludedUnits->contains($includeUnit)) {
+            $this->excludedUnits->remove($includeUnit);
         }
     }
 }
