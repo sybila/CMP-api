@@ -31,7 +31,7 @@ class UnitAlias implements IdentifiedObject
 	 * @var string
 	 * @ORM\Column(type="string", name="alternative_name")
 	 */
-	private $alternative_name;
+	private $alternativeName;
 
 
 
@@ -41,17 +41,17 @@ class UnitAlias implements IdentifiedObject
 	 */
 	public function getAlternativeName(): string
 	{
-		return $this->alternative_name;
+		return $this->alternativeName;
 	}
 
 	/**
 	 * Set name
-	 * @param string $alternative_name
+	 * @param string $alternativeName
 	 * @return UnitAlias
 	 */
-	public function setAlternativeName(string $alternative_name): UnitAlias
+	public function setAlternativeName(string $alternativeName): UnitAlias
 	{
-		$this->alternative_name = $alternative_name;
+		$this->alternativeName = $alternativeName;
 		return $this;
 	}
 

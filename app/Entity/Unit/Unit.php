@@ -30,7 +30,7 @@ class Unit implements IdentifiedObject
      * @var string
      * @ORM\Column(type="string", name="preferred_name")
      */
-    private $preferred_name;
+    private $preferredName;
 
     /**
      * @var double
@@ -93,7 +93,7 @@ class Unit implements IdentifiedObject
      */
     public function getPreferredName(): ?string
     {
-        return $this->preferred_name;
+        return $this->preferredName;
     }
 
     /**
@@ -103,7 +103,7 @@ class Unit implements IdentifiedObject
      */
     public function setPreferredName($name): Unit
     {
-        $this->preferred_name = $name;
+        $this->preferredName = $name;
         return $this;
     }
 
