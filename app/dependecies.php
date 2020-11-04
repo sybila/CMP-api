@@ -251,63 +251,67 @@ $c[EntityRepo\ExperimentNoteRepository::class] = function (Container $c) {
 };
 
 $c[EntityRepo\ExperimentVariableNoteRepository::class] = function (Container $c) {
-    return new EntityRepo\ExperimentVariableNoteRepository($c[EntityManager::class]);
+	return new EntityRepo\ExperimentVariableNoteRepository($c[EntityManager::class]);
 };
 
 $c[EntityRepo\DeviceRepository::class] = function (Container $c) {
-    return new EntityRepo\DeviceRepository($c[EntityManager::class]);
+	return new EntityRepo\DeviceRepository($c[EntityManager::class]);
 };
 
 $c[EntityRepo\AnalysisTypeRepository::class] = function (Container $c) {
-    return new EntityRepo\AnalysisTypeRepository($c[EntityManager::class]);
+	return new EntityRepo\AnalysisTypeRepository($c[EntityManager::class]);
 };
 
 $c[EntityRepo\AnalysisToolRepository::class] = function (Container $c) {
-    return new EntityRepo\AnalysisToolRepository($c[EntityManager::class]);
+	return new EntityRepo\AnalysisToolRepository($c[EntityManager::class]);
 };
 
 $c[EntityRepo\AnalysisMethodRepository::class] = function (Container $c) {
-    return new EntityRepo\AnalysisMethodRepository($c[EntityManager::class]);
+	return new EntityRepo\AnalysisMethodRepository($c[EntityManager::class]);
 };
 
 $c[EntityRepo\AnalysisSettingsRepository::class] = function (Container $c) {
-    return new EntityRepo\AnalysisSettingsRepository($c[EntityManager::class]);
+	return new EntityRepo\AnalysisSettingsRepository($c[EntityManager::class]);
 };
 
 $c[EntityRepo\AnalysisTaskRepository::class] = function (Container $c) {
-    return new EntityRepo\AnalysisTaskRepository($c[EntityManager::class]);
+	return new EntityRepo\AnalysisTaskRepository($c[EntityManager::class]);
 };
 
 $c[EntityRepo\AnalysisDatasetRepository::class] = function (Container $c) {
-    return new EntityRepo\AnalysisDatasetRepository($c[EntityManager::class]);
+	return new EntityRepo\AnalysisDatasetRepository($c[EntityManager::class]);
 };
 
 $c[EntityRepo\PhysicalQuantityRepository::class] = function (Container $c) {
-    return new EntityRepo\PhysicalQuantityRepository($c[EntityManager::class]);
+	return new EntityRepo\PhysicalQuantityRepository($c[EntityManager::class]);
 };
 
 $c[EntityRepo\UnitRepository::class] = function (Container $c) {
-    return new EntityRepo\UnitRepository($c[EntityManager::class]);
+	return new EntityRepo\UnitRepository($c[EntityManager::class]);
 };
 
 $c[EntityRepo\UnitAliasRepository::class] = function (Container $c) {
-    return new EntityRepo\UnitAliasRepository($c[EntityManager::class]);
+	return new EntityRepo\UnitAliasRepository($c[EntityManager::class]);
+};
+
+$c[EntityRepo\BioquantityRepository::class] = function (Container $c) {
+	return new EntityRepo\BioquantityRepository($c[EntityManager::class]);
 };
 
 $c[EntityRepo\PhysicalQuantityHierarchyRepository::class] = function (Container $c) {
-    return new EntityRepo\PhysicalQuantityHierarchyRepository($c[EntityManager::class]);
+	return new EntityRepo\PhysicalQuantityHierarchyRepository($c[EntityManager::class]);
 };
 
 $c[EntityRepo\AttributeRepository::class] = function (Container $c) {
-    return new EntityRepo\AttributeRepository($c[EntityManager::class]);
+	return new EntityRepo\AttributeRepository($c[EntityManager::class]);
 };
 
 $c[EntityRepo\UnitsAllRepository::class] = function (Container $c) {
-    return new EntityRepo\UnitsAllRepository($c[EntityManager::class]);
+	return new EntityRepo\UnitsAllRepository($c[EntityManager::class]);
 };
 
 $c[EntityRepo\UnitsAliasesAllRepository::class] = function (Container $c) {
-    return new EntityRepo\UnitsAliasesAllRepository($c[EntityManager::class]);
+	return new EntityRepo\UnitsAliasesAllRepository($c[EntityManager::class]);
 };
 
 $c[AuthorizationServer::class] = function (Container $c) {

@@ -228,6 +228,7 @@ return function(App $app) {
         ->setAuthMask(true)
 		->register();
 	#FIXME ------ WTH is this endpoint? Makes no sense
+	// Note: This is an endpoint for parameters bound to a specific reaction, as opposed to global parameters - Havlík
 	(new RouteHelper)
 		->setRoute(Ctl\ReactionItemParentedParameterController::class, '/models/{model-id:\\d+}/reactions/{reactionItem-id:\\d+}/parameters')
         ->setAuthMask(true)
@@ -313,6 +314,12 @@ return function(App $app) {
 		->setRoute(Ctl\UserGroupRoleController::class, '/userGroupRoles')
         ->setMask(RouteHelper::LIST | RouteHelper::DETAIL)
         ->register();
+
+	// Bioquantities module
+	(new RouteHelper)
+		->setRoute(Ctl\BioquantityController::class, '/bioquantities')
+        ->setAuthMask(true)
+		->register();
 
 	// Units module
     (new RouteHelper)
