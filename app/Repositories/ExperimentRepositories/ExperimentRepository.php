@@ -53,7 +53,8 @@ class ExperimentRepository implements IEndpointRepository
 	private function buildListQuery(array $filter): QueryBuilder
 	{
 		$query = $this->em->createQueryBuilder()
-			->from(Experiment::class, 'e');
+			->from(Experiment::class, 'e')
+		    ->orWhere("e.status = 'public'");
         $query = $this->addFilterDql($query, $filter);
 		return $query;
 	}
