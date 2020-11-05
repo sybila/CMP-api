@@ -28,6 +28,9 @@ trait ExperimentEndpointAuthorizable
         if ($rootRouteParent['type'] == ('experiments'||'experimentvalues') ) {
             /** @var Experiment $routeParentObject */
             $routeParentObject = $this->getObjectViaORM(Experiment::class, $rootRouteParent['id']);
+            if($routeParentObject->getStatus() == 'public'){
+                return null;
+            }
             if(array_key_exists($routeParentObject->getGroupId(), $userGroups)) {
                 return $routeParentObject->getGroupId();
             } else {
