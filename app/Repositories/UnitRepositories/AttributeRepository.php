@@ -10,7 +10,7 @@ use App\Helpers\QueryRepositoryHelper;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 
-class AttributeRepository implements IDependentSBaseRepository
+class AttributeRepository implements IDependentEndpointRepository
 {
     use QueryRepositoryHelper;
 

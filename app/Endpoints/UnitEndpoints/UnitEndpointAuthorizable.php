@@ -13,13 +13,13 @@ trait UnitEndpointAuthorizable
      * @throws InvalidArgumentException if user with non-existing role
      * @throws InvalidAuthenticationException
      */
-    public function validateList(): ?array
+    public function validateList(): bool
     {
         switch ($this->userPermissions['platform_wise']){
             case User::ADMIN:
             case User::POWER:
             case User::REGISTERED:
-                return [];
+                return True;
             case User::TEMPORARY:
             case User::GUEST:
                 throw new InvalidAuthenticationException("Temporary user and guest can't access this endpoint.",

@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Entity\{IdentifiedObject,
+    PhysicalQuantity,
     PhysicalQuantityHierarchy,
     Repositories\IEndpointRepository,
     Repositories\PhysicalQuantityHierarchyRepository,
@@ -98,11 +99,11 @@ final class PhysicalQuantityHierarchyController extends ParentedRepositoryContro
 		return PhysicalQuantityRepository::class;
 	}
 
-	protected function getParentObjectInfo(): array
-	{
-		return ['physicalQuantity-id', 'physicalQuantity'];
-	}
 
+    protected function getParentObjectInfo(): ParentObjectInfo
+    {
+        return new ParentObjectInfo('physicalQuantity-id',PhysicalQuantity::class);
+    }
 
     protected function checkParentValidity(IdentifiedObject $parent, IdentifiedObject $child)
     {

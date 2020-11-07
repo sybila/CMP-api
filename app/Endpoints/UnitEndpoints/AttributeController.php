@@ -150,12 +150,10 @@ final class AttributeController extends ParentedRepositoryController
 		return PhysicalQuantityRepository::class;
 	}
 
-
-	protected function getParentObjectInfo(): array
-	{
-		return ['physicalQuantity-id', 'physicalQuantity'];
-	}
-
+    protected function getParentObjectInfo(): ParentObjectInfo
+    {
+        return new ParentObjectInfo('physicalQuantity-id',PhysicalQuantity::class);
+    }
 
 	protected function checkParentValidity(IdentifiedObject $parent, IdentifiedObject $child)
 	{
