@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use App\Helpers\Notification;
 use App\Entity\{Authorization\User,
     Authorization\UserGroup,
     Authorization\UserGroupToUser,

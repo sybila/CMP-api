@@ -12,7 +12,9 @@ use App\Exceptions\InvalidRoleException;
 use App\Exceptions\InvalidTypeException;
 use App\Exceptions\NonExistingObjectException;
 use App\Helpers\ArgumentParser;
+use App\Helpers\CMPSQLLogger;
 use Closure;
+use Doctrine\DBAL\Logging\DebugStack;
 use Doctrine\ORM\ORMException;
 use IGroupRoleAuthController;
 use IPlatformRoleAuthController;
@@ -87,10 +89,17 @@ abstract class RepositoryController extends AbstractController
 	{
 		parent::__construct($c);
 		$this->repository = $c->get(static::getRepositoryClassName());
-
+		$logger = new CMPSQLLogger();
+        $this->orm
+            ->getConnection()
+            ->getConfiguration()
+            ->setSQLLogger($logger);
         $this->beforeRequest[] = function(Request $request, Response $response, ArgumentParser $args)
         {
             $this->setUserPermissions($request->getAttribute('oauth_user_id'));
+            $this->orm->getEventManager()->addEventSubscriber(
+                new NotificationDispatchController($this->userPermissions['user_id'])
+            );
         };
 	}
 

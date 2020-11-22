@@ -229,6 +229,8 @@ return function(App $app) {
 		->register();
 	#FIXME ------ WTH is this endpoint? Makes no sense
 	// Note: This is an endpoint for parameters bound to a specific reaction, as opposed to global parameters - Havlík
+    #FIXME ----- the implementation of the class is getting the data from reaction of some ID, rather then reaction-item
+    # of some id. According to your comment, this looks like it is your historical error and therefore needs fixing.
 	(new RouteHelper)
 		->setRoute(Ctl\ReactionItemParentedParameterController::class, '/models/{model-id:\\d+}/reactions/{reactionItem-id:\\d+}/parameters')
         ->setAuthMask(true)
@@ -313,6 +315,11 @@ return function(App $app) {
 	(new RouteHelper)
 		->setRoute(Ctl\UserGroupRoleController::class, '/userGroupRoles')
         ->setMask(RouteHelper::LIST | RouteHelper::DETAIL)
+        ->register();
+    (new RouteHelper)
+        ->setRoute(Ctl\NotificationLogController::class, '/notificationLog')
+        ->setMask(RouteHelper::LIST | RouteHelper::DETAIL)
+        //->setAuthMask(true)
         ->register();
 
 	// Bioquantities module

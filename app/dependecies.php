@@ -2,9 +2,11 @@
 
 use App\Helpers\DateTimeJsonType;
 use App\Entity\Repositories as EntityRepo;
+use App\Helpers\Notification;
 use App\Repositories\Authorization as AuthRepo;
 use App\Helpers;
 use Defuse\Crypto\Key;
+use Doctrine\Common\EventManager;
 use Doctrine\ORM\EntityManager;
 use Doctrine\DBAL\Types\Type;
 use League\OAuth2\Server\AuthorizationServer;
@@ -57,7 +59,13 @@ $c[EntityManager::class] = function (Container $c) {
 
 	$config->addCustomStringFunction('TYPE', \App\Doctrine\ORM\Query\Functions\TypeFunction::class);
 
+//    $eventManager = new EventManager();
+//    $eventManager->addEventSubscriber(
+//        new \App\Controllers\NotificationDispatchController()
+//    );
+
 	return EntityManager::create($settings['doctrine']['connection'], $config);
+        //, $eventManager);
 };
 
 $c['foundHandler'] = function (Container $c) {
@@ -342,6 +350,10 @@ $c[ResourceServer::class] = function (Container $c) {
 		$c[AuthRepo\AccessTokenRepository::class],
 		$c->settings['oauth']['publicKey']
 	);
+};
+
+$c[AuthRepo\NotificationLogRepository::class] = function (Container $c) {
+    return new AuthRepo\NotificationLogRepository($c[EntityManager::class]);
 };
 
 $c['mailer'] = $c->settings['mailer'];

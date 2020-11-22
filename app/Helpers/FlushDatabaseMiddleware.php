@@ -27,7 +27,6 @@ class FlushDatabaseMiddleware
 		$response = $next($request, $response);
 		if ($this->data->needsFlush)
 			$this->em->flush();
-
 		return $response;
 	}
 }
