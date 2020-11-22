@@ -32,7 +32,8 @@
 		"league/oauth2-server": "^7.3",
 		"ext-json": "*",
 		"ext-pdo": "*",
-		"greenlion/php-sql-parser": "*"
+		"greenlion/php-sql-parser": "*",
+		"ratchet/pawl": "^v0.3.5"
     },
 	"require-dev": {
 		"nette/utils": "^2.4",

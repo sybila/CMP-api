@@ -9,6 +9,8 @@ use App\Entity\IdentifiedObject;
 use Doctrine\Common\EventSubscriber;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Events;
+use Ratchet\WebSocket\WsServer;
+use function Ratchet\Client\connect;
 
 class NotificationDispatchController implements EventSubscriber
 {
@@ -59,6 +61,7 @@ class NotificationDispatchController implements EventSubscriber
         $this->setData($notification, $how, $ent, $method);
         $em->persist($notification);
         $em->flush();
+        $this->shootTheNotification($notification);
     }
 
     protected function setData(IdentifiedObject $notification, array $how, IdentifiedObject $ent, $method): void
@@ -76,6 +79,43 @@ class NotificationDispatchController implements EventSubscriber
         $notification->setWhat(json_encode([
             'type' => current($how)['table'],
             'id' => $ent->getId()]));
+    }
+
+    /** Connect to a webSocket and send the json
+     * @param NotificationLog $object
+     */
+    protected function shootTheNotification(NotificationLog $object){
+        $jsonMsg = $this->prepareTheNotification($object);
+        connect('ws://localhost:8080')->then(function($conn) use ($jsonMsg) {
+            //TODO send the secret first
+            $conn->send($jsonMsg);
+            $conn->close();
+        }, function ($e) {
+            dump("pozor");exit;
+        });
+    }
+
+    /**
+     * Prepare the notification
+     * @param NotificationLog $object
+     * @return string
+     */
+    protected function prepareTheNotification(NotificationLog $object): string
+    {
+        $how = json_decode($object->getHow(), true);
+        $data = [
+            "who" => $object->getWhoId(),
+            "what" => json_decode($object->getWhat()),
+            "origin" => json_decode($object->getWhichParent()),
+            "when"=> json_decode($object->getWhen()),
+            "how" => [
+                'method' => $how['method'],
+                'data' => json_decode($how['data'])
+            ]
+        ];
+        return json_encode(["type" => "notification",
+            "id" => 1,
+            "data" => $data]);
     }
 
     public function getSubscribedEvents()
