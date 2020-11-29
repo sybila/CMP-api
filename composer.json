@@ -33,8 +33,9 @@
 		"ext-json": "*",
 		"ext-pdo": "*",
 		"greenlion/php-sql-parser": "*",
-		"ratchet/pawl": "^v0.3.5"
-    },
+		"ext-sockets": "*",
+		"ext-openssl": "*"
+	},
 	"require-dev": {
 		"nette/utils": "^2.4",
 		"nette/database": "^2.4",

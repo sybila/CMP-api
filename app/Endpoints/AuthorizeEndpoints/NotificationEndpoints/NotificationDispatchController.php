@@ -5,21 +5,28 @@ namespace App\Controllers;
 
 
 use App\Entity\Authorization\Notification\NotificationLog;
+use App\Entity\Authorization\UserGroup;
+use App\Entity\Authorization\UserGroupToUser;
+use App\Entity\Experiment;
 use App\Entity\IdentifiedObject;
+use App\Entity\Model;
 use Doctrine\Common\EventSubscriber;
+use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Events;
-use Ratchet\WebSocket\WsServer;
+use SocketIO;
 use function Ratchet\Client\connect;
 
 class NotificationDispatchController implements EventSubscriber
 {
 
     private $id;
+    private $auth;
 
-    public function __construct($id)
+    public function __construct($id, $auth)
     {
         $this->id = $id;
+        $this->auth = $auth;
     }
 
     /**
@@ -60,8 +67,9 @@ class NotificationDispatchController implements EventSubscriber
         $ent = $args->getEntity();
         $this->setData($notification, $how, $ent, $method);
         $em->persist($notification);
-        $em->flush();
-        $this->shootTheNotification($notification);
+        //$em->flush();
+
+        $this->shootTheNotification($notification, $em);
     }
 
     protected function setData(IdentifiedObject $notification, array $how, IdentifiedObject $ent, $method): void
@@ -74,48 +82,69 @@ class NotificationDispatchController implements EventSubscriber
             'data' => current($how)['data']]));
         $rootParent = $this->getRootParent();
         $notification->setWhichParent(json_encode([
-            'type' => $rootParent['type'],
+            'type' => substr($rootParent['type'], 0, -1),
             'id' => (int)$rootParent['id']]));
         $notification->setWhat(json_encode([
             'type' => current($how)['table'],
             'id' => $ent->getId()]));
     }
 
-    /** Connect to a webSocket and send the json
+    /** This is our client. Get the receivers, connects to a webSocket and send the json
      * @param NotificationLog $object
+     * @param EntityManager $em
+     * @throws mixed
      */
-    protected function shootTheNotification(NotificationLog $object){
-        $jsonMsg = $this->prepareTheNotification($object);
-        connect('ws://localhost:8080')->then(function($conn) use ($jsonMsg) {
-            //TODO send the secret first
-            $conn->send($jsonMsg);
-            $conn->close();
-        }, function ($e) {
-            dump("pozor");exit;
-        });
+    protected function shootTheNotification(NotificationLog $object, EntityManager $em){
+        $origin = json_decode($object->getWhichParent(), TRUE);
+
+        /** @var Model|Experiment $identifiedObject */
+        $identifiedObject = $em->find('App\Entity\\' . ucfirst($origin['type']), $origin['id']);
+        $receivers = $em->find(UserGroup::class, $identifiedObject->getGroupId())
+            ->getUsers()->map(function (UserGroupToUser $groupLink) {
+                $user = $groupLink->getUserId();
+                return $user->getId();
+            })->toArray();
+
+        $client = new SocketIO('localhost', 9001);
+        $client->setQueryParams([
+            'token' => $client->setAuth($this->auth),
+            //'id' => '8780',
+            //'cid' => '344',
+            'cmp' => 2339
+        ]);
+
+        $success = $client->emit('notification', json_encode($this->prepareTheNotification($object, $receivers)));
+
+        if(!$success)
+        {
+            var_dump($client->getErrors());
+        }
+        else {
+            var_dump("Success");
+        }
     }
 
     /**
      * Prepare the notification
      * @param NotificationLog $object
-     * @return string
+     * @param array $toIds
+     * @return array
      */
-    protected function prepareTheNotification(NotificationLog $object): string
+    protected function prepareTheNotification(NotificationLog $object, array $toIds): array
     {
         $how = json_decode($object->getHow(), true);
-        $data = [
-            "who" => $object->getWhoId(),
-            "what" => json_decode($object->getWhat()),
-            "origin" => json_decode($object->getWhichParent()),
-            "when"=> json_decode($object->getWhen()),
-            "how" => [
-                'method' => $how['method'],
-                'data' => json_decode($how['data'])
+        return ["ids" => $toIds,
+                "data" => [
+                "who" => $object->getWhoId(),
+                "what" => json_decode($object->getWhat()),
+                "origin" => json_decode($object->getWhichParent()),
+                "when"=> json_decode($object->getWhen()),
+                "how" => [
+                    'method' => $how['method'],
+                    'data' => json_decode($how['data'])
+                ]
             ]
         ];
-        return json_encode(["type" => "notification",
-            "id" => 1,
-            "data" => $data]);
     }
 
     public function getSubscribedEvents()
@@ -133,4 +162,5 @@ class NotificationDispatchController implements EventSubscriber
         $split = array_diff(explode("/" , $_SERVER['REQUEST_URI']), explode("/", $_SERVER['SCRIPT_NAME']));
         return ['type' => array_shift($split), 'id' => array_shift($split)];
     }
+
 }

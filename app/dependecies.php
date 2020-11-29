@@ -357,5 +357,5 @@ $c[AuthRepo\NotificationLogRepository::class] = function (Container $c) {
 };
 
 $c['mailer'] = $c->settings['mailer'];
-
+$c['notificationAuth'] = $c->settings['notificationAuth'];
 return $c;

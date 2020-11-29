@@ -89,16 +89,16 @@ abstract class RepositoryController extends AbstractController
 	{
 		parent::__construct($c);
 		$this->repository = $c->get(static::getRepositoryClassName());
-		$logger = new CMPSQLLogger();
         $this->orm
             ->getConnection()
             ->getConfiguration()
-            ->setSQLLogger($logger);
-        $this->beforeRequest[] = function(Request $request, Response $response, ArgumentParser $args)
+            ->setSQLLogger(new CMPSQLLogger());
+        $nAuth = $c['notificationAuth'];
+        $this->beforeRequest[] = function(Request $request, Response $response, ArgumentParser $args) use ($nAuth)
         {
             $this->setUserPermissions($request->getAttribute('oauth_user_id'));
             $this->orm->getEventManager()->addEventSubscriber(
-                new NotificationDispatchController($this->userPermissions['user_id'])
+                new NotificationDispatchController($this->userPermissions['user_id'], $nAuth)
             );
         };
 	}
