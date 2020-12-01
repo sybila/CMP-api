@@ -10,7 +10,7 @@ use App\Helpers\QueryRepositoryHelper;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 
-class PhysicalQuantityHierarchyRepository implements IDependentSBaseRepository
+class PhysicalQuantityHierarchyRepository implements IDependentEndpointRepository
 {
     use QueryRepositoryHelper;
 

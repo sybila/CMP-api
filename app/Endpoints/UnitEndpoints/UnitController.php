@@ -2,7 +2,9 @@
 
 namespace App\Controllers;
 
-use App\Entity\{IdentifiedObject,
+use App\Entity\{
+    IdentifiedObject,
+    PhysicalQuantity,
     Repositories\IEndpointRepository,
     Repositories\PhysicalQuantityRepository,
     Repositories\UnitAliasRepository,
@@ -124,10 +126,10 @@ final class UnitController extends ParentedRepositoryController
 		return PhysicalQuantityRepository::class;
 	}
 
-	protected function getParentObjectInfo(): array
-	{
-		return ['physicalQuantity-id', 'physicalQuantity'];
-	}
+    protected function getParentObjectInfo(): ParentObjectInfo
+    {
+        return new ParentObjectInfo('physicalQuantity-id',PhysicalQuantity::class);
+    }
 
     protected function checkParentValidity(IdentifiedObject $parent, IdentifiedObject $child)
     {

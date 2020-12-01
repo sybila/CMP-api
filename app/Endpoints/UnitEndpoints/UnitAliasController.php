@@ -102,10 +102,10 @@ final class UnitAliasController extends ParentedRepositoryController
 		return UnitRepository::class;
 	}
 
-	protected function getParentObjectInfo(): array
-	{
-		return ['unit-id', 'unit'];
-	}
+    protected function getParentObjectInfo(): ParentObjectInfo
+    {
+        return new ParentObjectInfo('unit-id',Unit::class);
+    }
 
     protected function checkParentValidity(IdentifiedObject $parent, IdentifiedObject $child)
     {

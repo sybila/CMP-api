@@ -9,7 +9,7 @@ use App\Helpers\QueryRepositoryHelper;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 
-class UnitRepository implements IDependentSBaseRepository
+class UnitRepository implements IDependentEndpointRepository
 {
     use QueryRepositoryHelper;
 
@@ -54,7 +54,7 @@ class UnitRepository implements IDependentSBaseRepository
 	public function getList(array $filter, array $sort, array $limit): array
 	{
 		$query = $this->buildListQuery($filter)
-			->select('u.id, u.preferred_name, u.coefficient, u.sbmlId');
+			->select('u.id, u.preferredName, u.coefficient, u.sbmlId');
         $query = $this->addPagingDql($query, $limit);
         $query = $this->addSortDql($query, $sort);
 		return $query->getQuery()->getArrayResult();
