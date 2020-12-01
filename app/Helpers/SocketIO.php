@@ -286,7 +286,6 @@ class SocketIO
         });
 
         $fd = fsockopen("{$this->protocole}{$this->host}", $this->port, $errno, $errstr);
-
         if (!$fd) {
             restore_error_handler();
             return false;
@@ -300,6 +299,7 @@ class SocketIO
         $out.= "Sec-WebSocket-Key: $key\r\n";
         $out.= "Sec-WebSocket-Version: 13\r\n";
         $out.= "Origin: *\r\n\r\n";
+
 
         fwrite($fd, $out);
         // 101 switching protocols, see if echoes key

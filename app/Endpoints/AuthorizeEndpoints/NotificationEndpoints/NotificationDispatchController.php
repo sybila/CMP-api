@@ -105,7 +105,8 @@ class NotificationDispatchController implements EventSubscriber
                 return $user->getId();
             })->toArray();
 
-        $client = new SocketIO('localhost', 9001);
+        $client = new SocketIO('service.e-cyanobacterium.org', 443, '/socket.io/socket.io/EIO=3');
+        $client->setProtocole(SocketIO::SSL_PROTOCOLE);
         $client->setQueryParams([
             'token' => $client->setAuth($this->auth),
             //'id' => '8780',
