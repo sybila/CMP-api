@@ -89,8 +89,8 @@ use Identifier;
 	/**
 	 * @var ArrayCollection
 	 * @ORM\ManyToMany(targetEntity="Attribute", inversedBy="bioquantities")
-	 * @ORM\JoinTable(name="bioquantity_to_attribute", joinColumns={@ORM\JoinColumn(name="bioquantity_id", referencedColumnName="id")},
-	 * inverseJoinColumns={@ORM\JoinColumn(name="attributeId", referencedColumnName="id")})
+	 * @ORM\JoinTable(name="unit_attribute", joinColumns={@ORM\JoinColumn(name="bioquantity_id", referencedColumnName="id")},
+	 * inverseJoinColumns={@ORM\JoinColumn(name="bioquantity_id", referencedColumnName="id")})
 	 */
 	protected $attributes;
 
@@ -104,9 +104,9 @@ use Identifier;
 
 	/**
 	 * @var ArrayCollection
-	 * @ORM\ManyToMany(targetEntity="ModelUnitDefinition", inversedBy="bioquantities")
-	 * @ORM\JoinTable(name="bioquantity_to_unit_definition", joinColumns={@ORM\JoinColumn(name="bioquantity_id", referencedColumnName="id")},
-	 * inverseJoinColumns={@ORM\JoinColumn(name="unitDefinitionId", referencedColumnName="id")})
+	 * @ORM\ManyToMany(targetEntity="Unit", inversedBy="bioquantities")
+	 * @ORM\JoinTable(name="unit", joinColumns={@ORM\JoinColumn(name="bioquantity_id", referencedColumnName="id")},
+	 * inverseJoinColumns={@ORM\JoinColumn(name="bioquantity_id", referencedColumnName="id")})
 	 */
 	protected $unitDefinitions;
 

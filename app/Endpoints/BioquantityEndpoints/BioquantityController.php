@@ -56,18 +56,15 @@ class BioquantityController extends WritableRepositoryController
 			'valueFrom' => $bioquantity->getValueFrom(),
 			'valueTo' => $bioquantity->getValueTo(),
 			'valueStep' => $bioquantity->getValueStep(),
-			// FIX: table `unit_attribute` is not present in production db, but referenced in Attribute object ??
-			/*'attributes' => $bioquantity->getAttributes()->map(function (Attribute $attributes) {
+			'attributes' => $bioquantity->getAttributes()->map(function (Attribute $attributes) {
 					return ['id' => $attributes->getId(), 'name' => $attributes->getName()];
-				})->toArray(),*/
+				})->toArray(),
 			'variables' => $bioquantity->getVariables()->map(function (VariableValues $variables) {
 					return ['id' => $variables->getId(), 'name' => $variables->getName()];
 				})->toArray(),
-			// NOTE: Commented this one out since unit definition module is being remade
-			// DISCUSS: What should bioquantity map to in the new module?
-			/*'unitDefinitions' => $bioquantity->getUnitDefinitions()->map(function (UnitDefinition $unitDefinition) {
+			'units' => $bioquantity->getUnitDefinitions()->map(function (Unit $unitDefinition) {
 					return ['id' => $unitDefinition->getId(), 'name' => $unitDefinition->getName()];
-				})->toArray(),*/
+				})->toArray(),
 		];
 	}
 
