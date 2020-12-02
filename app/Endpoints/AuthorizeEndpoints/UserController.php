@@ -2,8 +2,8 @@
 
 namespace App\Controllers;
 
-use App\Helpers\Notification;
-use App\Entity\{Authorization\User,
+use App\Entity\{Authorization\Notification\MailNotification,
+    Authorization\User,
     Authorization\UserGroup,
     Authorization\UserGroupToUser,
     Authorization\UserType,
@@ -12,12 +12,10 @@ use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\ORMException;
 use IGroupRoleAuthWritableController;
 use IPlatformRoleAuthWritableController;
-use Symfony\Component\Mailer\Exception\InvalidArgumentException;
-use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
-use Symfony\Component\Mailer\Mailer;
 use App\Entity\Repositories\IEndpointRepository;
 use App\Repositories\Authorization\UserRepository;
 use App\Exceptions\{ActionConflictException,
+    InvalidArgumentException,
     InvalidAuthenticationException,
     InvalidRoleException,
     MissingRequiredKeyException,
@@ -29,8 +27,6 @@ use Slim\Http\{
 	Request,
 	Response
 };
-use Symfony\Component\Mailer\Transport;
-use Symfony\Component\Mime\Email;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -41,13 +37,15 @@ class UserController extends WritableRepositoryController
     implements IPlatformRoleAuthWritableController, IGroupRoleAuthWritableController
 {
 
-	/** @var string */
-	private $mailer;
+    /**
+     * @var MailNotification
+     */
+	protected $mailer;
 
 	public function __construct(Container $c)
 	{
 		parent::__construct($c);
-		$this->mailer = $c['mailer'];
+		$this->mailer = $c[MailNotification::class];
 	}
 
 
@@ -148,9 +146,8 @@ class UserController extends WritableRepositoryController
             throw new MissingRequiredKeyException('isPublic');
         //FIXME following lines should not be here
         $user->setType($this->getUserType(User::TEMPORARY));
-        $this->sendConfirmationMail($user->getEmail());
+        //$this->sendConfirmationMail($user->getEmail());
         $this->setDefaultUserSpaceGroup($user);
-
     }
 
     protected function getUserType(int $tier)
@@ -165,8 +162,8 @@ class UserController extends WritableRepositoryController
 	{
 		// TODO: verify group dependencies, fuck you
 		$response = parent::delete($request, $response, $args);
-		$this->sendNotificationEmail('Your account has been deleted. Bye.',
-            $entity = $this->getObject($this->getModifyId($args))->getEmail());
+//		$this->sendNotificationEmail('Your account has been deleted. Bye.',
+//            $entity = $this->getObject($this->getModifyId($args))->getEmail());
 		return $response;
 	}
 
@@ -215,10 +212,12 @@ class UserController extends WritableRepositoryController
             /** @var User $usr */
             $usr = $this->orm->getRepository(User::class)->findOneBy(['email' => $mail]);
             if ($usr){
-                $hash = sha1($this->mailer['salt'] . $mail);
-                $url = $_SERVER['REQUEST_SCHEME'] . '://' . $this->mailer['client_srv_redirect'] . '/' . $mail . '/pswRenew/' . $hash;
-                $this->sendNotificationEmail("Hello {$usr->getUsername()}. To generate new password click on this link <a href=$url>this link</a>." .
-                    "Ignore this e-mail if you did not ask for a new password generation.", $mail);
+                $hash = sha1($this->mailer->getAuthSalt() . $mail);
+                $url = $_SERVER['REQUEST_SCHEME'] . '://' . $this->mailer->getRedirect() . '/' . $mail . '/pswRenew/' . $hash;
+
+                $this->mailer->sendNotificationEmail($usr->getEmail(), "CMP: You asked for the password renewal.",
+                    "Hello {$usr->getUsername()}. To generate new password click on this link <a href=$url>this link</a>." .
+                    "Ignore this e-mail if you did not ask for a new password generation.");
                 return self::formatOk($response, ['Renewal email sent.']);
             }
             else throw new NonExistingObjectException(0, $mail);
@@ -244,7 +243,7 @@ class UserController extends WritableRepositoryController
         if ($user === false)
             throw new InvalidAuthenticationException("User registered under this email does not exist.",
                 "Try signing up");
-        if ( sha1($this->mailer['salt'] . $user->getEmail()) === $args['hash']) {
+        if ( sha1($this->mailer->getAuthSalt() . $user->getEmail()) === $args['hash']) {
             if ($body->hasKey('password')){
                 $user->setPasswordHash($user->hashPassword($body->getString('password')));
                 $this->orm->persist($user);
@@ -333,62 +332,6 @@ class UserController extends WritableRepositoryController
         return $this->canEdit($role, $id);
     }
 
-    //-----MAIL NOTIFICATION HELPERS
-    //FIXME move me to some other place, once the platform notifications are implemented
-
-    /**
-     * @param $receiver
-     * @throws MissingRequiredKeyException
-     */
-    protected function sendConfirmationMail($receiver){
-        try {
-            $transport = Transport::fromDsn($this->mailer['dsn']);
-        }
-        catch (InvalidArgumentException $e) {
-            throw new MissingRequiredKeyException('dsn is not set up properly.');
-        }
-        $hash = sha1($receiver . $this->mailer['salt']);
-        $url = $_SERVER['REQUEST_SCHEME'] . '://' . $this->mailer['client_srv_redirect'] . '/' . $receiver . '/' . $hash;
-        $mailer = new Mailer($transport);
-        $email = (new Email())
-            ->from('ecyano@fi.muni.cz')
-            ->to($receiver)
-            ->subject('CMP: Confirm your registration')
-            ->html("<p>If you want to fully activate your account click on <a href=$url>this link</a></p>");
-        try {
-            $mailer->send($email);
-        }
-        catch (TransportExceptionInterface $e){
-            throw new MissingRequiredKeyException($e->getMessage() . $e->getDebug());
-        }
-    }
-
-    /**
-     * @param $message
-     * @param $receiver
-     * @throws MissingRequiredKeyException
-     */
-    protected function sendNotificationEmail($message, $receiver){
-        try {
-            $transport = Transport::fromDsn($this->mailer['dsn']);
-        }
-        catch (InvalidArgumentException $e) {
-            throw new MissingRequiredKeyException('dsn is not set up properly.');
-        }
-        $mailer = new Mailer($transport);
-        $email = (new Email())
-            ->from('TODO@mail.muni.cz')
-            ->to($receiver)
-            ->subject('CMP: Account notification.')
-            ->html("<p>$message</p>");
-        try {
-            $mailer->send($email);
-        }
-        catch (TransportExceptionInterface $e){
-            throw new MissingRequiredKeyException($e->getMessage() . $e->getDebug());
-        }
-    }
-
     /**
      * ROUTE: Confirm user, basically change the type from 4 to 3. And create own group for the user.
      * @param Request $request
@@ -408,7 +351,7 @@ class UserController extends WritableRepositoryController
                 "Try signing up");
         if ($user->getType()->getTier() <= User::REGISTERED)
             throw new ActionConflictException("This user has already confirmed the registration");
-        if ( sha1($user->getEmail() . $this->mailer['salt']) === $args['hash']) {
+        if ( sha1($user->getEmail() . $this->mailer->getAuthSalt()) === $args['hash']) {
             $user->setType($this->getUserType(User::REGISTERED));
             $this->orm->persist($user);
             $this->setDefaultUserSpaceGroup($user);
@@ -448,7 +391,7 @@ class UserController extends WritableRepositoryController
             case User::GUEST:
                 return true;
             default:
-                throw new \App\Exceptions\InvalidArgumentException('user_type', $this->userPermissions['user_type'],
+                throw new InvalidArgumentException('user_type', $this->userPermissions['user_type'],
                     'This user type does not exist on the platform');
         }
     }
@@ -511,7 +454,7 @@ final class LoggedInUserController extends UserController
             $this->uniqueCheck('email', $mail);
             $authUser->setEmail($mail);
         }
-        $this->sendConfirmationMail($authUser->getEmail());
+        $this->mailer->sendConfirmationMail($authUser->getEmail());
         $this->orm->persist($authUser);
         $this->orm->flush();
         return self::formatOk($response, ['receiver' => $mail]);

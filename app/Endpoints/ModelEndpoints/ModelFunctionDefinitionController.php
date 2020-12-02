@@ -92,7 +92,7 @@ final class ModelFunctionDefinitionController extends ParentedRepositoryControll
     protected function checkParentValidity(IdentifiedObject $model, IdentifiedObject $child)
     {
         /** @var ModelFunctionDefinition $child */
-        if ($model->getId() != $child->getModelId()) {
+        if ($model->getId() != $child->getModelId()->getId()) {
             throw new WrongParentException($this->getParentObjectInfo()->parentEntityClass, $model->getId(),
                 self::getObjectName(), $child->getId());
         }

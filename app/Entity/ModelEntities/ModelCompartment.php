@@ -63,8 +63,8 @@ class ModelCompartment implements IdentifiedObject
 	protected $unitDefinitions;
 
 	/**
-	 * Get modelId
-	 * @return integer|null
+     * This returns model object, non-intuitively
+	 * Get model
 	 */
 	public function getModelId()
 	{

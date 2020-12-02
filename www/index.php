@@ -34,7 +34,8 @@ $app->add(function ($req, $res, $next) {
     $response = $next($req, $res);
     return $response
         ->withHeader('Access-Control-Allow-Origin', '*')
-        ->withHeader('Access-Control-Allow-Headers', 'DNT, User-Agent, X-Requested-With, If-Modified-Since, Cache-Control, Content-Type, Range, Authorization')
+        ->withHeader('Access-Control-Allow-Headers', 'DNT, User-Agent, X-Requested-With, If-Modified-Since, 
+        Cache-Control, Content-Type, Range, Authorization, Access-Control-Allow-Origin')
         ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, HEAD');
 });
 

@@ -96,7 +96,7 @@ final class ModelConstraintController extends ParentedRepositoryController imple
     protected function checkParentValidity(IdentifiedObject $model, IdentifiedObject $child)
     {
         /** @var ModelConstraint $child */
-        if ($model->getId() != $child->getModelId()) {
+        if ($model->getId() != $child->getModelId()->getId()) {
             throw new WrongParentException($this->getParentObjectInfo()->parentEntityClass, $model->getId(),
                 self::getObjectName(), $child->getId());
         }

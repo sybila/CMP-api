@@ -148,7 +148,7 @@ final class ReactionParentedReactionItemController extends ModelReactionItemCont
     protected function checkParentValidity(IdentifiedObject $parent, IdentifiedObject $child)
     {
         /** @var ModelReactionItem $child */
-        if ($parent->getId() != $child->getReactionId()) {
+        if ($parent->getId() != $child->getReactionId()->getId()) {
             throw new WrongParentException($this->getParentObjectInfo()->parentEntityClass, $parent->getId(),
                 self::getObjectName(), $child->getId());
         }
@@ -211,7 +211,7 @@ final class SpecieParentedReactionItemController extends ModelReactionItemContro
     protected function checkParentValidity(IdentifiedObject $parent, IdentifiedObject $child)
     {
         /** @var ModelReactionItem $child */
-        if ($parent->getId() != $child->getSpecieId()) {
+        if ($parent->getId() != $child->getSpecieId()->getId()) {
             throw new WrongParentException($this->getParentObjectInfo()->parentEntityClass, $parent->getId(),
                 self::getObjectName(), $child->getId());
         }

@@ -69,7 +69,6 @@ class ModelFunction implements IdentifiedObject
 
 	/**
 	 * Get reactionId
-	 * @return integer
 	 */
 	public function getReactionId()
 	{

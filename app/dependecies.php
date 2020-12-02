@@ -1,8 +1,8 @@
 <?php
 
+use App\Entity\Authorization\Notification\MailNotification;
 use App\Helpers\DateTimeJsonType;
 use App\Entity\Repositories as EntityRepo;
-use App\Helpers\Notification;
 use App\Repositories\Authorization as AuthRepo;
 use App\Helpers;
 use Defuse\Crypto\Key;
@@ -356,6 +356,14 @@ $c[AuthRepo\NotificationLogRepository::class] = function (Container $c) {
     return new AuthRepo\NotificationLogRepository($c[EntityManager::class]);
 };
 
-$c['mailer'] = $c->settings['mailer'];
-$c['notificationAuth'] = $c->settings['notificationAuth'];
+$c[MailNotification::class] = function (Container $c) {
+    $mailerInfo = $c->settings['notifications']['mailer'];
+    return new MailNotification(
+        $mailerInfo['dsn'],
+        $mailerInfo['salt'],
+        $mailerInfo['client_srv_redirect']
+    );
+};
+
+$c['notifications'] = $c->settings['notifications'];
 return $c;

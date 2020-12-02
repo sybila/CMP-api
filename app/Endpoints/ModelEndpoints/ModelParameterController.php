@@ -155,7 +155,7 @@ final class ModelParentedParameterController extends ModelParameterController
     protected function checkParentValidity(IdentifiedObject $parent, IdentifiedObject $child)
     {
         /** @var ModelParameter $child */
-        if ($parent->getId() != $child->getModelId()) {
+        if ($parent->getId() != $child->getModelId()->getId()) {
             throw new WrongParentException($this->getParentObjectInfo()->parentEntityClass, $parent->getId(),
                 self::getObjectName(), $child->getId());
         }
@@ -187,7 +187,7 @@ final class ReactionItemParentedParameterController extends ModelParameterContro
     protected function checkParentValidity(IdentifiedObject $parent, IdentifiedObject $child)
     {
         /** @var ModelParameter $child */
-        if ($parent->getId() != $child->getReactionId()) {
+        if ($parent->getId() != $child->getReactionId()->getId()) {
             throw new WrongParentException($this->getParentObjectInfo()->parentEntityClass, $parent->getId(),
                 self::getObjectName(), $child->getId());
         }

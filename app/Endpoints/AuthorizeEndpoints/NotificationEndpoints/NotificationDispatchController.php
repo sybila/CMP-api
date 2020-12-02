@@ -3,61 +3,147 @@
 
 namespace App\Controllers;
 
-
+use App\Entity\Authorization\Notification\MailNotification;
 use App\Entity\Authorization\Notification\NotificationLog;
+use App\Entity\Authorization\User;
 use App\Entity\Authorization\UserGroup;
 use App\Entity\Authorization\UserGroupToUser;
+use App\Entity\EBase;
 use App\Entity\Experiment;
 use App\Entity\IdentifiedObject;
 use App\Entity\Model;
+use App\Entity\ModelFunction;
+use App\Entity\SBase;
+use App\Exceptions\MissingRequiredKeyException;
 use Doctrine\Common\EventSubscriber;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Events;
+use Doctrine\ORM\ORMException;
 use SocketIO;
-use function Ratchet\Client\connect;
 
 class NotificationDispatchController implements EventSubscriber
 {
 
+    /**
+     * User id of the user that caused the notification
+     * @var $id
+     */
     private $id;
+
+    /**
+     * Defined in settings.local.php, array for auth purposes
+     * @var $auth
+     */
     private $auth;
 
-    public function __construct($id, $auth)
+    /**
+     * Associative array that defines where is the websocket server
+     * @var mixed
+     */
+    private $sock;
+
+
+    /**
+     * @var MailNotification
+     */
+    private $mailer;
+
+    /**
+     * NotificationDispatchController constructor.
+     * @param $id
+     * @param $notificationSettings
+     * @throws MissingRequiredKeyException
+     */
+    public function __construct($id, $notificationSettings)
     {
         $this->id = $id;
-        $this->auth = $auth;
+        $this->mailer = new MailNotification(
+            $notificationSettings['mailer']['dsn'],
+            $notificationSettings['mailer']['salt'],
+            $notificationSettings['mailer']['client_srv_redirect']);
+        $this->auth = $notificationSettings['socketSettings']['auth'];
+        $this->sock = $notificationSettings['socketSettings']['route'];
     }
 
     /**
-     * Event to crete notification when a resource is updated
+     * Event to create notification when a resource is updated
      * @param LifecycleEventArgs $args
+     * @throws ORMException|MissingRequiredKeyException
      */
     public function postUpdate(LifecycleEventArgs $args)
     {
-        $this->createNotification($args, 'Updated');
+        $className = get_class($args->getObject());
+        if($className == User::class) {
+            $this->mailAboutUpdated($args->getObject()->getEmail());
+        }
+        if ($this->isModelEntity($className) || $this->isExpEntity($className)) {
+            $this->createNotification($args, 'Updated');
+        }
     }
 
     /**
-     * Event to crete notification when a resource is deleted
+     * Event to create notification when a resource is deleted
      * @param LifecycleEventArgs $args
+     * @throws ORMException|MissingRequiredKeyException
      */
     public function postDelete(LifecycleEventArgs $args)
     {
-        $this->createNotification($args, 'Deleted');
+        $className = get_class($args->getObject());
+        if($className == User::class) {
+            $this->mailAboutDeletion($args->getObject()->getEmail());
+        }
+        if ($this->isModelEntity($className) || $this->isExpEntity($className)) {
+           $this->createNotification($args, 'Deleted');
+        }
     }
 
     /**
-     * Event to crete notification when new resource is inserted
+     * Event to create notification when new resource is inserted
      * @param LifecycleEventArgs $args
+     * @throws ORMException
+     * @throws MissingRequiredKeyException
      */
     public function postPersist(LifecycleEventArgs $args)
     {
-        if (! $args->getObject() instanceof NotificationLog) {
+        $className = get_class($args->getObject());
+        if($className == User::class) {
+            $this->mailer->sendConfirmationMail($args->getObject()->getEmail());
+        }
+        if ($this->isModelEntity($className) || $this->isExpEntity($className)) {
             $this->createNotification($args, 'Added');
         }
     }
 
+    /**
+     * Discover if the persisted object has model origin.
+     * Most of the model entities share SBase trait, except one.
+     * @param string $className
+     * @return bool
+     */
+    private function isModelEntity(string $className): bool
+    {
+        return in_array(SBase::class, class_uses($className)) ||
+            $className == ModelFunction::class;
+    }
+
+    /**
+     * Discover if the persisted object has model origin.
+     * All of the Experiment entities share EBase trait.
+     * @param string $className
+     * @return bool
+     */
+    private function isExpEntity(string $className): bool
+    {
+        return in_array(EBase::class, class_uses($className));
+    }
+
+    /**
+     * Creates new notification object, inserts it into DB and sends it via websocket to users.
+     * @param LifecycleEventArgs $args
+     * @param string $method
+     * @throws ORMException
+     */
     protected function createNotification(LifecycleEventArgs $args, string $method)
     {
         $notification = new NotificationLog();
@@ -67,7 +153,7 @@ class NotificationDispatchController implements EventSubscriber
         $ent = $args->getEntity();
         $this->setData($notification, $how, $ent, $method);
         $em->persist($notification);
-        //$em->flush();
+        $em->flush();
 
         $this->shootTheNotification($notification, $em);
     }
@@ -89,7 +175,7 @@ class NotificationDispatchController implements EventSubscriber
             'id' => $ent->getId()]));
     }
 
-    /** This is our client. Get the receivers, connects to a webSocket and send the json
+    /** This is where the emitter-client happens. Get the receivers, connect to a webSocket and send the json
      * @param NotificationLog $object
      * @param EntityManager $em
      * @throws mixed
@@ -105,8 +191,9 @@ class NotificationDispatchController implements EventSubscriber
                 return $user->getId();
             })->toArray();
 
-        $client = new SocketIO('service.e-cyanobacterium.org', 443, '/socket.io/socket.io/EIO=3');
-        $client->setProtocole(SocketIO::SSL_PROTOCOLE);
+        $client = new SocketIO($this->sock['host'], $this->sock['port'],$this->sock['path']. '/socket.io/EIO=3');
+        //$client = new SocketIO('service.e-cyanobacterium.org', 443, '/socket.io/socket.io/EIO=3');
+        $client->setProtocol(SocketIO::SSL_PROTOCOL);
         $client->setQueryParams([
             'token' => $client->setAuth($this->auth),
             //'id' => '8780',
@@ -116,6 +203,7 @@ class NotificationDispatchController implements EventSubscriber
 
         $success = $client->emit('notification', json_encode($this->prepareTheNotification($object, $receivers)));
 
+        //For testing
         if(!$success)
         {
             var_dump($client->getErrors());
@@ -162,6 +250,31 @@ class NotificationDispatchController implements EventSubscriber
     {
         $split = array_diff(explode("/" , $_SERVER['REQUEST_URI']), explode("/", $_SERVER['SCRIPT_NAME']));
         return ['type' => array_shift($split), 'id' => array_shift($split)];
+    }
+
+
+    //---------- Mails to user -------//
+
+    /**
+     * @param $receiver
+     * @throws MissingRequiredKeyException
+     */
+    protected function mailAboutDeletion(string $receiver): void
+    {
+        $this->mailer
+            ->sendNotificationEmail($receiver,
+                'Notification about account deletion.', "Your account is deleted.");
+    }
+
+    /**
+     * @param $receiver
+     * @throws MissingRequiredKeyException
+     */
+    protected function mailAboutUpdated(string $receiver):void
+    {
+        $this->mailer
+            ->sendNotificationEmail($receiver,
+                'Your account information has been updated.',"Your CMP acc was updated.");
     }
 
 }

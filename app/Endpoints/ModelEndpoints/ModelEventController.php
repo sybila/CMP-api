@@ -110,7 +110,7 @@ final class ModelEventController extends ParentedRepositoryController implements
     protected function checkParentValidity(IdentifiedObject $model, IdentifiedObject $child)
     {
         /** @var ModelEvent $child */
-        if ($model->getId() != $child->getModelId()) {
+        if ($model->getId() != $child->getModelId()->getId()) {
             throw new WrongParentException($this->getParentObjectInfo()->parentEntityClass, $model->getId(),
                 self::getObjectName(), $child->getId());
         }

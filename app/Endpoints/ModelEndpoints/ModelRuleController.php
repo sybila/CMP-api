@@ -111,7 +111,7 @@ final class ModelParentedRuleController extends ModelRuleController
     protected function checkParentValidity(IdentifiedObject $parent, IdentifiedObject $child)
     {
         /** @var ModelRule $child */
-        if ($parent->getId() != $child->getModelId()) {
+        if ($parent->getId() != $child->getModelId()->getId()) {
             throw new WrongParentException($this->getParentObjectInfo()->parentEntityClass, $parent->getId(),
                 self::getObjectName(), $child->getId());
         }

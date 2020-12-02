@@ -153,7 +153,7 @@ final class ModelSpecieController extends ParentedRepositoryController implement
     protected function checkParentValidity(IdentifiedObject $parent, IdentifiedObject $child)
     {
         /** @var ModelSpecie $child */
-        if ($parent->getId() != $child->getCompartmentId()) {
+        if ($parent->getId() != $child->getCompartmentId()->getId()) {
             throw new WrongParentException($this->getParentObjectInfo()->parentEntityClass, $parent->getId(),
                 self::getObjectName(), $child->getId());
         }

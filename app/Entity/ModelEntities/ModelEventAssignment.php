@@ -36,7 +36,6 @@ class ModelEventAssignment implements IdentifiedObject
 
 	/**
 	 * Get eventId
-	 * @return integer|null
 	 */
 	public function getEventId()
 	{

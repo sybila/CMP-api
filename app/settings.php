@@ -54,5 +54,21 @@ return array_replace_recursive([
 			'privateKey' => null,
 			'encryptionKey' => null,
 		],
+        'mailer' => [
+            'dsn' => '',
+            'salt' => '',
+            'client_srv_redirect' => '',
+        ],
+        'socketSettings' => [
+            'route' => [
+                'host' => null,
+                'port' => null,
+                'path' => null,
+            ],
+            'auth' => [
+                'publicKeyToWSServer' => null,
+                'psw' => null
+            ]
+        ]
 	],
 ], require __DIR__ . '/settings.local.php');

@@ -4,9 +4,9 @@
 class SocketIO
 {
 
-    const  SSL_PROTOCOLE = 'ssl://';
-    const  TLS_PROTOCOLE = 'tls://';
-    const  NO_SECURE_PROTOCOLE = '';
+    const  SSL_PROTOCOL = 'ssl://';
+    const  TLS_PROTOCOL = 'tls://';
+    const  NO_SECURE_PROTOCOL = '';
 
     /**
      * @var string null
@@ -22,7 +22,7 @@ class SocketIO
     /**
      * @var string
      */
-    private $protocole = SocketIO::NO_SECURE_PROTOCOLE;
+    private $protocol = SocketIO::NO_SECURE_PROTOCOL;
 
 
     /**
@@ -213,22 +213,22 @@ class SocketIO
     /**
      * @return string
      */
-    public function getProtocole()
+    public function getProtocol()
     {
-        return $this->protocole;
+        return $this->protocol;
     }
 
     /**
-     * @param string $protocole
+     * @param string $protocol
      */
-    public function setProtocole( $protocole)
+    public function setProtocol( $protocol)
     {
-        if(!in_array($protocole, [SocketIO::NO_SECURE_PROTOCOLE, SocketIO::SSL_PROTOCOLE, SocketIO::TLS_PROTOCOLE]))
+        if(!in_array($protocol, [SocketIO::NO_SECURE_PROTOCOL, SocketIO::SSL_PROTOCOL, SocketIO::TLS_PROTOCOL]))
         {
-            $protocole = SocketIO::NO_SECURE_PROTOCOLE;
+            $protocol = SocketIO::NO_SECURE_PROTOCOL;
         }
 
-        $this->protocole = $protocole;
+        $this->protocol = $protocol;
     }
 
 
@@ -285,7 +285,7 @@ class SocketIO
 
         });
 
-        $fd = fsockopen("{$this->protocole}{$this->host}", $this->port, $errno, $errstr);
+        $fd = fsockopen("{$this->protocol}{$this->host}", $this->port, $errno, $errstr);
         if (!$fd) {
             restore_error_handler();
             return false;

@@ -8,6 +8,7 @@ use App\Exceptions\InvalidArgumentException;
 use App\Exceptions\InvalidRoleException;
 use App\Exceptions\InvalidTypeException;
 use App\Helpers\ArgumentParser;
+use App\Helpers\CMPSQLLogger;
 use IGroupRoleAuthWritableController;
 use IPlatformRoleAuthWritableController;
 use Slim\Container;
@@ -49,6 +50,16 @@ abstract class WritableRepositoryController extends RepositoryController
 	{
 		parent::__construct($c);
 		$this->data = $c['persistentData'];
+        $this->orm->getConnection()
+            ->getConfiguration()
+            ->setSQLLogger(new CMPSQLLogger());
+        $sock = $c['notifications'];
+        $this->beforeRequest[] = function(Request $request, Response $response, ArgumentParser $args) use ($sock)
+        {
+            $this->orm->getEventManager()->addEventSubscriber(
+                new NotificationDispatchController($this->userPermissions['user_id'], $sock)
+            );
+        };
 	}
 
 
