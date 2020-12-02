@@ -38,15 +38,18 @@ class CMPSQLLogger implements SQLLogger
         //START TRANSACTION and COMMIT should trigger with em->flush, however, it might be good to check it in future
         $parser = new PHPSQLParser();
         if (str_starts_with($sql, 'UPDATE')) {
-            $parsed = $parser->parse($this->replaceSqlWildcards($sql, $params));
+            $parsed = $parser->parse($sql);
             $table = current($parsed['UPDATE'])['table'];
+            $i = 0;
             foreach ($parsed['SET'] as $expr) {
                 parse_str($expr['base_expr'], $res);
-                $data[substr(array_key_first($res),0,-1)] = trim(current($res));
+                $data[substr(array_key_first($res),0,-1)] = $params[$i];
+                $i++;
             }
             $this->queries[++$this->currentQuery] = [
                 'table' => $table,
-                'data' => json_encode($data)
+                'data' => json_encode($data),
+                dump(json_encode($data))
             ];
         }
         elseif (str_starts_with($sql, 'DELETE')) {
