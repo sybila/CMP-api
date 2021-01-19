@@ -104,7 +104,7 @@ class ModelParameterRepository implements IDependentEndpointRepository
 		if ($this->parent instanceof Model) {
 			$query = $this->em->createQueryBuilder()
 				->from(ModelParameter::class, 'p')
-				->where('p.modelId = :modelId AND p.reactionId IS NULL')
+				->where('p.modelId = :modelId') // AND p.reactionId IS NULL')
 				->setParameter('modelId', $this->parent->getId());
 		}
 		if ($this->parent instanceof ModelReaction) {

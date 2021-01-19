@@ -220,10 +220,10 @@ class Model implements IdentifiedObject
     }
 
     /**
+     * //FIXME why is this, what is my purpose
      * @param string $origin
-     * @return Model
      */
-    public function setOrigin(string $origin): Model
+    public function setOrigin(string $origin)
     {
         $this->origin = $origin;
     }
@@ -273,9 +273,9 @@ class Model implements IdentifiedObject
 	 */
 	public function getParameters(): Collection
 	{
-		$criteria = Criteria::create();
-		$criteria->where(Criteria::expr()->eq('reactionId', null));
-		return $this->parameters->matching($criteria);
+//		$criteria = Criteria::create();
+//		$criteria->where(Criteria::expr()->eq('reactionId', null));
+		return $this->parameters; //->matching($criteria);
 	}
 
 	/**
