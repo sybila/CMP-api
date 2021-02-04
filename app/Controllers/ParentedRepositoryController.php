@@ -16,24 +16,8 @@ use Slim\Http\Response;
 /**
  * @property-read IDependentEndpointRepository $repository
  */
-abstract class ParentedRepositoryController extends WritableRepositoryController
+abstract class ParentedRepositoryController extends MultiParentedRepoController
 {
-
-    /**
-     * Returns object with one variable - string that marks how is the parent-id
-     * labelled in the route (how the ArgumentParser parses this argument)
-     * and the second element is the name of the class entity.
-     * @return ParentObjectInfo
-     */
-	abstract protected function getParentObjectInfo(): ParentObjectInfo;
-
-    /**
-     * Throws an error if paternity test fails.
-     * @param IdentifiedObject $parent entity
-     * @param IdentifiedObject $child
-     * @throws WrongParentException
-     */
-	abstract protected function checkParentValidity(IdentifiedObject $parent, IdentifiedObject $child);
 
     /**
      * @param ArgumentParser $args
@@ -51,46 +35,6 @@ abstract class ParentedRepositoryController extends WritableRepositoryController
         }
         return $this->getObjectViaORM($info->parentEntityClass, $id);
 	}
-
-
-
-	public function __construct(Container $c)
-	{
-		parent::__construct($c);
-		$this->beforeRequest[] = function(Request $request, Response $response, ArgumentParser $args)
-		{
-			$this->repository->setParent($this->getParentObject($args));
-		};
-		$this->beforeInsert[] = function($entity)
-		{
-            $this->checkParentValidity($this->repository->getParent(), $entity);
-			$this->repository->add($entity);
-		};
-        $this->beforeUpdate[] = function($entity)
-        {
-            $this->checkParentValidity($this->repository->getParent(), $entity);
-        };
-		$this->beforeDelete[] = function($entity)
-		{
-		    $this->checkParentValidity($this->repository->getParent(), $entity);
-			$this->repository->remove($entity);
-		};
-	}
-
-    /**
-     * @inheritDoc
-     * @throws WrongParentException
-     */
-    public function readIdentified(Request $request, Response $response, ArgumentParser $args): Response
-    {
-        $this->runEvents($this->beforeRequest, $request, $response, $args);
-        $id = current($this->getReadIds($args));
-        $ent = $this->getObject((int)$id);
-        $this->validateDetail();
-        $data = $this->getData($ent);
-        $this->checkParentValidity($this->repository->getParent(), $ent);
-        return self::formatOk($response, $data);
-    }
 }
 
 /**

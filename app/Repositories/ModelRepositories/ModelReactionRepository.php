@@ -60,7 +60,7 @@ class ModelReactionRepository implements IDependentEndpointRepository
 	public function getList(array $filter, array $sort, array $limit): array
 	{
 		$query = $this->buildListQuery($filter)
-			->select('r.id, r.name, r.sbmlId, r.sboTerm, r.notes, r.annotation, r.isReversible, r.rate');
+			->select('r.id, r.name, r.sbmlId, r.sboTerm, r.notes, r.isReversible, r.rate');
         $query = $this->addPagingDql($query, $limit);
         $query = $this->addSortDql($query, $sort);
 		return $query->getQuery()->getArrayResult();

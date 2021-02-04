@@ -2,7 +2,8 @@
 
 namespace App\Controllers;
 
-use App\Entity\{Authorization\User,
+use App\Entity\{AnnotationToResource,
+    Authorization\User,
     Model,
     IdentifiedObject,
     ModelCompartment,
@@ -24,7 +25,6 @@ use IGroupRoleAuthWritableController;
 use Slim\Http\{
 	Request, Response
 };
-use SBaseControllerCommonable;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -52,15 +52,13 @@ final class ModelController extends WritableRepositoryController implements IGro
 
 	protected function getData(IdentifiedObject $model): array
 	{
-		/** @var Model $model */
+	    /** @var Model $model */
 		$sBaseData = $this->getSBaseData($model);
 		return array_merge($sBaseData, [
 			'userId' => $model->getUserId(),
 			'groupId' => $model->getGroupId(),
-			'approvedId' => $model->getApprovedId(),
 			'description' => $model->getDescription(),
 			'status' => (string)$model->getStatus(),
-			//'origin' => $model->getOrigin(),
 			'compartments' => $model->getCompartments()->map(function (ModelCompartment $compartment) {
 				return ['id' => $compartment->getId(), 'name' => $compartment->getName()];
 			})->toArray(),
@@ -85,9 +83,9 @@ final class ModelController extends WritableRepositoryController implements IGro
 			'rules' => $model->getRules()->map(function (ModelRule $rule) {
 			    return ['id' => $rule->getId(), 'equation' => $rule->getEquation()];
 			})->toArray(),
-			'unitDefinitions' => $model->getUnitDefinitions()->map(function (ModelUnitDefinition $unitDefinition) {
-				return ['id' => $unitDefinition->getId(), 'name' => $unitDefinition->getName()];
-			})->toArray()
+//			'unitDefinitions' => $model->getUnitDefinitions()->map(function (ModelUnitDefinition $unitDefinition) {
+//				return ['id' => $unitDefinition->getId(), 'name' => $unitDefinition->getName()];
+//			})->toArray()
 		]);
 	}
 
@@ -96,15 +94,16 @@ final class ModelController extends WritableRepositoryController implements IGro
 		/** @var Model $model */
 		$this->setSBaseData($model, $data);
 		$model->setUserId($this->userPermissions['user_id']);
-        !$data->hasKey('groupId') ?: $model->setGroupId($data->getString('groupId'));
+        !$data->hasKey('groupId') ? $model->setGroupId(array_key_first($this->userPermissions['group_wise'])) :
+            $model->setGroupId($data->getString('groupId'));
 		!$data->hasKey('approvedId') ?: $model->setApprovedId($data->getString('approvedId'));
 		!$data->hasKey('description') ?: $model->setDescription($data->getString('description'));
 		!$data->hasKey('status') ?: $model->setStatus($data->getString('status'));
-		!$data->hasKey('origin') ?: $model->setOrigin($data->getString('origin'));
 	}
 
 	protected function createObject(ArgumentParser $body): IdentifiedObject
 	{
+	    //dump($body);exit;
 		if (!$body->hasKey('userId'))
 			throw new MissingRequiredKeyException('userId');
 		if (!$body->hasKey('sbmlId'))
@@ -148,8 +147,8 @@ final class ModelController extends WritableRepositoryController implements IGro
 			throw new DependentResourcesBoundException('rules');
 		if (!$model->getReactions()->isEmpty())
 			throw new DependentResourcesBoundException('reactions');
-		if (!$model->getUnitDefinitions()->isEmpty())
-			throw new DependentResourcesBoundException('unitDefinitions');
+//		if (!$model->getUnitDefinitions()->isEmpty())
+//			throw new DependentResourcesBoundException('unitDefinitions');
 		return parent::delete($request, $response, $args);
 	}
 

@@ -55,7 +55,7 @@ class ModelConstraintRepository implements IDependentEndpointRepository
 	public function getList(array $filter, array $sort, array $limit): array
 	{
 		$query = $this->buildListQuery($filter)
-			->select('c.id, c.name, c.sbmlId, c.sboTerm, c.notes, c.annotation, c.message, c.formula');
+			->select('c.id, c.name, c.sbmlId, c.sboTerm, c.notes, c.message, c.formula');
         $query = $this->addPagingDql($query, $limit);
         $query = $this->addSortDql($query, $sort);
 		return $query->getQuery()->getArrayResult();

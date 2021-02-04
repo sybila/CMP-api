@@ -13,7 +13,6 @@ use App\Entity\{IdentifiedObject,
     Repositories\ModelReactionRepository};
 use App\Exceptions\{DependentResourcesBoundException, MissingRequiredKeyException, WrongParentException};
 use App\Helpers\ArgumentParser;
-use SBaseControllerCommonable;
 use Slim\Http\{
 	Request, Response
 };

@@ -65,7 +65,6 @@ class RouteHelper
 		return $this;
 	}
 
-
 	public function register(string $idName = 'id')
 	{
 		$routes = [];
@@ -101,6 +100,16 @@ class RouteHelper
 		}
 
 	}
+
+	public function addAnnotationsRoutes(): RouteHelper
+    {
+        (new RouteHelper())
+            ->setRoute(Ctl\AnnotationSourceController::class, $this->path . '/{obj-id:\\d+}/annotations')
+            ->setAuthMask($this->authMask)
+            ->setMask(RouteHelper::ADD | RouteHelper::EDIT | RouteHelper::DELETE)
+            ->register();
+        return $this;
+    }
 
 }
 
@@ -169,63 +178,74 @@ return function(App $app) {
 
 	// models module
 	(new RouteHelper)
-		->setRoute(Ctl\ModelController::class, '/models')
+		->setRoute(Ctl\ModelController::class, '/{obj:model}s')
         ->setAuthMask(true)
+        ->addAnnotationsRoutes()
 		->register();
 	(new RouteHelper)
-		->setRoute(Ctl\ModelCompartmentController::class, '/models/{model-id:\\d+}/compartments')
+		->setRoute(Ctl\ModelCompartmentController::class, '/models/{model-id:\\d+}/{obj:compartment}s')
         ->setAuthMask(true)
+        ->addAnnotationsRoutes()
 		->register();
 	(new RouteHelper)
-		->setRoute(Ctl\ModelSpecieController::class, '/models/{model-id:\\d+}/compartments/{compartment-id:\\d+}/species')
+		->setRoute(Ctl\ModelSpecieController::class,
+            '/models/{model-id:\\d+}/compartments/{compartment-id:\\d+}/{obj:specie}s')
         ->setAuthMask(true)
+        ->addAnnotationsRoutes()
 		->register();
 	(new RouteHelper)
-		->setRoute(Ctl\ModelReactionController::class, '/models/{model-id:\\d+}/reactions')
+		->setRoute(Ctl\ModelReactionController::class, '/models/{model-id:\\d+}/{obj:reaction}s')
         ->setAuthMask(true)
+        ->addAnnotationsRoutes()
 		->register();
 	(new RouteHelper)
 		->setRoute(Ctl\ModelFunctionController::class, '/models/{model-id:\\d+}/reactions/{reaction-id:\\d+}/functions')
         ->setAuthMask(true)
 		->register();
 	(new RouteHelper)
-		->setRoute(Ctl\ModelFunctionDefinitionController::class, '/models/{model-id:\\d+}/functionDefinitions')
+		->setRoute(Ctl\ModelFunctionDefinitionController::class,
+            '/models/{model-id:\\d+}/{obj:functionDefinition}s')
         ->setAuthMask(true)
+        ->addAnnotationsRoutes()
 		->register();
 	(new RouteHelper)
-		->setRoute(Ctl\ReactionParentedReactionItemController::class, '/models/{model-id:\\d+}/reactions/{reaction-id:\\d+}/reactionItems')
+		->setRoute(Ctl\ReactionParentedReactionItemController::class,
+            '/models/{model-id:\\d+}/reactions/{reaction-id:\\d+}/{obj:reactionItem}s')
         ->setAuthMask(true)
+        ->addAnnotationsRoutes()
 		->register();
 	(new RouteHelper)
-		->setRoute(Ctl\SpecieParentedReactionItemController::class, '/models/{model-id:\\d+}/compartments/{compartment-id:\\d+}/species/{specie-id:\\d+}/reactionItems')
+		->setRoute(Ctl\SpecieParentedReactionItemController::class,
+            '/models/{model-id:\\d+}/compartments/{compartment-id:\\d+}/species/{specie-id:\\d+}/{obj:reactionItem}s')
         ->setAuthMask(true)
+        ->addAnnotationsRoutes()
         ->register();
 	(new RouteHelper)
-		->setRoute(Ctl\ModelConstraintController::class, '/models/{model-id:\\d+}/constraints')
+		->setRoute(Ctl\ModelConstraintController::class, '/models/{model-id:\\d+}/{obj:constraint}s')
         ->setAuthMask(true)
+        ->addAnnotationsRoutes()
 		->register();
 	(new RouteHelper)
-		->setRoute(Ctl\ModelEventController::class, '/models/{model-id:\\d+}/events')
+		->setRoute(Ctl\ModelEventController::class, '/models/{model-id:\\d+}/{obj:event}s')
         ->setAuthMask(true)
+        ->addAnnotationsRoutes()
 		->register();
 	(new RouteHelper)
-		->setRoute(Ctl\ModelEventAssignmentController::class, '/models/{model-id:\\d+}/events/{event-id:\\d+}/eventAssignments')
+		->setRoute(Ctl\ModelEventAssignmentController::class,
+            '/models/{model-id:\\d+}/events/{event-id:\\d+}/{obj:eventAssignment}s')
         ->setAuthMask(true)
+        ->addAnnotationsRoutes()
 		->register();
 	(new RouteHelper)
-		->setRoute(Ctl\ModelUnitDefinitionController::class, '/models/{model-id:\\d+}/unitDefinitions')
+		->setRoute(Ctl\ModelInitialAssignmentController::class,
+            '/models/{model-id:\\d+}/{obj:initialAssignment}s')
         ->setAuthMask(true)
+        ->addAnnotationsRoutes()
 		->register();
 	(new RouteHelper)
-		->setRoute(Ctl\ModelUnitController::class, '/units')
-		->register();
-	(new RouteHelper)
-		->setRoute(Ctl\ModelInitialAssignmentController::class, '/models/{model-id:\\d+}/initialAssignments')
+		->setRoute(Ctl\ModelParentedParameterController::class, '/models/{model-id:\\d+}/{obj:parameter}s')
         ->setAuthMask(true)
-		->register();
-	(new RouteHelper)
-		->setRoute(Ctl\ModelParentedParameterController::class, '/models/{model-id:\\d+}/parameters')
-        ->setAuthMask(true)
+        ->addAnnotationsRoutes()
 		->register();
 	#FIXME ------ WTH is this endpoint? Makes no sense
 	// Note: This is an endpoint for parameters bound to a specific reaction, as opposed to global parameters - Havlík
@@ -234,11 +254,13 @@ return function(App $app) {
 	(new RouteHelper)
 		->setRoute(Ctl\ReactionItemParentedParameterController::class, '/models/{model-id:\\d+}/reactions/{reactionItem-id:\\d+}/parameters')
         ->setAuthMask(true)
+        ->addAnnotationsRoutes()
 		->register();
 	// ------------
 	(new RouteHelper)
-		->setRoute(Ctl\ModelParentedRuleController::class, '/models/{model-id:\\d+}/rules')
+		->setRoute(Ctl\ModelParentedRuleController::class, '/models/{model-id:\\d+}/{obj:rule}s')
         ->setAuthMask(true)
+        ->addAnnotationsRoutes()
 		->register();
 
 	// experiments module
@@ -358,6 +380,15 @@ return function(App $app) {
         ->setRoute(Ctl\UnitsAliasesAllController::class, '/unitsAliasesAll')
         ->setAuthMask(true)
         ->setMask(RouteHelper::LIST | RouteHelper::DETAIL)
+        ->register();
+
+    //Annotation
+    (new RouteHelper())
+        ->setRoute(Ctl\AnnotationController::class,
+            '/{.+/}{obj-type:
+            experiments|models}/{obj-id:\\d+}/annotations')
+        ->setAuthMask(true)
+        ->setMask(RouteHelper::ADD | RouteHelper::EDIT | RouteHelper::DELETE)
         ->register();
 
 	// model species

@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Entity\Authorization\User;
 use App\Entity\IdentifiedObject;
+use App\Entity\Model;
 use App\Entity\Repositories\IEndpointRepository;
 use App\Exceptions\InternalErrorException;
 use App\Exceptions\InvalidArgumentException;
@@ -172,7 +173,7 @@ abstract class RepositoryController extends AbstractController
      */
 	protected function getObjectViaORM(string $entityClassName, int $id){
         /** @var  IdentifiedObject $object */
-        $object = $this->orm->getRepository($entityClassName)->find($id);
+       $object = $this->orm->getRepository($entityClassName)->find($id);
         if (!$object)
             throw new NonExistingObjectException($id, $entityClassName);
         return $object;
@@ -222,7 +223,7 @@ abstract class RepositoryController extends AbstractController
         if (call_user_func($authPlatformRoleCheck)){
             return;
         }
-        //But if platform role is not enought, check if the resource is not available via group
+        //But if platform role is not enough, check if the resource is not available via group
         $groupId = $this->hasAccessToObject($this->userPermissions['group_wise']);
         //If no group ID is returned, the resource is public
         if ($groupId === null){

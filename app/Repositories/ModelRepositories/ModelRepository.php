@@ -44,7 +44,7 @@ class ModelRepository implements IEndpointRepository
 	public function getList(array $filter, array $sort, array $limit): array
 	{
 		$query = $this->buildListQuery($filter)
-			->select('m.id, m.name, m.sbmlId, m.sboTerm, m.notes, m.annotation, m.userId, m.approvedId, m.status');
+			->select('m.id, m.name, m.userId, m.groupId, m.description, m.status, m.isPublic');
         $query = $this->addPagingDql($query, $limit);
         $query = $this->addSortDql($query, $sort);
 		return $query->getQuery()->getArrayResult();
@@ -53,7 +53,8 @@ class ModelRepository implements IEndpointRepository
 	private function buildListQuery(array $filter): QueryBuilder
 	{
 		$query = $this->em->createQueryBuilder()
-			->from(Model::class, 'm');
+			->from(Model::class, 'm')
+            ->orWhere('m.isPublic = TRUE');
 		$query = $this->addFilterDql($query, $filter);
 		return $query;
 	}

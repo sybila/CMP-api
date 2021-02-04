@@ -55,7 +55,7 @@ class ModelEventAssignmentRepository implements IDependentEndpointRepository
 	public function getList(array $filter, array $sort, array $limit): array
 	{
 		$query = $this->buildListQuery($filter)
-			->select('e.id, e.name, e.sbmlId, e.sboTerm, e.notes, e.annotation, e.formula');
+			->select('e.id, e.name, e.sbmlId, e.sboTerm, e.notes, e.formula');
         $query = $this->addPagingDql($query, $limit);
         $query = $this->addSortDql($query, $sort);
 		return $query->getQuery()->getArrayResult();

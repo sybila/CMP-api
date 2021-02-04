@@ -29,28 +29,10 @@ class Model implements IdentifiedObject
 	private $groupId;
 
 	/**
-	 * @var int
-	 * @ORM\Column(type="integer", name="approved_id")
-	 */
-	private $approvedId;
-
-	/**
 	 * @var string
 	 * @ORM\Column(type="string")
 	 */
 	private $description;
-
-	/**
-	 * @var string
-	 * @ORM\Column (type="string")
-	 */
-	private $status;
-
-	/**
-     * @var string
-     * @ORM\Column (type="string")
-     */
-	private $origin;
 
 	/**
 	 * @var ArrayCollection
@@ -100,9 +82,19 @@ class Model implements IdentifiedObject
 	 */
 	private $rules;
 
+    /**
+     * @var bool
+     * @ORM\Column(name="is_public")
+     */
+	private $isPublic;
+
+    /**
+     * @ORM\Column
+     */
+    private $status;
+
 	/**
 	 * @var ArrayCollection
-	 * @ORM\OneToMany(targetEntity="ModelUnitDefinition", mappedBy="modelId")
 	 */
 	private $unitDefinitions;
 
@@ -152,26 +144,6 @@ class Model implements IdentifiedObject
     }
 
 	/**
-	 * Get approvedId
-	 * @return integer
-	 */
-	public function getApprovedId(): ?int
-	{
-		return $this->approvedId;
-	}
-
-	/**
-	 * Set approvedId
-	 * @param int $approvedId
-	 * @return Model
-	 */
-	public function setApprovedId($approvedId): Model
-	{
-		$this->approvedId = $approvedId;
-		return $this;
-	}
-
-	/**
 	 * Get description
 	 * @return string
 	 */
@@ -211,23 +183,6 @@ class Model implements IdentifiedObject
 		return $this;
 	}
 
-    /**
-     * @return string
-     */
-    public function getOrigin(): ?string
-    {
-        return $this->origin;
-    }
-
-    /**
-     * //FIXME why is this, what is my purpose
-     * @param string $origin
-     */
-    public function setOrigin(string $origin)
-    {
-        $this->origin = $origin;
-    }
-
 	/**
 	 * @return ModelCompartment[]|Collection
 	 */
@@ -253,7 +208,7 @@ class Model implements IdentifiedObject
 	}
 
 	/**
-	 * @return ModelFunctinoDefinition[]|Collection
+	 * @return ModelFunctionDefinition[]|Collection
 	 */
 	public function getFunctionDefinitions(): Collection
 	{
@@ -294,13 +249,31 @@ class Model implements IdentifiedObject
 		return $this->rules;
 	}
 
-	/**
-	 * @return ModelUnitDefinition[]|Collection
-	 */
-	public function getUnitDefinitions(): Collection
-	{
-		return $this->unitDefinitions;
-	}
+//	/**
+//	 * @return ModelUnitDefinition[]|Collection
+//	 */
+//	public function getUnitDefinitions(): Collection
+//	{
+//		return $this->unitDefinitions;
+//	}
+
+    /**
+     * @return bool
+     */
+    public function isPublic(): bool
+    {
+        return $this->isPublic;
+    }
+
+    /**
+     * @param bool $isPublic
+     */
+    public function setIsPublic(bool $isPublic): void
+    {
+        $this->isPublic = $isPublic;
+    }
+
+
 
     /**
      * @return Experiment[]|Collection

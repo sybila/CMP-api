@@ -15,7 +15,6 @@ use App\Entity\{Model,
     Repositories\ModelCompartmentRepository};
 use App\Exceptions\{DependentResourcesBoundException, MissingRequiredKeyException, WrongParentException};
 use App\Helpers\ArgumentParser;
-use SBaseControllerCommonable;
 use Slim\Http\{
 	Request, Response
 };
@@ -52,9 +51,9 @@ final class ModelCompartmentController extends ParentedRepositoryController impl
 			'rules' => $compartment->getRules()->map(function (ModelRule $rule) {
 				return ['id' => $rule->getId(), 'equation' => $rule->getEquation()];
 			})->toArray(),
-			'unitDefinitions' => $compartment->getUnitDefinitions()->map(function (ModelUnitDefinition $unit) {
-				return ['id' => $unit->getId(), 'symbol' => $unit->getSymbol()];
-			})->toArray(),
+//			'unitDefinitions' => $compartment->getUnitDefinitions()->map(function (ModelUnitDefinition $unit) {
+//				return ['id' => $unit->getId(), 'symbol' => $unit->getSymbol()];
+//			})->toArray(),
 		]);
 	}
 
@@ -97,8 +96,8 @@ final class ModelCompartmentController extends ParentedRepositoryController impl
 			throw new DependentResourcesBoundException('rules');
 		if (!$compartment->getReactions()->isEmpty())
 			throw new DependentResourcesBoundException('reaction');
-		if (!$compartment->getUnitDefinitions()->isEmpty())
-			throw new DependentResourcesBoundException('unitDefinitions');
+//		if (!$compartment->getUnitDefinitions()->isEmpty())
+//			throw new DependentResourcesBoundException('unitDefinitions');
 		return parent::delete($request, $response, $args);
 	}
 

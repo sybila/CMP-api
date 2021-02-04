@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 trait SBase
@@ -15,6 +17,7 @@ trait SBase
 	private $id;
 
 	/**
+     * This is an alias, an abbreviation, this is used in math expressions
 	 * @var string
 	 * @ORM\Column(type="string", name="sbml_id")
 	 */
@@ -38,17 +41,26 @@ trait SBase
 	 */
 	private $sboTerm;
 
-	/**
-	 * @var string
-	 * @ORM\Column(type="string")
-	 */
-	private $annotation;
 
 	/**
 	 * @var string
 	 * @ORM\Column(type="string")
 	 */
 	private $notes;
+
+    /**
+     * @var ArrayCollection
+     * @ORM\OneToMany(targetEntity="AnnotationToResource", mappedBy="resourceId")
+     */
+    private $annotation;
+
+    /**
+     * @return ArrayCollection|AnnotationToResource[]
+     */
+    public function getAnnotation()
+    {
+        return $this->annotation;
+    }
 
 	/**
 	 * Get id
@@ -139,25 +151,6 @@ trait SBase
 		return $this;
 	}
 
-	/**
-	 * Get annotation
-	 * @return string
-	 */
-	public function getAnnotation()
-	{
-		return $this->annotation;
-	}
-
-	/**
-	 * Set annotation
-	 * @param string $annotation
-	 * @return Model
-	 */
-	public function setAnnotation($annotation)
-	{
-		$this->annotation = $annotation;
-		return $this;
-	}
 
 	/**
 	 * Get notes

@@ -46,6 +46,7 @@ abstract class WritableRepositoryController extends RepositoryController
 	protected $beforeDelete = [];
 
 
+
 	public function __construct(Container $c)
 	{
 		parent::__construct($c);
@@ -108,6 +109,7 @@ abstract class WritableRepositoryController extends RepositoryController
 	public function add(Request $request, Response $response, ArgumentParser $args): Response
 	{
 		$this->runEvents($this->beforeRequest, $request, $response, $args);
+
 		$this->permitUser([$this, 'validateAdd'], [$this, 'canAdd']);
 		$body = new ArgumentParser($request->getParsedBody());
 		$this->validate($body, $this->getValidator());
@@ -164,7 +166,6 @@ abstract class WritableRepositoryController extends RepositoryController
 		$this->data->needsFlush = true;
 		return self::formatOk($response);
 	}
-
 
 	/**
 	 * Iterate over array of argument names, throw exception if an argument is missing

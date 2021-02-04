@@ -1,5 +1,10 @@
 <?php
 
+namespace App\Controllers;
+
+use App\Entity\AnnotableObject;
+use App\Entity\AnnotationSource;
+use App\Entity\AnnotationToResource;
 use App\Entity\Authorization\User;
 use App\Entity\IdentifiedObject;
 use App\Entity\Model;
@@ -11,26 +16,28 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 trait SBaseControllerCommonable
 {
+
     protected function getSBaseData(IdentifiedObject $object): array
     {
         /** @var SBase $object*/
         return [
             'id' => $object->getId(),
             'name' => $object->getName(),
-            'sbmlId' => $object->getSbmlId(),
+            'alias' => $object->getSbmlId(),
             'sboTerm' => $object->getSboTerm(),
             'notes' => $object->getNotes(),
-            'annotation' => $object->getAnnotation()
+            'annotation' => $this->getAnnotations($object),
         ];
     }
 
     protected function setSBaseData(IdentifiedObject $object, ArgumentParser $body): void
     {
         /** @var SBase $object */
-        !$body->hasKey('name') ? $object->setName($body->getString('sbmlId')) : $object->setName($body->getString('name'));
-        !$body->hasKey('sbmlId') ?: $object->setSbmlId($body->getString('sbmlId'));
+        !$body->hasKey('name') ?: $object->setName($body->getString('name'));
+        !$body->hasKey('alias') ?: $object->setSbmlId($body->getString('alias'));
         !$body->hasKey('sboTerm') ?: $object->setSboTerm($body->getString('sboTerm'));
         !$body->hasKey('notes') ?: $object->setNotes($body->getString('notes'));
+        //FIXME annotation is not a string field anymore
         !$body->hasKey('annotation') ?: $object->setAnnotation($body->getString(('annotation')));
     }
 
@@ -38,11 +45,25 @@ trait SBaseControllerCommonable
     {
         return [
             'name' => new Assert\Type(['type' => 'string']),
-            'sbmlId' => new Assert\Type(['type' => 'string']),
+            'alias' => new Assert\Type(['type' => 'string']),
             'sboTerm' => new Assert\Type(['type' => 'string']),
             'notes' => new Assert\Type(['type' => 'string']),
-            'annotation' => new Assert\Type(['type' => 'string']),
+            'annotation' => new Assert\Type(['type' => 'array']),
         ];
+    }
+
+    protected function getAnnotations($object): array
+    {
+        return $this->orm->createQueryBuilder()
+            ->from(AnnotationToResource::class, 'a')
+            ->where('a.resourceId = :id')
+            ->setParameter('id', $object->getId())
+            ->join(AnnotableObject::class, 'o', 'WITH','a.resourceType = o.id')
+            ->andWhere('o.type = :class')
+            ->setParameter('class', $this->getObjectName())
+            ->join(AnnotationSource::class, 's', 'WITH','a.annotation = s.id')
+            ->select('s.id, s.link')//, s.source, s.sourceId')
+            ->getQuery()->getArrayResult();
     }
 
     public function hasAccessToObject(array $userGroups): ?int
@@ -54,11 +75,14 @@ trait SBaseControllerCommonable
         if ($rootRouteParent['type'] == 'models') {
             /** @var Model $routeParentObject */
             $routeParentObject = $this->getObjectViaORM(Model::class, $rootRouteParent['id']);
+            if($routeParentObject->isPublic()){
+                return null;
+            }
             if(array_key_exists($routeParentObject->getGroupId(), $userGroups)) {
                 return $routeParentObject->getGroupId();
             } else {
                 throw new InvalidAuthenticationException("You cannot access this resource.",
-                    "Not a member of the group.");
+                    "You have tried to access a private resource that does not belong to any of your groups");
             }
         }
         else {

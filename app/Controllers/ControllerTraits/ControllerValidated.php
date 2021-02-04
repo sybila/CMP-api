@@ -19,7 +19,6 @@ trait ControllerValidated
 	{
 		if ($rules === null)
 			return;
-
 		$validator = Validation::createValidator();
 
 		$rules->allowExtraFields = true;

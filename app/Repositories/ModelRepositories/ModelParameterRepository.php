@@ -66,7 +66,7 @@ class ModelParameterRepository implements IDependentEndpointRepository
 	public function getList(array $filter, array $sort, array $limit): array
 	{
 		$query = $this->buildListQuery($filter)
-			->select('p.id, p.name, p.sbmlId, p.sboTerm, p.notes, p.annotation, p.value, p.isConstant');
+			->select('p.id, p.name, p.sbmlId, p.sboTerm, p.notes, p.value, p.isConstant');
         $query = $this->addPagingDql($query, $limit);
         $query = $this->addSortDql($query, $sort);
 		return $query->getQuery()->getArrayResult();

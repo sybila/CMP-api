@@ -18,7 +18,6 @@ use App\Exceptions\{
     NonExistingObjectException,
     WrongParentException};
 use App\Helpers\ArgumentParser;
-use SBaseControllerCommonable;
 use Slim\Http\{
 	Request, Response
 };

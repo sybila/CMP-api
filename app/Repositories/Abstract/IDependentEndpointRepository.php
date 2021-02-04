@@ -7,6 +7,7 @@ use App\Exceptions\WrongParentException;
 
 interface IDependentEndpointRepository extends IEndpointRepository
 {
+
     public function getParent(): IdentifiedObject;
 
     /**

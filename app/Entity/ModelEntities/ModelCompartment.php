@@ -58,7 +58,6 @@ class ModelCompartment implements IdentifiedObject
 
 	/**
 	 * @var ArrayCollection
-	 * @ORM\OneToMany(targetEntity="ModelUnitDefinition", mappedBy="compartmentId")
 	 */
 	protected $unitDefinitions;
 
@@ -166,12 +165,12 @@ class ModelCompartment implements IdentifiedObject
 		return $this->rules;
 	}
 
-	/**
-	 * @return ModelUnitDefinition[]|Collection
-	 */
-	public function getUnitDefinitions(): Collection
-	{
-		return $this->unitDefinitions;
-	}
+//	/**
+//	 * @return ModelUnitDefinition[]|Collection
+//	 */
+//	public function getUnitDefinitions(): Collection
+//	{
+//		return $this->unitDefinitions;
+//	}
 
 }

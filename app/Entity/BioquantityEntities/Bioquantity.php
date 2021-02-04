@@ -102,13 +102,13 @@ use Identifier;
 	 */
 	protected $variables;
 
-	/**
-	 * @var ArrayCollection
-	 * @ORM\ManyToMany(targetEntity="Unit", inversedBy="bioquantities")
-	 * @ORM\JoinTable(name="unit", joinColumns={@ORM\JoinColumn(name="bioquantity_id", referencedColumnName="id")},
-	 * inverseJoinColumns={@ORM\JoinColumn(name="bioquantity_id", referencedColumnName="id")})
-	 */
-	protected $unitDefinitions;
+//	/**
+//	 * @var ArrayCollection
+//	 * @ORM\ManyToMany(targetEntity="Unit", inversedBy="bioquantities")
+//	 * @ORM\JoinTable(name="unit", joinColumns={@ORM\JoinColumn(name="bioquantity_id", referencedColumnName="id")},
+//	 * inverseJoinColumns={@ORM\JoinColumn(name="bioquantity_id", referencedColumnName="id")})
+//	 */
+//	protected $unitDefinitions;
 
 
 	public function getOrganismId(): ?int
@@ -282,12 +282,12 @@ use Identifier;
         return $this->variables;
     }
 
-    /**
-     * @return UnitDefinitions[]|Collection
-     */
-    public function getUnitDefinitions(): Collection
-    {
-        return $this->unitDefinitions;
-    }
+//    /**
+//     * @return UnitDefinitions[]|Collection
+//     */
+//    public function getUnitDefinitions(): Collection
+//    {
+//        return $this->unitDefinitions;
+//    }
 
 }

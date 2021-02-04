@@ -108,7 +108,7 @@ class EntityRepositoryImpl implements EntityRepository
 	public function findCompartmentComponents(Compartment $entity): ArrayCollection
 	{
 		return new ArrayCollection($this->em
-			->createQuery('SELECT e FROM \\App\\Entity\\Entity e INNER JOIN e.compartments em WHERE em.id = :id AND e NOT INSTANCE OF \\App\\Entity\\Compartment')
+			->createQuery("SELECT e FROM \\App\\Entity\\Entity e INNER JOIN e.compartments em WHERE em.id = :id AND e NOT INSTANCE OF \\App\\Entity\\Compartment")
 			->setParameters(['id' => $entity->getId()])
 			->getResult());
 	}

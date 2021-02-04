@@ -194,14 +194,6 @@ $c[EntityRepo\ModelEventAssignmentRepository::class] = function (Container $c) {
 	return new EntityRepo\ModelEventAssignmentRepository($c[EntityManager::class]);
 };
 
-$c[EntityRepo\ModelUnitDefinitionRepository::class] = function (Container $c) {
-	return new EntityRepo\ModelUnitDefinitionRepository($c[EntityManager::class]);
-};
-
-$c[EntityRepo\ModelUnitRepository::class] = function (Container $c) {
-	return new EntityRepo\ModelUnitRepository($c[EntityManager::class]);
-};
-
 $c[EntityRepo\ModelInitialAssignmentRepository::class] = function (Container $c) {
 	return new EntityRepo\ModelInitialAssignmentRepository($c[EntityManager::class]);
 };
@@ -321,6 +313,11 @@ $c[EntityRepo\UnitsAllRepository::class] = function (Container $c) {
 $c[EntityRepo\UnitsAliasesAllRepository::class] = function (Container $c) {
 	return new EntityRepo\UnitsAliasesAllRepository($c[EntityManager::class]);
 };
+
+$c[EntityRepo\AnnotationSourceRepository::class] = function (Container $c) {
+    return new EntityRepo\AnnotationSourceRepository($c[EntityManager::class]);
+};
+
 
 $c[AuthorizationServer::class] = function (Container $c) {
 	$srv = new AuthorizationServer(

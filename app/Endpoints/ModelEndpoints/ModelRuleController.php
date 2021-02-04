@@ -12,7 +12,6 @@ use Exception;
 use IGroupRoleAuthWritableController;
 use App\Exceptions\{InvalidArgumentException, MissingRequiredKeyException, WrongParentException};
 use App\Helpers\ArgumentParser;
-use SBaseControllerCommonable;
 use Slim\Http\{
 	Request, Response
 };

@@ -87,7 +87,7 @@ class NotificationDispatchController implements EventSubscriber
      * @param LifecycleEventArgs $args
      * @throws ORMException|MissingRequiredKeyException
      */
-    public function postDelete(LifecycleEventArgs $args)
+    public function postRemove(LifecycleEventArgs $args)
     {
         $className = get_class($args->getObject());
         if($className == User::class) {
@@ -169,7 +169,7 @@ class NotificationDispatchController implements EventSubscriber
         $rootParent = $this->getRootParent();
         $notification->setWhichParent(json_encode([
             'type' => substr($rootParent['type'], 0, -1),
-            'id' => (int)$rootParent['id']]));
+            'id' => $rootParent['id']]));
         $notification->setWhat(json_encode([
             'type' => current($how)['table'],
             'id' => $ent->getId()]));
@@ -182,9 +182,9 @@ class NotificationDispatchController implements EventSubscriber
      */
     protected function shootTheNotification(NotificationLog $object, EntityManager $em){
         $origin = json_decode($object->getWhichParent(), TRUE);
-
         /** @var Model|Experiment $identifiedObject */
-        $identifiedObject = $em->find('App\Entity\\' . ucfirst($origin['type']), $origin['id']);
+        $originId = is_null($origin['id']) ? json_decode($object->getWhat(), TRUE)['id'] : $origin['id'];
+        $identifiedObject = $em->find('App\Entity\\' . ucfirst($origin['type']), $originId);
         $receivers = $em->find(UserGroup::class, $identifiedObject->getGroupId())
             ->getUsers()->map(function (UserGroupToUser $groupLink) {
                 $user = $groupLink->getUserId();

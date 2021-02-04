@@ -62,9 +62,9 @@ class BioquantityController extends WritableRepositoryController
 			'variables' => $bioquantity->getVariables()->map(function (VariableValues $variables) {
 					return ['id' => $variables->getId(), 'name' => $variables->getName()];
 				})->toArray(),
-			'units' => $bioquantity->getUnitDefinitions()->map(function (Unit $unitDefinition) {
-					return ['id' => $unitDefinition->getId(), 'name' => $unitDefinition->getName()];
-				})->toArray(),
+//			'units' => $bioquantity->getUnitDefinitions()->map(function (Unit $unitDefinition) {
+//					return ['id' => $unitDefinition->getId(), 'name' => $unitDefinition->getName()];
+//				})->toArray(),
 		];
 	}
 

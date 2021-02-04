@@ -14,7 +14,6 @@ use App\Helpers\ArgumentParser;
 use Slim\Http\{
 	Request, Response
 };
-use SBaseControllerCommonable;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
