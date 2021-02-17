@@ -60,7 +60,7 @@ class ModelCompartmentRepository implements IDependentEndpointRepository
 	{
 		$query = $this->em->createQueryBuilder()
 			->from(ModelCompartment::class, 'c')
-			->where('c.modelId = :modelId')
+			->where('c.model = :modelId')
 			->setParameter('modelId', $this->model->getId());
         $query = $this->addFilterDql($query, $filter);
 		return $query;
