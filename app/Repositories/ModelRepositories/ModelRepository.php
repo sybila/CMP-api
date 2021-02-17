@@ -53,8 +53,7 @@ class ModelRepository implements IEndpointRepository
 	private function buildListQuery(array $filter): QueryBuilder
 	{
 		$query = $this->em->createQueryBuilder()
-			->from(Model::class, 'm')
-            ->orWhere('m.isPublic = TRUE');
+			->from(Model::class, 'm');
 		$query = $this->addFilterDql($query, $filter);
 		return $query;
 	}

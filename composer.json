@@ -34,7 +34,11 @@
 		"ext-pdo": "*",
 		"greenlion/php-sql-parser": "*",
 		"ext-sockets": "*",
-		"ext-openssl": "*"
+		"ext-openssl": "*",
+		"ext-xsl": "*",
+		"ext-simplexml": "*",
+		"ext-dom": "*",
+		"ext-libxml": "*"
 	},
 	"require-dev": {
 		"nette/utils": "^2.4",

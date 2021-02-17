@@ -56,6 +56,7 @@ abstract class ModelRuleController extends ParentedRepositoryController implemen
 		} catch (Exception $e) {
 			throw new InvalidArgumentException('annotation', $args->getString('annotation'), 'must be in format term:id');
 		}
+        $this->deleteAnnotations($args->getInt('id'));
 		return $a;
 	}
 

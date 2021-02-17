@@ -14,6 +14,12 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Model implements IdentifiedObject
 {
+
+    const INCOMPLETE='incomplete';
+    const COMPLETE='complete';
+    const CURATED='curated';
+    const NONCURATED='non-curated';
+
 	use SBase;
 
 	/**
@@ -36,55 +42,54 @@ class Model implements IdentifiedObject
 
 	/**
 	 * @var ArrayCollection
-	 * @ORM\OneToMany(targetEntity="ModelCompartment", mappedBy="modelId")
+	 * @ORM\OneToMany(targetEntity="ModelCompartment", mappedBy="model", cascade={"remove"})
 	 */
 	private $compartments;
 
 	/**
 	 * @var ArrayCollection
-	 * @ORM\OneToMany(targetEntity="ModelConstraint", mappedBy="modelId")
+	 * @ORM\OneToMany(targetEntity="ModelConstraint", mappedBy="modelId", cascade={"remove"})
 	 */
 	private $constraints;
 
 	/**
 	 * @var ArrayCollection
-	 * @ORM\OneToMany(targetEntity="ModelEvent", mappedBy="modelId")
+	 * @ORM\OneToMany(targetEntity="ModelEvent", mappedBy="modelId", cascade={"remove"})
 	 */
 	private $events;
 
 	/**
 	 * @var ArrayCollection
-	 * @ORM\OneToMany(targetEntity="ModelFunctionDefinition", mappedBy="modelId")
+	 * @ORM\OneToMany(targetEntity="ModelFunctionDefinition", mappedBy="modelId", cascade={"remove"})
 	 */
 	private $functionDefinitions;
 
 	/**
 	 * @var ArrayCollection
-	 * @ORM\OneToMany(targetEntity="ModelInitialAssignment", mappedBy="modelId")
+	 * @ORM\OneToMany(targetEntity="ModelInitialAssignment", mappedBy="modelId", cascade={"remove"})
 	 */
 	private $initialAssignments;
 
 	/**
 	 * @var ArrayCollection
-	 * @ORM\OneToMany(targetEntity="ModelParameter", mappedBy="modelId")
+	 * @ORM\OneToMany(targetEntity="ModelParameter", mappedBy="modelId", cascade={"remove"})
 	 */
 	private $parameters;
 
 	/**
 	 * @var ArrayCollection
-	 * @ORM\OneToMany(targetEntity="ModelReaction", mappedBy="modelId")
+	 * @ORM\OneToMany(targetEntity="ModelReaction", mappedBy="modelId", cascade={"remove"})
 	 */
 	private $reactions;
 
 	/**
 	 * @var ArrayCollection
-	 * @ORM\OneToMany(targetEntity="ModelRule", mappedBy="modelId")
+	 * @ORM\OneToMany(targetEntity="ModelRule", mappedBy="modelId", cascade={"remove"})
 	 */
 	private $rules;
 
     /**
-     * @var bool
-     * @ORM\Column(name="is_public")
+     * @ORM\Column(type="boolean",name="is_public")
      */
 	private $isPublic;
 
@@ -93,19 +98,19 @@ class Model implements IdentifiedObject
      */
     private $status;
 
-	/**
-	 * @var ArrayCollection
-	 */
-	private $unitDefinitions;
+//	/**
+//	 * @var ArrayCollection
+//	 */
+//	private $unitDefinitions;
 
-    /**
-     * @var ArrayCollection
-     * @ORM\ManyToMany(targetEntity="Experiment", inversedBy="experimentModels")
-     * @ORM\JoinTable(name="experiment_to_model", joinColumns={@ORM\JoinColumn(name="modelId", referencedColumnName="id")},
-     * inverseJoinColumns={@ORM\JoinColumn(name="experimentId", referencedColumnName="id")})
-     */
-    private $experiments;
-
+//    /**
+//     * @var ArrayCollection
+//     * @ORM\ManyToMany(targetEntity="Experiment", inversedBy="experimentModels")
+//     * @ORM\JoinTable(name="experiment_to_model", joinColumns={@ORM\JoinColumn(name="modelId", referencedColumnName="id")},
+//     * inverseJoinColumns={@ORM\JoinColumn(name="experimentId", referencedColumnName="id")})
+//     */
+//    private $experiments;
+//
 
 	/**
 	 * Get userId

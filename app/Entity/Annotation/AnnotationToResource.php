@@ -1,10 +1,6 @@
 <?php
 namespace App\Entity;
 
-use App\Entity\Identifier;
-use App\Entity\IdentifiedObject;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -17,7 +13,7 @@ class AnnotationToResource implements IdentifiedObject
     use Identifier;
 
     /**
-     * @ORM\ManyToOne(targetEntity="AnnotationSource", inversedBy="annotatedResources")
+     * @ORM\ManyToOne(targetEntity="AnnotationSource", inversedBy="annotatedResources",cascade={"remove"})
      * @ORM\JoinColumn(name="annotation_id", referencedColumnName="id")
      */
     private $annotation;
@@ -27,9 +23,12 @@ class AnnotationToResource implements IdentifiedObject
      */
     private $resourceId;
 
+//    /**
+//     * @ORM\OneToOne(targetEntity="AnnotableObject")
+//     * @ORM\JoinColumn(name="resource_type", referencedColumnName="id")
+//     */
     /**
-     * @ORM\OneToOne(targetEntity="AnnotableObject")
-     * @ORM\JoinColumn(name="resource_type", referencedColumnName="id")
+     * @ORM\Column(name="resource_type",type="annotable_obj_type")
      */
     private $resourceType;
 
@@ -40,7 +39,7 @@ class AnnotationToResource implements IdentifiedObject
      * @param $resourceId
      * @param $resourceType
      */
-    public function __construct(AnnotationSource $annotation, $resourceId, AnnotableObject $resourceType)
+    public function __construct(AnnotationSource $annotation, $resourceId, $resourceType)
     {
         $this->annotation = $annotation;
         $this->resourceId = $resourceId;
@@ -51,23 +50,23 @@ class AnnotationToResource implements IdentifiedObject
     /**
      * @return AnnotationSource
      */
-    public function getAnnotationId()
+    public function getAnnotation(): AnnotationSource
     {
         return $this->annotation;
     }
 
     /**
-     * @param mixed $annotationId
+     * @param mixed $annotation
      */
-    public function setAnnotationId($annotationId): void
+    public function setAnnotation($annotation): void
     {
-        $this->annotationId = $annotationId;
+        $this->annotation = $annotation;
     }
 
     /**
      * @return int
      */
-    public function getResourceId()
+    public function getResourceId(): int
     {
         return $this->resourceId;
     }
@@ -80,9 +79,7 @@ class AnnotationToResource implements IdentifiedObject
         $this->resourceId = $resourceId;
     }
 
-    /**
-     * @return AnnotableObject
-     */
+
     public function getResourceType()
     {
         return $this->resourceType;

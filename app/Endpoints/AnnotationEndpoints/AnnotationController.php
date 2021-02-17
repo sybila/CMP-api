@@ -3,8 +3,7 @@
 
 namespace App\Controllers;
 
-
-use App\Entity\AnnotableObject;
+use App\Entity\AnnotatedEntity;
 use App\Entity\AnnotationSource;
 use App\Entity\AnnotationToResource;
 use App\Entity\IdentifiedObject;
@@ -57,12 +56,9 @@ class AnnotationSourceController extends MultiParentedRepoController
         !$body->hasKey('link') ?: $object->setLink($body->getString('link'));
     }
 
-    protected function getAnnotableType(): AnnotableObject
+    protected function getAnnotableType(): string
     {
-        /** @var AnnotableObject $type */
-        $type = $this->orm->getRepository(AnnotableObject::class)
-            ->findOneBy(['type' => $this->annotatedObjType]);
-        return $type;
+        return $this->annotatedObjType;
     }
 
     protected function createObject(ArgumentParser $body): IdentifiedObject
@@ -99,7 +95,7 @@ class AnnotationSourceController extends MultiParentedRepoController
         /** @var AnnotationSource $child */
         $count = $child->getAnnotatedResources()->filter(function (AnnotationToResource $rel) use ($parent){
             return ($rel->getResourceId() == $parent->getId()) &&
-                ($rel->getResourceType()->getType() === $this->annotatedObjType);
+                ($rel->getResourceType() === $this->annotatedObjType);
         })->count();
         if (!($count>0)){
             throw new WrongParentException($this->annotatedObjType,$parent->getId(),'annotation',$child->getId());
@@ -111,10 +107,10 @@ class AnnotationSourceController extends MultiParentedRepoController
         $info = static::getParentObjectInfo();
         try {
             $id = $args->get($info->parentIdRoutePlaceholder);
-            $this->annotatedObjType = $args->get($info->parentEntityClass);
+            $this->annotatedObjType = AnnotatedEntity::$routeObjToEntityClass[$args->get($info->parentEntityClass)];
         } catch (Exception $e) {
             throw new MissingRequiredKeyException($e->getMessage());
         }
-        return $this->getObjectViaORM(AnnotableObject::KNOWN_TYPES[$this->annotatedObjType], $id);
+        return $this->getObjectViaORM($this->annotatedObjType, $id);
     }
 }

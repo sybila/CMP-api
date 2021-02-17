@@ -7,16 +7,19 @@ use App\Entity\AnnotationSource;
 use App\Entity\AnnotationToResource;
 use App\Entity\Authorization\User;
 use App\Entity\IdentifiedObject;
+use App\Entity\KnownAnnotableObjType;
 use App\Entity\Model;
 use App\Entity\SBase;
 use App\Exceptions\InvalidAuthenticationException;
 use App\Exceptions\WrongParentException;
 use App\Helpers\ArgumentParser;
+use Doctrine\Common\Collections\Criteria;
+use Slim\Http\Request;
+use Slim\Http\Response;
 use Symfony\Component\Validator\Constraints as Assert;
 
 trait SBaseControllerCommonable
 {
-
     protected function getSBaseData(IdentifiedObject $object): array
     {
         /** @var SBase $object*/
@@ -26,7 +29,11 @@ trait SBaseControllerCommonable
             'alias' => $object->getSbmlId(),
             'sboTerm' => $object->getSboTerm(),
             'notes' => $object->getNotes(),
-            'annotation' => $this->getAnnotations($object),
+            'annotations' => $object->getAnnotations($this->orm)
+                ->map(function (AnnotationSource $ann) {
+                    return ['id' => $ann->getId(),
+                        'link' => $ann->getLink()];
+                })->toArray()
         ];
     }
 
@@ -37,8 +44,6 @@ trait SBaseControllerCommonable
         !$body->hasKey('alias') ?: $object->setSbmlId($body->getString('alias'));
         !$body->hasKey('sboTerm') ?: $object->setSboTerm($body->getString('sboTerm'));
         !$body->hasKey('notes') ?: $object->setNotes($body->getString('notes'));
-        //FIXME annotation is not a string field anymore
-        !$body->hasKey('annotation') ?: $object->setAnnotation($body->getString(('annotation')));
     }
 
     protected function getSBaseValidator(): array
@@ -48,22 +53,7 @@ trait SBaseControllerCommonable
             'alias' => new Assert\Type(['type' => 'string']),
             'sboTerm' => new Assert\Type(['type' => 'string']),
             'notes' => new Assert\Type(['type' => 'string']),
-            'annotation' => new Assert\Type(['type' => 'array']),
         ];
-    }
-
-    protected function getAnnotations($object): array
-    {
-        return $this->orm->createQueryBuilder()
-            ->from(AnnotationToResource::class, 'a')
-            ->where('a.resourceId = :id')
-            ->setParameter('id', $object->getId())
-            ->join(AnnotableObject::class, 'o', 'WITH','a.resourceType = o.id')
-            ->andWhere('o.type = :class')
-            ->setParameter('class', $this->getObjectName())
-            ->join(AnnotationSource::class, 's', 'WITH','a.annotation = s.id')
-            ->select('s.id, s.link')//, s.source, s.sourceId')
-            ->getQuery()->getArrayResult();
     }
 
     public function hasAccessToObject(array $userGroups): ?int
@@ -97,7 +87,9 @@ trait SBaseControllerCommonable
             return [];
         }
         $dql = "m.groupId";
-        return array_map(function () use ($dql) { return $dql; }, $userGroups);
+        $dql_array = (array_map(function () use ($dql) { return $dql; }, $userGroups));
+        $dql_array['true'] = "m.isPublic";
+        return $dql_array;
     }
 
     public function canAdd(int $role, int $id): bool
@@ -131,6 +123,14 @@ trait SBaseControllerCommonable
             }
         }
         return true;
+    }
+
+    public function deleteAnnotations($objId)
+    {
+        $entity = $this->getObject($objId);
+        foreach ($entity->getAnnotations($this->orm) as $annotation){
+            $this->orm->remove($annotation);
+        }
     }
 
 }

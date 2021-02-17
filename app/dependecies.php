@@ -1,5 +1,6 @@
 <?php
 
+use App\Entity\AnnotableObjectType;
 use App\Entity\Authorization\Notification\MailNotification;
 use App\Helpers\DateTimeJsonType;
 use App\Entity\Repositories as EntityRepo;
@@ -23,6 +24,7 @@ $config = require __DIR__ . '/../app/settings.php';
 Type::overrideType('datetime', DateTimeJsonType::class);
 Type::overrideType('datetime_immutable', DateTimeJsonType::class);
 Type::overrideType('datetime', DateTimeJsonType::class);
+Type::addType('annotable_obj_type',AnnotableObjectType::class);
 
 $c = new Container($config);
 unset($c['errorHandler']);

@@ -30,14 +30,11 @@ class AnnotationSource implements IdentifiedObject
     protected $link;
 
     /**
-     * @var ArrayCollection
      * @ORM\OneToMany(targetEntity="AnnotationToResource", mappedBy="annotation", cascade={"persist", "remove"})
      */
     private $annotatedResources;
 
-    /**
-     * @return ArrayCollection
-     */
+
     public function getAnnotatedResources()
     {
         return $this->annotatedResources;

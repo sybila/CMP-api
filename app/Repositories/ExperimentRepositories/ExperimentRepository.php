@@ -4,6 +4,7 @@ namespace App\Entity\Repositories;
 
 use App\Entity\Experiment;
 use App\Helpers\QueryRepositoryHelper;
+use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 
@@ -14,7 +15,7 @@ class ExperimentRepository implements IEndpointRepository
 	/** @var EntityManager * */
 	protected $em;
 
-	/** @var \Doctrine\ORM\ExperimentRepository */
+	/** @var \Doctrine\ORM\EntityRepository */
 	private $repository;
 
 	public function __construct(EntityManager $em)
@@ -44,11 +45,12 @@ class ExperimentRepository implements IEndpointRepository
 	public function getList(array $filter, array $sort, array $limit): array
 	{
 		$query = $this->buildListQuery($filter)
-			->select('e.id, e.name, e.description, e.protocol, e.started, e.inserted, e.status');
+			->select('e.id, e.name, e.description, e.protocol, e.started, e.inserted, e.status,e.groupId');
         $query = $this->addPagingDql($query, $limit);
         $query = $this->addSortDql($query, $sort);
 		return $query->getQuery()->getArrayResult();
 	}
+
 
 	private function buildListQuery(array $filter): QueryBuilder
 	{

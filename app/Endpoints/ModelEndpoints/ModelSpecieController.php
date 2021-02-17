@@ -114,6 +114,7 @@ final class ModelSpecieController extends ParentedRepositoryController implement
 			throw new DependentResourcesBoundException('rule');
 		if (!$specie->getReactionItems()->isEmpty())
 			throw new DependentResourcesBoundException('reactionItem');
+        $this->deleteAnnotations($args->getInt('id'));
 		return parent::delete($request, $response, $args);
 	}
 

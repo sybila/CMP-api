@@ -16,7 +16,7 @@ class ExperimentNoteRepository implements IDependentEndpointRepository
 	/** @var EntityManager * */
 	protected $em;
 
-	/** @var \Doctrine\ORM\NoteRepository */
+	/** @var \Doctrine\ORM\EntityRepository */
 	private $repository;
 
 	/** @var Experiment */

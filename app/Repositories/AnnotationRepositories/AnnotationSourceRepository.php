@@ -6,11 +6,7 @@ namespace App\Entity\Repositories;
 
 use App\Entity\AnnotationSource;
 use App\Entity\IdentifiedObject;
-use App\Entity\Model;
-use App\Exceptions\WrongParentException;
 use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\ORMException;
-use Doctrine\ORM\UnexpectedResultException;
 
 class AnnotationSourceRepository implements IDependentEndpointRepository
 {

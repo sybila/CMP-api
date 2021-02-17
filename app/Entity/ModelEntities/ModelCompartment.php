@@ -8,7 +8,6 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * @ORM\Entity
  * @ORM\Table(name="model_compartment")
- * @ORM\DiscriminatorColumn(name="hierarchy_type", type="string")
  */
 class ModelCompartment implements IdentifiedObject
 {
@@ -18,9 +17,10 @@ class ModelCompartment implements IdentifiedObject
 	 * @ORM\ManyToOne(targetEntity="Model", inversedBy="compartments")
 	 * @ORM\JoinColumn(name="model_id", referencedColumnName="id")
 	 */
-	protected $modelId;
+	protected $model;
 
 	/**
+     * //FIXME closely interconnected with units, when units are done we need to look at this again
 	 * @var float
 	 * @ORM\Column(name="spatial_dimensions",type="float",nullable=true)
 	 */
@@ -56,29 +56,24 @@ class ModelCompartment implements IdentifiedObject
 	 */
 	protected $rules;
 
-	/**
-	 * @var ArrayCollection
-	 */
-	protected $unitDefinitions;
+//	/**
+//	 * @var ArrayCollection
+//	 */
+//	protected $unitDefinitions;
 
 	/**
      * This returns model object, non-intuitively
 	 * Get model
 	 */
-	public function getModelId()
+	public function getModel()
 	{
-		return $this->modelId;
+		return $this->model;
 	}
 
-	/**
-	 * Set modelId
-	 * @param integer $modelId
-	 * @return ModelCompartment
-	 */
-	public function setModelId($modelId): ModelCompartment
+
+	public function setModel($model)
 	{
-		$this->modelId = $modelId;
-		return $this;
+		$this->model = $model;
 	}
 
 	/**
@@ -93,12 +88,10 @@ class ModelCompartment implements IdentifiedObject
 	/**
 	 * Set spatialDimensions
 	 * @param integer $spatialDimensions
-	 * @return ModelCompartment
 	 */
-	public function setSpatialDimensions($spatialDimensions): ModelCompartment
+	public function setSpatialDimensions(int $spatialDimensions)
 	{
 		$this->spatialDimensions = $spatialDimensions;
-		return $this;
 	}
 
 	/**
@@ -113,13 +106,12 @@ class ModelCompartment implements IdentifiedObject
 	/**
 	 * Set size
 	 * @param integer $size
-	 * @return ModelCompartment
 	 */
-	public function setSize($size): ModelCompartment
+	public function setSize(int $size)
 	{
 		$this->size = $size;
-		return $this;
 	}
+
 
 	/**
 	 * Get isConstant
@@ -135,11 +127,18 @@ class ModelCompartment implements IdentifiedObject
 	 * @param integer $isConstant
 	 * @return ModelCompartment
 	 */
-	public function setIsConstant($isConstant): ModelCompartment
+	public function setIsConstant(int $isConstant): ModelCompartment
 	{
 		$this->isConstant = $isConstant;
+		//FIXME this one modus operandi is good if we want to chain the "set" methods
+        //FIXME but why, if we never use it. It is more transparent, but it is slower.
 		return $this;
 	}
+
+    public function setIsConstant2(int $isConstant)
+    {
+        $this->isConstant = $isConstant;
+    }
 
 	/**
 	 * @return ModelSpecie[]|Collection

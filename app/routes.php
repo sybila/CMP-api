@@ -265,8 +265,9 @@ return function(App $app) {
 
 	// experiments module
 	(new RouteHelper)
-		->setRoute(Ctl\ExperimentController::class, '/experiments')
+		->setRoute(Ctl\ExperimentController::class, '/{obj:experiment}s')
         ->setAuthMask(true)
+        ->addAnnotationsRoutes()
 		->register();
     (new RouteHelper)
         ->setRoute(Ctl\VariablesValuesController::class, '/experimentvalues')
@@ -290,6 +291,7 @@ return function(App $app) {
         ->register();
     (new RouteHelper)
         ->setRoute(Ctl\DeviceController::class, '/devices')
+        ->addAnnotationsRoutes()
         ->register();
 
     //analysis module

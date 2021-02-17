@@ -87,6 +87,7 @@ final class ModelReactionController extends ParentedRepositoryController impleme
 			throw new DependentResourcesBoundException('reactionItem');
 		if (!$specie->getFunctions()->isEmpty())
 			throw new DependentResourcesBoundException('function');
+        $this->deleteAnnotations($args->getInt('id'));
 		return parent::delete($request, $response, $args);
 	}
 

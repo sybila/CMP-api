@@ -87,7 +87,7 @@ class NotificationDispatchController implements EventSubscriber
      * @param LifecycleEventArgs $args
      * @throws ORMException|MissingRequiredKeyException
      */
-    public function postRemove(LifecycleEventArgs $args)
+    public function preRemove(LifecycleEventArgs $args)
     {
         $className = get_class($args->getObject());
         if($className == User::class) {
@@ -239,7 +239,7 @@ class NotificationDispatchController implements EventSubscriber
     public function getSubscribedEvents()
     {
         return [Events::postUpdate,
-            Events::postRemove,
+            Events::preRemove,
             Events::postPersist];
     }
 

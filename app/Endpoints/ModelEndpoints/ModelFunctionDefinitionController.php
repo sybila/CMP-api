@@ -62,6 +62,7 @@ final class ModelFunctionDefinitionController extends ParentedRepositoryControll
 
 	public function delete(Request $request, Response $response, ArgumentParser $args): Response
 	{
+        $this->deleteAnnotations($args->getInt('id'));
 		return parent::delete($request, $response, $args);
 	}
 

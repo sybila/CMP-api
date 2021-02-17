@@ -42,7 +42,6 @@ trait QueryRepositoryHelper
 
     public static function addFilterDql(QueryBuilder $query, array $filter) : QueryBuilder
     {
-
         if (!empty($filter['accessFilter'])){
             $query = static::addAccessibleDql($query, $filter['accessFilter']);
         }

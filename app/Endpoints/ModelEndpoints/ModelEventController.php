@@ -76,6 +76,7 @@ final class ModelEventController extends ParentedRepositoryController implements
 		$event = $this->getObject($args->getInt('id'));
 		if (!$event->getEventAssignments()->isEmpty())
 			throw new DependentResourcesBoundException('event');
+        $this->deleteAnnotations($args->getInt('id'));
 		return parent::delete($request, $response, $args);
 	}
 

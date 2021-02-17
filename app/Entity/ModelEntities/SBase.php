@@ -2,12 +2,19 @@
 
 namespace App\Entity;
 
+
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\Criteria;
+use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Mapping as ORM;
+use EntityAnnotable;
 
 trait SBase
 {
+
+    use EntityAnnotable;
+
 	/**
 	 * @ORM\Id
 	 * @ORM\Column(type="integer")
@@ -48,19 +55,6 @@ trait SBase
 	 */
 	private $notes;
 
-    /**
-     * @var ArrayCollection
-     * @ORM\OneToMany(targetEntity="AnnotationToResource", mappedBy="resourceId")
-     */
-    private $annotation;
-
-    /**
-     * @return ArrayCollection|AnnotationToResource[]
-     */
-    public function getAnnotation()
-    {
-        return $this->annotation;
-    }
 
 	/**
 	 * Get id
@@ -75,17 +69,17 @@ trait SBase
 	 * Get sbmlId
 	 * @return string
 	 */
-	public function getSbmlId()
-	{
+	public function getSbmlId(): ?string
+    {
 		return $this->sbmlId;
 	}
 
-	/**
-	 * Set sbmlId
-	 * @param string $sbmlId
-	 * @return Model
-	 */
-	public function setSbmlId($sbmlId)
+    /**
+     * Set sbmlId
+     * @param string $sbmlId
+     * @return mixed
+     */
+	public function setSbmlId(string $sbmlId)
 	{
 		$this->sbmlId = $sbmlId;
 		return $this;
@@ -95,17 +89,17 @@ trait SBase
 	 * Get name
 	 * @return string
 	 */
-	public function getName()
-	{
+	public function getName(): ?string
+    {
 		return $this->name;
 	}
 
-	/**
-	 * Set name
-	 * @param string $name
-	 * @return Model
-	 */
-	public function setName($name)
+    /**
+     * Set name
+     * @param string $name
+     * @return mixed
+     */
+	public function setName(string $name)
 	{
 		$this->name = $name;
 		return $this;
@@ -115,17 +109,17 @@ trait SBase
 	 * Get metaId
 	 * @return string
 	 */
-	public function getMetaId()
-	{
-		return $this->name;
+	public function getMetaId(): ?string
+    {
+		return $this->metaId;
 	}
 
-	/**
-	 * Set metaId
-	 * @param string $metaId
-	 * @return Model
-	 */
-	public function setMetaId($metaId)
+    /**
+     * Set metaId
+     * @param string $metaId
+     * @return mixed
+     */
+	public function setMetaId(string $metaId)
 	{
 		$this->metaId = $metaId;
 		return $this;
@@ -135,17 +129,17 @@ trait SBase
 	 * Get sboTerm
 	 * @return string
 	 */
-	public function getSboTerm()
-	{
+	public function getSboTerm(): ?string
+    {
 		return $this->sboTerm;
 	}
 
-	/**
-	 * Set metaId
-	 * @param string $sboTerm
-	 * @return Model
-	 */
-	public function setSboTerm($sboTerm)
+    /**
+     * Set metaId
+     * @param string $sboTerm
+     * @return mixed
+     */
+	public function setSboTerm(string $sboTerm)
 	{
 		$this->sboTerm = $sboTerm;
 		return $this;
@@ -156,24 +150,20 @@ trait SBase
 	 * Get notes
 	 * @return string
 	 */
-	public function getNotes()
-	{
+	public function getNotes(): ?string
+    {
 		return $this->notes;
 	}
 
-	/**
-	 * Set notes
-	 * @param string $notes
-	 * @return Model
-	 */
-	public function setNotes($notes)
+    /**
+     * Set notes
+     * @param string $notes
+     * @return mixed
+     */
+	public function setNotes(string $notes)
 	{
 		$this->notes = $notes;
 		return $this;
 	}
 
-	public function getRootParent()
-    {
-        return $this;
-    }
 }

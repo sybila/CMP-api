@@ -3,7 +3,9 @@
 namespace App\Controllers;
 
 use IGroupRoleAuthWritableController;
-use App\Entity\{Model,
+use MathMLContentToPresentation as MathML;
+use App\Entity\{Compartment,
+    Model,
     ModelCompartment,
     ModelSpecie,
     ModelReaction,
@@ -36,7 +38,7 @@ final class ModelCompartmentController extends ParentedRepositoryController impl
 
 	protected function getData(IdentifiedObject $compartment): array
 	{
-		/** @var ModelCompartment $compartment */
+        /** @var ModelCompartment $compartment */
 		$sBaseData = $this->getSBaseData($compartment);
 		return array_merge ($sBaseData, [
 			'spatialDimensions' => $compartment->getSpatialDimensions(),
@@ -49,7 +51,7 @@ final class ModelCompartmentController extends ParentedRepositoryController impl
 				return ['id' => $reaction->getId(), 'name' => $reaction->getName()];
 			})->toArray(),
 			'rules' => $compartment->getRules()->map(function (ModelRule $rule) {
-				return ['id' => $rule->getId(), 'equation' => $rule->getEquation()];
+				return ['id' => $rule->getId(), 'equation' => MathML::convert($rule->getEquation())];
 			})->toArray(),
 //			'unitDefinitions' => $compartment->getUnitDefinitions()->map(function (ModelUnitDefinition $unit) {
 //				return ['id' => $unit->getId(), 'symbol' => $unit->getSymbol()];
@@ -61,7 +63,6 @@ final class ModelCompartmentController extends ParentedRepositoryController impl
 	{
 		/** @var ModelCompartment $compartment */
 		$this->setSBaseData($compartment, $data);
-		$compartment->getModelId() ?: $compartment->setModelId($this->repository->getParent()->getId());
 		!$data->hasKey('spatialDimensions') ?: $compartment->setSpatialDimensions($data->getString('spatialDimensions'));
 		!$data->hasKey('size') ?: $compartment->setSize($data->getString('size'));
 		!$data->hasKey('isConstant') ?: $compartment->setIsConstant($data->getInt('isConstant'));
@@ -69,18 +70,18 @@ final class ModelCompartmentController extends ParentedRepositoryController impl
 
 	protected function createObject(ArgumentParser $body): IdentifiedObject
 	{
-		if (!$body->hasKey('sbmlId'))
-			throw new MissingRequiredKeyException('sbmlId');
+		if (!$body->hasKey('alias'))
+			throw new MissingRequiredKeyException('alias');
 		if (!$body->hasKey('isConstant'))
 			throw new MissingRequiredKeyException('isConstant');
-		return new ModelCompartment;
+		$compartment = new ModelCompartment;
+		$compartment->setModel($this->repository->getParent());
+		return $compartment;
 	}
 
 	protected function checkInsertObject(IdentifiedObject $compartment): void
 	{
 		/** @var ModelCompartment $compartment */
-		if ($compartment->getModelId() === null)
-			throw new MissingRequiredKeyException('modelId');
 		if ($compartment->getSbmlId() === null)
 			throw new MissingRequiredKeyException('sbmlId');
 		if ($compartment->getIsConstant() === null)
@@ -98,6 +99,7 @@ final class ModelCompartmentController extends ParentedRepositoryController impl
 			throw new DependentResourcesBoundException('reaction');
 //		if (!$compartment->getUnitDefinitions()->isEmpty())
 //			throw new DependentResourcesBoundException('unitDefinitions');
+        $this->deleteAnnotations($args->getInt('id'));
 		return parent::delete($request, $response, $args);
 	}
 
@@ -134,8 +136,7 @@ final class ModelCompartmentController extends ParentedRepositoryController impl
 
     protected function checkParentValidity(IdentifiedObject $parent, IdentifiedObject $child)
     {
-        /** @var ModelCompartment $child */
-        if ($parent->getId() != $child->getModelId()->getId()) {
+        if ($parent != $child->getModel()) {
             throw new WrongParentException($this->getParentObjectInfo()->parentEntityClass, $parent->getId(),
                 self::getObjectName(), $child->getId());
         }

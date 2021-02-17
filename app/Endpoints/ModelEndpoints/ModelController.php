@@ -2,7 +2,7 @@
 
 namespace App\Controllers;
 
-use App\Entity\{AnnotationToResource,
+use App\Entity\{
     Authorization\User,
     Model,
     IdentifiedObject,
@@ -14,7 +14,6 @@ use App\Entity\{AnnotationToResource,
     ModelParameter,
     ModelReaction,
     ModelRule,
-    ModelUnitDefinition,
     Repositories\IEndpointRepository,
     Repositories\ModelRepository};
 use App\Exceptions\{DependentResourcesBoundException,
@@ -58,9 +57,10 @@ final class ModelController extends WritableRepositoryController implements IGro
 			'userId' => $model->getUserId(),
 			'groupId' => $model->getGroupId(),
 			'description' => $model->getDescription(),
-			'status' => (string)$model->getStatus(),
+			'status' => (string) $model->getStatus(),
+			'isPublic' => (bool) $model->isPublic(),
 			'compartments' => $model->getCompartments()->map(function (ModelCompartment $compartment) {
-				return ['id' => $compartment->getId(), 'name' => $compartment->getName()];
+				return ['id' => $compartment->getId(), 'alias'=> $compartment->getSbmlId(), 'name' => $compartment->getName()];
 			})->toArray(),
 			'constraints' => $model->getConstraints()->map(function (ModelConstraint $constraint) {
 				return ['id' => $constraint->getId(), 'formula' => $constraint->getFormula()];
@@ -89,26 +89,45 @@ final class ModelController extends WritableRepositoryController implements IGro
 		]);
 	}
 
+    /**
+     * @inheritDoc
+     * @throws InvalidRoleException
+     */
 	protected function setData(IdentifiedObject $model, ArgumentParser $data): void
 	{
 		/** @var Model $model */
 		$this->setSBaseData($model, $data);
-		$model->setUserId($this->userPermissions['user_id']);
-        !$data->hasKey('groupId') ? $model->setGroupId(array_key_first($this->userPermissions['group_wise'])) :
+		$model->getUserId() != null ?: $model->setUserId($this->userPermissions['user_id']);
+        !$data->hasKey('groupId') && ($model->getGroupId() === null) ?
+            $model->setGroupId(array_key_first($this->userPermissions['group_wise'])) :
             $model->setGroupId($data->getString('groupId'));
-		!$data->hasKey('approvedId') ?: $model->setApprovedId($data->getString('approvedId'));
-		!$data->hasKey('description') ?: $model->setDescription($data->getString('description'));
-		!$data->hasKey('status') ?: $model->setStatus($data->getString('status'));
+        !$data->hasKey('description') ?: $model->setDescription($data->getString('description'));
+		//status should be set automatically when proper actions are taken
+        //!$data->hasKey('status') ?: $model->setStatus($data->getString('status'));
+		if ($data->hasKey('isPublic'))
+        {
+            $data->getBool('isPublic') == false ? $model->setIsPublic(false) :
+                $model->setIsPublic($this->canPublish($model->getStatus()));
+        }
 	}
+
+	protected function canPublish(string $status): bool
+    {
+        $role = $this->userPermissions['platform_wise'];
+        if ( ($role == User::ADMIN || $role == User::POWER) && ($status != Model::INCOMPLETE) ) {
+            return true;
+        }
+        throw new InvalidRoleException("publish the model",'PUT/POST',$_SERVER['REQUEST_URI']);
+    }
 
 	protected function createObject(ArgumentParser $body): IdentifiedObject
 	{
-	    //dump($body);exit;
-		if (!$body->hasKey('userId'))
-			throw new MissingRequiredKeyException('userId');
-		if (!$body->hasKey('sbmlId'))
-			throw new MissingRequiredKeyException('sbmlId');
-		return new Model;
+		if (!$body->hasKey('name'))
+			throw new MissingRequiredKeyException('name');
+		$model = new Model;
+		$model->setStatus(Model::INCOMPLETE);
+		$model->setIsPublic(false);
+		return $model;
 	}
 
     /**
@@ -118,10 +137,6 @@ final class ModelController extends WritableRepositoryController implements IGro
 	protected function checkInsertObject(IdentifiedObject $model): void
 	{
 		/** @var Model $model */
-		if ($model->getUserId() === null)
-			throw new MissingRequiredKeyException('userId');
-        if ($model->getGroupId() === null)
-            throw new MissingRequiredKeyException('groupId');
         if ($this->userPermissions['platform_wise'] != User::ADMIN &&
             !in_array($this->userPermissions['group_wise'][$model->getGroupId()],User::CAN_ADD))
             throw new InvalidRoleException("assign group ID = {$model->getGroupId()} to this ",
@@ -147,8 +162,9 @@ final class ModelController extends WritableRepositoryController implements IGro
 			throw new DependentResourcesBoundException('rules');
 		if (!$model->getReactions()->isEmpty())
 			throw new DependentResourcesBoundException('reactions');
-//		if (!$model->getUnitDefinitions()->isEmpty())
-//			throw new DependentResourcesBoundException('unitDefinitions');
+		if (!$model->getUnitDefinitions()->isEmpty())
+			throw new DependentResourcesBoundException('unitDefinitions');
+        $this->deleteAnnotations($args->getInt('id'));
 		return parent::delete($request, $response, $args);
 	}
 
