@@ -6,9 +6,7 @@ use App\Entity\Identifier;
 
 
 /**
- * Class Author
- * @ORM\Entity
- * @ORM\Table(name="author")
+ * FIXME do it
  */
 class Author implements IdentifiedObject
 {
