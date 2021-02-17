@@ -57,7 +57,7 @@ final class ModelController extends WritableRepositoryController implements IGro
 			'userId' => $model->getUserId(),
 			'groupId' => $model->getGroupId(),
 			'description' => $model->getDescription(),
-			'status' => (string) $model->getStatus(),
+			'status' => $model->getStatus(),
 			'isPublic' => (bool) $model->isPublic(),
 			'compartments' => $model->getCompartments()->map(function (ModelCompartment $compartment) {
 				return ['id' => $compartment->getId(), 'alias'=> $compartment->getSbmlId(), 'name' => $compartment->getName()];
