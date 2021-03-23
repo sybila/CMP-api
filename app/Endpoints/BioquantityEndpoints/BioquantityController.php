@@ -56,15 +56,19 @@ class BioquantityController extends WritableRepositoryController
 			'valueFrom' => $bioquantity->getValueFrom(),
 			'valueTo' => $bioquantity->getValueTo(),
 			'valueStep' => $bioquantity->getValueStep(),
-			'attributes' => $bioquantity->getAttributes()->map(function (Attribute $attributes) {
-					return ['id' => $attributes->getId(), 'name' => $attributes->getName()];
-				})->toArray(),
+			// FIX: table `unit_attribute` is not present in production db, but referenced in Attribute object ??
+			/* 'attributes' => $bioquantity->getAttributes()->map(function (Attribute $attributes) {
+			  return ['id' => $attributes->getId(), 'name' => $attributes->getName()];
+			  })->toArray(), */
 			'variables' => $bioquantity->getVariables()->map(function (VariableValues $variables) {
 					return ['id' => $variables->getId(), 'name' => $variables->getName()];
 				})->toArray(),
-//			'units' => $bioquantity->getUnitDefinitions()->map(function (Unit $unitDefinition) {
-//					return ['id' => $unitDefinition->getId(), 'name' => $unitDefinition->getName()];
-//				})->toArray(),
+			// NOTE: Commented this one out since unit definition module is being remade
+			// DISCUSS: What should bioquantity map to in the new module?
+			/* 'unitDefinitions' => $bioquantity->getUnitDefinitions()->map(function (UnitDefinition $unitDefinition) {
+			  return ['id' => $unitDefinition->getId(), 'name' => $unitDefinition->getName()];
+			  })->toArray(), */
+			'annotations' => $bioquantity->getAnnotations(),
 		];
 	}
 
@@ -83,6 +87,7 @@ class BioquantityController extends WritableRepositoryController
 			'valueFrom' => new Assert\Type(['type' => 'float']),
 			'valueTo' => new Assert\Type(['type' => 'float']),
 			'valueStep' => new Assert\Type(['type' => 'float']),
+			'annotations' => new Assert\Type(['type' => 'string']),
 		]);
 	}
 
@@ -101,7 +106,9 @@ class BioquantityController extends WritableRepositoryController
 		!$data->hasKey('valueFrom') ?: $bioquantity->setValueFrom($data->getFloat('valueFrom'));
 		!$data->hasKey('valueTo') ?: $bioquantity->setValueTo($data->getFloat('valueTo'));
 		!$data->hasKey('valueStep') ?: $bioquantity->setValueStep($data->getFloat('valueStep'));
+		!$data->hasKey('annotations') ?: $bioquantity->setAnotations($data->getString('annotatnions'));
 	}
+
 
 	protected static function getAllowedSort(): array
 	{
@@ -125,7 +132,5 @@ class BioquantityController extends WritableRepositoryController
 	{
 		return 'bq';
 	}
-
-
 
 }

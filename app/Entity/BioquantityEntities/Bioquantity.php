@@ -87,10 +87,16 @@ use Identifier;
 	protected $valueStep;
 
 	/**
+	 * @var string
+	 * @ORM\Column(name="annotations", type="string")
+	 */
+	protected $annotations;
+
+	/**
 	 * @var ArrayCollection
 	 * @ORM\ManyToMany(targetEntity="Attribute", inversedBy="bioquantities")
-	 * @ORM\JoinTable(name="unit_attribute", joinColumns={@ORM\JoinColumn(name="bioquantity_id", referencedColumnName="id")},
-	 * inverseJoinColumns={@ORM\JoinColumn(name="bioquantity_id", referencedColumnName="id")})
+	 * @ORM\JoinTable(name="bioquantity_to_attribute", joinColumns={@ORM\JoinColumn(name="bioquantity_id", referencedColumnName="id")},
+	 * inverseJoinColumns={@ORM\JoinColumn(name="attributeId", referencedColumnName="id")})
 	 */
 	protected $attributes;
 
@@ -102,13 +108,13 @@ use Identifier;
 	 */
 	protected $variables;
 
-//	/**
-//	 * @var ArrayCollection
-//	 * @ORM\ManyToMany(targetEntity="Unit", inversedBy="bioquantities")
-//	 * @ORM\JoinTable(name="unit", joinColumns={@ORM\JoinColumn(name="bioquantity_id", referencedColumnName="id")},
-//	 * inverseJoinColumns={@ORM\JoinColumn(name="bioquantity_id", referencedColumnName="id")})
-//	 */
-//	protected $unitDefinitions;
+	/**
+	 * @var ArrayCollection
+	 * @ORM\ManyToMany(targetEntity="ModelUnitDefinition", inversedBy="bioquantities")
+	 * @ORM\JoinTable(name="bioquantity_to_unit_definition", joinColumns={@ORM\JoinColumn(name="bioquantity_id", referencedColumnName="id")},
+	 * inverseJoinColumns={@ORM\JoinColumn(name="unitDefinitionId", referencedColumnName="id")})
+	 */
+	protected $unitDefinitions;
 
 
 	public function getOrganismId(): ?int
@@ -266,28 +272,44 @@ use Identifier;
 		return $this;
 	}
 
-    /**
-     * @return Attributes[]|Collection
-     */
-    public function getAttributes(): Collection
-    {
-        return $this->attributes;
-    }
 
-    /**
-     * @return Variables[]|Collection
-     */
-    public function getVariables(): Collection
-    {
-        return $this->variables;
-    }
+	public function getAnnotations(): ?string
+	{
+		return $this->annotations;
+	}
 
-//    /**
-//     * @return UnitDefinitions[]|Collection
-//     */
-//    public function getUnitDefinitions(): Collection
-//    {
-//        return $this->unitDefinitions;
-//    }
+
+	public function setAnotations(string $annotations): self
+	{
+		$this->annotations = $annotations;
+		return $this;
+	}
+
+
+	/**
+	 * @return Attributes[]|Collection
+	 */
+	public function getAttributes(): Collection
+	{
+		return $this->attributes;
+	}
+
+
+	/**
+	 * @return Variables[]|Collection
+	 */
+	public function getVariables(): Collection
+	{
+		return $this->variables;
+	}
+
+
+	/**
+	 * @return UnitDefinitions[]|Collection
+	 */
+	public function getUnitDefinitions(): Collection
+	{
+		return $this->unitDefinitions;
+	}
 
 }
