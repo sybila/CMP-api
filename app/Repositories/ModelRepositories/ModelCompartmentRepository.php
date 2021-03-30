@@ -5,7 +5,11 @@ namespace App\Entity\Repositories;
 use App\Entity\Model;
 use App\Entity\ModelCompartment;
 use App\Entity\IdentifiedObject;
+use App\Entity\ModelReaction;
+use App\Entity\ModelRule;
+use App\Entity\ModelSpecie;
 use App\Helpers\QueryRepositoryHelper;
+use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 use Exception;
@@ -41,20 +45,52 @@ class ModelCompartmentRepository implements IDependentEndpointRepository
 
 	public function getNumResults(array $filter): int
 	{
-		return ((int)$this->buildListQuery($filter)
-			->select('COUNT(c)')
-			->getQuery()
-			->getSingleScalarResult());
+        return $this->repository
+            ->matching($this->createQueryCriteria($filter))
+            ->count();
 	}
 
 	public function getList(array $filter, array $sort, array $limit): array
 	{
-		$query = $this->buildListQuery($filter)
-			->select('c.id, c.name, c.alias, c.sboTerm, c.notes, c.spatialDimensions, c.size, c.constant');
-        $query = $this->addPagingDql($query, $limit);
-        $query = $this->addSortDql($query, $sort);
-        return $query->getQuery()->getArrayResult();
+        return $this->repository
+            ->matching($this->createQueryCriteria($filter, $limit, $sort))
+            ->map(function (ModelCompartment $compartment) {
+                return [
+                    'id' => $compartment->getId(),
+                    'alias' => $compartment->getAlias(),
+                    'name' => $compartment->getName(),
+//                    'ontologyTerm' => $compartment->getSboTerm(),
+//                    'notes' => $compartment->getNotes(),
+                    'spatialDimensions' => $compartment->getSpatialDimensions(),
+                    'size' => $compartment->getSize(),
+                    'constant' => $compartment->getConstant(),
+                    'species' => $compartment->getSpecies()->map(function (ModelSpecie $specie) {
+                        return ['id' => $specie->getId(), 'name' => $specie->getName()];
+                    })->toArray(),
+                    'rules' => $compartment->getRules()->map(function (ModelRule $rule) {
+                        return ['id' => $rule->getId(), 'equation' => [
+                            'latex' => is_null($rule->getExpression()) ? '' :$rule->getExpression()->getLatex(),
+                            'cmml' => is_null($rule->getExpression()) ? '' : $rule->getExpression()->getContentMML()]];
+                    })->toArray(),
+                ];
+            })->toArray();
+//		$query = $this->buildListQuery($filter)
+//			->select('c.id, c.name, c.alias, c.sboTerm, c.notes, c.spatialDimensions, c.size, c.constant');
+//        $query = $this->addPagingDql($query, $limit);
+//        $query = $this->addSortDql($query, $sort);
+//        return $query->getQuery()->getArrayResult();
 	}
+
+    public function createQueryCriteria(array $filter, array $limit = null, array $sort = null): Criteria
+    {
+        $criteria = Criteria::create()->where(Criteria::expr()->eq('model', $this->getParent()));
+        foreach ($filter['argFilter'] as $by => $expr){
+            $criteria = $criteria->andWhere(Criteria::expr()->contains($by, $expr));
+        }
+        return $criteria->setMaxResults($limit['limit'] ? $limit['limit'] : null)
+            ->setFirstResult($limit['offset'] ? $limit['offset'] : null)
+            ->orderBy($sort ? $sort : []);
+    }
 
 	private function buildListQuery(array $filter): QueryBuilder
 	{
