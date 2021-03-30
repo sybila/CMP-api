@@ -42,7 +42,7 @@ class BioquantityRepository implements IEndpointRepository
 	public function getList(array $filter, array $sort, array $limit): array
 	{
 		$query = $this->buildListQuery($filter)
-			->select('bq.id, bq.name, bq.organismId, bq.userId, bq.isValid, bq.value, bq.link, bq.timeFrom, bq.timeTo, bq.valueFrom, bq.valueTo, bq.valueStep');
+			->select('bq.id, bq.name, bq.organismId, bq.userId, bq.isValid, bq.value, bq.link, bq.timeFrom, bq.timeTo, bq.valueFrom, bq.valueTo, bq.valueStep, bq.annotations');
 
 		$query = $this->addPagingDql($query, $limit);
 		$query = $this->addSortDql($query, $sort);
