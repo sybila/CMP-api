@@ -64,7 +64,9 @@ final class ModelSpecieController extends ParentedRepositoryController implement
 				return ['id' => $reactionItem->getId(), 'name' => $reactionItem->getName()];
 			})->toArray(),
 			'rules' => $specie->getRules()->map(function (ModelRule $rule) {
-				return ['id' => $rule->getId(), 'equation' => $rule->getExpression()];
+				return ['id' => $rule->getId(), 'equation' => [
+                    'latex' => is_null($rule->getExpression()) ? '' : $rule->getExpression()->getLatex(),
+                    'cmml' => is_null($rule->getExpression()) ? '' : $rule->getExpression()->getContentMML()]];
 			})->toArray()
 		]);
 	}

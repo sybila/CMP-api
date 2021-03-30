@@ -51,7 +51,9 @@ final class ModelCompartmentController extends ParentedRepositoryController impl
 				return ['id' => $reaction->getId(), 'name' => $reaction->getName()];
 			})->toArray(),
 			'rules' => $compartment->getRules()->map(function (ModelRule $rule) {
-				return ['id' => $rule->getId(), 'equation' => MathML::convert($rule->getExpression())];
+				return ['id' => $rule->getId(), 'equation' => [
+                    'latex' => is_null($rule->getExpression()) ? '' :$rule->getExpression()->getLatex(),
+                    'cmml' => is_null($rule->getExpression()) ? '' : $rule->getExpression()->getContentMML()]];
 			})->toArray(),
 //			'unitDefinitions' => $compartment->getUnitDefinitions()->map(function (ModelUnitDefinition $unit) {
 //				return ['id' => $unit->getId(), 'symbol' => $unit->getSymbol()];

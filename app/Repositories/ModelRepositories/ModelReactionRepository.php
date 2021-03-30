@@ -5,6 +5,7 @@ namespace App\Entity\Repositories;
 use App\Entity\Model;
 use App\Entity\ModelReaction;
 use App\Entity\IdentifiedObject;
+use App\Entity\ModelReactionItem;
 use App\Helpers\QueryRepositoryHelper;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\EntityManager;
@@ -64,14 +65,19 @@ class ModelReactionRepository implements IDependentEndpointRepository
             ->map(function (ModelReaction $reaction) {
                 return [
                     'id' => $reaction->getId(),
-                    'alias' => $reaction->getAlias(),
                     'name' => $reaction->getName(),
                     'ontologyTerm' => $reaction->getSboTerm(),
-                    'notes' => $reaction->getNotes(),
                     'isReversible' => $reaction->getIsReversible(),
-                    'expression' => [
+                    'rate' => [
                         'latex' => is_null($reaction->getRate()) ? '' : $reaction->getRate()->getLatex(),
                         'cmml' => is_null($reaction->getRate()) ? '' : $reaction->getRate()->getContentMML()],
+                    'reactionItems' => $reaction->getReactionItems()->map(function (ModelReactionItem $reactionItem) {
+                        return ['id' => $reactionItem->getId(),
+                            'name' => $reactionItem->getName(),
+                            'alias' => $reactionItem->getAlias(),
+                            'stoichiometry' => $reactionItem->getStoichiometry(),
+                            'type' => $reactionItem->getType()];
+                    })->toArray()
                 ];
             })->toArray();
 //
