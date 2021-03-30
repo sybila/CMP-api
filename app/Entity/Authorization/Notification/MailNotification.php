@@ -65,20 +65,20 @@ class MailNotification
      * @throws MissingRequiredKeyException
      */
     public function sendConfirmationMail($receiver){
-        $hash = sha1($receiver . $this->authSalt);
-        $url = $_SERVER['REQUEST_SCHEME'] . '://' . $this->redirect . '/' . $receiver . '/' . $hash;
-        $mailer = new Mailer($this->transport);
-        $email = (new Email())
-            ->from('ecyano@fi.muni.cz')
-            ->to($receiver)
-            ->subject('CMP: Confirm your registration')
-            ->html("<p>If you want to fully activate your account click on <a href=$url>this link</a></p>");
-        try {
-            $mailer->send($email);
-        }
-        catch (TransportExceptionInterface $e){
-            throw new MissingRequiredKeyException($e->getMessage() . $e->getDebug());
-        }
+//        $hash = sha1($receiver . $this->authSalt);
+//        $url = $_SERVER['REQUEST_SCHEME'] . '://' . $this->redirect . '/' . $receiver . '/' . $hash;
+//        $mailer = new Mailer($this->transport);
+//        $email = (new Email())
+//            ->from('ecyano@fi.muni.cz')
+//            ->to($receiver)
+//            ->subject('CMP: Confirm your registration')
+//            ->html("<p>If you want to fully activate your account click on <a href=$url>this link</a></p>");
+//        try {
+//            $mailer->send($email);
+//        }
+//        catch (TransportExceptionInterface $e){
+//            throw new MissingRequiredKeyException($e->getMessage() . $e->getDebug());
+//        }
     }
 
     /**

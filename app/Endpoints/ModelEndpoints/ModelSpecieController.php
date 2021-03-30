@@ -58,13 +58,13 @@ final class ModelSpecieController extends ParentedRepositoryController implement
 		return array_merge($sBaseData, [
 			'initialExpression' => $specie->getInitialExpression(),
 			'hasOnlySubstanceUnits' => $specie->getHasOnlySubstanceUnits(),
-			'isConstant' => $specie->getIsConstant(),
+			'constant' => $specie->getConstant(),
 			'boundaryCondition' => $specie->getBoundaryCondition(),
 			'reactionItems' => $specie->getReactionItems()->map(function (ModelReactionItem $reactionItem) {
 				return ['id' => $reactionItem->getId(), 'name' => $reactionItem->getName()];
 			})->toArray(),
 			'rules' => $specie->getRules()->map(function (ModelRule $rule) {
-				return ['id' => $rule->getId(), 'equation' => $rule->getEquation()];
+				return ['id' => $rule->getId(), 'equation' => $rule->getExpression()];
 			})->toArray()
 		]);
 	}
@@ -73,25 +73,27 @@ final class ModelSpecieController extends ParentedRepositoryController implement
 	{
 		/** @var ModelSpecie $specie */
 		$this->setSBaseData($specie, $data);
-		$specie->setModelId($this->repository->getParent()->getModelId()->getId());
+		$specie->setModelId($this->repository->getParent()->getModel()->getId());
 		if(!$specie->getCompartmentId()) {
 		    /** @var ModelCompartment $compartment */
 		    $compartment = $this->repository->getParent();
             $specie->setCompartmentId($compartment);
         }
 		!$data->hasKey('initialExpression') ?: $specie->setInitialExpression($data->getString('initialExpression'));
-		!$data->hasKey('boundaryCondition') ?: $specie->setBoundaryCondition($data->getInt('boundaryCondition'));
-		!$data->hasKey('hasOnlySubstanceUnits') ?: $specie->setHasOnlySubstanceUnits($data->getInt('hasOnlySubstanceUnits'));
-		!$data->hasKey('isConstant') ?: $specie->setIsConstant($data->getInt('isConstant'));
+		!$data->hasKey('boundaryCondition') ?: $specie->setBoundaryCondition($data->getBool('boundaryCondition'));
+		!$data->hasKey('hasOnlySubstanceUnits') ?: $specie->setHasOnlySubstanceUnits($data->getBool('hasOnlySubstanceUnits'));
+		!$data->hasKey('constant') ?: $specie->setConstant($data->getBool('constant'));
 	}
 
 	protected function createObject(ArgumentParser $body): IdentifiedObject
 	{
-		if (!$body->hasKey('isConstant'))
-			throw new MissingRequiredKeyException('isConstant');
+	    $specie = new ModelSpecie;
+		if (!$body->hasKey('isConstant')) {
+            $specie->setConstant(false);
+        }
 		if (!$body->hasKey('hasOnlySubstanceUnits'))
-			throw new MissingRequiredKeyException('hasOnlySubstanceUnits');
-		return new ModelSpecie;
+            $specie->setHasOnlySubstanceUnits(true);
+		return $specie;
 	}
 
 	protected function checkInsertObject(IdentifiedObject $specie): void
@@ -103,8 +105,8 @@ final class ModelSpecieController extends ParentedRepositoryController implement
 			throw new MissingRequiredKeyException('compartmentId');
 		if ($specie->getHasOnlySubstanceUnits() === null)
 			throw new MissingRequiredKeyException('hasOnlySubstanceUnits');
-		if ($specie->getIsConstant() === null)
-			throw new MissingRequiredKeyException('isConstant');
+		if ($specie->getConstant() === null)
+			throw new MissingRequiredKeyException('constant');
 	}
 
 	public function delete(Request $request, Response $response, ArgumentParser $args): Response
@@ -126,7 +128,7 @@ final class ModelSpecieController extends ParentedRepositoryController implement
 			'initialExpression' => new Assert\Type(['type' => 'string']),
 			'boundaryCondition' => new Assert\Type(['type' => 'integer']),
 			'hasOnlySubstanceUnits' => new Assert\Type(['type' => 'integer']),
-			'isConstant' => new Assert\Type(['type' => 'integer']),
+			'constant' => new Assert\Type(['type' => 'integer']),
 		]));
 	}
 

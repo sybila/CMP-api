@@ -26,20 +26,23 @@ class ModelEvent implements IdentifiedObject
 	 */
 	protected $eventAssignments;
 
+
 	/**
-	 * @var string
-	 * @ORM\Column(type="string", name="event_trigger")
-	 */
+     * @ORM\OneToOne(targetEntity="MathExpression", cascade={"persist", "remove"})
+     * @ORM\JoinColumn(name="event_trigger", referencedColumnName="id")
+     */
 	protected $trigger;
-	/**
-	 * @var string
-	 * @ORM\Column(type="string")
-	 */
+
+    /**
+     * @ORM\OneToOne(targetEntity="MathExpression", cascade={"persist", "remove"})
+     * @ORM\JoinColumn(name="delay", referencedColumnName="id")
+     */
 	protected $delay;
-	/**
-	 * @var string
-	 * @ORM\Column(type="string")
-	 */
+
+    /**
+     * @ORM\OneToOne(targetEntity="MathExpression", cascade={"persist", "remove"})
+     * @ORM\JoinColumn(name="priority", referencedColumnName="id")
+     */
 	protected $priority;
 
 	/**
@@ -77,64 +80,39 @@ class ModelEvent implements IdentifiedObject
 		return $this;
 	}
 
-	/**
-	 * Get trigger
-	 * @return null|string
-	 */
-	public function getTrigger(): ?string
+
+	public function getTrigger()
 	{
 		return $this->trigger;
 	}
 
-	/**
-	 * Set trigger
-	 * @param string $trigger
-	 * @return ModelEvent
-	 */
-	public function setTrigger($trigger): ModelEvent
+
+	public function setTrigger($trigger)
 	{
 		$this->trigger = $trigger;
-		return $this;
 	}
 
-	/**
-	 * Get delay
-	 * @return null|string
-	 */
-	public function getDelay(): ?string
+
+	public function getDelay()
 	{
 		return $this->delay;
 	}
 
-	/**
-	 * Set delay
-	 * @param string $delay
-	 * @return ModelEvent
-	 */
-	public function setDelay($delay): ModelEvent
+
+	public function setDelay($delay)
 	{
 		$this->delay = $delay;
-		return $this;
 	}
 
-	/**
-	 * Get priority
-	 * @return null|string
-	 */
-	public function getPriority(): ?string
+
+	public function getPriority()
 	{
 		return $this->priority;
 	}
 
-	/**
-	 * Set priority
-	 * @param string $priority
-	 * @return ModelEvent
-	 */
-	public function setPriority($priority): ModelEvent
+	public function setPriority($priority)
 	{
 		$this->priority = $priority;
-		return $this;
 	}
 
 	/**

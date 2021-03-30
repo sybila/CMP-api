@@ -19,11 +19,12 @@ class ModelInitialAssignment implements IdentifiedObject
 	 */
 	protected $modelId;
 
-	/**
-	 * @var string
-	 * @ORM\Column(type="string")
-	 */
-	protected $formula;
+    /**
+     * @ORM\OneToOne(targetEntity="MathExpression", cascade={"persist", "remove"})
+     * @ORM\JoinColumn(name="formula", referencedColumnName="id")
+     */
+	protected $expression;
+
 
 	/**
 	 * Get id
@@ -53,24 +54,16 @@ class ModelInitialAssignment implements IdentifiedObject
 		return $this;
 	}
 
-	/**
-	 * Get formula
-	 * @return null|string
-	 */
-	public function getFormula(): ?string
+
+	public function getExpression()
 	{
-		return $this->formula;
+		return $this->expression;
 	}
 
-	/**
-	 * Set function
-	 * @param string $formula
-	 * @return ModelInitialAssignment
-	 */
-	public function setFormula($formula): ModelInitialAssignment
+
+	public function setExpression($expression)
 	{
-		$this->formula = $formula;
-		return $this;
+		$this->expression = $expression;
 	}
 
 }

@@ -60,7 +60,7 @@ final class ModelController extends WritableRepositoryController implements IGro
 			'status' => $model->getStatus(),
 			'isPublic' => (bool) $model->isPublic(),
 			'compartments' => $model->getCompartments()->map(function (ModelCompartment $compartment) {
-				return ['id' => $compartment->getId(), 'alias'=> $compartment->getSbmlId(), 'name' => $compartment->getName()];
+				return ['id' => $compartment->getId(), 'alias'=> $compartment->getAlias(), 'name' => $compartment->getName()];
 			})->toArray(),
 			'constraints' => $model->getConstraints()->map(function (ModelConstraint $constraint) {
 				return ['id' => $constraint->getId(), 'formula' => $constraint->getFormula()];
@@ -72,7 +72,9 @@ final class ModelController extends WritableRepositoryController implements IGro
 				return ['id' => $functionDefinition->getId(), 'name' => $functionDefinition->getName()];
 			})->toArray(),
 			'initialAssignments' => $model->getInitialAssignments()->map(function (ModelInitialAssignment $initialAssignment) {
-				return ['id' => $initialAssignment->getId(), 'formula' => $initialAssignment->getFormula()];
+				return ['id' => $initialAssignment->getId(), 'formula' => [
+                        'latex' => $initialAssignment->getExpression()->getLatex(),
+                        'cmml' => $initialAssignment->getExpression()->getContentMML()]];
 			})->toArray(),
 			'parameters' => $model->getParameters()->map(function (ModelParameter $parameter) {
 				return ['id' => $parameter->getId(), 'name' => $parameter->getName()];
@@ -81,7 +83,10 @@ final class ModelController extends WritableRepositoryController implements IGro
 				return ['id' => $reaction->getId(), 'name' => $reaction->getName()];
 			})->toArray(),
 			'rules' => $model->getRules()->map(function (ModelRule $rule) {
-			    return ['id' => $rule->getId(), 'equation' => $rule->getEquation()];
+			    return ['id' => $rule->getId(),
+                    'equation' => [
+                        'latex' => $rule->getExpression()->getLatex(),
+                        'cmml' => $rule->getExpression()->getContentMML()]];
 			})->toArray(),
 //			'unitDefinitions' => $model->getUnitDefinitions()->map(function (ModelUnitDefinition $unitDefinition) {
 //				return ['id' => $unitDefinition->getId(), 'name' => $unitDefinition->getName()];
@@ -98,9 +103,12 @@ final class ModelController extends WritableRepositoryController implements IGro
 		/** @var Model $model */
 		$this->setSBaseData($model, $data);
 		$model->getUserId() != null ?: $model->setUserId($this->userPermissions['user_id']);
-        !$data->hasKey('groupId') && ($model->getGroupId() === null) ?
-            $model->setGroupId(array_key_first($this->userPermissions['group_wise'])) :
-            $model->setGroupId($data->getString('groupId'));
+		if ($model->getGroupId() === null && !$data->hasKey('groupId')) {
+            $model->setGroupId(array_key_first($this->userPermissions['group_wise']));
+        } else {
+		    //TODO check if the group is one of the users group
+            !$data->hasKey('groupId') ?: $model->setGroupId($data->getString('groupId'));
+        }
         !$data->hasKey('description') ?: $model->setDescription($data->getString('description'));
 		//status should be set automatically when proper actions are taken
         //!$data->hasKey('status') ?: $model->setStatus($data->getString('status'));
@@ -146,8 +154,8 @@ final class ModelController extends WritableRepositoryController implements IGro
 	public function delete(Request $request, Response $response, ArgumentParser $args): Response
 	{
 		$model = $this->getObject($args->getInt('id'));
-		if (!$model->getCompartments()->isEmpty())
-			throw new DependentResourcesBoundException('compartment');
+//		if (!$model->getCompartments()->isEmpty())
+//			throw new DependentResourcesBoundException('compartment');
 		if (!$model->getConstraints()->isEmpty())
 			throw new DependentResourcesBoundException('constraints');
 		if (!$model->getEvents()->isEmpty())
@@ -162,8 +170,8 @@ final class ModelController extends WritableRepositoryController implements IGro
 			throw new DependentResourcesBoundException('rules');
 		if (!$model->getReactions()->isEmpty())
 			throw new DependentResourcesBoundException('reactions');
-		if (!$model->getUnitDefinitions()->isEmpty())
-			throw new DependentResourcesBoundException('unitDefinitions');
+//		if (!$model->getUnitDefinitions()->isEmpty())
+//			throw new DependentResourcesBoundException('unitDefinitions');
         $this->deleteAnnotations($args->getInt('id'));
 		return parent::delete($request, $response, $args);
 	}
@@ -179,5 +187,20 @@ final class ModelController extends WritableRepositoryController implements IGro
 			'status' => new Assert\Type(['type' => 'string']),
 		]));
 	}
+
+	public function import(Request $request, Response $response, ArgumentParser $args): Response
+    {
+        $this->setUserPermissions($request->getAttribute('oauth_user_id'));
+        $this->permitUser([$this, 'validateAdd'], [$this, 'canAdd']);
+        $wholeModel = $request->getParsedBody()['model'];
+        dump($wholeModel['general']);
+        $modelInfo = new ArgumentParser($wholeModel['general']);
+        $modelObj = $this->createObject($modelInfo);
+        $this->checkInsertObject($modelObj);
+        $this->setData($modelObj, $modelInfo);
+
+        dump($modelObj);exit();
+
+    }
 
 }

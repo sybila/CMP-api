@@ -23,10 +23,7 @@ class AnnotationToResource implements IdentifiedObject
      */
     private $resourceId;
 
-//    /**
-//     * @ORM\OneToOne(targetEntity="AnnotableObject")
-//     * @ORM\JoinColumn(name="resource_type", referencedColumnName="id")
-//     */
+
     /**
      * @ORM\Column(name="resource_type",type="annotable_obj_type")
      */

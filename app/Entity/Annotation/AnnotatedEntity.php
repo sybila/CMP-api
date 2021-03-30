@@ -79,6 +79,7 @@ class AnnotatedEntity
                 return $id;
             }
         }
+        dump($entity);exit();
         throw new EntityNotFoundException("This object is not registered annotable type.");
     }
 

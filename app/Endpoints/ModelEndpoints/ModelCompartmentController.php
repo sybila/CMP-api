@@ -43,7 +43,7 @@ final class ModelCompartmentController extends ParentedRepositoryController impl
 		return array_merge ($sBaseData, [
 			'spatialDimensions' => $compartment->getSpatialDimensions(),
 			'size' => $compartment->getSize(),
-			'isConstant' => $compartment->getIsConstant(),
+			'constant' => $compartment->getConstant(),
 			'species' => $compartment->getSpecies()->map(function (ModelSpecie $specie) {
 				return ['id' => $specie->getId(), 'name' => $specie->getName()];
 			})->toArray(),
@@ -51,7 +51,7 @@ final class ModelCompartmentController extends ParentedRepositoryController impl
 				return ['id' => $reaction->getId(), 'name' => $reaction->getName()];
 			})->toArray(),
 			'rules' => $compartment->getRules()->map(function (ModelRule $rule) {
-				return ['id' => $rule->getId(), 'equation' => MathML::convert($rule->getEquation())];
+				return ['id' => $rule->getId(), 'equation' => MathML::convert($rule->getExpression())];
 			})->toArray(),
 //			'unitDefinitions' => $compartment->getUnitDefinitions()->map(function (ModelUnitDefinition $unit) {
 //				return ['id' => $unit->getId(), 'symbol' => $unit->getSymbol()];
@@ -65,16 +65,17 @@ final class ModelCompartmentController extends ParentedRepositoryController impl
 		$this->setSBaseData($compartment, $data);
 		!$data->hasKey('spatialDimensions') ?: $compartment->setSpatialDimensions($data->getString('spatialDimensions'));
 		!$data->hasKey('size') ?: $compartment->setSize($data->getString('size'));
-		!$data->hasKey('isConstant') ?: $compartment->setIsConstant($data->getInt('isConstant'));
+		!$data->hasKey('constant') ?: $compartment->setConstant($data->getBool('constant'));
 	}
 
 	protected function createObject(ArgumentParser $body): IdentifiedObject
 	{
 		if (!$body->hasKey('alias'))
 			throw new MissingRequiredKeyException('alias');
-		if (!$body->hasKey('isConstant'))
-			throw new MissingRequiredKeyException('isConstant');
-		$compartment = new ModelCompartment;
+        $compartment = new ModelCompartment;
+        if (!$body->hasKey('constant')) {
+		    $compartment->setConstant(true);
+        }
 		$compartment->setModel($this->repository->getParent());
 		return $compartment;
 	}
@@ -82,10 +83,10 @@ final class ModelCompartmentController extends ParentedRepositoryController impl
 	protected function checkInsertObject(IdentifiedObject $compartment): void
 	{
 		/** @var ModelCompartment $compartment */
-		if ($compartment->getSbmlId() === null)
+		if ($compartment->getAlias() === null)
 			throw new MissingRequiredKeyException('sbmlId');
-		if ($compartment->getIsConstant() === null)
-			throw new MissingRequiredKeyException('isConstant');
+		if ($compartment->getConstant() === null)
+			throw new MissingRequiredKeyException('constant');
 	}
 
 	public function delete(Request $request, Response $response, ArgumentParser $args): Response
@@ -108,7 +109,7 @@ final class ModelCompartmentController extends ParentedRepositoryController impl
 		$validatorArray = $this->getSBaseValidator();
 		return new Assert\Collection(array_merge($validatorArray, [
 			'modelId' => new Assert\Type(['type' => 'integer']),
-			'isConstant' => new Assert\Type(['type' => 'integer']),
+			'constant' => new Assert\Type(['type' => 'integer']),
 			'spatialDimensions' => new Assert\Type(['type' => 'double']),
 			'size' => new Assert\Type(['type' => 'double']),
 		]));

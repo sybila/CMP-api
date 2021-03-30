@@ -6,6 +6,7 @@ use App\Entity\ModelRule;
 use App\Entity\Model;
 use App\Entity\IdentifiedObject;
 use App\Helpers\QueryRepositoryHelper;
+use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 use Exception;
@@ -46,19 +47,30 @@ class ModelRuleRepository implements IDependentEndpointRepository
 
 	public function getNumResults(array $filter): int
 	{
-		return ((int)$this->buildListQuery($filter)
-			->select('COUNT(r)')
-			->getQuery()
-			->getSingleScalarResult());
+        return $this->repository
+            ->matching($this->createQueryCriteria($filter))
+            ->count();
 	}
 
 	public function getList(array $filter, array $sort, array $limit): array
 	{
-		$query = $this->buildListQuery($filter)
-			->select('r.id, r.modelId');
-        $query = $this->addPagingDql($query, $limit);
-        $query = $this->addSortDql($query, $sort);
-		return $query->getQuery()->getArrayResult();
+        return $this->repository
+            ->matching($this->createQueryCriteria($filter, $limit, $sort))
+            ->map(function (ModelRule $rule) {
+                return [
+                    'id' => $rule->getId(),
+                    'alias' => $rule->getAlias(),
+                    'name' => $rule->getName(),
+                    'rate' => [
+                        'latex' => is_null($rule->getExpression()) ? '' : $rule->getExpression()->getLatex(),
+                        'cmml' => is_null($rule->getExpression()) ? '' : $rule->getExpression()->getContentMML()],
+                ];
+            })->toArray();
+//		$query = $this->buildListQuery($filter)
+//			->select('r.id, r.modelId');
+//        $query = $this->addPagingDql($query, $limit);
+//        $query = $this->addSortDql($query, $sort);
+//		return $query->getQuery()->getArrayResult();
 	}
 
     /**
@@ -83,6 +95,23 @@ class ModelRuleRepository implements IDependentEndpointRepository
         $query = $this->addFilterDql($query, $filter);
 		return $query;
 	}
+
+    /**
+     * @param array $filter
+     * @param array|null $limit
+     * @param array|null $sort
+     * @return Criteria
+     */
+    public function createQueryCriteria(array $filter, array $limit = null, array $sort = null): Criteria
+    {
+        $criteria = Criteria::create()->where(Criteria::expr()->eq('modelId', $this->getParent()));
+        foreach ($filter['argFilter'] as $by => $expr){
+            $criteria = $criteria->andWhere(Criteria::expr()->contains($by, $expr));
+        }
+        return $criteria->setMaxResults($limit['limit'] ? $limit['limit'] : null)
+            ->setFirstResult($limit['offset'] ? $limit['offset'] : null)
+            ->orderBy($sort ? $sort : []);
+    }
 
 	public function getParent(): IdentifiedObject
 	{

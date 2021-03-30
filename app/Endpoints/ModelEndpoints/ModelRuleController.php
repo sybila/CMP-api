@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Entity\{Entity,
     IdentifiedObject,
+    MathExpression,
     Model,
     ModelRule,
     Repositories\IEndpointRepository,
@@ -36,7 +37,10 @@ abstract class ModelRuleController extends ParentedRepositoryController implemen
 		/** @var ModelRule $rule */
 		$sBaseData = $this->getSBaseData($rule);
 		return array_merge($sBaseData, [
-			'modelId' => $rule->getModelId(),
+			'modelId' => $rule->getModelId()->getId(),
+            'expression' => [
+                'latex' => is_null($rule->getExpression()) ? '' : $rule->getExpression()->getLatex(),
+                'cmml' => is_null($rule->getExpression()) ? '' : $rule->getExpression()->getContentMML()],
 		]);
 	}
 
@@ -91,9 +95,13 @@ final class ModelParentedRuleController extends ModelRuleController
 	{
 		/** @var ModelRule $rule */
         $this->setSBaseData($rule, $data);
-		$rule->setModelId($this->repository->getParent()->getId());
-		!$data->hasKey('equation') ?: $rule->setEquation($data->getString('equation'));
+		$rule->setModelId($this->repository->getParent());
 		!$data->hasKey('type') ?: $rule->setType($data->getString('type'));
+        if ($data->hasKey('expression')) {
+            $expr = $rule->getExpression();
+            $expr->setContentMML($data->getString('expression'), true);
+            $rule->setExpression($expr);
+        }
 	}
 
 	protected function checkInsertObject(IdentifiedObject $rule): void
@@ -105,7 +113,10 @@ final class ModelParentedRuleController extends ModelRuleController
 
 	protected function createObject(ArgumentParser $body): IdentifiedObject
 	{
-		return new ModelRule;
+        $expr = new MathExpression();
+		$rule = new ModelRule;
+        $rule->setExpression($expr);
+        return $rule;
 	}
 
     protected function checkParentValidity(IdentifiedObject $parent, IdentifiedObject $child)

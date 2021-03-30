@@ -6,6 +6,7 @@ use App\Entity\Model;
 use App\Entity\ModelEvent;
 use App\Entity\IdentifiedObject;
 use App\Helpers\QueryRepositoryHelper;
+use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 use Exception;
@@ -46,20 +47,51 @@ class ModelEventRepository implements IDependentEndpointRepository
 
 	public function getNumResults(array $filter): int
 	{
-		return ((int)$this->buildListQuery($filter)
-			->select('COUNT(e)')
-			->getQuery()
-			->getSingleScalarResult());
+        return $this->repository
+            ->matching($this->createQueryCriteria($filter))
+            ->count();
 	}
 
 	public function getList(array $filter, array $sort, array $limit): array
 	{
-		$query = $this->buildListQuery($filter)
-			->select('e.id, e.name, e.sbmlId, e.sboTerm, e.notes, e.delay, e.trigger, e.priority');
-        $query = $this->addPagingDql($query, $limit);
-        $query = $this->addSortDql($query, $sort);
-		return $query->getQuery()->getArrayResult();
+        return $this->repository
+            ->matching($this->createQueryCriteria($filter, $limit, $sort))
+            ->map(function (ModelEvent $event) {
+                return [
+                    'id' => $event->getId(),
+                    'alias' => $event->getAlias(),
+                    'name' => $event->getName(),
+                    'ontologyTerm' => $event->getSboTerm(),
+                    'notes' => $event->getNotes(),
+                    'delay' => [
+                        'latex' => is_null($event->getDelay()) ? '' : $event->getDelay()->getLatex(),
+                        'cmml' => is_null($event->getDelay()) ? '' : $event->getDelay()->getContentMML()],
+                    'trigger' => [
+                        'latex' => is_null($event->getTrigger()) ? '' : $event->getTrigger()->getLatex(),
+                        'cmml' => is_null($event->getTrigger()) ? '' : $event->getTrigger()->getContentMML()],
+                    'priority' => [
+                        'latex' => is_null($event->getPriority()) ? '' : $event->getPriority()->getLatex(),
+                        'cmml' => is_null($event->getPriority()) ? '' : $event->getPriority()->getContentMML()]
+                ];
+            })->toArray();
 	}
+
+    /**
+     * @param array $filter
+     * @param array|null $limit
+     * @param array|null $sort
+     * @return Criteria
+     */
+    public function createQueryCriteria(array $filter, array $limit = null, array $sort = null): Criteria
+    {
+        $criteria = Criteria::create()->where(Criteria::expr()->eq('modelId', $this->getParent()));
+        foreach ($filter['argFilter'] as $by => $expr){
+            $criteria = $criteria->andWhere(Criteria::expr()->contains($by, $expr));
+        }
+        return $criteria->setMaxResults($limit['limit'] ? $limit['limit'] : null)
+            ->setFirstResult($limit['offset'] ? $limit['offset'] : null)
+            ->orderBy($sort ? $sort : []);
+    }
 
 	public function getParent(): IdentifiedObject
 	{

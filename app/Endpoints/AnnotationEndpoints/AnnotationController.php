@@ -53,7 +53,12 @@ class AnnotationSourceController extends MultiParentedRepoController
     protected function setData(IdentifiedObject $object, ArgumentParser $body): void
     {
         /** @var AnnotationSource $object */
-        !$body->hasKey('link') ?: $object->setLink($body->getString('link'));
+        !$body->hasKey('link') ?
+            $object->setLink('http://identifiers.org/' . $body['sourceNamespace'] .'/'. $body['sourceIdentifier']) :
+            $object->setLink($body->getString('link'));
+        !$body->hasKey('qualifier') ?: $object->setQualifier($body->getString('qualifier'));
+        !$body->hasKey('sourceNamespace') ?: $object->setSourceNamespace($body->getString('sourceNamespace'));
+        !$body->hasKey('sourceIdentifier') ?: $object->setSourceIdentifier($body->getString('sourceIdentifier'));
     }
 
     protected function getAnnotableType(): string
@@ -61,10 +66,22 @@ class AnnotationSourceController extends MultiParentedRepoController
         return $this->annotatedObjType;
     }
 
+    /**
+     * @param string $annotatedObjType
+     */
+    public function setAnnotatedObjType(string $annotatedObjType): void
+    {
+        $this->annotatedObjType = $annotatedObjType;
+    }
+
+
     protected function createObject(ArgumentParser $body): IdentifiedObject
     {
-        if (!$body->hasKey('link'))
-            throw new MissingRequiredKeyException('link');
+        $url = $body->hasKey('link');
+        $uri = ($body->hasKey('sourceNamespace') && $body->hasKey('sourceIdentifier'));
+        if (!$url && !$uri) {
+            throw new MissingRequiredKeyException('(link) or (sourceNamespace and sourceIdentifier)');
+        }
         $object = new AnnotationSource;
         $object->annotate($object, $this->getAnnotableType(), $this->repository->getParent()->getId());
         return $object;

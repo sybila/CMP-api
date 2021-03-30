@@ -19,9 +19,11 @@ class ModelEventAssignment implements IdentifiedObject
 	 */
 	protected $eventId;
 
-	/**
-	 * @var string
-	 * @ORM\Column(type="string")
+    //* @ORM\Column(type="string")
+
+    /**
+	 * @ORM\OneToOne(targetEntity="MathExpression", cascade={"persist", "remove"})
+     * @ORM\JoinColumn(name="formula", referencedColumnName="id")
 	 */
 	protected $formula;
 
@@ -53,24 +55,36 @@ class ModelEventAssignment implements IdentifiedObject
 		return $this;
 	}
 
-	/**
-	 * Get formula
-	 * @return null|string
-	 */
-	public function getFormula(): ?string
-	{
-		return $this->formula;
-	}
+    public function getFormula()
+    {
+        return $this->formula;
+    }
 
-	/**
-	 * Set formula
-	 * @param string $formula
-	 * @return ModelEventAssignment
-	 */
-	public function setFormula($formula): ModelEventAssignment
-	{
-		$this->formula = $formula;
-		return $this;
-	}
+    public function setFormula(MathExpression $formula): void
+    {
+        $this->formula = $formula;
+    }
+//
+//	/**
+//	 * Get formula
+//	 * @return null|string
+//	 */
+//	public function getFormula(): ?string
+//	{
+//		return $this->formula;
+//	}
+//
+//	/**
+//	 * Set formula
+//	 * @param string $formula
+//	 * @return ModelEventAssignment
+//	 */
+//	public function setFormula($formula): ModelEventAssignment
+//	{
+//		$this->formula = $formula;
+//		return $this;
+//	}
+
+
 
 }

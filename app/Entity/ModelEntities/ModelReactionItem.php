@@ -121,12 +121,10 @@ class ModelReactionItem implements IdentifiedObject
     /**
      * Set type
      * @param string $type
-     * @return ModelReactionItem
      */
 	public function setType(string $type)
     {
 		$this->type = $type;
-		return $this;
 	}
 
 	/**

@@ -32,7 +32,7 @@ class ModelParameterRepository implements IDependentEndpointRepository
 
 	public function getBySbmlId(string $sbmlId)
 	{
-		return $this->repository->findOneBy(['sbmlId' => $sbmlId]);
+		return $this->repository->findOneBy(['alias' => $sbmlId]);
 	}
 
 	protected static function getParentClassName(): array
@@ -66,7 +66,7 @@ class ModelParameterRepository implements IDependentEndpointRepository
 	public function getList(array $filter, array $sort, array $limit): array
 	{
 		$query = $this->buildListQuery($filter)
-			->select('p.id, p.name, p.sbmlId, p.sboTerm, p.notes, p.value, p.isConstant');
+			->select('p.id, p.name, p.alias, p.sboTerm, p.notes, p.value, p.constant');
         $query = $this->addPagingDql($query, $limit);
         $query = $this->addSortDql($query, $sort);
 		return $query->getQuery()->getArrayResult();

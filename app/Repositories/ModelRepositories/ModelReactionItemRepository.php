@@ -7,6 +7,7 @@ use App\Entity\ModelSpecie;
 use App\Entity\ModelReactionItem;
 use App\Entity\IdentifiedObject;
 use App\Helpers\QueryRepositoryHelper;
+use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 use Exception;
@@ -52,19 +53,32 @@ class ModelReactionItemRepository implements IDependentEndpointRepository
 
 	public function getNumResults(array $filter): int
 	{
-		return ((int)$this->buildListQuery($filter)
-			->select('COUNT(r)')
-			->getQuery()
-			->getSingleScalarResult());
+        return $this->repository
+            ->matching($this->createQueryCriteria($filter))
+            ->count();
 	}
 
 	public function getList(array $filter, array $sort, array $limit): array
 	{
-		$query = $this->buildListQuery($filter)
-			->select('r.id, r.name, r.sbmlId, r.sboTerm, r.notes, r.type, r.value, r.stoichiometry');
-        $query = $this->addPagingDql($query, $limit);
-        $query = $this->addSortDql($query, $sort);
-		return $query->getQuery()->getArrayResult();
+        return $this->repository
+            ->matching($this->createQueryCriteria($filter, $limit, $sort))
+            ->map(function (ModelReactionItem $item) {
+                return [
+                    'id' => $item->getId(),
+                    'alias' => $item->getAlias(),
+                    'name' => $item->getName(),
+                    'ontologyTerm' => $item->getSboTerm(),
+                    'notes' => $item->getNotes(),
+                    'type' => $item->getType(),
+                    'value' => $item->getValue(),
+                    'stoichiometry' => $item->getStoichiometry()
+                    ];
+            })->toArray();
+//		$query = $this->buildListQuery($filter)
+//			->select('r.id, r.name, r.alias, r.sboTerm, r.notes, r.type, r.value, r.stoichiometry');
+//        $query = $this->addPagingDql($query, $limit);
+//        $query = $this->addSortDql($query, $sort);
+//		return $query->getQuery()->getArrayResult();
 	}
 
     /**
@@ -92,6 +106,21 @@ class ModelReactionItemRepository implements IDependentEndpointRepository
 	{
 		return $this->em;
 	}
+    public function createQueryCriteria(array $filter, array $limit = null, array $sort = null): Criteria
+    {
+        if ($this->parent instanceof ModelReaction) {
+            $criteria = Criteria::create()->where(Criteria::expr()->eq('reactionId', $this->getParent()));
+        }
+        if ($this->parent instanceof ModelSpecie) {
+            $criteria = Criteria::create()->where(Criteria::expr()->eq('specieId', $this->getParent()));
+        }
+        foreach ($filter['argFilter'] as $by => $expr){
+            $criteria = $criteria->andWhere(Criteria::expr()->contains($by, $expr));
+        }
+        return $criteria->setMaxResults($limit['limit'] ? $limit['limit'] : null)
+            ->setFirstResult($limit['offset'] ? $limit['offset'] : null)
+            ->orderBy($sort ? $sort : []);
+    }
 
 	private function buildListQuery(array $filter): QueryBuilder
 	{

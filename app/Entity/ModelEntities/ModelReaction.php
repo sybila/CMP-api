@@ -26,10 +26,10 @@ class ModelReaction implements IdentifiedObject
 	 */
 	protected $compartmentId;
 
-	/**
-	 * @return string
-	 * @ORM\Column(type="string")
-	 */
+    /**
+     * @ORM\OneToOne(targetEntity="MathExpression", cascade={"persist", "remove"})
+     * @ORM\JoinColumn(name="rate", referencedColumnName="id")
+     */
 	protected $rate;
 
 	/**
@@ -116,24 +116,16 @@ class ModelReaction implements IdentifiedObject
 		return $this;
 	}
 
-	/**
-	 * Get rate
-	 * @return string
-	 */
-	public function getRate(): ?string
+
+	public function getRate()
 	{
 		return $this->rate;
 	}
 
-	/**
-	 * Set rate
-	 * @param string $rate
-	 * @return ModelReaction
-	 */
-	public function setRate($rate): ModelReaction
+
+	public function setRate($rate)
 	{
 		$this->rate = $rate;
-		return $this;
 	}
 
 	/**

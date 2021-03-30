@@ -50,7 +50,7 @@ class ModelCompartmentRepository implements IDependentEndpointRepository
 	public function getList(array $filter, array $sort, array $limit): array
 	{
 		$query = $this->buildListQuery($filter)
-			->select('c.id, c.name, c.sbmlId, c.sboTerm, c.notes, c.spatialDimensions, c.size, c.isConstant');
+			->select('c.id, c.name, c.alias, c.sboTerm, c.notes, c.spatialDimensions, c.size, c.constant');
         $query = $this->addPagingDql($query, $limit);
         $query = $this->addSortDql($query, $sort);
         return $query->getQuery()->getArrayResult();

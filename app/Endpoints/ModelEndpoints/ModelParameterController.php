@@ -47,7 +47,7 @@ abstract class ModelParameterController extends ParentedRepositoryController
 	public function readSbmlId(Request $request, Response $response, ArgumentParser $args)
 	{
 	    /** @var IdentifiedObject $parameter */
-		$parameter = $this->repository->getBySbmlId($args->getString('sbmlId'));
+		$parameter = $this->repository->getBySbmlId($args->getString('alias'));
 		return self::formatOk(
 			$response,
 			$parameter ? $this->getData($parameter) : null
@@ -60,12 +60,12 @@ abstract class ModelParameterController extends ParentedRepositoryController
 		$sBaseData = $this->getSBaseData($parameter);
 		return array_merge($sBaseData, [
 			'value' => $parameter->getValue(),
-			'isConstant' => $parameter->getValue(),
+			'constant' => $parameter->getValue(),
 			'reactionItems' => $parameter->getReactionsItems()->map(function (ModelReactionItem $reactionItem) {
 				return ['id' => $reactionItem->getId(), 'name' => $reactionItem->getName()];
 			})->toArray(),
 			'rules' => $parameter->getRules()->map(function (ModelRule $rule) {
-				return ['id' => $rule->getId(), 'equation' => $rule->getEquation()];
+				return ['id' => $rule->getId(), 'expression' => $rule->getExpression()];
 			})->toArray()
 		]);
 	}
@@ -75,7 +75,7 @@ abstract class ModelParameterController extends ParentedRepositoryController
 		/** @var ModelParameter $parameter */
         $this->setSBaseData($parameter, $data);
 		!$data->hasKey('value') ?: $parameter->setValue($data->getString('value'));
-		!$data->hasKey('isConstant') ?: $parameter->setIsConstant($data->getString('isConstant'));
+		!$data->hasKey('constant') ?: $parameter->setIsConstant($data->getString('constant'));
 	}
 
 	public function delete(Request $request, Response $response, ArgumentParser $args): Response
@@ -89,7 +89,7 @@ abstract class ModelParameterController extends ParentedRepositoryController
 		$validatorArray = $this->getSBaseValidator();
 		return new Assert\Collection(array_merge($validatorArray, [
 			'value' => new Assert\Type(['type' => 'float']),
-			'isConstant' => new Assert\Type(['type' => 'integer']),
+			'constant' => new Assert\Type(['type' => 'integer']),
 		]));
 	}
 
@@ -123,7 +123,7 @@ final class ModelParentedParameterController extends ModelParameterController
 	protected function setData(IdentifiedObject $parameter, ArgumentParser $data): void
 	{
 		/** @var ModelParameter $parameter */
-		$parameter->getModelId() ?: $parameter->setModelId($this->repository->getParent()->getId());
+		$parameter->getModelId() ?: $parameter->setModelId($this->repository->getParent());
 		if ($data->hasKey('reactionId')) {
 			$reaction = $this->repository->getEntityManager()->find(ModelReaction::class, $data->getInt('reactionId'));
 			if ($reaction === null) {
@@ -137,19 +137,21 @@ final class ModelParentedParameterController extends ModelParameterController
 	protected function checkInsertObject(IdentifiedObject $parameter): void
 	{
 		/** @var ModelParameter $parameter */
-		if ($parameter->getSbmlId() === null)
-			throw new MissingRequiredKeyException('sbmlId');
+		if ($parameter->getAlias() === null)
+			throw new MissingRequiredKeyException('alias');
 		if ($parameter->getIsConstant() === null)
-			throw new MissingRequiredKeyException('isConstant');
+			throw new MissingRequiredKeyException('constant');
 	}
 
 	protected function createObject(ArgumentParser $body): IdentifiedObject
 	{
-		if (!$body->hasKey('isConstant'))
-			throw new MissingRequiredKeyException('isConstant');
-		if (!$body->hasKey('sbmlId'))
-			throw new MissingRequiredKeyException('sbmlId');
-		return new ModelParameter;
+		if (!$body->hasKey('alias'))
+			throw new MissingRequiredKeyException('alias');
+        $modelParameter = new ModelParameter();
+        if (!$body->hasKey('constant')) {
+            $modelParameter->setIsConstant(false);
+        }
+        return $modelParameter;
 	}
 
     protected function checkParentValidity(IdentifiedObject $parent, IdentifiedObject $child)
@@ -173,14 +175,14 @@ final class ReactionItemParentedParameterController extends ModelParameterContro
 	protected function checkInsertObject(IdentifiedObject $parameter): void
 	{
 		/** @var ModelParameter $parameter */
-		if ($parameter->getSbmlId() === null)
-			throw new MissingRequiredKeyException('sbmlId');
+		if ($parameter->getAlias() === null)
+			throw new MissingRequiredKeyException('alias');
 	}
 
 	protected function createObject(ArgumentParser $body): IdentifiedObject
 	{
-		if (!$body->hasKey('sbmlId'))
-			throw new MissingRequiredKeyException('sbmlId');
+		if (!$body->hasKey('alias'))
+			throw new MissingRequiredKeyException('alias');
 		return new ModelParameter;
 	}
 

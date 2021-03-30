@@ -6,6 +6,7 @@ use App\Entity\Model;
 use App\Entity\ModelReaction;
 use App\Entity\IdentifiedObject;
 use App\Helpers\QueryRepositoryHelper;
+use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 use Exception;
@@ -51,19 +52,34 @@ class ModelReactionRepository implements IDependentEndpointRepository
 
 	public function getNumResults(array $filter): int
 	{
-		return ((int)$this->buildListQuery($filter)
-			->select('COUNT(r)')
-			->getQuery()
-			->getSingleScalarResult());
+        return $this->repository
+            ->matching($this->createQueryCriteria($filter))
+            ->count();
 	}
 
 	public function getList(array $filter, array $sort, array $limit): array
 	{
-		$query = $this->buildListQuery($filter)
-			->select('r.id, r.name, r.sbmlId, r.sboTerm, r.notes, r.isReversible, r.rate');
-        $query = $this->addPagingDql($query, $limit);
-        $query = $this->addSortDql($query, $sort);
-		return $query->getQuery()->getArrayResult();
+        return $this->repository
+            ->matching($this->createQueryCriteria($filter, $limit, $sort))
+            ->map(function (ModelReaction $reaction) {
+                return [
+                    'id' => $reaction->getId(),
+                    'alias' => $reaction->getAlias(),
+                    'name' => $reaction->getName(),
+                    'ontologyTerm' => $reaction->getSboTerm(),
+                    'notes' => $reaction->getNotes(),
+                    'isReversible' => $reaction->getIsReversible(),
+                    'expression' => [
+                        'latex' => is_null($reaction->getRate()) ? '' : $reaction->getRate()->getLatex(),
+                        'cmml' => is_null($reaction->getRate()) ? '' : $reaction->getRate()->getContentMML()],
+                ];
+            })->toArray();
+//
+//		$query = $this->buildListQuery($filter)
+//			->select('r.id, r.name, r.sbmlId, r.sboTerm, r.notes, r.isReversible, r.rate');
+//        $query = $this->addPagingDql($query, $limit);
+//        $query = $this->addSortDql($query, $sort);
+//		return $query->getQuery()->getArrayResult();
 	}
 
     /**
@@ -77,6 +93,23 @@ class ModelReactionRepository implements IDependentEndpointRepository
 			throw new Exception('Parent of reaction must be ' . $className);
 		$this->model = $object;
 	}
+
+    /**
+     * @param array $filter
+     * @param array|null $limit
+     * @param array|null $sort
+     * @return Criteria
+     */
+    public function createQueryCriteria(array $filter, array $limit = null, array $sort = null): Criteria
+    {
+        $criteria = Criteria::create()->where(Criteria::expr()->eq('modelId', $this->getParent()));
+        foreach ($filter['argFilter'] as $by => $expr){
+            $criteria = $criteria->andWhere(Criteria::expr()->contains($by, $expr));
+        }
+        return $criteria->setMaxResults($limit['limit'] ? $limit['limit'] : null)
+            ->setFirstResult($limit['offset'] ? $limit['offset'] : null)
+            ->orderBy($sort ? $sort : []);
+    }
 
 	private function buildListQuery(array $filter): QueryBuilder
 	{

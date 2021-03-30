@@ -26,7 +26,7 @@ trait SBaseControllerCommonable
         return [
             'id' => $object->getId(),
             'name' => $object->getName(),
-            'alias' => $object->getSbmlId(),
+            'alias' => $object->getAlias(),
             'sboTerm' => $object->getSboTerm(),
             'notes' => $object->getNotes(),
             'annotations' => $object->getAnnotations($this->orm)
@@ -41,7 +41,7 @@ trait SBaseControllerCommonable
     {
         /** @var SBase $object */
         !$body->hasKey('name') ?: $object->setName($body->getString('name'));
-        !$body->hasKey('alias') ?: $object->setSbmlId($body->getString('alias'));
+        !$body->hasKey('alias') ?: $object->setAlias($body->getString('alias'));
         !$body->hasKey('sboTerm') ?: $object->setSboTerm($body->getString('sboTerm'));
         !$body->hasKey('notes') ?: $object->setNotes($body->getString('notes'));
     }

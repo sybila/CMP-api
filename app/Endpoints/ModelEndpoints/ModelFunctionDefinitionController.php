@@ -3,9 +3,11 @@
 namespace App\Controllers;
 
 use IGroupRoleAuthWritableController;
-use App\Entity\{Model,
+use App\Entity\{MathExpression,
+    Model,
     ModelFunctionDefinition,
     IdentifiedObject,
+    ModelInitialAssignment,
     Repositories\IEndpointRepository,
     Repositories\ModelFunctionDefinitionRepository};
 use App\Exceptions\{MissingRequiredKeyException, WrongParentException};
@@ -36,7 +38,11 @@ final class ModelFunctionDefinitionController extends ParentedRepositoryControll
 		/** @var ModelFunctionDefinition $functionDefinition */
 		$sBaseData = $this->getSBaseData($functionDefinition);
 		return array_merge($sBaseData, [
-			'formula' => $functionDefinition->getFormula(),
+			'expression' => [
+                'latex' => is_null($functionDefinition->getExpression()) ? ''
+                    : $functionDefinition->getExpression()->getLatex(),
+                'cmml' => is_null($functionDefinition->getExpression()) ? ''
+                    : $functionDefinition->getExpression()->getContentMML()]
 		]);
 	}
 
@@ -44,13 +50,20 @@ final class ModelFunctionDefinitionController extends ParentedRepositoryControll
 	{
 		/** @var ModelFunctionDefinition $functionDefinition */
         $this->setSBaseData($functionDefinition, $data);
-		$functionDefinition->getModelId() ?: $functionDefinition->setModelId($this->repository->getParent()->getId());
-		!$data->hasKey('formula') ?: $functionDefinition->setFormula($data->getString('formula'));
+		$functionDefinition->getModelId() ?: $functionDefinition->setModelId($this->repository->getParent());
+		if ($data->hasKey('expression')) {
+            $expr = $functionDefinition->getExpression();
+            $expr->setContentMML($data->getString('expression'), true);
+            $functionDefinition->setExpression($expr);
+        }
 	}
 
 	protected function createObject(ArgumentParser $body): IdentifiedObject
 	{
-		return new ModelFunctionDefinition();
+        $expr = new MathExpression();
+        $modFn = new ModelFunctionDefinition();
+        $modFn->setExpression($expr);
+        return $modFn;
 	}
 
 	protected function checkInsertObject(IdentifiedObject $functionDefinition): void

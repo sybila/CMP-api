@@ -263,6 +263,13 @@ return function(App $app) {
         ->addAnnotationsRoutes()
 		->register();
 
+    (new RouteHelper)
+        ->setRoute(Ctl\ImportModelController::class,'/models/import')
+        ->setAuthMask(true)
+        ->setMask(RouteHelper::ADD)
+        ->register();
+
+
 	// experiments module
 	(new RouteHelper)
 		->setRoute(Ctl\ExperimentController::class, '/{obj:experiment}s')

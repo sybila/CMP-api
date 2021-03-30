@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use IGroupRoleAuthWritableController;
 use App\Entity\{IdentifiedObject,
+    MathExpression,
     Model,
     ModelParameter,
     ModelReaction,
@@ -41,9 +42,15 @@ final class ModelReactionController extends ParentedRepositoryController impleme
 			'modelId' => $reaction->getModelId()->getId(),
 			'compartmentId' => $reaction->getCompartmentId() ? $reaction->getCompartmentId()->getId() : null,
 			'isReversible' => $reaction->getIsReversible(),
-			'rate' => $reaction->getRate(),
+            'rate' => [
+                'latex' => is_null($reaction->getRate()) ? '' : $reaction->getRate()->getLatex(),
+                'cmml' => is_null($reaction->getRate()) ? '' : $reaction->getRate()->getContentMML()],
 			'reactionItems' => $reaction->getReactionItems()->map(function (ModelReactionItem $reactionItem) {
-				return ['id' => $reactionItem->getId(), 'name' => $reactionItem->getName()];
+				return ['id' => $reactionItem->getId(),
+                    'name' => $reactionItem->getName(),
+                    'alias' => $reactionItem->getAlias(),
+                    'stoichiometry' => $reactionItem->getStoichiometry(),
+                    'type' => $reactionItem->getType()];
 			})->toArray(),
 			'functions' => $reaction->getFunctions()->map(function (ModelFunction $function) {
 				return ['id' => $function->getId(), 'name' => $function->getName()];
@@ -58,17 +65,24 @@ final class ModelReactionController extends ParentedRepositoryController impleme
 	{
 		/** @var ModelReaction $reaction */
         $this->setSBaseData($reaction, $data);
-		$reaction->getModelId() ?: $reaction->setModelId($this->repository->getParent()->getId());
+		$reaction->getModelId() ?: $reaction->setModelId($this->repository->getParent());
 		!$data->hasKey('compartmentId') ?: $reaction->setCompartmentId($data->getString('compartmentId'));
-		!$data->hasKey('isReversible') ?: $reaction->setIsReversible($data->getInt('isReversible'));
-		!$data->hasKey('rate') ?: $reaction->setRate($data->getString('rate'));
+		!$data->hasKey('reversible') ?: $reaction->setIsReversible($data->getBool('reversible'));
+		if ($data->hasKey('rate')) {
+            $expr = $reaction->getRate();
+            $expr->setContentMML($data->getString('rate'), true);
+            $reaction->setExpression($expr);
+        }
 	}
 
 	protected function createObject(ArgumentParser $body): IdentifiedObject
 	{
-		if (!$body->hasKey('isReversible'))
-			throw new MissingRequiredKeyException('isReversible');
-		return new ModelReaction;
+        $expr = new MathExpression();
+        $reaction = new ModelReaction();
+        $reaction->setRate($expr);
+        return $reaction;
+//		if (!$body->hasKey('isReversible'))
+//			throw new MissingRequiredKeyException('isReversible');
 	}
 
 	protected function checkInsertObject(IdentifiedObject $reaction): void
@@ -77,7 +91,7 @@ final class ModelReactionController extends ParentedRepositoryController impleme
 		if ($reaction->getModelId() === null)
 			throw new MissingRequiredKeyException('modelId');
 		if ($reaction->getIsReversible() === null)
-			throw new MissingRequiredKeyException('isReversible');
+			throw new MissingRequiredKeyException('reversible');
 	}
 
 	public function delete(Request $request, Response $response, ArgumentParser $args): Response
@@ -95,7 +109,7 @@ final class ModelReactionController extends ParentedRepositoryController impleme
 	{
 		$validatorArray = $this->getSBaseValidator();
 		return new Assert\Collection(array_merge($validatorArray, [
-			'isReversible' => new Assert\Type(['type' => 'integer']),
+			'reversible' => new Assert\Type(['type' => 'integer']),
 			'rate' => new Assert\Type(['type' => 'string']),
 		]));
 	}

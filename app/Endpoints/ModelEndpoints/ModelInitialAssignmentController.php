@@ -3,7 +3,8 @@
 namespace App\Controllers;
 
 use IGroupRoleAuthWritableController;
-use App\Entity\{Model,
+use App\Entity\{MathExpression,
+    Model,
     ModelInitialAssignment,
     IdentifiedObject,
     Repositories\IEndpointRepository,
@@ -36,7 +37,11 @@ final class ModelInitialAssignmentController extends ParentedRepositoryControlle
 		$sBaseData = $this->getSBaseData($initialAssignment);
 		return array_merge($sBaseData, [
 			'id' => $initialAssignment->getId(),
-			'formula' => $initialAssignment->getFormula(),
+            'expression' => [
+                'latex' => is_null($initialAssignment->getExpression()) ? ''
+                    : $initialAssignment->getExpression()->getLatex(),
+                'cmml' => is_null($initialAssignment->getExpression()) ? ''
+                    : $initialAssignment->getExpression()->getContentMML()],
 		]);
 	}
 
@@ -44,13 +49,20 @@ final class ModelInitialAssignmentController extends ParentedRepositoryControlle
 	{
 		/** @var ModelInitialAssignment $initialAssignment */
 		$this->setSBaseData($initialAssignment, $data);
-		$initialAssignment->getModelId() ?: $initialAssignment->setModelId($this->repository->getParent()->getId());
-		!$data->hasKey('formula') ?: $initialAssignment->setFormula($data->getString('formula'));
+		$initialAssignment->getModelId() ?: $initialAssignment->setModelId($this->repository->getParent());
+		if ($data->hasKey('expression')) {
+		    $expr = $initialAssignment->getExpression();
+		    $expr->setContentMML($data->getString('expression'), true);
+            $initialAssignment->setExpression($expr);
+        }
 	}
 
 	protected function createObject(ArgumentParser $body): IdentifiedObject
 	{
-		return new ModelInitialAssignment();
+        $expr = new MathExpression();
+        $modAss = new ModelInitialAssignment();
+        $modAss->setExpression($expr);
+		return $modAss;
 	}
 
 	protected function checkInsertObject(IdentifiedObject $initialAssignment): void
@@ -58,8 +70,8 @@ final class ModelInitialAssignmentController extends ParentedRepositoryControlle
 		/** @var ModelInitialAssignment $initialAssignment */
 		if ($initialAssignment->getModelId() == null)
 			throw new MissingRequiredKeyException('modelId');
-		if ($initialAssignment->getFormula() == null)
-			throw new MissingRequiredKeyException('formula');
+		if ($initialAssignment->getExpression() == null) {}
+			throw new MissingRequiredKeyException('expression');
 	}
 
 	public function delete(Request $request, Response $response, ArgumentParser $args): Response
@@ -73,7 +85,7 @@ final class ModelInitialAssignmentController extends ParentedRepositoryControlle
 		$validatorArray = $this->getSBaseValidator();
 		return new Assert\Collection(array_merge($validatorArray, [
 			'modelId' => new Assert\Type(['type' => 'integer']),
-			'formula' => new Assert\Type(['type' => 'string'])
+			'expression' => new Assert\Type(['type' => 'string'])
 		]));
 	}
 

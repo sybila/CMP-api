@@ -34,10 +34,10 @@ class ModelRule implements IdentifiedObject
 	 */
 	private $modelId;
 
-	/**
-	 * @var integer
-	 * @ORM\Column(type="integer", name="model_compartment_id")
-	 */
+    /**
+     * @ORM\ManyToOne(targetEntity="ModelCompartment", inversedBy="rules")
+     * @ORM\JoinColumn(name="model_compartment_id", referencedColumnName="id")
+     */
 	private $compartmentId;
 
 	/**
@@ -58,11 +58,11 @@ class ModelRule implements IdentifiedObject
 	 */
 	protected $type;
 
-	/**
-	 * @var string
-	 * @ORM\Column(type="string")
-	 */
-	protected $equation;
+    /**
+     * @ORM\OneToOne(targetEntity="MathExpression", cascade={"persist", "remove"})
+     * @ORM\JoinColumn(name="equation", referencedColumnName="id")
+     */
+	protected $expression;
 
 	/**
 	 * Get id
@@ -122,6 +122,15 @@ class ModelRule implements IdentifiedObject
 		return $this->compartmentId;
 	}
 
+    /**
+     * @param ModelCompartment $compartment
+     */
+    public function setCompartmentId(ModelCompartment $compartment): void
+    {
+        $this->compartmentId = $compartment;
+    }
+
+
 	/**
 	 * Get specieId
 	 * @return integer
@@ -130,6 +139,15 @@ class ModelRule implements IdentifiedObject
 	{
 		return $this->specieId;
 	}
+
+    /**
+     * @param int $specieId
+     */
+    public function setSpecieId(int $specieId): void
+    {
+        $this->specieId = $specieId;
+    }
+
 
 	/**
 	 * Get type
@@ -151,24 +169,15 @@ class ModelRule implements IdentifiedObject
 		return $this;
 	}
 
-	/**
-	 * Get equation
-	 * @return string
-	 */
-	public function getEquation(): ?string
+
+	public function getExpression()
 	{
-		return $this->equation;
+		return $this->expression;
 	}
 
-	/**
-	 * Set name
-	 * @param string $equation
-	 * @return Rule
-	 */
-	public function setEquation($equation)
+	public function setExpression($expression)
 	{
-		$this->equation = $equation;
-		return $this;
+		$this->expression = $expression;
 	}
 
 }

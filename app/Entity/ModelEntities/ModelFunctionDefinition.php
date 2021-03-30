@@ -19,11 +19,11 @@ class ModelFunctionDefinition implements IdentifiedObject
 	 */
 	protected $modelId;
 
-	/**
-	 * @var string
-	 * @ORM\Column(type="string")
-	 */
-	protected $formula;
+    /**
+     * @ORM\OneToOne(targetEntity="MathExpression", cascade={"persist", "remove"})
+     * @ORM\JoinColumn(name="formula", referencedColumnName="id")
+     */
+	protected $expression;
 
 	/**
 	 * Get modelId
@@ -34,36 +34,24 @@ class ModelFunctionDefinition implements IdentifiedObject
 		return $this->modelId;
 	}
 
-	/**
-	 * Set modelId
-	 * @param integer $modelId
-	 * @return ModelCompartment
-	 */
-	public function setModelId($modelId): ModelCompartment
+    /**
+     * @param $modelId
+     */
+	public function setModelId($modelId)
 	{
 		$this->modelId = $modelId;
-		return $this;
 	}
 
 
-	/**
-	 * Get formula
-	 * @return null|string
-	 */
-	public function getFormula(): ?string
+	public function getExpression()
 	{
-		return $this->formula;
+		return $this->expression;
 	}
 
-	/**
-	 * Set formula
-	 * @param string $formula
-	 * @return ModelEventAssignment
-	 */
-	public function setFormula($formula): ModelEventAssignment
+
+	public function setExpression($expression)
 	{
-		$this->formula = $formula;
-		return $this;
+		$this->expression = $expression;
 	}
 
 }

@@ -2,6 +2,7 @@
 namespace App\Entity;
 
 
+use App\Exceptions\MissingRequiredKeyException;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -17,18 +18,24 @@ class AnnotationSource implements IdentifiedObject
     /**
      * @ORM\Column(name="source")
      */
-    protected $source;
+    protected $sourceNamespace;
 
     /**
      * @ORM\Column(name="source_id",nullable=true)
      */
-    protected $sourceId;
+    protected $sourceIdentifier;
 
     /**
      * @ORM\Column(name="link",type="string")
      */
     protected $link;
 
+    /**
+     * @ORM\Column(name="qualifier", type="string")
+     */
+    protected $qualifier;
+    protected $possibleQualifiers = ["encodes","hasPart","hasProperty","hasVersion","is","isDescribedBy","isEncodedBy","isHomologTo",
+        "isPartOf","isPropertyOf","isVersionOf","occursIn","hasTaxon", "isDerivedFrom","isInstanceOf","hasInstance"];
     /**
      * @ORM\OneToMany(targetEntity="AnnotationToResource", mappedBy="annotation", cascade={"persist", "remove"})
      */
@@ -55,33 +62,33 @@ class AnnotationSource implements IdentifiedObject
     /**
      * @return mixed
      */
-    public function getSource()
+    public function getSourceNamespace()
     {
-        return $this->source;
+        return $this->sourceNamespace;
     }
 
     /**
-     * @param mixed $source
+     * @param mixed $sourceNamespace
      */
-    public function setSource($source): void
+    public function setSourceNamespace($sourceNamespace): void
     {
-        $this->source = $source;
+        $this->sourceNamespace = $sourceNamespace;
     }
 
     /**
      * @return mixed
      */
-    public function getSourceId()
+    public function getSourceIdentifier()
     {
-        return $this->sourceId;
+        return $this->sourceIdentifier;
     }
 
     /**
-     * @param mixed $sourceId
+     * @param mixed $sourceIdentifier
      */
-    public function setSourceId($sourceId): void
+    public function setSourceIdentifier($sourceIdentifier): void
     {
-        $this->sourceId = $sourceId;
+        $this->sourceIdentifier = $sourceIdentifier;
     }
 
     /**
@@ -99,5 +106,28 @@ class AnnotationSource implements IdentifiedObject
     {
         $this->link = $link;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getQualifier()
+    {
+        return $this->qualifier;
+    }
+
+    /**
+     * @param mixed $qualifier
+     */
+    public function setQualifier($qualifier): void
+    {
+        if (in_array('qualifier',$this->possibleQualifiers)) {
+            $this->qualifier = $qualifier;
+        } else {
+            /** @var string qualifier; if not set, 'occursIn' appears as the most general qualifier */
+            $this->qualifier = $this->possibleQualifiers[2];
+        }
+    }
+
+
 
 }

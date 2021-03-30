@@ -28,7 +28,7 @@ trait SBase
 	 * @var string
 	 * @ORM\Column(type="string", name="sbml_id")
 	 */
-	private $sbmlId;
+	private $alias;
 
 	/**
 	 * @var string
@@ -69,19 +69,19 @@ trait SBase
 	 * Get sbmlId
 	 * @return string
 	 */
-	public function getSbmlId(): ?string
+	public function getAlias(): ?string
     {
-		return $this->sbmlId;
+		return $this->alias;
 	}
 
     /**
      * Set sbmlId
-     * @param string $sbmlId
+     * @param string $alias
      * @return mixed
      */
-	public function setSbmlId(string $sbmlId)
+	public function setAlias(string $alias)
 	{
-		$this->sbmlId = $sbmlId;
+		$this->alias = $alias;
 		return $this;
 	}
 

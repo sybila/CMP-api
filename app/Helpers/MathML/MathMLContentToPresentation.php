@@ -1,11 +1,11 @@
 <?php
 
-class MathMLContentToPresentation
+class MathMLContentToLatex
 {
     public static function convert(string $input){
         $start_time = microtime(true);
         $xml=simplexml_load_string($input);
-        $xsl=simplexml_load_file('../app/Helpers/MathML/ctop.xsl');
+        $xsl=simplexml_load_file('../app/Helpers/MathML/mmltex.xsl');
         // Configure the transformer
         $proc = new XSLTProcessor;
         $proc->importStyleSheet($xsl); // attach the xsl rules

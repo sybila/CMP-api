@@ -34,12 +34,20 @@ final class ModelEventController extends ParentedRepositoryController implements
 		/** @var ModelEvent $event */
 		$sBaseData = $this->getSBaseData($event);
 		return array_merge($sBaseData, [
-			'delay' => $event->getDelay(),
-			'trigger' => $event->getTrigger(),
-			'priority' => $event->getPriority(),
+            'delay' => [
+                'latex' => is_null($event->getDelay()) ? '' : $event->getDelay()->getLatex(),
+                'cmml' => is_null($event->getDelay()) ? '' : $event->getDelay()->getContentMML()],
+            'trigger' => [
+                'latex' => is_null($event->getTrigger()) ? '' : $event->getTrigger()->getLatex(),
+                'cmml' => is_null($event->getTrigger()) ? '' : $event->getTrigger()->getContentMML()],
+            'priority' => [
+                'latex' => is_null($event->getPriority()) ? '' : $event->getPriority()->getLatex(),
+                'cmml' => is_null($event->getPriority()) ? '' : $event->getPriority()->getContentMML()],
 			'evaluateOnTrigger' => $event->getEvaluateOnTrigger(),
 			'eventAssignments' => $event->getEventAssignments()->map(function (ModelEventAssignment $eventAssignment) {
-				return ['id' => $eventAssignment->getId(), 'formula' => $eventAssignment->getFormula()];
+				return ['id' => $eventAssignment->getId(), 'formula' =>
+                    ['latex' => $eventAssignment->getFormula()->getLatex(),
+                    'cmml' => $eventAssignment->getFormula()->getContentMML()]];
 			})->toArray(),
 		]);
 	}

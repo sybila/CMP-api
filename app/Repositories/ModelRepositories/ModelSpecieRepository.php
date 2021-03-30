@@ -60,7 +60,7 @@ class ModelSpecieRepository implements IDependentEndpointRepository
 	public function getList(array $filter, array $sort, array $limit): array
 	{
 		$query = $this->buildListQuery($filter)
-			->select('s.id, s.name, s.sbmlId, s.sboTerm, s.notes, s.initialExpression, s.hasOnlySubstanceUnits, s.isConstant, s.boundaryCondition');
+			->select('s.id, s.name, s.alias, s.sboTerm, s.notes, s.initialExpression, s.hasOnlySubstanceUnits, s.constant, s.boundaryCondition');
         $query = $this->addPagingDql($query, $limit);
         $query = $this->addSortDql($query, $sort);
 		return $query->getQuery()->getArrayResult();

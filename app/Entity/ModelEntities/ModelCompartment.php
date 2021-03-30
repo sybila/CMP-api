@@ -36,7 +36,7 @@ class ModelCompartment implements IdentifiedObject
 	 * @var boolean
 	 * @ORM\Column(name="is_constant",type="integer")
 	 */
-	protected $isConstant;
+	protected $constant;
 
 	/**
 	 * @var Collection
@@ -117,19 +117,19 @@ class ModelCompartment implements IdentifiedObject
 	 * Get isConstant
 	 * @return integer
 	 */
-	public function getIsConstant(): int
+	public function getConstant(): int
 	{
-		return $this->isConstant;
+		return $this->constant;
 	}
 
 	/**
 	 * Set isConstant
-	 * @param integer $isConstant
+	 * @param integer $constant
 	 * @return ModelCompartment
 	 */
-	public function setIsConstant(int $isConstant): ModelCompartment
+	public function setConstant(int $constant): ModelCompartment
 	{
-		$this->isConstant = $isConstant;
+		$this->constant = $constant;
 		//FIXME this one modus operandi is good if we want to chain the "set" methods
         //FIXME but why, if we never use it. It is more transparent, but it is slower.
 		return $this;
@@ -137,7 +137,7 @@ class ModelCompartment implements IdentifiedObject
 
     public function setIsConstant2(int $isConstant)
     {
-        $this->isConstant = $isConstant;
+        $this->constant = $isConstant;
     }
 
 	/**

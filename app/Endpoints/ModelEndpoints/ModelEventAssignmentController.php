@@ -36,7 +36,8 @@ final class ModelEventAssignmentController extends ParentedRepositoryController
 		/** @var ModelEventAssignment $eventAssignment */
 		$sBaseData = $this->getSBaseData($eventAssignment);
 		return array_merge($sBaseData, [
-			'formula' => $eventAssignment->getFormula()
+			'formula' => ['latex' => $eventAssignment->getFormula()->getLatex(),
+                'cmml' => $eventAssignment->getFormula()->getContentMML()]
 		]);
 	}
 
@@ -44,7 +45,7 @@ final class ModelEventAssignmentController extends ParentedRepositoryController
 	{
 		/** @var ModelEventAssignment $eventAssignment */
         $this->setSBaseData($eventAssignment, $data);
-		$eventAssignment->getEventId() ?: $eventAssignment->setEventId($this->repository->getParent()->getId());
+		$eventAssignment->getEventId() ?: $eventAssignment->setEventId($this->repository->getParent());
 		!$data->hasKey('formula') ?: $eventAssignment->setFormula($data->getString('formula'));
 	}
 

@@ -50,7 +50,7 @@ class ModelSpecie implements IdentifiedObject
 	 * @var int
 	 * @ORM\Column(type="integer", name="is_constant")
 	 */
-	protected $isConstant;
+	protected $constant;
 
 	/**
 	 * @var Collection
@@ -168,19 +168,19 @@ class ModelSpecie implements IdentifiedObject
 	 * Get isConstant
 	 * @return integer
 	 */
-	public function getIsConstant(): int
+	public function getConstant(): int
 	{
-		return $this->isConstant;
+		return $this->constant;
 	}
 
 	/**
 	 * Set isConstant
-	 * @param integer $isConstant
+	 * @param integer $constant
 	 * @return ModelSpecie
 	 */
-	public function setIsConstant($isConstant): ModelSpecie
+	public function setConstant($constant): ModelSpecie
 	{
-		$this->isConstant = $isConstant;
+		$this->constant = $constant;
 		return $this;
 	}
 

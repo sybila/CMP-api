@@ -6,6 +6,7 @@ use App\Entity\ModelEvent;
 use App\Entity\ModelEventAssignment;
 use App\Entity\IdentifiedObject;
 use App\Helpers\QueryRepositoryHelper;
+use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 use Exception;
@@ -44,21 +45,47 @@ class ModelEventAssignmentRepository implements IDependentEndpointRepository
         return 'e';
     }
 
-	public function getNumResults(array $filter): int
-	{
-		return ((int)$this->buildListQuery($filter)
-			->select('COUNT(e)')
-			->getQuery()
-			->getSingleScalarResult());
-	}
+    /**
+     * @param array $filter
+     * @param array|null $limit
+     * @param array|null $sort
+     * @return Criteria
+     */
+    public function createQueryCriteria(array $filter, array $limit = null, array $sort = null): Criteria
+    {
+        $criteria = Criteria::create()->where(Criteria::expr()->eq('eventId', $this->object));
+        foreach ($filter['argFilter'] as $by => $expr){
+            $criteria = $criteria->andWhere(Criteria::expr()->contains($by, $expr));
+        }
+        return $criteria->setMaxResults($limit['limit'] ? $limit['limit'] : null)
+            ->setFirstResult($limit['offset'] ? $limit['offset'] : null)
+            ->orderBy($sort ? $sort : []);
+    }
+
+
+    public function getNumResults(array $filter): int
+    {
+        return $this->repository
+            ->matching($this->createQueryCriteria($filter))
+            ->count();
+    }
 
 	public function getList(array $filter, array $sort, array $limit): array
 	{
-		$query = $this->buildListQuery($filter)
-			->select('e.id, e.name, e.sbmlId, e.sboTerm, e.notes, e.formula');
-        $query = $this->addPagingDql($query, $limit);
-        $query = $this->addSortDql($query, $sort);
-		return $query->getQuery()->getArrayResult();
+        return $this->repository
+            ->matching($this->createQueryCriteria($filter, $limit, $sort))
+            ->map(function (ModelEventAssignment $eventAss) {
+                return [
+                    'id' => $eventAss->getId(),
+                    'alias' => $eventAss->getAlias(),
+                    'name' => $eventAss->getName(),
+                    'ontologyTerm' => $eventAss->getSboTerm(),
+                    'notes' => $eventAss->getNotes(),
+                    'formula' => [
+                        'latex' => $eventAss->getFormula()->getLatex(),
+                        'cmml' => $eventAss->getFormula()->getContentMML()]
+                ];
+            })->toArray();
 	}
 
 	public function getParent(): IdentifiedObject
