@@ -108,12 +108,12 @@ use Identifier;
 	 */
 	protected $variables;
 
-	/**
-	 * @var ArrayCollection
-	 * @ORM\ManyToMany(targetEntity="ModelUnitDefinition", inversedBy="bioquantities")
-	 * @ORM\JoinTable(name="bioquantity_to_unit_definition", joinColumns={@ORM\JoinColumn(name="bioquantity_id", referencedColumnName="id")},
-	 * inverseJoinColumns={@ORM\JoinColumn(name="unitDefinitionId", referencedColumnName="id")})
-	 */
+//	/**
+//	 * @var ArrayCollection
+//	 * @ORM\ManyToMany(targetEntity="ModelUnitDefinition", inversedBy="bioquantities")
+//	 * @ORM\JoinTable(name="bioquantity_to_unit_definition", joinColumns={@ORM\JoinColumn(name="bioquantity_id", referencedColumnName="id")},
+//	 * inverseJoinColumns={@ORM\JoinColumn(name="unitDefinitionId", referencedColumnName="id")})
+//	 */
 	protected $unitDefinitions;
 
 
