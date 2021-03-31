@@ -7,6 +7,7 @@ use MathMLContentToPresentation as MathML;
 use App\Entity\{Compartment,
     Model,
     ModelCompartment,
+    ModelFunctionDefinition,
     ModelSpecie,
     ModelReaction,
     ModelRule,
@@ -38,6 +39,13 @@ final class ModelCompartmentController extends ParentedRepositoryController impl
 
 	protected function getData(IdentifiedObject $compartment): array
 	{
+//	    /** @var Model $model */
+//	    $model = $this->repository->getParent();
+//	    $defs = [];
+//	    $model->getFunctionDefinitions()->map(function (ModelFunctionDefinition $fnDef) use (&$defs) {
+//	        $defs[$fnDef->getAlias()] = $fnDef->getExpression();
+//        });
+//	    dump($defs);exit;
         /** @var ModelCompartment $compartment */
 		$sBaseData = $this->getSBaseData($compartment);
 		return array_merge ($sBaseData, [
@@ -50,11 +58,21 @@ final class ModelCompartmentController extends ParentedRepositoryController impl
 			'reactions' => $compartment->getReactions()->map(function (ModelReaction $reaction) {
 				return ['id' => $reaction->getId(), 'name' => $reaction->getName()];
 			})->toArray(),
-			'rules' => $compartment->getRules()->map(function (ModelRule $rule) {
-				return ['id' => $rule->getId(), 'equation' => [
-                    'latex' => is_null($rule->getExpression()) ? '' :$rule->getExpression()->getLatex(),
-                    'cmml' => is_null($rule->getExpression()) ? '' : $rule->getExpression()->getContentMML()]];
-			})->toArray(),
+            'rules' => $compartment->getRules()
+                ->filter(function (ModelRule $rule) use ($compartment) {
+                    return $rule->getCompartmentId() == $compartment;
+                })->map(function (ModelRule $rule) {
+                    return ['id' => $rule->getId(),
+                        'type' => $rule->getType(),
+                        'equation' => [
+                            'latex' => is_null($rule->getExpression()) ? '' :$rule->getExpression()->getLatex(),
+                            'cmml' => is_null($rule->getExpression()) ? '' : $rule->getExpression()->getContentMML()]];
+            })->toArray()
+//			'rules' => $compartment->getRules()->map(function (ModelRule $rule) {
+//				return ['id' => $rule->getId(), 'equation' => [
+//                    'latex' => is_null($rule->getExpression()) ? '' :$rule->getExpression()->getLatex(),
+//                    'cmml' => is_null($rule->getExpression()) ? '' : $rule->getExpression()->getContentMML()]];
+//			})->toArray(),
 //			'unitDefinitions' => $compartment->getUnitDefinitions()->map(function (ModelUnitDefinition $unit) {
 //				return ['id' => $unit->getId(), 'symbol' => $unit->getSymbol()];
 //			})->toArray(),

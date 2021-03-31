@@ -113,11 +113,8 @@ class ModelRule implements IdentifiedObject
 		return $this;
 	}
 
-	/**
-	 * Get compartmentId
-	 * @return integer
-	 */
-	public function getCompartmentId(): ?int
+
+	public function getCompartmentId()
 	{
 		return $this->compartmentId;
 	}

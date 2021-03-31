@@ -61,17 +61,17 @@ class ModelCompartmentRepository implements IDependentEndpointRepository
                     'name' => $compartment->getName(),
 //                    'ontologyTerm' => $compartment->getSboTerm(),
 //                    'notes' => $compartment->getNotes(),
-                    'spatialDimensions' => $compartment->getSpatialDimensions(),
-                    'size' => $compartment->getSize(),
-                    'constant' => $compartment->getConstant(),
+//                    'spatialDimensions' => $compartment->getSpatialDimensions(),
+//                    'size' => $compartment->getSize(),
+//                    'constant' => $compartment->getConstant(),
                     'species' => $compartment->getSpecies()->map(function (ModelSpecie $specie) {
                         return ['id' => $specie->getId(), 'name' => $specie->getName()];
                     })->toArray(),
-                    'rules' => $compartment->getRules()->map(function (ModelRule $rule) {
-                        return ['id' => $rule->getId(), 'equation' => [
-                            'latex' => is_null($rule->getExpression()) ? '' :$rule->getExpression()->getLatex(),
-                            'cmml' => is_null($rule->getExpression()) ? '' : $rule->getExpression()->getContentMML()]];
-                    })->toArray(),
+//                    'rules' => $compartment->getRules()->map(function (ModelRule $rule) {
+//                        return ['id' => $rule->getId(), 'equation' => [
+//                            'latex' => is_null($rule->getExpression()) ? '' :$rule->getExpression()->getLatex(),
+//                            'cmml' => is_null($rule->getExpression()) ? '' : $rule->getExpression()->getContentMML()]];
+//                    })->toArray(),
                 ];
             })->toArray();
 //		$query = $this->buildListQuery($filter)

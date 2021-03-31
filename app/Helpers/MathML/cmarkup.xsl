@@ -111,7 +111,7 @@
 	<xsl:apply-templates select="m:bvar/*"/>
   <xsl:text>\mapsto </xsl:text>
   <xsl:apply-templates select="*[last()]"/>
-<!--	Other variant 
+<!--	Other variant
 	<xsl:text>\mathrm{lambda}\: </xsl:text>
   	<xsl:apply-templates select="m:bvar/*"/>
   	<xsl:text>.\: </xsl:text>
@@ -311,7 +311,7 @@
 		<xsl:if test="position() &gt; 1">
 			<xsl:choose>
 				<xsl:when test="self::m:cn">\times <!-- times --></xsl:when>
-				<xsl:otherwise><!--invisible times--></xsl:otherwise>
+				<xsl:otherwise> \cdot <!--invisible times--></xsl:otherwise>
 			</xsl:choose>
 		</xsl:if> 
 		<xsl:if test="position()&gt;= $first">
