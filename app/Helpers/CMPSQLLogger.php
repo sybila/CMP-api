@@ -88,7 +88,7 @@ class CMPSQLLogger implements SQLLogger
         foreach ($params as $param) {
             $pos = strpos($haystack, $needle, $pos);
             if ($pos !== false) {
-                $haystack = substr_replace($haystack, $param, $pos, strlen($needle));
+                $haystack = substr_replace($haystack, json_encode($param), $pos, strlen($needle));
             }
         }
         return $haystack;

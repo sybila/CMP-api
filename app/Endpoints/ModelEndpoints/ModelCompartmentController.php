@@ -39,13 +39,6 @@ final class ModelCompartmentController extends ParentedRepositoryController impl
 
 	protected function getData(IdentifiedObject $compartment): array
 	{
-//	    /** @var Model $model */
-//	    $model = $this->repository->getParent();
-//	    $defs = [];
-//	    $model->getFunctionDefinitions()->map(function (ModelFunctionDefinition $fnDef) use (&$defs) {
-//	        $defs[$fnDef->getAlias()] = $fnDef->getExpression();
-//        });
-//	    dump($defs);exit;
         /** @var ModelCompartment $compartment */
 		$sBaseData = $this->getSBaseData($compartment);
 		return array_merge ($sBaseData, [
@@ -61,7 +54,7 @@ final class ModelCompartmentController extends ParentedRepositoryController impl
             'rules' => $compartment->getRules()
                 ->filter(function (ModelRule $rule) use ($compartment) {
                     return $rule->getCompartmentId() == $compartment;
-                })->map(function (ModelRule $rule) {
+                })->map(function (ModelRule $rule){
                     return ['id' => $rule->getId(),
                         'type' => $rule->getType(),
                         'equation' => [

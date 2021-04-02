@@ -51,7 +51,8 @@
 		<xsl:when test="string-length(normalize-space(text()))>1">
 			<xsl:text>\mathrm{</xsl:text><xsl:apply-templates/><xsl:text>}</xsl:text>
 		</xsl:when>
-		<xsl:otherwise><xsl:apply-templates/></xsl:otherwise>
+		<!--<xsl:otherwise><xsl:apply-templates/></xsl:otherwise>-->
+		<xsl:otherwise><xsl:text>\mathrm{</xsl:text><xsl:apply-templates/><xsl:text>}</xsl:text></xsl:otherwise>
 	</xsl:choose>
 </xsl:template>
 
@@ -108,8 +109,21 @@
 
 <!-- 4.4.2.9 lambda -->
 <xsl:template match="m:lambda">
-	<xsl:apply-templates select="m:bvar/*"/>
-  <xsl:text>\mapsto </xsl:text>
+	<xsl:text>\lambda(</xsl:text>
+	<xsl:for-each select="m:bvar">
+		<xsl:text>\mathrm{</xsl:text>
+		<xsl:value-of select="m:ci"/>
+		<xsl:text>}</xsl:text>
+		<xsl:choose>
+			<xsl:when test="following-sibling::m:bvar">
+				<xsl:text>, </xsl:text>
+			</xsl:when>
+			<xsl:otherwise>
+				<!-- Do nothing -->
+			</xsl:otherwise>
+		</xsl:choose>
+	</xsl:for-each>
+  <xsl:text>)\mapsto </xsl:text>
   <xsl:apply-templates select="*[last()]"/>
 <!--	Other variant
 	<xsl:text>\mathrm{lambda}\: </xsl:text>
@@ -135,7 +149,7 @@
 		4.4.5.9 grad 4.4.5.10 curl 4.4.9.4 median 4.4.9.5 mode-->
 <xsl:template match="m:domain | m:codomain | m:image | m:arg | m:lcm | m:grad |
 								 m:curl | m:median | m:mode">
-	<xsl:text>\mathop{\mathrm{</xsl:text>
+	<xsl:text>\mathop{\mathup{</xsl:text>
 	<xsl:value-of select="local-name()"/>
 	<xsl:text>}}</xsl:text>
 </xsl:template>
@@ -365,7 +379,7 @@
 	<xsl:call-template name="infix">
 		<xsl:with-param name="this-p" select="3"/>
 		<xsl:with-param name="p" select="$p"/>
-		<xsl:with-param name="mo">\mathop{\mathrm{xor}}</xsl:with-param>
+		<xsl:with-param name="mo">\mathop{\mathbf{xor}}</xsl:with-param>
 	</xsl:call-template>
 </xsl:template>
 
@@ -629,7 +643,7 @@
 </xsl:template>
 
 <!-- 4.4.5.8 divergence-->
-<xsl:template match="m:divergence"><xsl:text>\mathop{\mathrm{div}}</xsl:text></xsl:template>
+<xsl:template match="m:divergence"><xsl:text>\mathop{\mathbf{div}}</xsl:text></xsl:template>
 
 <!-- 4.4.5.11 laplacian-->
 <xsl:template match="m:laplacian"><xsl:text>\nabla^2 </xsl:text></xsl:template>
@@ -865,7 +879,7 @@ priority="2">
  self::m:arccot or 	self::m:arccoth or 	self::m:arccsc or
  self::m:arccsch or self::m:arcsec or 	self::m:arcsech or
  self::m:arcsinh or self::m:arctanh]]">
-	<xsl:text>\mathrm{</xsl:text>
+	<xsl:text>\mathbf{</xsl:text>
 	<xsl:value-of select="local-name(*[1])"/>
 	<xsl:text>\,}</xsl:text>
 	<xsl:apply-templates select="*[2]">
@@ -876,7 +890,7 @@ priority="2">
 <xsl:template match="m:sech | m:csch | m:arccosh | m:arccot |
 								 m:arccoth | m:arccsc |m:arccsch |m:arcsec |
 								 m:arcsech | m:arcsinh | m:arctanh">
-	<xsl:text>\mathrm{</xsl:text>
+	<xsl:text>\mathbf{</xsl:text>
 	<xsl:value-of select="local-name(.)"/>
 	<xsl:text>}</xsl:text>
 </xsl:template>
