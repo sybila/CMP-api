@@ -109,7 +109,6 @@ abstract class WritableRepositoryController extends RepositoryController
 	public function add(Request $request, Response $response, ArgumentParser $args): Response
 	{
 		$this->runEvents($this->beforeRequest, $request, $response, $args);
-
 		$this->permitUser([$this, 'validateAdd'], [$this, 'canAdd']);
 		$body = new ArgumentParser($request->getParsedBody());
 		$this->validate($body, $this->getValidator());

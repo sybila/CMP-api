@@ -156,6 +156,7 @@ return function(App $app) {
 		->register();
 	(new RouteHelper)
 		->setRoute(Ctl\OrganismController::class, '/organisms')
+        ->setAuthMask(true)
 		->register();
 	(new RouteHelper)
 		->setRoute(Ctl\EntityController::class, '/entities')
