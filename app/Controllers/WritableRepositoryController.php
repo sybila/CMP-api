@@ -51,16 +51,16 @@ abstract class WritableRepositoryController extends RepositoryController
 	{
 		parent::__construct($c);
 		$this->data = $c['persistentData'];
-        $this->orm->getConnection()
-            ->getConfiguration()
-            ->setSQLLogger(new CMPSQLLogger());
-        $sock = $c['notifications'];
-        $this->beforeRequest[] = function(Request $request, Response $response, ArgumentParser $args) use ($sock)
-        {
-            $this->orm->getEventManager()->addEventSubscriber(
-                new NotificationDispatchController($this->userPermissions['user_id'], $sock)
-            );
-        };
+//        $this->orm->getConnection()
+//            ->getConfiguration()
+//            ->setSQLLogger(new CMPSQLLogger());
+//        $sock = $c['notifications'];
+//        $this->beforeRequest[] = function(Request $request, Response $response, ArgumentParser $args) use ($sock)
+//        {
+//            $this->orm->getEventManager()->addEventSubscriber(
+//                new NotificationDispatchController($this->userPermissions['user_id'], $sock)
+//            );
+//        };
 	}
 
 
