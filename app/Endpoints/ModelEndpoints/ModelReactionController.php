@@ -36,39 +36,17 @@ final class ModelReactionController extends ParentedRepositoryController impleme
 	}
 
 	protected function getData(IdentifiedObject $reaction): array
-	{	    /** @var Model $model */
-//        $model = $this->repository->getParent();
-//        $defs = [];
-//        $model->getFunctionDefinitions()->map(function (ModelFunctionDefinition $fnDef) use (&$defs) {
-//            $defs[$fnDef->getAlias()] = $fnDef->getExpression()->getLatex();
-//        });
-//        foreach ($defs as $alias => $fn) {
-//            $latex = is_null($reaction->getRate()) ? '' : $reaction->getRate()->getLatex();
-//            $pattern = '/(?<=\\mathrm{' . addcslashes(addcslashes($alias, '_'),'\\') . '}\().*?(?=\))/s';
-//            preg_match_all($pattern,$latex,$ci);
-//            $broken = explode( '\mapsto', $fn);
-//            preg_match_all('/(?<=\\\lambda\().*?(?=\))/s', $broken[0], $strVar);
-//            $vars = explode(',', str_replace(' ', '', $strVar[0][0]));
-//            foreach ($ci[0] as $strSubs){
-//                dump($strSubs, $pattern);exit();
-//                $subs = explode(',', $strSubs);
-//                $i = 0;
-//                foreach ($subs as $sub)
-//                {
-//                    $broken[1] = str_replace($vars[$i], $sub, $broken[1]);
-//                    $i++;
-//                }
-//            }
-//        }
+	{
 		/** @var ModelReaction $reaction */
 		$sBaseData = $this->getSBaseData($reaction);
 		return array_merge($sBaseData, [
 			'modelId' => $reaction->getModelId()->getId(),
 			'compartmentId' => $reaction->getCompartmentId() ? $reaction->getCompartmentId()->getId() : null,
 			'isReversible' => $reaction->getIsReversible(),
-            'rate' => [
-                'latex' => is_null($reaction->getRate()) ? '' : $reaction->getRate()->getLatex(),
-                'cmml' => is_null($reaction->getRate()) ? '' : $reaction->getRate()->getContentMML()],
+            'rate' => is_null($reaction->getRate()) ? ['latex' => '', 'cmml' => '', 'components' => ''] :
+                ['latex' => $reaction->getRate()->getLatex(),
+                'cmml' => $reaction->getRate()->getContentMML(),
+                'detail' => $reaction->getRate()->getModelComponents($this->repository->getParent())],
 			'reactionItems' => $reaction->getReactionItems()->map(function (ModelReactionItem $reactionItem) {
 				return ['id' => $reactionItem->getId(),
                     'name' => $reactionItem->getName(),

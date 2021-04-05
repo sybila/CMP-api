@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use DOMDocument;
 
 /**
  * @ORM\Entity
@@ -24,6 +25,11 @@ class ModelFunctionDefinition implements IdentifiedObject
      * @ORM\JoinColumn(name="formula", referencedColumnName="id")
      */
 	protected $expression;
+
+    /**
+     * @ORM\Column(type="string", name="argv")
+     */
+	protected $arguments;
 
 	/**
 	 * Get modelId
@@ -48,10 +54,34 @@ class ModelFunctionDefinition implements IdentifiedObject
 		return $this->expression;
 	}
 
-
-	public function setExpression($expression)
+	public function setExpression(MathExpression $expression)
 	{
 		$this->expression = $expression;
+        $dom = new DOMDocument;
+        $dom->loadXML($expression->getContentMML());
+        $args = [];
+        foreach ($dom->getElementsByTagName('bvar') as $arg) {
+            array_push($args, $arg->nodeValue);
+        }
+        $this->setArguments($args);
 	}
+
+    /**
+     * @return mixed
+     */
+    public function getArguments(): array
+    {
+        return json_decode($this->arguments);
+    }
+
+    /**
+     * @param mixed $arguments
+     */
+    public function setArguments(array $arguments): void
+    {
+        $this->arguments = json_encode($arguments);
+    }
+
+
 
 }
