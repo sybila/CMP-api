@@ -75,8 +75,8 @@ class ExperimentGraphsetController extends ParentedRepositoryController
 
     protected function checkInsertObject(IdentifiedObject $object): void
     {
-        /** @var ExperimentGraphset $functionDefinition */
-        if ($functionDefinition->getName() == null)
+        /** @var ExperimentGraphset $object */
+        if ($object->getName() == null)
             throw new MissingRequiredKeyException('name');
     }
 
