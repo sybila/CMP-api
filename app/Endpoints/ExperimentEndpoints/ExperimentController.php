@@ -2,8 +2,9 @@
 
 namespace App\Controllers;
 
-use App\Entity\{
-    Experiment,
+use App\Entity\{Experiment,
+    ExperimentGraphset,
+    ExpVarToGraphset,
     IdentifiedObject,
     ExperimentVariable,
     ExperimentNote,
@@ -92,6 +93,13 @@ final class ExperimentController extends WritableRepositoryController implements
 //                })->toArray(),
                 'devices' => $experiment->getDevices()->map(function (Device $device) {
                       return ['id' => $device->getId(), 'name' => $device->getName()];
+                })->toArray(),
+                'graphsets' => $experiment->getGraphsets()->map(function (ExperimentGraphset $g) {
+                    $vars = $g->getVarToGraphset()->map(function (ExpVarToGraphset $eg) {
+                        return ['id' => $eg->getExpVar()->getId(), 'name' => $eg->getExpVar()->getName(),
+                            'visualize' => $eg->getVisualize()];
+                    })->toArray();
+                    return ['name' => $g->getName(), 'variables' => $vars];
                 })->toArray(),
             ];
         }

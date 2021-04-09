@@ -298,6 +298,12 @@ return function(App $app) {
         ->setAuthMask(true)
         ->register();
     (new RouteHelper)
+        ->setRoute(Ctl\ExperimentGraphsetController::class, '/experiments/{experiment-id:\\d+}/graphsets')
+        ->setMask(RouteHelper::ADD | RouteHelper::EDIT | RouteHelper::DELETE)
+        ->setAuthMask(true)
+        ->register();
+
+    (new RouteHelper)
         ->setRoute(Ctl\DeviceController::class, '/devices')
         ->addAnnotationsRoutes()
         ->register();

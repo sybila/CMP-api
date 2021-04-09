@@ -256,6 +256,10 @@ $c[EntityRepo\ExperimentVariableNoteRepository::class] = function (Container $c)
 	return new EntityRepo\ExperimentVariableNoteRepository($c[EntityManager::class]);
 };
 
+$c[EntityRepo\ExperimentGraphsetRepository::class] = function (Container $c) {
+    return new EntityRepo\ExperimentGraphsetRepository($c[EntityManager::class]);
+};
+
 $c[EntityRepo\DeviceRepository::class] = function (Container $c) {
 	return new EntityRepo\DeviceRepository($c[EntityManager::class]);
 };

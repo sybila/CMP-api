@@ -125,6 +125,11 @@ class Experiment implements IdentifiedObject
 //    private $bioquantities;
 
 
+    /**
+     * @ORM\OneToMany(targetEntity="ExperimentGraphset", mappedBy="experiment")
+     */
+    private $graphsets;
+
     public function __construct()
     {
         $this->inserted = new DateTimeJson;
@@ -456,5 +461,23 @@ class Experiment implements IdentifiedObject
     {
         $this->groupId = $groupId;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getGraphsets()
+    {
+        return $this->graphsets;
+    }
+
+    /**
+     * @param mixed $graphsets
+     */
+    public function setGraphsets($graphsets): void
+    {
+        $this->graphsets = $graphsets;
+    }
+
+
 
 }

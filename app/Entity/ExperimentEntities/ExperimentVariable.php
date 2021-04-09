@@ -72,6 +72,11 @@ class ExperimentVariable implements IdentifiedObject
 	 */
 	private $notes;
 
+    /**
+     * @ORM\OneToMany(targetEntity="ExpVarToGraphset", mappedBy="expVar", cascade={"remove"})
+     */
+	private $graphsets;
+
 	/**
 	 * Get id
 	 * @return integer
