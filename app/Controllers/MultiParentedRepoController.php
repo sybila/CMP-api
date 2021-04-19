@@ -13,7 +13,11 @@ use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;
 
-
+/**
+ * Class MultiParentedRepoController
+ * @package App\Controllers
+ * @author Radoslav Doktor 433286@mail.muni.cz
+ */
 abstract class MultiParentedRepoController extends WritableRepositoryController
 {
 

@@ -7,6 +7,7 @@ use App\Entity\Identifier;
 
 /**
  * FIXME do it
+ * @author Radoslav Doktor 433286@mail.muni.cz
  */
 class Author implements IdentifiedObject
 {

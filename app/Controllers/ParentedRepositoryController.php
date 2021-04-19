@@ -15,6 +15,7 @@ use Slim\Http\Response;
 
 /**
  * @property-read IDependentEndpointRepository $repository
+ * @author Radoslav Doktor 433286@mail.muni.cz
  */
 abstract class ParentedRepositoryController extends MultiParentedRepoController
 {
@@ -40,6 +41,7 @@ abstract class ParentedRepositoryController extends MultiParentedRepoController
 /**
  * Class ParentObjectInfo defines the info that is needed for parent validation
  * @package App\Controllers
+ * @author Radoslav Doktor 433286@mail.muni.cz
  */
 class ParentObjectInfo
 {

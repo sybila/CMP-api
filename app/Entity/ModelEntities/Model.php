@@ -71,8 +71,7 @@ class Model implements IdentifiedObject
 	private $initialAssignments;
 
 	/**
-	 * @var ArrayCollection
-	 * @ORM\OneToMany(targetEntity="ModelParameter", mappedBy="modelId", cascade={"remove"})
+	 * @ORM\OneToMany(targetEntity="ModelParameter", mappedBy="model", cascade={"remove"})
 	 */
 	private $parameters;
 
@@ -98,6 +97,12 @@ class Model implements IdentifiedObject
      */
     private $status;
 
+    /**
+     * @var ArrayCollection
+     * @ORM\OneToMany(targetEntity="ModelDataset", mappedBy="model", cascade={"persist","remove"})
+     */
+    private $datasets;
+
 //	/**
 //	 * @var ArrayCollection
 //	 */
@@ -111,8 +116,18 @@ class Model implements IdentifiedObject
 //     */
 //    private $experiments;
 //
+    /**
+     * Model constructor.
+     */
+    public function __construct()
+    {
+        $this->status = Model::INCOMPLETE;
+        $this->isPublic = false;
+        $this->datasets = new ArrayCollection([new ModelDataset($this, 'initial', true)]);
+    }
 
-	/**
+
+    /**
 	 * Get userId
 	 * @return integer
 	 */
@@ -228,11 +243,8 @@ class Model implements IdentifiedObject
 		return $this->initialAssignments;
 	}
 
-	/**
-	 * @return ModelParameter[]|Collection
-	 */
-	public function getParameters(): Collection
-	{
+	public function getParameters()
+    {
 //		$criteria = Criteria::create();
 //		$criteria->where(Criteria::expr()->eq('reactionId', null));
 		return $this->parameters; //->matching($criteria);
@@ -278,38 +290,98 @@ class Model implements IdentifiedObject
         $this->isPublic = $isPublic;
     }
 
-
-
     /**
-     * @return Experiment[]|Collection
+     * @return mixed
      */
-    public function getExperiment(): Collection
+    public function getDatasets()
     {
-        return $this->experiments;
+        return $this->datasets;
     }
 
-
     /**
-     * @param Experiment $experiment
+     * @param mixed $datasets
      */
-    public function addExperiment(Experiment $experiment)
+    public function setDatasets($datasets): void
     {
-        if ($this->experiments->contains($experiment)) {
-            return;
+        $this->datasets = $datasets;
+    }
+
+    public function addDataset(ModelDataset $ds)
+    {
+        $this->datasets->add($ds);
+    }
+
+    public function uniqueAliasCheck(string $newAlias): bool
+    {
+        foreach ($this->getCompartments() as $c) {
+            if ($c->getAlias() === $newAlias) {
+                return false;
+            }
+            foreach ($c->getSpecies() as $sp) {
+                if ($sp->getAlias() === $newAlias) {
+                    return false;
+                }
+            }
         }
-        $this->experiments->add($experiment);
-        $experiment->addModel($this);
+        foreach ($this->getParameters() as $p) {
+            if ($p->getAlias() === $newAlias) {
+                return false;
+            }
+        }
+        foreach ($this->getFunctionDefinitions() as $fn) {
+            if ($fn->getAlias() === $newAlias) {
+                return false;
+            }
+        }
+        foreach ($this->getReactions() as $rt){
+            if ($rt->getAlias() === $newAlias) {
+                return false;
+            }
+        }
+        return true;
     }
 
-    /**
-     * @param Experiment $experiment
-     */
-    public function removeExperiment(Experiment $experiment)
+    public function getDefaultDataset()
     {
-        if (!$this->experiments->contains($experiment)) {
-            return;
-        }
-        $this->experiments->removeElement($experiment);
-        $experiment->removeModel($this);
+        return $this->getDatasets()->filter(function (ModelDataset $ds) {
+            return $ds->getIsDefault();
+        })->current();
     }
+
+
+
+//    /**
+//     * @return Experiment[]|Collection
+//     */
+//    public function getExperiment(): Collection
+//    {
+//        return $this->experiments;
+//    }
+//
+//
+//    /**
+//     * @param Experiment $experiment
+//     */
+//    public function addExperiment(Experiment $experiment)
+//    {
+//        if ($this->experiments->contains($experiment)) {
+//            return;
+//        }
+//        $this->experiments->add($experiment);
+//        $experiment->addModel($this);
+//    }
+//
+//    /**
+//     * @param Experiment $experiment
+//     */
+//    public function removeExperiment(Experiment $experiment)
+//    {
+//        if (!$this->experiments->contains($experiment)) {
+//            return;
+//        }
+//        $this->experiments->removeElement($experiment);
+//        $experiment->removeModel($this);
+//    }
+
+
 }

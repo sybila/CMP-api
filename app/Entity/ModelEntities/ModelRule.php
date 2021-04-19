@@ -42,9 +42,10 @@ class ModelRule implements IdentifiedObject
 
 	/**
 	 * @var integer
-	 * @ORM\Column(type="integer", name="model_parameter_id")
-	 */
-	private $parameterId;
+     * @ORM\OneToOne(targetEntity="ModelParameter", inversedBy="rule")
+     * @ORM\JoinColumn(name="model_parameter_id", referencedColumnName="id")
+     */
+	private $parameter;
 
 	/**
 	 * @var integer
@@ -97,19 +98,19 @@ class ModelRule implements IdentifiedObject
 	 * Get parameterId
 	 * @return integer
 	 */
-	public function getParameterId()
+	public function getParameter()
 	{
-		return $this->parameterId;
+		return $this->parameter;
 	}
 
 	/**
 	 * Set parameterId
-	 * @param integer $parameterId
+	 * @param integer $parameter
 	 * @return ModelRule
 	 */
-	public function setParameterId($parameterId): ModelRule
+	public function setParameter($parameter): ModelRule
 	{
-		$this->parameterId = $parameterId;
+		$this->parameter = $parameter;
 		return $this;
 	}
 

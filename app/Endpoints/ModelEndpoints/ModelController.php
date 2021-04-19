@@ -2,18 +2,19 @@
 
 namespace App\Controllers;
 
-use App\Entity\{
-    Authorization\User,
+use App\Entity\{Authorization\User,
     Model,
     IdentifiedObject,
     ModelCompartment,
     ModelConstraint,
+    ModelDataset,
     ModelEvent,
     ModelFunctionDefinition,
     ModelInitialAssignment,
     ModelParameter,
     ModelReaction,
     ModelRule,
+    ModelVarToDataset,
     Repositories\IEndpointRepository,
     Repositories\ModelRepository};
 use App\Exceptions\{DependentResourcesBoundException,
@@ -72,7 +73,7 @@ final class ModelController extends WritableRepositoryController implements IGro
 				return ['id' => $functionDefinition->getId(), 'name' => $functionDefinition->getName()];
 			})->toArray(),
 			'initialAssignments' => $model->getInitialAssignments()->map(function (ModelInitialAssignment $initialAssignment) {
-				return ['id' => $initialAssignment->getId(), 'formula' => [
+			    return ['id' => $initialAssignment->getId(), 'formula' => [
                         'latex' => $initialAssignment->getExpression()->getLatex(),
                         'cmml' => $initialAssignment->getExpression()->getContentMML()]];
 			})->toArray(),
@@ -88,6 +89,16 @@ final class ModelController extends WritableRepositoryController implements IGro
                         'latex' => $rule->getExpression()->getLatex(),
                         'cmml' => $rule->getExpression()->getContentMML()]];
 			})->toArray(),
+            'datasets' => $model->getDatasets()->map(function (ModelDataset $dataset) {
+                $vars = $dataset->getVarsToDataset()->map(function (ModelVarToDataset $var) {
+                    return ['type' => $var->getVarType(),
+                        'varId' => is_null($var->getModelVar()) ? ' ' : $var->getModelVar()->getId(),
+                        'value' => $var->getValue()];
+                })->toArray();
+                return ['id' => $dataset->getId(),
+                    'name' => $dataset->getName(),
+                    'variables' => $vars];
+            })->toArray(),
 //			'unitDefinitions' => $model->getUnitDefinitions()->map(function (ModelUnitDefinition $unitDefinition) {
 //				return ['id' => $unitDefinition->getId(), 'name' => $unitDefinition->getName()];
 //			})->toArray()

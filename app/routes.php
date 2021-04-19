@@ -200,10 +200,6 @@ return function(App $app) {
         ->addAnnotationsRoutes()
 		->register();
 	(new RouteHelper)
-		->setRoute(Ctl\ModelFunctionController::class, '/models/{model-id:\\d+}/reactions/{reaction-id:\\d+}/functions')
-        ->setAuthMask(true)
-		->register();
-	(new RouteHelper)
 		->setRoute(Ctl\ModelFunctionDefinitionController::class,
             '/models/{model-id:\\d+}/{obj:functionDefinition}s')
         ->setAuthMask(true)
@@ -257,6 +253,10 @@ return function(App $app) {
         ->setAuthMask(true)
         ->addAnnotationsRoutes()
 		->register();
+    (new RouteHelper())
+        ->setRoute(Ctl\ModelDatasetController::class, '/models/{model-id:\\d+}/datasets')
+        ->setAuthMask(true)
+        ->register();
 	// ------------
 	(new RouteHelper)
 		->setRoute(Ctl\ModelParentedRuleController::class, '/models/{model-id:\\d+}/{obj:rule}s')
@@ -323,10 +323,6 @@ return function(App $app) {
         ->register();
     (new RouteHelper())
         ->setRoute(Ctl\AnalysisSettingsController::class, '/analysisMethods/{meth-id:\\d+}/settings')
-        ->register();
-    (new RouteHelper())
-        ->setRoute(Ctl\AnalysisDatasetController::class, '/models/{model-id:\\d+}/datasets')
-        ->setAuthMask(true)
         ->register();
     (new RouteHelper())
         ->setRoute(Ctl\AnalysisTaskController::class, '/{obj-type:experiment|model}s/{obj-id:\\d+}/tasks')

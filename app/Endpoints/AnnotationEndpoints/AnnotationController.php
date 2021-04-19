@@ -14,6 +14,11 @@ use App\Helpers\ArgumentParser;
 use Exception;
 use Symfony\Component\Validator\Constraints as Assert;
 
+/**
+ * Class AnnotationSourceController
+ * @package App\Controllers
+ * @author Radoslav Doktor 433286@mail.muni.cz
+ */
 class AnnotationSourceController extends MultiParentedRepoController
 {
     /** Type of the object that the annotation belongs to

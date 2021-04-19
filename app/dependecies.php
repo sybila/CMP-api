@@ -172,10 +172,6 @@ $c[EntityRepo\ModelReactionRepository::class] = function (Container $c) {
 	return new EntityRepo\ModelReactionRepository($c[EntityManager::class]);
 };
 
-$c[EntityRepo\ModelFunctionRepository::class] = function (Container $c) {
-	return new EntityRepo\ModelFunctionRepository($c[EntityManager::class]);
-};
-
 $c[EntityRepo\ModelFunctionDefinitionRepository::class] = function (Container $c) {
 	return new EntityRepo\ModelFunctionDefinitionRepository($c[EntityManager::class]);
 };
@@ -284,8 +280,8 @@ $c[EntityRepo\AnalysisTaskRepository::class] = function (Container $c) {
 	return new EntityRepo\AnalysisTaskRepository($c[EntityManager::class]);
 };
 
-$c[EntityRepo\AnalysisDatasetRepository::class] = function (Container $c) {
-	return new EntityRepo\AnalysisDatasetRepository($c[EntityManager::class]);
+$c[EntityRepo\ModelDatasetRepository::class] = function (Container $c) {
+	return new EntityRepo\ModelDatasetRepository($c[EntityManager::class]);
 };
 
 $c[EntityRepo\PhysicalQuantityRepository::class] = function (Container $c) {

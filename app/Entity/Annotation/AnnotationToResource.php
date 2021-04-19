@@ -6,6 +6,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * @ORM\Entity
  * @ORM\Table(name="annotation_to_resource")
+ * @author Radoslav Doktor 433286@mail.muni.cz
  */
 class AnnotationToResource implements IdentifiedObject
 {

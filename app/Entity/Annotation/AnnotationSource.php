@@ -10,6 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
  * Class AnnotationSource
  * @ORM\Entity
  * @ORM\Table(name="annotation")
+ * @author Radoslav Doktor 433286@mail.muni.cz
  */
 class AnnotationSource implements IdentifiedObject
 {

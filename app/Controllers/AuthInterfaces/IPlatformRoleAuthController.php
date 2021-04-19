@@ -2,6 +2,10 @@
 
 use App\Exceptions\InvalidRoleException;
 
+/**
+ * Interface IPlatformRoleAuthController
+ * @author Radoslav Doktor 433286@mail.muni.cz
+ */
 interface IPlatformRoleAuthController
 {
     /**

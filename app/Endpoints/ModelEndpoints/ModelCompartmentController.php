@@ -43,7 +43,7 @@ final class ModelCompartmentController extends ParentedRepositoryController impl
 		$sBaseData = $this->getSBaseData($compartment);
 		return array_merge ($sBaseData, [
 			'spatialDimensions' => $compartment->getSpatialDimensions(),
-			'size' => $compartment->getSize(),
+			'size' => $compartment->getDefaultValue(),
 			'constant' => $compartment->getConstant(),
 			'species' => $compartment->getSpecies()->map(function (ModelSpecie $specie) {
 				return ['id' => $specie->getId(), 'name' => $specie->getName()];
@@ -84,13 +84,15 @@ final class ModelCompartmentController extends ParentedRepositoryController impl
 
 	protected function createObject(ArgumentParser $body): IdentifiedObject
 	{
-		if (!$body->hasKey('alias'))
-			throw new MissingRequiredKeyException('alias');
-        $compartment = new ModelCompartment;
+        if (!$body->hasKey('size')) {
+            throw new MissingRequiredKeyException('size');
+        }
+        /** @var Model $model */
+        $model = $this->repository->getParent();
+        $compartment = new ModelCompartment($model, $body->get('size'));
         if (!$body->hasKey('constant')) {
 		    $compartment->setConstant(true);
         }
-		$compartment->setModel($this->repository->getParent());
 		return $compartment;
 	}
 
@@ -98,7 +100,7 @@ final class ModelCompartmentController extends ParentedRepositoryController impl
 	{
 		/** @var ModelCompartment $compartment */
 		if ($compartment->getAlias() === null)
-			throw new MissingRequiredKeyException('sbmlId');
+			throw new MissingRequiredKeyException('alias');
 		if ($compartment->getConstant() === null)
 			throw new MissingRequiredKeyException('constant');
 	}

@@ -9,6 +9,7 @@ use Doctrine\ORM\EntityNotFoundException;
  * Class AnnotatedEntity
  * Contains information for Doctrine Custom Mapping Type class AnnotableObjectType
  * @package App\Entity
+ * @author Radoslav Doktor 433286@mail.muni.cz
  */
 class AnnotatedEntity
 {
