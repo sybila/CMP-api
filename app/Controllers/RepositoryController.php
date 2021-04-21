@@ -23,6 +23,11 @@ use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;
 
+/**
+ * Class RepositoryController
+ * @package App\Controllers
+ * @author Radoslav Doktor & Jakub Hrabec
+ */
 abstract class RepositoryController extends AbstractController
     implements IGroupRoleAuthController, IPlatformRoleAuthController
 {

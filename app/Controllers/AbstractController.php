@@ -6,6 +6,11 @@ use Doctrine\ORM\EntityManager;
 use Slim\Container;
 use Slim\Http\Response;
 
+/**
+ * Class AbstractController
+ * @package App\Controllers
+ * @author J.Hrabec
+ */
 abstract class AbstractController
 {
 	/** @var EntityManager */

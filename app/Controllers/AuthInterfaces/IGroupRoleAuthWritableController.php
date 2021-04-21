@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * Interface IGroupRoleAuthWritableController
+ * @author Radoslav Doktor 433286@mail.muni.cz
+ */
 interface IGroupRoleAuthWritableController extends IGroupRoleAuthController
 {
 

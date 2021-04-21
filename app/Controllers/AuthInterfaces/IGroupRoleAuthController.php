@@ -3,6 +3,10 @@
 use App\Exceptions\InvalidAuthenticationException;
 use App\Exceptions\NonExistingObjectException;
 
+/**
+ * Interface IGroupRoleAuthController
+ * @author Radoslav Doktor 433286@mail.muni.cz
+ */
 interface IGroupRoleAuthController
 {
 

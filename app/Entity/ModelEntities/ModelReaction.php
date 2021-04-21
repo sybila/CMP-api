@@ -50,11 +50,6 @@ class ModelReaction implements IdentifiedObject
 	 */
 	protected $reactionItems;
 
-	/**
-	 * @var Collection
-	 * @ORM\OneToMany(targetEntity="ModelFunction", mappedBy="reactionId", cascade={"persist"})
-	 */
-	protected $functions;
 
 	/**
 	 * Get model
@@ -128,13 +123,6 @@ class ModelReaction implements IdentifiedObject
 		$this->rate = $rate;
 	}
 
-	/**
-	 * @return Collection[] ModelFunction
-	 */
-	public function getFunctions(): Collection
-	{
-		return $this->functions;
-	}
 
 	/**
 	 * @return Collection[] ReactionItem

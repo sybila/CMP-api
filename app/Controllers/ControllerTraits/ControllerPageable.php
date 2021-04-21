@@ -8,6 +8,11 @@ use App\Exceptions\MalformedInputException;
 use App\Helpers\ArgumentParser;
 use Symfony\Component\Validator\Constraints as Assert;
 
+/**
+ * Trait ControllerPageable
+ * @package App\Controllers
+ * @author Jakub Hrabec & Radoslav Doktor
+ */
 trait ControllerPageable
 {
 	use ControllerValidated;

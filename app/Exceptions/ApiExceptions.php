@@ -355,5 +355,20 @@ class WrongParentException extends ApiException
         return self::CODE;
     }
 }
+class NonUniqueModelVariableAlias extends ApiException
+{
+    const CODE = 711;
+    public function __construct(string $varType, string $alias,
+                                string $existing, ?Throwable $previous = null)
+    {
+        parent::__construct($previous)
+            ->setMessage('Cannot create %s with unique alias %s, because %s with such alias already exists.',
+                $varType, $alias, $existing);
+    }
 
+    public function getHttpCode(): int
+    {
+        return self::CODE;
+    }
+}
 

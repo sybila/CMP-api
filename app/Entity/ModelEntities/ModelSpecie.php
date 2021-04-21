@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -15,11 +16,12 @@ class ModelSpecie implements IdentifiedObject
 
 	use SBase;
 
-	/**
-	 * @var int
-	 * @ORM\Column(type="integer", name="model_id")
-	 */
-	protected $modelId;
+    /**
+     * @var Model
+     * @ORM\ManyToOne(targetEntity="Model", inversedBy="parameters")
+     * @ORM\JoinColumn(name="model_id", referencedColumnName="id")
+     */
+	protected $model;
 
 	/**
 	 * @var int
@@ -64,24 +66,39 @@ class ModelSpecie implements IdentifiedObject
 	 */
 	protected $rules;
 
-	/**
-	 * Get modelId
-	 * @return integer
-	 */
-	public function getModelId()
+    /**
+     * @var ArrayCollection
+     * @ORM\OneToMany(targetEntity="ModelVarToDataset", mappedBy="species", cascade={"persist", "remove"})
+     */
+	protected $inDatasets;
+
+    /**
+     * ModelSpecie constructor.
+     */
+    public function __construct(Model $model, $value)
+    {
+        $this->setModel($model);
+        $this->inDatasets = new ArrayCollection();
+        $var = new ModelVarToDataset();
+        $var->setSpecies($this);
+        $var->setVarType('species');
+        $var->setValue($value);
+        foreach ($this->model->getDatasets() as $ds){
+        /** @var ModelDataset $ds */
+            $var->setDataset($ds);
+            $this->inDatasets->add($var);
+        }
+    }
+
+    public function getModel()
 	{
-		return $this->modelId;
+		return $this->model;
 	}
 
-	/**
-	 * Set modelId
-	 * @param integer $modelId
-	 * @return ModelSpecie
-	 */
-	public function setModelId($modelId): ModelSpecie
+
+	public function setModel($model)
 	{
-		$this->modelId = $modelId;
-		return $this;
+		$this->model = $model;
 	}
 
 	/**
@@ -199,5 +216,34 @@ class ModelSpecie implements IdentifiedObject
 	{
 		return $this->rules;
 	}
+
+    /**
+     * @return mixed
+     */
+    public function getInDatasets()
+    {
+        return $this->inDatasets;
+    }
+
+    /**
+     * @param mixed $inDatasets
+     */
+    public function setInDatasets($inDatasets): void
+    {
+        $this->inDatasets = $inDatasets;
+    }
+
+    public function getDefaultValue(): int
+    {
+        //TODO get rid of value property (getValue)
+        /** @var ModelDataset $ds */
+        $ds = $this->getModel()->getDatasets()->filter(function (ModelDataset $dataset) {
+            return $dataset->getIsDefault();
+        })->current();
+        $res = 0;
+        $ds->getDatasetVariableValue('species', $this->getId(), $res);
+
+        return $res;
+    }
 
 }

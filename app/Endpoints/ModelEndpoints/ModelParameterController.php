@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use IGroupRoleAuthWritableController;
 use App\Entity\{Model,
+    ModelDataset,
     ModelRule,
     ModelReaction,
     ModelReactionItem,
@@ -57,17 +58,18 @@ abstract class ModelParameterController extends ParentedRepositoryController
 	protected function getData(IdentifiedObject $parameter): array
 	{
 		/** @var ModelParameter $parameter */
-		$sBaseData = $this->getSBaseData($parameter);
+        $sBaseData = $this->getSBaseData($parameter);
 		return array_merge($sBaseData, [
-			'value' => $parameter->getValue(),
+			'value' => $parameter->getDefaultValue(),
 			'constant' => $parameter->getValue(),
 			'reactionItems' => $parameter->getReactionsItems()->map(function (ModelReactionItem $reactionItem) {
 				return ['id' => $reactionItem->getId(), 'name' => $reactionItem->getName()];
 			})->toArray(),
-			'rules' => $parameter->getRules()->map(function (ModelRule $rule) {
-				return ['id' => $rule->getId(), 'expression' => $rule->getExpression()];
-			})->toArray()
-		]);
+			'rule' => ['id' => $parameter->getRule()->getId(), 'expression' => is_null($parameter->getRule()->getExpression()) ?
+                    ['latex' => '', 'cmml' => ''] :
+                    ['latex' => $parameter->getRule()->getExpression()->getLatex(),
+                    'cmml' => $parameter->getRule()->getExpression()->getContentMML()]]
+        ]);
 	}
 
 	protected function setData(IdentifiedObject $parameter, ArgumentParser $data): void
@@ -123,7 +125,7 @@ final class ModelParentedParameterController extends ModelParameterController
 	protected function setData(IdentifiedObject $parameter, ArgumentParser $data): void
 	{
 		/** @var ModelParameter $parameter */
-		$parameter->getModelId() ?: $parameter->setModelId($this->repository->getParent());
+		$parameter->getModel() ?: $parameter->setModel();
 		if ($data->hasKey('reactionId')) {
 			$reaction = $this->repository->getEntityManager()->find(ModelReaction::class, $data->getInt('reactionId'));
 			if ($reaction === null) {
@@ -147,7 +149,12 @@ final class ModelParentedParameterController extends ModelParameterController
 	{
 		if (!$body->hasKey('alias'))
 			throw new MissingRequiredKeyException('alias');
-        $modelParameter = new ModelParameter();
+		if (!$body->hasKey('value')){
+            throw new MissingRequiredKeyException('value');
+        }
+		/** @var Model $model */
+		$model = $this->repository->getParent();
+        $modelParameter = new ModelParameter($model,$body->get('value'));
         if (!$body->hasKey('constant')) {
             $modelParameter->setIsConstant(false);
         }
@@ -157,7 +164,7 @@ final class ModelParentedParameterController extends ModelParameterController
     protected function checkParentValidity(IdentifiedObject $parent, IdentifiedObject $child)
     {
         /** @var ModelParameter $child */
-        if ($parent->getId() != $child->getModelId()->getId()) {
+        if ($parent->getId() != $child->getModel()->getId()) {
             throw new WrongParentException($this->getParentObjectInfo()->parentEntityClass, $parent->getId(),
                 self::getObjectName(), $child->getId());
         }

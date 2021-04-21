@@ -8,6 +8,11 @@ use App\Exceptions\EmptyArraySelection;
 use App\Exceptions\InvalidTypeException;
 use App\Helpers\ArgumentParser;
 
+/**
+ * Trait ControllerFilterable
+ * @package App\Controllers
+ * @author Jakub Hrabec
+ */
 trait ControllerFilterable
 {
     /**

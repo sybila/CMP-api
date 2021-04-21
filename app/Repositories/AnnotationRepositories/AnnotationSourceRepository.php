@@ -8,6 +8,11 @@ use App\Entity\AnnotationSource;
 use App\Entity\IdentifiedObject;
 use Doctrine\ORM\EntityManager;
 
+/**
+ * Class AnnotationSourceRepository
+ * @package App\Entity\Repositories
+ * @author Radoslav Doktor 433286@mail.muni.cz
+ */
 class AnnotationSourceRepository implements IDependentEndpointRepository
 {
     /** @var EntityManager * */

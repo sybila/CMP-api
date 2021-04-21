@@ -7,6 +7,11 @@ namespace App\Controllers;
 
 use App\Entity\Authorization\User;
 
+/**
+ * Trait DefaultControllerAccessible
+ * @package App\Controllers
+ * @author Radoslav Doktor 433286@mail.muni.cz
+ */
 trait DefaultControllerAccessible
 {
 

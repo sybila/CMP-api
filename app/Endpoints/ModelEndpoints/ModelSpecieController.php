@@ -59,6 +59,7 @@ final class ModelSpecieController extends ParentedRepositoryController implement
 			'initialExpression' => $specie->getInitialExpression(),
 			'hasOnlySubstanceUnits' => $specie->getHasOnlySubstanceUnits(),
 			'constant' => $specie->getConstant(),
+			'value' => $specie->getDefaultValue(),
 			'boundaryCondition' => $specie->getBoundaryCondition(),
 			'reactionItems' => $specie->getReactionItems()->map(function (ModelReactionItem $reactionItem) {
 				return ['id' => $reactionItem->getId(), 'name' => $reactionItem->getName()];
@@ -75,7 +76,6 @@ final class ModelSpecieController extends ParentedRepositoryController implement
 	{
 		/** @var ModelSpecie $specie */
 		$this->setSBaseData($specie, $data);
-		$specie->setModelId($this->repository->getParent()->getModel()->getId());
 		if(!$specie->getCompartmentId()) {
 		    /** @var ModelCompartment $compartment */
 		    $compartment = $this->repository->getParent();
@@ -89,19 +89,22 @@ final class ModelSpecieController extends ParentedRepositoryController implement
 
 	protected function createObject(ArgumentParser $body): IdentifiedObject
 	{
-	    $specie = new ModelSpecie;
-		if (!$body->hasKey('isConstant')) {
-            $specie->setConstant(false);
+        if (!$body->hasKey('initialValue'))
+            throw new MissingRequiredKeyException('initialValue');
+	    $specie = new ModelSpecie($this->repository->getParent()->getModel(), $body->get('initialValue'));
+		if (!$body->hasKey('constant')) {
+            $specie->setConstant(true);
         }
-		if (!$body->hasKey('hasOnlySubstanceUnits'))
+		if (!$body->hasKey('hasOnlySubstanceUnits')) {
             $specie->setHasOnlySubstanceUnits(true);
+        }
 		return $specie;
 	}
 
 	protected function checkInsertObject(IdentifiedObject $specie): void
 	{
 		/** @var ModelSpecie $specie */
-		if ($specie->getModelId() === null)
+		if ($specie->getModel()->getId() === null)
 			throw new MissingRequiredKeyException('modelId');
 		if ($specie->getCompartmentId() === null)
 			throw new MissingRequiredKeyException('compartmentId');
@@ -109,6 +112,8 @@ final class ModelSpecieController extends ParentedRepositoryController implement
 			throw new MissingRequiredKeyException('hasOnlySubstanceUnits');
 		if ($specie->getConstant() === null)
 			throw new MissingRequiredKeyException('constant');
+        if (!$specie->getAlias())
+            throw new MissingRequiredKeyException('alias');
 	}
 
 	public function delete(Request $request, Response $response, ArgumentParser $args): Response

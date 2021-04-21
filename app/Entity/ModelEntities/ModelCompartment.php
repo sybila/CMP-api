@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -56,13 +57,31 @@ class ModelCompartment implements IdentifiedObject
 	 */
 	protected $rules;
 
-//	/**
-//	 * @var ArrayCollection
-//	 */
-//	protected $unitDefinitions;
+    /**
+     * @var ArrayCollection
+     * @ORM\OneToMany(targetEntity="ModelVarToDataset", mappedBy="compartment", cascade={"persist", "remove"})
+     */
+	protected $inDatasets;
+
+    /**
+     * ModelCompartment constructor.
+     */
+    public function __construct(Model $model, $value)
+    {
+        $this->setModel($model);
+        $this->inDatasets = new ArrayCollection();
+        $var = new ModelVarToDataset();
+        $var->setCompartment($this);
+        $var->setVarType('compartment');
+        $var->setValue($value);
+        foreach ($this->model->getDatasets() as $ds){
+            /** @var ModelDataset $ds */
+            $var->setDataset($ds);
+            $this->inDatasets->add($var);
+        }
+    }
 
 	/**
-     * This returns model object, non-intuitively
 	 * Get model
 	 */
 	public function getModel()
@@ -164,12 +183,33 @@ class ModelCompartment implements IdentifiedObject
 		return $this->rules;
 	}
 
-//	/**
-//	 * @return ModelUnitDefinition[]|Collection
-//	 */
-//	public function getUnitDefinitions(): Collection
-//	{
-//		return $this->unitDefinitions;
-//	}
+    /**
+     * @return mixed
+     */
+    public function getInDatasets()
+    {
+        return $this->inDatasets;
+    }
+
+    /**
+     * @param mixed $datasets
+     */
+    public function setInDatasets($datasets): void
+    {
+        $this->inDatasets = $datasets;
+    }
+
+    public function getDefaultValue() : int
+    {
+        //TODO get rid of value property (getValue)
+        /** @var ModelDataset $ds */
+        $ds = $this->getModel()->getDatasets()->filter(function (ModelDataset $dataset) {
+            return $dataset->getIsDefault();
+        })->current();
+        $res = $this->getSize();
+        $ds->getDatasetVariableValue('compartment', $this->getId(), $res);
+
+        return $res;
+    }
 
 }

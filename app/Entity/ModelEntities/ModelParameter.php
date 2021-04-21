@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\Collection;
 
@@ -19,7 +20,7 @@ class ModelParameter implements IdentifiedObject
 	 * @ORM\ManyToOne(targetEntity="Model", inversedBy="parameters")
 	 * @ORM\JoinColumn(name="model_id", referencedColumnName="id")
 	 */
-	protected $modelId;
+	protected $model;
 
 	/**
 	 * @ORM\ManyToOne(targetEntity="ModelReaction", inversedBy="parameters")
@@ -46,28 +47,42 @@ class ModelParameter implements IdentifiedObject
 	protected $reactionItems;
 
 	/**
-	 * @var Collection
-	 * @ORM\OneToMany(targetEntity="ModelRule", mappedBy="parameterId")
+     * @ORM\OneToOne(targetEntity="ModelRule", mappedBy="parameter")
 	 */
-	protected $rules;
-	/**
-	 * Get modelId
-	 * @return integer|null
-	 */
-	public function getModelId()
+	protected $rule;
+
+    /**
+     * @ORM\OneToMany(targetEntity="ModelVarToDataset", mappedBy="parameter")
+     */
+	protected $inDatasets;
+
+    /**
+     * ModelCompartment constructor.
+     */
+    public function __construct(Model $model, $value)
+    {
+        $this->setModel($model);
+        $this->inDatasets = new ArrayCollection();
+        $var = new ModelVarToDataset();
+        $var->setParameter($this);
+        $var->setVarType('parameter');
+        $var->setValue($value);
+        foreach ($this->model->getDatasets() as $ds){
+            /** @var ModelDataset $ds */
+            $var->setDataset($ds);
+            $this->inDatasets->add($var);
+        }
+    }
+
+	public function getModel()
 	{
-		return $this->modelId;
+		return $this->model;
 	}
 
-	/**
-	 * Set modelId
-	 * @param integer $modelId
-	 * @return ModelUnitDefinition
-	 */
-	public function setModelId($modelId): ModelParameter
+
+	public function setModel($model)
 	{
-		$this->modelId = $modelId;
-		return $this;
+		$this->model = $model;
 	}
 
 	/**
@@ -79,15 +94,9 @@ class ModelParameter implements IdentifiedObject
 		return $this->reactionId;
 	}
 
-	/**
-	 * Set reactionId
-	 * @param integer $reactionId
-	 * @return ModelParameter
-	 */
-	public function setReactionId($reactionId): ModelParameter
+	public function setReactionId($reactionId)
 	{
 		$this->reactionId = $reactionId;
-		return $this;
 	}
 
 	/**
@@ -99,15 +108,10 @@ class ModelParameter implements IdentifiedObject
 		return $this->value;
 	}
 
-	/**
-	 * Set value
-	 * @param integer $value
-	 * @return  ModelParameter
-	 */
-	public function setValue($value): ModelParameter
+
+	public function setValue($value)
 	{
 		$this->value = $value;
-		return $this;
 	}
 
 	/**
@@ -119,15 +123,10 @@ class ModelParameter implements IdentifiedObject
 		return $this->isConstant;
 	}
 
-	/**
-	 * Set isConstant
-	 * @param integer $isConstant
-	 * @return  ModelParameter
-	 */
-	public function setIsConstant($isConstant): ModelParameter
+
+	public function setIsConstant($isConstant)
 	{
 		$this->isConstant = $isConstant;
-		return $this;
 	}
 
 	/**
@@ -138,12 +137,37 @@ class ModelParameter implements IdentifiedObject
 		return $this->reactionItems;
 	}
 
-	/**
-	 * @return ModelRule[]|Collection
-	 */
-	public function getRules(): Collection
+	public function getRule()
 	{
-		return $this->rules;
+		return $this->rule;
 	}
 
+    /**
+     * @return mixed
+     */
+    public function getInDatasets()
+    {
+        return $this->inDatasets;
+    }
+
+    /**
+     * @param mixed $inDatasets
+     */
+    public function setInDatasets($inDatasets): void
+    {
+        $this->inDatasets = $inDatasets;
+    }
+
+    public function getDefaultValue() : int
+    {
+        //TODO get rid of value property (getValue)
+        /** @var ModelDataset $ds */
+        $ds = $this->getModel()->getDatasets()->filter(function (ModelDataset $dataset) {
+            return $dataset->getIsDefault();
+        })->current();
+        $res = $this->getValue();
+        $ds->getDatasetVariableValue('parameter', $this->getId(), $res);
+
+        return $res;
+    }
 }
