@@ -52,6 +52,7 @@ final class ModelController extends WritableRepositoryController implements IGro
 	protected function getData(IdentifiedObject $model): array
 	{
 	    /** @var Model $model */
+        return [$model->getSBML()];
 		$sBaseData = $this->getSBaseData($model);
 		return array_merge($sBaseData, [
 			'userId' => $model->getUserId(),
@@ -187,20 +188,5 @@ final class ModelController extends WritableRepositoryController implements IGro
 			'status' => new Assert\Type(['type' => 'string']),
 		]));
 	}
-
-	public function import(Request $request, Response $response, ArgumentParser $args): Response
-    {
-        $this->setUserPermissions($request->getAttribute('oauth_user_id'));
-        $this->permitUser([$this, 'validateAdd'], [$this, 'canAdd']);
-        $wholeModel = $request->getParsedBody()['model'];
-        dump($wholeModel['general']);
-        $modelInfo = new ArgumentParser($wholeModel['general']);
-        $modelObj = $this->createObject($modelInfo);
-        $this->checkInsertObject($modelObj);
-        $this->setData($modelObj, $modelInfo);
-
-        dump($modelObj);exit();
-
-    }
 
 }

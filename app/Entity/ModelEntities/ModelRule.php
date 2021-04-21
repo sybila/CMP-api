@@ -41,16 +41,16 @@ class ModelRule implements IdentifiedObject
 	private $compartmentId;
 
 	/**
-	 * @var integer
-	 * @ORM\Column(type="integer", name="model_parameter_id")
+     * @ORM\ManyToOne(targetEntity="ModelParameter")
+     * @ORM\JoinColumn(name="model_parameter_id", referencedColumnName="id")
 	 */
-	private $parameterId;
+	private $parameter;
 
 	/**
-	 * @var integer
-	 * @ORM\Column(type="integer", name="model_specie_id")
+     * @ORM\ManyToOne(targetEntity="ModelSpecie")
+     * @ORM\JoinColumn(name="model_specie_id", referencedColumnName="id")
 	 */
-	private $specieId;
+	private $specie;
 
 	/**
 	 * @var string
@@ -97,19 +97,19 @@ class ModelRule implements IdentifiedObject
 	 * Get parameterId
 	 * @return integer
 	 */
-	public function getParameterId()
+	public function getParameter()
 	{
-		return $this->parameterId;
+		return $this->parameter;
 	}
 
 	/**
 	 * Set parameterId
-	 * @param integer $parameterId
+	 * @param integer $parameter
 	 * @return ModelRule
 	 */
-	public function setParameterId($parameterId): ModelRule
+	public function setParameter($parameter): ModelRule
 	{
-		$this->parameterId = $parameterId;
+		$this->parameter = $parameter;
 		return $this;
 	}
 
@@ -132,17 +132,17 @@ class ModelRule implements IdentifiedObject
 	 * Get specieId
 	 * @return integer
 	 */
-	public function getSpecieId(): ?int
+	public function getSpecie(): ?int
 	{
-		return $this->specieId;
+		return $this->specie;
 	}
 
     /**
-     * @param int $specieId
+     * @param int $specie
      */
-    public function setSpecieId(int $specieId): void
+    public function setSpecie(int $specie): void
     {
-        $this->specieId = $specieId;
+        $this->specie = $specie;
     }
 
 
@@ -155,15 +155,9 @@ class ModelRule implements IdentifiedObject
 		return $this->type;
 	}
 
-	/**
-	 * Set name
-	 * @param string $type
-	 * @return Rule
-	 */
 	public function setType($type)
 	{
 		$this->type = $type;
-		return $this;
 	}
 
 
@@ -176,5 +170,19 @@ class ModelRule implements IdentifiedObject
 	{
 		$this->expression = $expression;
 	}
+
+	public function getVariableAlias()
+    {
+        if ($this->parameter !== null) {
+            return $this->parameter->getAlias();
+        }
+        if ($this->compartmentId !== null) {
+            return $this->compartmentId->getAlias();
+        }
+        if ($this->specie !== null) {
+            return $this->specie->getAlias();
+        }
+        return null;
+    }
 
 }

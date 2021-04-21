@@ -312,4 +312,80 @@ class Model implements IdentifiedObject
         $this->experiments->removeElement($experiment);
         $experiment->removeModel($this);
     }
+
+    public function getSBML()
+    {
+        $sbml = new \SimpleXMLElement("<sbml></sbml>");
+        $sbml->addAttribute('xmlns',"http://www.sbml.org/sbml/level2/version4");
+        $sbml->addAttribute('level', '2');
+        $sbml->addAttribute('version', "4");
+        $model = $sbml->addChild('model');
+        $model->addAttribute("id", $this->alias);
+        $model->addAttribute("name", $this->name);
+
+        $fnList = $sbml->addChild('listOfFunctionDefinitions');
+        $this->functionDefinitions->map(function (ModelFunctionDefinition $fnDef) use ($fnList) {
+            $fn = $fnList->addChild('functionDefinition');
+            $fn->addAttribute('id', $fnDef->getAlias());
+            $fn->addAttribute('name',$fnDef->getName());
+        });
+        $uUnitList = $sbml->addChild('listOfUnitDefinitions');
+        $compList = $sbml->addChild('listOfCompartments');
+        $specList = $sbml->addChild('listOfSpecies');
+        $this->compartments->map(function (ModelCompartment $cpt) use ($compList, $specList) {
+            $c = $compList->addChild('compartment');
+            $cAlias = $cpt->getAlias();
+            $c->addAttribute('id', $cpt->getAlias());
+            $c->addAttribute('name', $cpt->getName());
+            $c->addAttribute('spatialDimensions', $cpt->getSpatialDimensions());
+            $c->addAttribute('size', $cpt->getSize());
+            $c->addAttribute('constant', $cpt->getConstant() ? 'true' : 'false');
+            $cpt->getSpecies()->map(function (ModelSpecie $spec) use ($specList, $cAlias) {
+                $s = $specList->addChild('species');
+                $s->addAttribute('id', $spec->getAlias());
+                $s->addAttribute('name', $spec->getName());
+                $s->addAttribute('compartment', $cAlias);
+                $s->addAttribute('initialAmount');
+                $s->addAttribute('boundaryCondition', $spec->getBoundaryCondition() ? 'true' : 'false');
+                $s->addAttribute('constant', $spec->getConstant() ? 'true' : 'false');
+            });
+            //notes
+        });
+        $paraList = $sbml->addChild('listOfParameters');
+        $this->parameters->map(function (ModelParameter $param) use ($paraList) {
+            $p = $paraList->addChild('parameter');
+            $p->addAttribute('id', $param->getAlias());
+            $p->addAttribute('name', $param->getName());
+            $p->addAttribute('value', $param->getValue());
+            $p->addAttribute('units', '');
+            $p->addAttribute('constant', $param->getIsConstant() ? 'true' : 'false');
+        });
+        $initAssList = $sbml->addChild('listOfInitialAssignments');
+        $this->initialAssignments->map(function (ModelInitialAssignment $ass) use ($initAssList) {
+            $initAss = $initAssList->addChild('initialAssignment');
+            //matika
+            $initAss->addAttribute('symbol', $ass->getAlias());
+        });
+        $ruleList = $sbml->addChild('listOfRules');
+        $this->rules->map(function (ModelRule $rul) use ($ruleList) {
+            if ($rul->getType() === 'assignment') {
+                $mr = $ruleList->addChild('assignmentRule');
+                $mr->addAttribute('variable', $rul->getVariableAlias());
+                $mr->addAttribute();
+            }
+            if ($rul->getType() === 'rate') {
+                $mr = $ruleList->addChild('rateRule');
+                $mr->addAttribute('variable', $rul->getVariableAlias());
+                $mr->addAttribute();
+            }
+        });
+        $reactList = $sbml->addChild('listOfReactions');
+        $this->reactions->map(function (ModelReaction $reaction) use ($reactList) {
+            $rc = $reactList->addChild('reactiob');
+            $rc->addAttribute();
+            $rc->addAttribute();
+        });
+        $eventList = $sbml->addChild('listOfEvents');
+        return $sbml->asXML();
+    }
 }

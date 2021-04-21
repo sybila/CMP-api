@@ -272,8 +272,8 @@ class ImportModelController extends WritableRepositoryController
             }
             /** @var ModelRule $ruleObj */
             $ruleObj = $this->ruleCtl->createObject($ruleData);
-            !$parentType['parameter'] ?: $ruleObj->setParameterId($parentPar->getId());
-            !$parentType['species'] ?: $ruleObj->setSpecieId($parentSpec->getId());
+            !$parentType['parameter'] ?: $ruleObj->setParameter($parentPar->getId());
+            !$parentType['species'] ?: $ruleObj->setSpecie($parentSpec->getId());
             !$parentType['compartment'] ?: $ruleObj->setCompartmentId($parentComp);
             //user should be notified about this?
             $ruleData->hasKey('alias') ? $ruleObj->setAlias($ruleData['alias']) : $ruleObj->setAlias('rule' . $i);
