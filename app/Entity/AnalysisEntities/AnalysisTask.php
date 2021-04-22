@@ -42,12 +42,12 @@ class AnalysisTask implements IdentifiedObject
      */
     private $objectType;
 
-    /**
-     * @var int
-     * @ORM\OneToOne(targetEntity="AnalysisDataset")
-     * @ORM\JoinColumn(name="dataset_id", referencedColumnName="id")
-     */
-    private $dataset;
+//    /**
+//     * @var int
+//     * @ORM\OneToOne(targetEntity="AnalysisDataset")
+//     * @ORM\JoinColumn(name="dataset_id", referencedColumnName="id")
+//     */
+//    private $dataset;
 
     /**
      * @var int
