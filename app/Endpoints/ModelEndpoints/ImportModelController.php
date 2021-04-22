@@ -272,8 +272,8 @@ class ImportModelController extends WritableRepositoryController
             }
             /** @var ModelRule $ruleObj */
             $ruleObj = $this->ruleCtl->createObject($ruleData);
-            !$parentType['parameter'] ?: $ruleObj->setParameter($parentPar->getId());
-            !$parentType['species'] ?: $ruleObj->setSpecie($parentSpec->getId());
+            !$parentType['parameter'] ?: $ruleObj->setParameter($parentPar);
+            !$parentType['species'] ?: $ruleObj->setSpecie($parentSpec);
             !$parentType['compartment'] ?: $ruleObj->setCompartmentId($parentComp);
             //user should be notified about this?
             $ruleData->hasKey('alias') ? $ruleObj->setAlias($ruleData['alias']) : $ruleObj->setAlias('rule' . $i);
@@ -451,10 +451,6 @@ class ImportModelController extends WritableRepositoryController
         }
     }
 
-    private function insertMaths($mathml)
-    {
-
-    }
 
     protected function setData(IdentifiedObject $object, ArgumentParser $body): void
     {

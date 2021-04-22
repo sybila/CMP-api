@@ -42,7 +42,7 @@ class ModelVarToDataset implements IdentifiedObject
     private $dataset;
 
     /**
-     * @ORM\Column(type="float")
+     * @ORM\Column(type="string")
      */
     private $value;
 
@@ -59,12 +59,12 @@ class ModelVarToDataset implements IdentifiedObject
     private $attribute;
 
     /**
-     * @ORM\Column(type="float")
+     * @ORM\Column(type="float", name="range_from")
      */
     private $rangeFrom;
 
     /**
-     * @ORM\Column(type="float")
+     * @ORM\Column(type="float", name="range_to")
      */
     private $rangeTo;
 

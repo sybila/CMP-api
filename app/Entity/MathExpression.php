@@ -62,7 +62,7 @@ class MathExpression
     /**
      * @return string
      */
-    public function getContentMML(): string
+    public function getContentMML(): ?string
     {
         return $this->contentMML;
     }

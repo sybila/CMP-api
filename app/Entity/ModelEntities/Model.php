@@ -6,6 +6,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\Mapping as ORM;
+use SimpleXMLElement;
 
 /**
  * @ORM\Entity
@@ -344,6 +345,11 @@ class Model implements IdentifiedObject
 
     public function getSBML()
     {
+//        $domTree = new \DOMDocument('1.0', 'UTF-8');
+//        $sbmlRoot = $domTree->createElement('sbml');
+//        $sbmlRoot = $domTree->appendChild($sbmlRoot);
+//        $model = $domTree->appendChild($domTree->createElement('model'))
+//        dump($domTree->saveXML());exit();
         $sbml = new \SimpleXMLElement("<sbml></sbml>");
         $sbml->addAttribute('xmlns',"http://www.sbml.org/sbml/level2/version4");
         $sbml->addAttribute('level', '2');
@@ -357,6 +363,11 @@ class Model implements IdentifiedObject
             $fn = $fnList->addChild('functionDefinition');
             $fn->addAttribute('id', $fnDef->getAlias());
             $fn->addAttribute('name',$fnDef->getName());
+            $fnDom = dom_import_simplexml($fn);
+            $math = new SimpleXMLElement($fnDef->getExpression()->getContentMML());
+            $mathDom = dom_import_simplexml($math);
+            $mathDom = $fnDom->ownerDocument->importNode($mathDom, TRUE);
+            $fnDom->appendChild($mathDom);
         });
         $uUnitList = $sbml->addChild('listOfUnitDefinitions');
         $compList = $sbml->addChild('listOfCompartments');
@@ -367,14 +378,14 @@ class Model implements IdentifiedObject
             $c->addAttribute('id', $cpt->getAlias());
             $c->addAttribute('name', $cpt->getName());
             $c->addAttribute('spatialDimensions', $cpt->getSpatialDimensions());
-            $c->addAttribute('size', $cpt->getSize());
+            $c->addAttribute('size', $cpt->getDefaultValue());
             $c->addAttribute('constant', $cpt->getConstant() ? 'true' : 'false');
             $cpt->getSpecies()->map(function (ModelSpecie $spec) use ($specList, $cAlias) {
                 $s = $specList->addChild('species');
                 $s->addAttribute('id', $spec->getAlias());
                 $s->addAttribute('name', $spec->getName());
                 $s->addAttribute('compartment', $cAlias);
-                $s->addAttribute('initialAmount');
+                $s->addAttribute('initialAmount', $spec->getDefaultValue());
                 $s->addAttribute('boundaryCondition', $spec->getBoundaryCondition() ? 'true' : 'false');
                 $s->addAttribute('constant', $spec->getConstant() ? 'true' : 'false');
             });
@@ -385,36 +396,71 @@ class Model implements IdentifiedObject
             $p = $paraList->addChild('parameter');
             $p->addAttribute('id', $param->getAlias());
             $p->addAttribute('name', $param->getName());
-            $p->addAttribute('value', $param->getValue());
+            $p->addAttribute('value', $param->getDefaultValue());
             $p->addAttribute('units', '');
             $p->addAttribute('constant', $param->getIsConstant() ? 'true' : 'false');
         });
         $initAssList = $sbml->addChild('listOfInitialAssignments');
         $this->initialAssignments->map(function (ModelInitialAssignment $ass) use ($initAssList) {
             $initAss = $initAssList->addChild('initialAssignment');
-            //matika
             $initAss->addAttribute('symbol', $ass->getAlias());
+            $iADom = dom_import_simplexml($initAss);
+            $math = new SimpleXMLElement($ass->getExpression()->getContentMML());
+            $mathDom = dom_import_simplexml($math);
+            $mathDom = $iADom->ownerDocument->importNode($mathDom, TRUE);
+            $iADom->appendChild($mathDom);
         });
         $ruleList = $sbml->addChild('listOfRules');
         $this->rules->map(function (ModelRule $rul) use ($ruleList) {
             if ($rul->getType() === 'assignment') {
                 $mr = $ruleList->addChild('assignmentRule');
                 $mr->addAttribute('variable', $rul->getVariableAlias());
-                $mr->addAttribute();
+                $ruleDom = dom_import_simplexml($mr);
+                $math = new SimpleXMLElement($rul->getExpression()->getContentMML());
+                $mathDom = dom_import_simplexml($math);
+                $mathDom = $ruleDom->ownerDocument->importNode($mathDom, TRUE);
+                $ruleDom->appendChild($mathDom);
             }
             if ($rul->getType() === 'rate') {
                 $mr = $ruleList->addChild('rateRule');
                 $mr->addAttribute('variable', $rul->getVariableAlias());
-                $mr->addAttribute();
+                $ruleDom = dom_import_simplexml($mr);
+                $math = new SimpleXMLElement($rul->getExpression()->getContentMML());
+                $mathDom = dom_import_simplexml($math);
+                $mathDom = $ruleDom->ownerDocument->importNode($mathDom, TRUE);
+                $ruleDom->appendChild($mathDom);
             }
         });
         $reactList = $sbml->addChild('listOfReactions');
         $this->reactions->map(function (ModelReaction $reaction) use ($reactList) {
-            $rc = $reactList->addChild('reactiob');
-            $rc->addAttribute();
-            $rc->addAttribute();
+            $rc = $reactList->addChild('reaction');
+            $rc->addAttribute('id', $reaction->getAlias());
+            $rc->addAttribute('name', $reaction->getName());
+            $rc->addAttribute('reversible', $reaction->getIsReversible() ? 'true' : 'false');
+            $reactants = $rc->addChild('listOfReactants');
+            $products = $rc->addChild('listOfProducts');
+            $reaction->getReactionItems()->map(function (ModelReactionItem $rItem) use ($reactants, $products){
+                if ($rItem->getType() === 'reactant') {
+                    $rRef = $reactants->addChild('speciesReference');
+                    $rRef->addAttribute('species', $rItem->getAlias());
+                    $rRef->addAttribute('stoichiometry', $rItem->getStoichiometry());
+                }
+                if ($rItem->getType() === 'product') {
+                    $pRef = $products->addChild('speciesReference');
+                    $pRef->addAttribute('species', $rItem->getAlias());
+                    $pRef->addAttribute('stoichiometry', $rItem->getStoichiometry());
+                }
+            });
+            $reactDom = dom_import_simplexml($rc);
+            $math = new SimpleXMLElement($reaction->getRate()->getContentMML());
+            $mathDom = dom_import_simplexml($math);
+            $mathDom = $reactDom->ownerDocument->importNode($mathDom, TRUE);
+            $reactDom->appendChild($mathDom);
         });
         $eventList = $sbml->addChild('listOfEvents');
+        $this->events->map(function (ModelEvent $event) use ($eventList) {
+            $sbmlExent = $eventList->addChild('event');
+        });
         return $sbml->asXML();
     }
 

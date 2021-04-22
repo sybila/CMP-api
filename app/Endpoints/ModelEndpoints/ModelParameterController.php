@@ -60,7 +60,7 @@ abstract class ModelParameterController extends ParentedRepositoryController
 		/** @var ModelParameter $parameter */
         $sBaseData = $this->getSBaseData($parameter);
 		return array_merge($sBaseData, [
-			'value' => $parameter->getDefaultValue(),
+			'value' => $parameter->getValue(),
 			'constant' => $parameter->getValue(),
 			'reactionItems' => $parameter->getReactionsItems()->map(function (ModelReactionItem $reactionItem) {
 				return ['id' => $reactionItem->getId(), 'name' => $reactionItem->getName()];
@@ -131,7 +131,7 @@ final class ModelParentedParameterController extends ModelParameterController
 			if ($reaction === null) {
 				throw new NonExistingObjectException($data->getInt('reactionId'), 'reaction');
 			}
-			$parameter->setReactionId($reaction->getId());
+			$parameter->setReaction($reaction->getId());
 		}
 		parent::setData($parameter, $data);
 	}
@@ -196,7 +196,7 @@ final class ReactionItemParentedParameterController extends ModelParameterContro
     protected function checkParentValidity(IdentifiedObject $parent, IdentifiedObject $child)
     {
         /** @var ModelParameter $child */
-        if ($parent->getId() != $child->getReactionId()->getId()) {
+        if ($parent->getId() != $child->getReaction()->getId()) {
             throw new WrongParentException($this->getParentObjectInfo()->parentEntityClass, $parent->getId(),
                 self::getObjectName(), $child->getId());
         }

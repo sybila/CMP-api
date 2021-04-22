@@ -41,9 +41,9 @@ class ModelRule implements IdentifiedObject
 	private $compartmentId;
 
 	/**
-     * @ORM\ManyToOne(targetEntity="ModelParameter")
+     * @ORM\OneToOne(targetEntity="ModelParameter", inversedBy="rule")
      * @ORM\JoinColumn(name="model_parameter_id", referencedColumnName="id")
-	 */
+     */
 	private $parameter;
 
 	/**
@@ -128,19 +128,12 @@ class ModelRule implements IdentifiedObject
     }
 
 
-	/**
-	 * Get specieId
-	 * @return integer
-	 */
-	public function getSpecie(): ?int
+	public function getSpecie()
 	{
 		return $this->specie;
 	}
 
-    /**
-     * @param int $specie
-     */
-    public function setSpecie(int $specie): void
+    public function setSpecie($specie)
     {
         $this->specie = $specie;
     }

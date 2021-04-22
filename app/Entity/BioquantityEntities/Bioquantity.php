@@ -18,11 +18,10 @@ class Bioquantity implements IdentifiedObject
 {
 	/* TODO: Many to many relations */
 
-use Identifier;
+    use Identifier;
 
 	/**
 	 * @var int
-	 * @ORM\Column(type="integer", name="organism_id")
 	 */
 	protected $organismId;
 

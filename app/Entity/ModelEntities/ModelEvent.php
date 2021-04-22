@@ -21,8 +21,7 @@ class ModelEvent implements IdentifiedObject
 	protected $modelId;
 
 	/**
-	 * @var ArrayCollection
-	 * @ORM\OneToMany(targetEntity="ModelEventAssignment", mappedBy="eventId")
+	 * @ORM\OneToMany(targetEntity="ModelEventAssignment", mappedBy="eventId", cascade={"persist", "remove"})
 	 */
 	protected $eventAssignments;
 

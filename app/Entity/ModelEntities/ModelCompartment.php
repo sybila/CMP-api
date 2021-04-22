@@ -28,12 +28,6 @@ class ModelCompartment implements IdentifiedObject
 	protected $spatialDimensions;
 
 	/**
-	 * @var float
-	 * @ORM\Column(name="size",type="float",nullable=true)
-	 */
-	protected $size;
-
-	/**
 	 * @var boolean
 	 * @ORM\Column(name="is_constant",type="integer")
 	 */
@@ -113,22 +107,22 @@ class ModelCompartment implements IdentifiedObject
 		$this->spatialDimensions = $spatialDimensions;
 	}
 
-	/**
-	 * Get size
-	 * @return float|null
-	 */
-	public function getSize(): ?float
+
+	public function getSize()
 	{
-		return $this->size;
+	    return $this->getDefaultValue();
 	}
 
-	/**
-	 * Set size
-	 * @param integer $size
-	 */
-	public function setSize(int $size)
+
+	public function setSize(string $size)
 	{
-		$this->size = $size;
+        /** @var ModelDataset $ds */
+        $dsId = $this->getModel()->getDatasets()->filter(function (ModelDataset $dataset) {
+            return $dataset->getIsDefault();
+        })->current()->getId();
+        $this->inDatasets->filter(function (ModelVarToDataset $varToDataset) use ($dsId) {
+           return $varToDataset->getDataset()->getId() === $dsId;
+        })->current()->setValue($size);
 	}
 
 
@@ -144,14 +138,10 @@ class ModelCompartment implements IdentifiedObject
 	/**
 	 * Set isConstant
 	 * @param integer $constant
-	 * @return ModelCompartment
 	 */
-	public function setConstant(int $constant): ModelCompartment
+	public function setConstant(int $constant)
 	{
 		$this->constant = $constant;
-		//FIXME this one modus operandi is good if we want to chain the "set" methods
-        //FIXME but why, if we never use it. It is more transparent, but it is slower.
-		return $this;
 	}
 
     public function setIsConstant2(int $isConstant)
@@ -199,16 +189,17 @@ class ModelCompartment implements IdentifiedObject
         $this->inDatasets = $datasets;
     }
 
-    public function getDefaultValue() : int
+    /**
+     * Gets value of the size of compartments from dataset that is default.
+     */
+    public function getDefaultValue()
     {
-        //TODO get rid of value property (getValue)
         /** @var ModelDataset $ds */
         $ds = $this->getModel()->getDatasets()->filter(function (ModelDataset $dataset) {
             return $dataset->getIsDefault();
         })->current();
-        $res = $this->getSize();
+        $res = 0;
         $ds->getDatasetVariableValue('compartment', $this->getId(), $res);
-
         return $res;
     }
 

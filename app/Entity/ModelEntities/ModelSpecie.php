@@ -24,7 +24,6 @@ class ModelSpecie implements IdentifiedObject
 	protected $model;
 
 	/**
-	 * @var int
 	 * @ORM\ManyToOne(targetEntity="ModelCompartment", inversedBy="species")
 	 * @ORM\JoinColumn(name="model_compartment_id", referencedColumnName="id")
 	 */
@@ -62,7 +61,7 @@ class ModelSpecie implements IdentifiedObject
 
 	/**
 	 * @var Collection
-	 * @ORM\OneToMany(targetEntity="ModelRule", mappedBy="specieId")
+	 * @ORM\OneToMany(targetEntity="ModelRule", mappedBy="specie")
 	 */
 	protected $rules;
 
@@ -127,6 +126,7 @@ class ModelSpecie implements IdentifiedObject
 	 */
 	public function getInitialExpression(): ?string
 	{
+
 		return $this->initialExpression;
 	}
 
@@ -233,17 +233,25 @@ class ModelSpecie implements IdentifiedObject
         $this->inDatasets = $inDatasets;
     }
 
-    public function getDefaultValue(): int
+    public function getDefaultValue()
     {
-        //TODO get rid of value property (getValue)
         /** @var ModelDataset $ds */
         $ds = $this->getModel()->getDatasets()->filter(function (ModelDataset $dataset) {
             return $dataset->getIsDefault();
         })->current();
         $res = 0;
         $ds->getDatasetVariableValue('species', $this->getId(), $res);
-
         return $res;
     }
 
+    public function setDefaultValue(string $size)
+    {
+        /** @var ModelDataset $ds */
+        $dsId = $this->getModel()->getDatasets()->filter(function (ModelDataset $dataset) {
+            return $dataset->getIsDefault();
+        })->current()->getId();
+        $this->inDatasets->filter(function (ModelVarToDataset $varToDataset) use ($dsId) {
+            return $varToDataset->getDataset()->getId() === $dsId;
+        })->current()->setValue($size);
+    }
 }

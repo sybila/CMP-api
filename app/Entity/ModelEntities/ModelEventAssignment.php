@@ -19,7 +19,6 @@ class ModelEventAssignment implements IdentifiedObject
 	 */
 	protected $eventId;
 
-    //* @ORM\Column(type="string")
 
     /**
 	 * @ORM\OneToOne(targetEntity="MathExpression", cascade={"persist", "remove"})

@@ -48,7 +48,7 @@ class BioquantityController extends WritableRepositoryController
 			'name' => $bioquantity->getName(),
 			'isValid' => $bioquantity->getIsValid(),
 			'userId' => $bioquantity->getUserId(),
-			'organismId' => $bioquantity->getOrganismId(),
+            'organism' => $bioquantity->getOrganismId()!= null ? OrganismController::getData($bioquantity->getOrganismId()):null,
 			'value' => $bioquantity->getValue(),
 			'link' => $bioquantity->getLink(),
 			'timeFrom' => $bioquantity->getTimeFrom(),

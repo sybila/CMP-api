@@ -145,21 +145,51 @@ class ModelDataset implements IdentifiedObject
             /** @var ModelVarToDataset $varChange */
             if ($type === $varChange->getVarType()) {
                 switch ($type) {
-                    case 'parameter': {
+                    case 'parameter':
                         if ($varChange->getParameter()->getId() == $id){
                             $result = $varChange->getValue();
+                            return true;
+                        }
+                        break;
+                    case 'species':
+                        if ($varChange->getSpecies()->getId() == $id) {
+                            $result = $varChange->getValue();
+                            return true;
+                        }
+                        break;
+                    case 'compartment':
+                        if ($varChange->getCompartment()->getId() == $id) {
+                            $result = $varChange->getValue();
+                            return true;
+                        }
+                        break;
+                }
+            }
+        }
+        return false;
+    }
+
+    public function setDatasetVariableValue(string $type, int $id, float $value): ?float
+    {
+        foreach ($this->varsToDataset as $varChange) {
+            /** @var ModelVarToDataset $varChange */
+            if ($type === $varChange->getVarType()) {
+                switch ($type) {
+                    case 'parameter': {
+                        if ($varChange->getParameter()->getId() == $id){
+                            $varChange->setValue($value);
                             return true;
                         }
                     }
                     case 'species': {
                         if ($varChange->getSpecies()->getId() == $id) {
-                            $result = $varChange->getValue();
+                            $varChange->setValue($value);
                             return true;
                         }
                     }
                     case 'compartment': {
                         if ($varChange->getCompartment()->getId() == $id) {
-                            $result = $varChange->getValue();
+                            $varChange->setValue($value);
                             return true;
                         }
                     }
@@ -168,7 +198,6 @@ class ModelDataset implements IdentifiedObject
         }
         return false;
     }
-
 
 
 }

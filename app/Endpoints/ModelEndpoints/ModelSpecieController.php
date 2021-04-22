@@ -53,13 +53,14 @@ final class ModelSpecieController extends ParentedRepositoryController implement
 
 	protected function getData(IdentifiedObject $specie): array
 	{
+
 		/** @var ModelSpecie $specie */
 		$sBaseData = $this->getSBaseData($specie);
 		return array_merge($sBaseData, [
 			'initialExpression' => $specie->getInitialExpression(),
 			'hasOnlySubstanceUnits' => $specie->getHasOnlySubstanceUnits(),
 			'constant' => $specie->getConstant(),
-			'value' => $specie->getDefaultValue(),
+			'initialAmount' => $specie->getDefaultValue(),
 			'boundaryCondition' => $specie->getBoundaryCondition(),
 			'reactionItems' => $specie->getReactionItems()->map(function (ModelReactionItem $reactionItem) {
 				return ['id' => $reactionItem->getId(), 'name' => $reactionItem->getName()];
@@ -85,13 +86,16 @@ final class ModelSpecieController extends ParentedRepositoryController implement
 		!$data->hasKey('boundaryCondition') ?: $specie->setBoundaryCondition($data->getBool('boundaryCondition'));
 		!$data->hasKey('hasOnlySubstanceUnits') ?: $specie->setHasOnlySubstanceUnits($data->getBool('hasOnlySubstanceUnits'));
 		!$data->hasKey('constant') ?: $specie->setConstant($data->getBool('constant'));
-	}
+        !$data->hasKey('initialAmount') ?: $specie->setDefaultValue($data->get('initialAmount'));
+    }
 
 	protected function createObject(ArgumentParser $body): IdentifiedObject
 	{
-        if (!$body->hasKey('initialValue'))
-            throw new MissingRequiredKeyException('initialValue');
-	    $specie = new ModelSpecie($this->repository->getParent()->getModel(), $body->get('initialValue'));
+        if (!$body->hasKey('initialAmount')) {
+            throw new MissingRequiredKeyException('initialAmount');
+        }
+
+	    $specie = new ModelSpecie($this->repository->getParent()->getModel(), $body->get('initialAmount'));
 		if (!$body->hasKey('constant')) {
             $specie->setConstant(true);
         }

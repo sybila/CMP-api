@@ -43,7 +43,7 @@ final class ModelCompartmentController extends ParentedRepositoryController impl
 		$sBaseData = $this->getSBaseData($compartment);
 		return array_merge ($sBaseData, [
 			'spatialDimensions' => $compartment->getSpatialDimensions(),
-			'size' => $compartment->getDefaultValue(),
+			'size' => $compartment->getSize(),
 			'constant' => $compartment->getConstant(),
 			'species' => $compartment->getSpecies()->map(function (ModelSpecie $specie) {
 				return ['id' => $specie->getId(), 'name' => $specie->getName()];
@@ -62,11 +62,6 @@ final class ModelCompartmentController extends ParentedRepositoryController impl
                             'cmml' => $rule->getExpression()->getContentMML(),
                             'detail' => $rule->getExpression()->getModelComponents($this->repository->getParent())]];
             })->toArray()
-//			'rules' => $compartment->getRules()->map(function (ModelRule $rule) {
-//				return ['id' => $rule->getId(), 'equation' => [
-//                    'latex' => is_null($rule->getExpression()) ? '' :$rule->getExpression()->getLatex(),
-//                    'cmml' => is_null($rule->getExpression()) ? '' : $rule->getExpression()->getContentMML()]];
-//			})->toArray(),
 //			'unitDefinitions' => $compartment->getUnitDefinitions()->map(function (ModelUnitDefinition $unit) {
 //				return ['id' => $unit->getId(), 'symbol' => $unit->getSymbol()];
 //			})->toArray(),

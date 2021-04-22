@@ -26,13 +26,7 @@ class ModelParameter implements IdentifiedObject
 	 * @ORM\ManyToOne(targetEntity="ModelReaction", inversedBy="parameters")
 	 * @ORM\JoinColumn(name="model_reaction_id", referencedColumnName="id")
 	 */
-	protected $reactionId;
-
-	/**
-	 * @var int
-	 * @ORM\Column(type="integer")
-	 */
-	protected $value;
+	protected $reaction;
 
 	/**
 	 * @var boolean
@@ -52,7 +46,7 @@ class ModelParameter implements IdentifiedObject
 	protected $rule;
 
     /**
-     * @ORM\OneToMany(targetEntity="ModelVarToDataset", mappedBy="parameter")
+     * @ORM\OneToMany(targetEntity="ModelVarToDataset", mappedBy="parameter", cascade={"persist", "remove"})
      */
 	protected $inDatasets;
 
@@ -89,29 +83,32 @@ class ModelParameter implements IdentifiedObject
 	 * Get reactionId
 	 * @return integer|null
 	 */
-	public function getReactionId()
+	public function getReaction()
 	{
-		return $this->reactionId;
+		return $this->reaction;
 	}
 
-	public function setReactionId($reactionId)
+	public function setReaction($reaction)
 	{
-		$this->reactionId = $reactionId;
+		$this->reaction = $reaction;
 	}
 
-	/**
-	 * Get value
-	 * @return integer
-	 */
-	public function getValue(): ?int
+
+	public function getValue()
 	{
-		return $this->value;
+		return $this->getDefaultValue();
 	}
 
 
 	public function setValue($value)
 	{
-		$this->value = $value;
+        /** @var ModelDataset $ds */
+        $dsId = $this->getModel()->getDatasets()->filter(function (ModelDataset $dataset) {
+            return $dataset->getIsDefault();
+        })->current()->getId();
+        $this->inDatasets->filter(function (ModelVarToDataset $varToDataset) use ($dsId) {
+            return $varToDataset->getDataset()->getId() === $dsId;
+        })->current()->setValue($value);
 	}
 
 	/**
@@ -158,14 +155,13 @@ class ModelParameter implements IdentifiedObject
         $this->inDatasets = $inDatasets;
     }
 
-    public function getDefaultValue() : int
+    public function getDefaultValue()
     {
-        //TODO get rid of value property (getValue)
         /** @var ModelDataset $ds */
         $ds = $this->getModel()->getDatasets()->filter(function (ModelDataset $dataset) {
             return $dataset->getIsDefault();
         })->current();
-        $res = $this->getValue();
+        $res = 0;
         $ds->getDatasetVariableValue('parameter', $this->getId(), $res);
 
         return $res;

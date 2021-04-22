@@ -57,13 +57,15 @@ class ModelFunctionDefinition implements IdentifiedObject
 	public function setExpression(MathExpression $expression)
 	{
 		$this->expression = $expression;
-        $dom = new DOMDocument;
-        $dom->loadXML($expression->getContentMML());
-        $args = [];
-        foreach ($dom->getElementsByTagName('bvar') as $arg) {
-            array_push($args, $arg->nodeValue);
+		if ($expression !== null) {
+            $dom = new DOMDocument;
+            $dom->loadXML($expression->getContentMML());
+            $args = [];
+            foreach ($dom->getElementsByTagName('bvar') as $arg) {
+                array_push($args, $arg->nodeValue);
+            }
+            $this->setArguments($args);
         }
-        $this->setArguments($args);
 	}
 
     /**

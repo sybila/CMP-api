@@ -168,20 +168,20 @@ final class ModelController extends WritableRepositoryController implements IGro
 		$model = $this->getObject($args->getInt('id'));
 //		if (!$model->getCompartments()->isEmpty())
 //			throw new DependentResourcesBoundException('compartment');
-		if (!$model->getConstraints()->isEmpty())
-			throw new DependentResourcesBoundException('constraints');
-		if (!$model->getEvents()->isEmpty())
-			throw new DependentResourcesBoundException('events');
-		if (!$model->getFunctionDefinitions()->isEmpty())
-			throw new DependentResourcesBoundException('functionDefinitions');
-		if (!$model->getInitialAssignments()->isEmpty())
-			throw new DependentResourcesBoundException('initialAssignments');
-		if (!$model->getParameters()->isEmpty())
-			throw new DependentResourcesBoundException('parameters');
-		if (!$model->getRules()->isEmpty())
-			throw new DependentResourcesBoundException('rules');
-		if (!$model->getReactions()->isEmpty())
-			throw new DependentResourcesBoundException('reactions');
+//		if (!$model->getConstraints()->isEmpty())
+//			throw new DependentResourcesBoundException('constraints');
+//		if (!$model->getEvents()->isEmpty())
+//			throw new DependentResourcesBoundException('events');
+//		if (!$model->getFunctionDefinitions()->isEmpty())
+//			throw new DependentResourcesBoundException('functionDefinitions');
+//		if (!$model->getInitialAssignments()->isEmpty())
+//			throw new DependentResourcesBoundException('initialAssignments');
+//		if (!$model->getParameters()->isEmpty())
+//			throw new DependentResourcesBoundException('parameters');
+//		if (!$model->getRules()->isEmpty())
+//			throw new DependentResourcesBoundException('rules');
+//		if (!$model->getReactions()->isEmpty())
+//			throw new DependentResourcesBoundException('reactions');
 //		if (!$model->getUnitDefinitions()->isEmpty())
 //			throw new DependentResourcesBoundException('unitDefinitions');
         $this->deleteAnnotations($args->getInt('id'));
