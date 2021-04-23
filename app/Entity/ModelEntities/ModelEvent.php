@@ -15,13 +15,13 @@ class ModelEvent implements IdentifiedObject
 	use SBase;
 
 	/**
-	 * @ORM\ManyToOne(targetEntity="Model", inversedBy="compartments")
+	 * @ORM\ManyToOne(targetEntity="Model", inversedBy="events")
 	 * @ORM\JoinColumn(name="model_id", referencedColumnName="id")
 	 */
-	protected $modelId;
+	protected $model;
 
 	/**
-	 * @ORM\OneToMany(targetEntity="ModelEventAssignment", mappedBy="eventId", cascade={"persist", "remove"})
+	 * @ORM\OneToMany(targetEntity="ModelEventAssignment", mappedBy="event", cascade={"persist", "remove"})
 	 */
 	protected $eventAssignments;
 
@@ -59,24 +59,16 @@ class ModelEvent implements IdentifiedObject
 		return $this->id;
 	}
 
-	/**
-	 * Get modelId
-	 * @return integer|null
-	 */
-	public function getModelId()
+
+	public function getModel()
 	{
-		return $this->modelId;
+		return $this->model;
 	}
 
-	/**
-	 * Set modelId
-	 * @param integer $modelId
-	 * @return ModelEvent
-	 */
-	public function setModelId($modelId): ModelEvent
+
+	public function setModel($model)
 	{
-		$this->modelId = $modelId;
-		return $this;
+		$this->model = $model;
 	}
 
 

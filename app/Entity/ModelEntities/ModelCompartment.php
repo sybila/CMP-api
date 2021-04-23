@@ -35,7 +35,7 @@ class ModelCompartment implements IdentifiedObject
 
 	/**
 	 * @var Collection
-	 * @ORM\OneToMany(targetEntity="ModelSpecie", mappedBy="compartmentId")
+	 * @ORM\OneToMany(targetEntity="ModelSpecie", mappedBy="compartmentId",cascade={"remove"})
 	 */
 	protected $species;
 
@@ -56,6 +56,12 @@ class ModelCompartment implements IdentifiedObject
      * @ORM\OneToMany(targetEntity="ModelVarToDataset", mappedBy="compartment", cascade={"persist", "remove"})
      */
 	protected $inDatasets;
+
+    /**
+     * @ORM\OneToMany(targetEntity="ModelEventAssignment", mappedBy="compartment", cascade={"remove"})
+     */
+    protected $eventAssignments;
+
 
     /**
      * ModelCompartment constructor.
@@ -202,5 +208,14 @@ class ModelCompartment implements IdentifiedObject
         $ds->getDatasetVariableValue('compartment', $this->getId(), $res);
         return $res;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getEventAssignments()
+    {
+        return $this->eventAssignments;
+    }
+
 
 }

@@ -76,6 +76,7 @@ class ImportModelController extends WritableRepositoryController
     protected $compartments = [];
     protected $species = [];
     protected $parameters = [];
+    protected $reactionItems = [];
 
 
     /**
@@ -359,7 +360,7 @@ class ImportModelController extends WritableRepositoryController
             $this->orm->persist($reactionItemObj);
             $this->orm->flush();
             !$reactionItemData->hasKey('annotations') ?: $this->importAnnotation(ModelReactionItem::class, $reactionItemObj, $reactionItemData['annotations']);
-
+            $this->reactionItems[$reactionItemObj->getAlias()] = $reactionItemObj;
         }
     }
 
@@ -418,7 +419,7 @@ class ImportModelController extends WritableRepositoryController
             }
             !$eventData->hasKey('alias') ?: $eventObj->setAlias($eventData->getString('alias'));
             !$eventData->hasKey('name') ?: $eventObj->setAlias($eventData->getString('name'));
-            $eventObj->setModelId($this->eventCtl->repository->getParent());
+            $eventObj->setModel($this->eventCtl->repository->getParent());
             $eventData->hasKey('useValuesFromTriggerTime') ?
                 $eventObj->setEvaluateOnTrigger($eventData['useValuesFromTriggerTime']) :
                 $eventObj->setEvaluateOnTrigger(true);
@@ -440,15 +441,35 @@ class ImportModelController extends WritableRepositoryController
             /** @var ModelEventAssignment $eventAssObj */
             $eventAssObj = $this->eventAssCtl->createObject($eventAssData);
             $this->eventAssCtl->setData($eventAssObj, $eventAssData);
+            $type = '';
+            $var = !$eventAssData->hasKey('variable') ?: $this->findVariableByAlias($eventAssData->getString('variable'), $type);
+            $eventAssObj->setVariableType($type);
+            $eventAssObj->setVariable($var->getId(), $this->orm);
             if ($eventAssData->hasKey('expression')) {
-                $formula = new MathExpression();
-                $formula->setContentMML($eventAssData['expression'], true);
-                $eventAssObj->setFormula($formula);
+                $eventAssObj->setFormula('cmml', $eventAssData->getString('expression'));
             }
             $this->orm->persist($eventAssObj);
             $this->orm->flush();
             !$eventAssData->hasKey('annotations') ?: $this->importAnnotation(ModelEventAssignment::class,$eventAssObj, $eventAssData['annotations']);
         }
+    }
+
+    private function findVariableByAlias($alias, &$type)
+    {
+        if (key_exists($alias, $this->compartments)) {
+            $type = 'compartment';
+            return $this->compartments[$alias];
+        } elseif (key_exists($alias, $this->species)) {
+            $type = 'species';
+            return $this->species[$alias];
+        } elseif (key_exists($alias, $this->parameters)) {
+            $type = 'parameter';
+            return $this->parameters[$alias];
+        } elseif (key_exists($alias, $this->reactionItems)) {
+            $type = 'reactionItem';
+            return $this->reactionItems[$alias];
+        }
+        return null;
     }
 
 

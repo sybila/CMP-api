@@ -49,7 +49,26 @@ class ModelReactionItem implements IdentifiedObject
 	 */
 	protected $stoichiometry;
 
-	/**
+    /**
+     * @ORM\Column(name="is_constant",type="integer")
+     */
+	protected $constant;
+
+    /**
+     * @ORM\OneToMany(targetEntity="ModelEventAssignment", mappedBy="reactionItem", cascade={"remove"})
+     */
+    protected $eventAssignments;
+
+    /**
+     * ModelReactionItem constructor.
+     */
+    public function __construct()
+    {
+        $this->constant = true;
+    }
+
+
+    /**
 	 * Get parameterId
 	 * @return ModelParameter
 	 */
@@ -166,5 +185,29 @@ class ModelReactionItem implements IdentifiedObject
 		$this->stoichiometry = $stoichiometry;
 		return $this;
 	}
+
+    /**
+     * @return mixed
+     */
+    public function getEventAssignments()
+    {
+        return $this->eventAssignments;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getConstant()
+    {
+        return $this->constant;
+    }
+
+    /**
+     * @param mixed $constant
+     */
+    public function setConstant($constant): void
+    {
+        $this->constant = $constant;
+    }
 
 }

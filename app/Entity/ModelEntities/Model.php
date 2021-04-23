@@ -55,7 +55,7 @@ class Model implements IdentifiedObject
 
 	/**
 	 * @var ArrayCollection
-	 * @ORM\OneToMany(targetEntity="ModelEvent", mappedBy="modelId", cascade={"remove"})
+	 * @ORM\OneToMany(targetEntity="ModelEvent", mappedBy="model", cascade={"remove"})
 	 */
 	private $events;
 
@@ -72,6 +72,7 @@ class Model implements IdentifiedObject
 	private $initialAssignments;
 
 	/**
+     * @var ArrayCollection
 	 * @ORM\OneToMany(targetEntity="ModelParameter", mappedBy="model", cascade={"remove"})
 	 */
 	private $parameters;
@@ -204,42 +205,32 @@ class Model implements IdentifiedObject
 		return $this;
 	}
 
-	/**
-	 * @return ModelCompartment[]|Collection
-	 */
-	public function getCompartments(): Collection
+
+	public function getCompartments()
 	{
 		return $this->compartments;
 	}
 
-	/**
-	 * @return ModelConstraint[]|Collection
-	 */
-	public function getConstraints(): Collection
+
+	public function getConstraints()
 	{
 		return $this->constraints;
 	}
 
-	/**
-	 * @return ModelEvent[]|Collection
-	 */
-	public function getEvents(): Collection
+
+	public function getEvents()
 	{
 		return $this->events;
 	}
 
-	/**
-	 * @return ModelFunctionDefinition[]|Collection
-	 */
-	public function getFunctionDefinitions(): Collection
+
+	public function getFunctionDefinitions()
 	{
 		return $this->functionDefinitions;
 	}
 
-	/**
-	 * @return ModelInitialAssignment[]|Collection
-	 */
-	public function getInitialAssignments(): Collection
+
+	public function getInitialAssignments()
 	{
 		return $this->initialAssignments;
 	}
@@ -251,18 +242,14 @@ class Model implements IdentifiedObject
 		return $this->parameters; //->matching($criteria);
 	}
 
-	/**
-	 * @return ModelReaction[]|Collection
-	 */
-	public function getReactions(): Collection
+
+	public function getReactions()
 	{
 		return $this->reactions;
 	}
 
-	/**
-	 * @return ModelRule[]|Collection
-	 */
-	public function getRules(): Collection
+
+	public function getRules()
 	{
 		return $this->rules;
 	}
@@ -310,6 +297,28 @@ class Model implements IdentifiedObject
     public function addDataset(ModelDataset $ds)
     {
         $this->datasets->add($ds);
+    }
+
+    public function getSpecies()
+    {
+        $species = new ArrayCollection();
+        $this->getCompartments()->map(function (ModelCompartment $compartment) use ($species) {
+            $compartment->getSpecies()->map(function (ModelSpecie $sp) use ($species) {
+                $species->add($sp);
+            });
+        });
+        return $species;
+    }
+
+    public function getReactionItems()
+    {
+        $rItems = new ArrayCollection();
+        $this->getReactions()->map(function (ModelReaction $reaction) use ($rItems) {
+            $reaction->getReactionItems()->map(function (ModelReactionItem $item) use ($rItems) {
+                $rItems->add($item);
+            });
+        });
+        return $rItems;
     }
 
     public function uniqueAliasCheck(string $newAlias): bool
@@ -398,7 +407,7 @@ class Model implements IdentifiedObject
             $p->addAttribute('name', $param->getName());
             $p->addAttribute('value', $param->getDefaultValue());
             $p->addAttribute('units', '');
-            $p->addAttribute('constant', $param->getIsConstant() ? 'true' : 'false');
+            $p->addAttribute('constant', $param->getConstant() ? 'true' : 'false');
         });
         $initAssList = $sbml->addChild('listOfInitialAssignments');
         $this->initialAssignments->map(function (ModelInitialAssignment $ass) use ($initAssList) {
@@ -460,6 +469,19 @@ class Model implements IdentifiedObject
         $eventList = $sbml->addChild('listOfEvents');
         $this->events->map(function (ModelEvent $event) use ($eventList) {
             $sbmlExent = $eventList->addChild('event');
+            $sbmlExent->addAttribute('id', $event->getAlias());
+            $sbmlExent->addAttribute('name', $event->getName());
+            $trig = $sbmlExent->addChild('trigger');
+            $trigDom = dom_import_simplexml($trig);
+            $math = new SimpleXMLElement($event->getTrigger()->getContentMML());
+            $mathDom = dom_import_simplexml($math);
+            $mathDom = $trigDom->ownerDocument->importNode($mathDom, TRUE);
+            $trigDom->appendChild($mathDom);
+            $eAssList = $sbmlExent->addChild('listOfEventAssignments');
+            $event->getEventAssignments()->map(function (ModelEventAssignment $eass) use ($eAssList) {
+                $ass = $eAssList->addChild('eventAssignment');
+                $ass->addAttribute('variable', $eass->getAlias());
+            });
         });
         return $sbml->asXML();
     }

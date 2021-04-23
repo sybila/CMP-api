@@ -5,6 +5,7 @@ namespace App\Entity\Repositories;
 use App\Entity\Model;
 use App\Entity\ModelEvent;
 use App\Entity\IdentifiedObject;
+use App\Entity\ModelEventAssignment;
 use App\Helpers\QueryRepositoryHelper;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\EntityManager;
@@ -61,8 +62,6 @@ class ModelEventRepository implements IDependentEndpointRepository
                     'id' => $event->getId(),
                     'alias' => $event->getAlias(),
                     'name' => $event->getName(),
-                    'ontologyTerm' => $event->getSboTerm(),
-                    'notes' => $event->getNotes(),
                     'delay' => [
                         'latex' => is_null($event->getDelay()) ? '' : $event->getDelay()->getLatex(),
                         'cmml' => is_null($event->getDelay()) ? '' : $event->getDelay()->getContentMML()],
@@ -71,7 +70,16 @@ class ModelEventRepository implements IDependentEndpointRepository
                         'cmml' => is_null($event->getTrigger()) ? '' : $event->getTrigger()->getContentMML()],
                     'priority' => [
                         'latex' => is_null($event->getPriority()) ? '' : $event->getPriority()->getLatex(),
-                        'cmml' => is_null($event->getPriority()) ? '' : $event->getPriority()->getContentMML()]
+                        'cmml' => is_null($event->getPriority()) ? '' : $event->getPriority()->getContentMML()],
+                    'eventAssignment' => $event->getEventAssignments()->map(function (ModelEventAssignment $ass) {
+                        dump($ass);exit;
+                        return ['variableType' => $ass->getVariableType(),
+                        'variableId' => $ass->getVariable()->getId(),
+                        'variable' => $ass->getVariable()->getAlias(),
+                        'formula' => [
+                            'latex' => is_null($ass->getFormula()) ? '' : $ass->getFormula()->getLatex(),
+                            'cmml' => is_null($ass->getFormula()) ? '' : $ass->getFormula()->getContentMML()]];
+                    })
                 ];
             })->toArray();
 	}
@@ -84,7 +92,7 @@ class ModelEventRepository implements IDependentEndpointRepository
      */
     public function createQueryCriteria(array $filter, array $limit = null, array $sort = null): Criteria
     {
-        $criteria = Criteria::create()->where(Criteria::expr()->eq('modelId', $this->getParent()));
+        $criteria = Criteria::create()->where(Criteria::expr()->eq('model', $this->getParent()));
         foreach ($filter['argFilter'] as $by => $expr){
             $criteria = $criteria->andWhere(Criteria::expr()->contains($by, $expr));
         }

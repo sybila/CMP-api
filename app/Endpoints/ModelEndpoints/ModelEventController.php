@@ -56,7 +56,7 @@ final class ModelEventController extends ParentedRepositoryController implements
 	{
 		/** @var ModelEvent $event */
 		$this->setSBaseData($event, $data);
-		$event->getModelId() ?: $event->setModelId($this->repository->getParent()->getId());
+		$event->getModel() ?: $event->setModel($this->repository->getParent()->getId());
 		!$data->hasKey('delay') ?: $event->setDelay($data->getString('delay'));
 		!$data->hasKey('trigger') ?: $event->setTrigger($data->getString('trigger'));
 		!$data->hasKey('priority') ?: $event->setPriority($data->getString('priority'));
@@ -71,7 +71,7 @@ final class ModelEventController extends ParentedRepositoryController implements
 	protected function checkInsertObject(IdentifiedObject $event): void
 	{
 		/** @var ModelEvent $event */
-		if ($event->getModelId() == null)
+		if ($event->getModel() == null)
 			throw new MissingRequiredKeyException('modelId');
 		if ($event->getTrigger() == null)
 			throw new MissingRequiredKeyException('trigger');
@@ -118,7 +118,7 @@ final class ModelEventController extends ParentedRepositoryController implements
     protected function checkParentValidity(IdentifiedObject $model, IdentifiedObject $child)
     {
         /** @var ModelEvent $child */
-        if ($model->getId() != $child->getModelId()->getId()) {
+        if ($model->getId() != $child->getModel()->getId()) {
             throw new WrongParentException($this->getParentObjectInfo()->parentEntityClass, $model->getId(),
                 self::getObjectName(), $child->getId());
         }

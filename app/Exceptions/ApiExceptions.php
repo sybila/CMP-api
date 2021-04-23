@@ -372,3 +372,30 @@ class NonUniqueModelVariableAlias extends ApiException
     }
 }
 
+class DependentAttributeException extends ApiException
+{
+    const CODE = 409;
+    public function __construct(string $key, Throwable $previous = null)
+    {
+        parent::__construct($previous)
+            ->setMessage('Attribute %s needs to be defined.', $key);
+
+        $this->additional = ['key' => $key];
+    }
+
+    public function getHttpCode(): int
+    {
+        return self::CODE;
+    }
+}
+
+class ConstantVariableException extends ApiException
+{
+    const CODE = 711;
+    public function __construct(string $id, string $type, string $alias, Throwable $previous = null)
+    {
+        parent::__construct($previous)
+            ->setMessage('%s with ID %s and alias %s is constant.', $type, $id, $alias);
+    }
+
+}

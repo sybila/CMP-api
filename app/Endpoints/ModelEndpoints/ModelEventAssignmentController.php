@@ -16,6 +16,7 @@ use Slim\Http\{
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
+ * @author Radoslav Doktor from 2018
  * @property-read ModelEventAssignmentRepository $repository
  * @method ModelEventAssignment getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */
@@ -28,7 +29,7 @@ final class ModelEventAssignmentController extends ParentedRepositoryController
 
 	protected static function getAllowedSort(): array
 	{
-		return ['id', 'name'];
+		return ['id', 'variable'];
 	}
 
 	protected function getData(IdentifiedObject $eventAssignment): array
@@ -36,31 +37,47 @@ final class ModelEventAssignmentController extends ParentedRepositoryController
 		/** @var ModelEventAssignment $eventAssignment */
 		$sBaseData = $this->getSBaseData($eventAssignment);
 		return array_merge($sBaseData, [
+		    'variable' => $eventAssignment->getVariable()->getAlias(),
 			'formula' => ['latex' => $eventAssignment->getFormula()->getLatex(),
                 'cmml' => $eventAssignment->getFormula()->getContentMML()]
 		]);
 	}
 
+    protected function createObject(ArgumentParser $body): IdentifiedObject
+    {
+        $eventAssignment = new ModelEventAssignment();
+        $eventAssignment->setEvent($this->repository->getParent());
+        return $eventAssignment;
+    }
+
 	protected function setData(IdentifiedObject $eventAssignment, ArgumentParser $data): void
 	{
 		/** @var ModelEventAssignment $eventAssignment */
         $this->setSBaseData($eventAssignment, $data);
-		$eventAssignment->getEventId() ?: $eventAssignment->setEventId($this->repository->getParent());
-		!$data->hasKey('formula') ?: $eventAssignment->setFormula($data->getString('formula'));
-	}
-
-	protected function createObject(ArgumentParser $body): IdentifiedObject
-	{
-		return new ModelEventAssignment;
-	}
+		if ($data->hasKey('variableType')) {
+            $eventAssignment->setVariableType($data->getString('variableType'));
+            if ($data->hasKey('variableId')) {
+                $eventAssignment->setVariable($data->get('variableId'));
+            } else {
+                throw new MissingRequiredKeyException('variableId');
+            }
+        }
+        if ($data->hasKey('formula')) {
+            $formula = $data->get('formula');
+            !key_exists('latex', $formula) ?: $eventAssignment->setFormula('latex', $formula['latex']);
+            !key_exists('cmml', $formula) ?: $eventAssignment->setFormula('cmml', $formula['cmml']);
+        }
+    }
 
 	protected function checkInsertObject(IdentifiedObject $eventAssignment): void
 	{
 		/** @var ModelEventAssignment $eventAssignment */
-		if ($eventAssignment->getEventId() == null)
-			throw new MissingRequiredKeyException('eventId');
 		if ($eventAssignment->getFormula() == null)
 			throw new MissingRequiredKeyException('formula');
+        if ($eventAssignment->getVariableType() == null)
+            throw new MissingRequiredKeyException('variableType');
+        if ($eventAssignment->getVariable() == null)
+            throw new MissingRequiredKeyException('variableId');
 	}
 
 	public function delete(Request $request, Response $response, ArgumentParser $args): Response
@@ -73,8 +90,8 @@ final class ModelEventAssignmentController extends ParentedRepositoryController
 	{
 		$validatorArray = $this->getSBaseValidator();
 		return new Assert\Collection(array_merge($validatorArray, [
-			'eventId' => new Assert\Type(['type' => 'integer']),
-			'formula' => new Assert\Type(['type' => 'string']),
+		    'variableType' => new Assert\Type(['type' => 'string']),
+            'variableId' => new Assert\Type(['type' => 'int'])
 		]));
 	}
 
@@ -97,7 +114,7 @@ final class ModelEventAssignmentController extends ParentedRepositoryController
     protected function checkParentValidity(IdentifiedObject $parent, IdentifiedObject $child)
     {
         /** @var ModelEventAssignment $child */
-        if ($parent->getId() != $child->getEventId()->getId()) {
+        if ($parent->getId() != $child->getEvent()->getId()) {
             throw new WrongParentException($this->getParentObjectInfo()->parentEntityClass, $parent->getId(),
                 self::getObjectName(), $child->getId());
         }

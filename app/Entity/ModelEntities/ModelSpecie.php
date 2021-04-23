@@ -72,6 +72,11 @@ class ModelSpecie implements IdentifiedObject
 	protected $inDatasets;
 
     /**
+     * @ORM\OneToMany(targetEntity="ModelEventAssignment", mappedBy="species", cascade={"remove"})
+     */
+    protected $eventAssignments;
+
+    /**
      * ModelSpecie constructor.
      */
     public function __construct(Model $model, $value)
@@ -254,4 +259,14 @@ class ModelSpecie implements IdentifiedObject
             return $varToDataset->getDataset()->getId() === $dsId;
         })->current()->setValue($size);
     }
+
+    /**
+     * @return mixed
+     */
+    public function getEventAssignments()
+    {
+        return $this->eventAssignments;
+    }
+
+
 }

@@ -32,7 +32,7 @@ class ModelParameter implements IdentifiedObject
 	 * @var boolean
 	 * @ORM\Column(name="is_constant",type="integer")
 	 */
-	protected $isConstant;
+	protected $constant;
 
 	/**
 	 * @var Collection
@@ -49,6 +49,11 @@ class ModelParameter implements IdentifiedObject
      * @ORM\OneToMany(targetEntity="ModelVarToDataset", mappedBy="parameter", cascade={"persist", "remove"})
      */
 	protected $inDatasets;
+
+    /**
+     * @ORM\OneToMany(targetEntity="ModelEventAssignment", mappedBy="parameter", cascade={"remove"})
+     */
+    protected $eventAssignments;
 
     /**
      * ModelCompartment constructor.
@@ -111,19 +116,16 @@ class ModelParameter implements IdentifiedObject
         })->current()->setValue($value);
 	}
 
-	/**
-	 * Get isConstant
-	 * @return integer
-	 */
-	public function getIsConstant(): int
+
+	public function getConstant()
 	{
-		return $this->isConstant;
+		return $this->constant;
 	}
 
 
-	public function setIsConstant($isConstant)
+	public function setConstant($constant)
 	{
-		$this->isConstant = $isConstant;
+		$this->constant = $constant;
 	}
 
 	/**
@@ -166,4 +168,14 @@ class ModelParameter implements IdentifiedObject
 
         return $res;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getEventAssignments()
+    {
+        return $this->eventAssignments;
+    }
+
+
 }

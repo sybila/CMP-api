@@ -53,7 +53,7 @@ final class ModelController extends WritableRepositoryController implements IGro
 	protected function getData(IdentifiedObject $model): array
 	{
 	    /** @var Model $model */
-        return [$model->getSBML()];
+        //return [$model->getSBML()];
 		$sBaseData = $this->getSBaseData($model);
 		return array_merge($sBaseData, [
 			'userId' => $model->getUserId(),

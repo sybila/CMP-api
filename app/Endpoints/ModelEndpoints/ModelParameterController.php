@@ -77,7 +77,7 @@ abstract class ModelParameterController extends ParentedRepositoryController
 		/** @var ModelParameter $parameter */
         $this->setSBaseData($parameter, $data);
 		!$data->hasKey('value') ?: $parameter->setValue($data->getString('value'));
-		!$data->hasKey('constant') ?: $parameter->setIsConstant($data->getString('constant'));
+		!$data->hasKey('constant') ?: $parameter->setConstant($data->getBool('constant'));
 	}
 
 	public function delete(Request $request, Response $response, ArgumentParser $args): Response
@@ -125,7 +125,6 @@ final class ModelParentedParameterController extends ModelParameterController
 	protected function setData(IdentifiedObject $parameter, ArgumentParser $data): void
 	{
 		/** @var ModelParameter $parameter */
-		$parameter->getModel() ?: $parameter->setModel();
 		if ($data->hasKey('reactionId')) {
 			$reaction = $this->repository->getEntityManager()->find(ModelReaction::class, $data->getInt('reactionId'));
 			if ($reaction === null) {
@@ -141,7 +140,7 @@ final class ModelParentedParameterController extends ModelParameterController
 		/** @var ModelParameter $parameter */
 		if ($parameter->getAlias() === null)
 			throw new MissingRequiredKeyException('alias');
-		if ($parameter->getIsConstant() === null)
+		if ($parameter->getConstant() === null)
 			throw new MissingRequiredKeyException('constant');
 	}
 
@@ -156,7 +155,7 @@ final class ModelParentedParameterController extends ModelParameterController
 		$model = $this->repository->getParent();
         $modelParameter = new ModelParameter($model,$body->get('value'));
         if (!$body->hasKey('constant')) {
-            $modelParameter->setIsConstant(false);
+            $modelParameter->setConstant(false);
         }
         return $modelParameter;
 	}
