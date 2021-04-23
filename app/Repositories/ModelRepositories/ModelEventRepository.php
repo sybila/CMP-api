@@ -72,14 +72,13 @@ class ModelEventRepository implements IDependentEndpointRepository
                         'latex' => is_null($event->getPriority()) ? '' : $event->getPriority()->getLatex(),
                         'cmml' => is_null($event->getPriority()) ? '' : $event->getPriority()->getContentMML()],
                     'eventAssignment' => $event->getEventAssignments()->map(function (ModelEventAssignment $ass) {
-                        dump($ass);exit;
                         return ['variableType' => $ass->getVariableType(),
                         'variableId' => $ass->getVariable()->getId(),
                         'variable' => $ass->getVariable()->getAlias(),
                         'formula' => [
                             'latex' => is_null($ass->getFormula()) ? '' : $ass->getFormula()->getLatex(),
                             'cmml' => is_null($ass->getFormula()) ? '' : $ass->getFormula()->getContentMML()]];
-                    })
+                    })->toArray()
                 ];
             })->toArray();
 	}
