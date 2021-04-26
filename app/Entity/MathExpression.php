@@ -112,11 +112,12 @@ class MathExpression
                         $found = true;
                     }
                     foreach ($mc->getSpecies() as $spec) {
+                        /** @var ModelSpecie $spec */
                         if ($spec->getAlias() === $pCi) {
                             $specIn[$spec->getAlias()] = [
                                 'id' => $spec->getId(),
                                 'alias' => $spec->getAlias(),
-                                //FIXME initial value for specie is nowhere
+                                'initial amount' => $spec->getDefaultValue()
                                 ];
                             $found = true;
                             break;
