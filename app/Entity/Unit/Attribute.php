@@ -10,7 +10,6 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * @ORM\Entity
  * @ORM\Table(name="unit_attribute")
- * @ORM\DiscriminatorColumn(name="hierarchy_type", type="string")
  */
 class Attribute implements IdentifiedObject
 {

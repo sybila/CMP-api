@@ -54,9 +54,6 @@ final class ModelReactionController extends ParentedRepositoryController impleme
                     'stoichiometry' => $reactionItem->getStoichiometry(),
                     'type' => $reactionItem->getType()];
 			})->toArray(),
-			'functions' => $reaction->getFunctions()->map(function (ModelFunction $function) {
-				return ['id' => $function->getId(), 'name' => $function->getName()];
-			})->toArray(),
 			'parameters' => $reaction->getParameters()->map(function (ModelParameter $parameter) {
 				return ['id' => $parameter->getId(), 'name' => $parameter->getName()];
 			})->toArray()

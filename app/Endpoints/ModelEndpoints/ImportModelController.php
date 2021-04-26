@@ -5,6 +5,7 @@ namespace App\Controllers;
 
 
 use App\Entity\AnnotableObjectType;
+use App\Entity\Attribute;
 use App\Entity\IdentifiedObject;
 use App\Entity\MathExpression;
 use App\Entity\Model;
@@ -18,6 +19,7 @@ use App\Entity\ModelReaction;
 use App\Entity\ModelReactionItem;
 use App\Entity\ModelRule;
 use App\Entity\ModelSpecie;
+use App\Entity\Unit;
 use App\Exceptions\InvalidTypeException;
 use App\Exceptions\MissingRequiredKeyException;
 use App\Exceptions\NonExistingObjectException;
@@ -166,6 +168,9 @@ class ImportModelController extends WritableRepositoryController
         $this->orm->flush();
         is_null($modelData['annotations']) ?: $this->importAnnotation(Model::class,$modelObj, $modelData['annotations']);
 
+        if ($modelData->hasKey('unitDefinitions')) {
+            $this->importUnits($modelData['compartments']);
+        }
         if ($modelData->hasKey('compartments')) {
             $this->compCtl->repository->setParent($modelObj);
             $this->importCompartments($modelData['compartments']);
@@ -188,9 +193,6 @@ class ImportModelController extends WritableRepositoryController
         if ($modelData->hasKey('functionDefinitions')) {
             $this->fnDefCtl->repository->setParent($modelObj);
             $this->importFunctionDefinitions($modelData['functionDefinitions']);
-        }
-        if ($modelData->hasKey('unitDefinitions')) {
-
         }
         if ($modelData->hasKey('initialAssignments')) {
             $this->initAssCtl->repository->setParent($modelObj);
@@ -491,6 +493,23 @@ class ImportModelController extends WritableRepositoryController
     protected function getValidator(): Assert\Collection
     {
         // TODO: Implement getValidator() method.
+    }
+
+    private function importUnits($units)
+    {
+        foreach ($units as $unit) {
+            $unitData = new ArgumentParser($unit);
+            /** @var Attribute $attrObj */
+            /** @var Unit $unitObj */
+            $attrObj = new Attribute;
+            !$unitData->hasKey('name') ?: $attrObj->setName($unitData->getString('name'));
+            $unitObj = new Unit;
+            $unitObj->set
+            !$unitData->hasKey('symbol') ?: $initAssObj->setAlias($unitData->getString('symbol'));
+            $this->orm->persist($initAssObj);
+            $this->orm->flush();
+            !$unitData->hasKey('annotations') ?: $this->importAnnotation(ModelInitialAssignment::class,$initAssObj, $unitData['annotations']);
+        }
     }
 
 }

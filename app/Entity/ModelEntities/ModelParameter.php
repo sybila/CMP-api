@@ -23,6 +23,7 @@ class ModelParameter implements IdentifiedObject
 	protected $model;
 
 	/**
+     * @var ModelReaction
 	 * @ORM\ManyToOne(targetEntity="ModelReaction", inversedBy="parameters")
 	 * @ORM\JoinColumn(name="model_reaction_id", referencedColumnName="id")
 	 */

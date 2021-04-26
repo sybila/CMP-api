@@ -6,9 +6,9 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
+ * //TODO initialValue (bool), persistent (bool)
  * @ORM\Entity
  * @ORM\Table(name="model_event")
- * @ORM\DiscriminatorColumn(name="hierarchy_type", type="string")
  */
 class ModelEvent implements IdentifiedObject
 {
@@ -46,6 +46,7 @@ class ModelEvent implements IdentifiedObject
 
 	/**
 	 * @var int
+     * equivalent of SBML attribute 'useValuesFromTriggerTime'
 	 * @ORM\Column(name="evaluate_on_trigger",type="integer")
 	 */
 	protected $evaluateOnTrigger;

@@ -40,7 +40,7 @@ class ModelReaction implements IdentifiedObject
 
 	/**
 	 * @var Collection
-	 * @ORM\OneToMany(targetEntity="ModelParameter", mappedBy="reactionId", cascade={"persist"})
+	 * @ORM\OneToMany(targetEntity="ModelParameter", mappedBy="reaction", cascade={"persist"})
 	 */
 	protected $parameters;
 
