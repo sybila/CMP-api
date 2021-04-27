@@ -61,7 +61,7 @@ abstract class ModelParameterController extends ParentedRepositoryController
         $sBaseData = $this->getSBaseData($parameter);
 		return array_merge($sBaseData, [
 			'value' => $parameter->getValue(),
-			'constant' => $parameter->getValue(),
+			'constant' => $parameter->getConstant() ? 'true' : 'false',
 			'reactionItems' => $parameter->getReactionsItems()->map(function (ModelReactionItem $reactionItem) {
 				return ['id' => $reactionItem->getId(), 'name' => $reactionItem->getName()];
 			})->toArray(),
