@@ -73,7 +73,7 @@ class ModelParameterRepository implements IDependentEndpointRepository
                     'alias' => $par->getAlias(),
                     'name' => $par->getName(),
                     'value' => $par->getDefaultValue(),
-                    'constant' => $par->getConstant(),
+                    'constant' => $par->getConstant() ? 'true' : 'false',
                     'ontologyTerm' => $par->getSboTerm(),
                 ];
             })->toArray();
