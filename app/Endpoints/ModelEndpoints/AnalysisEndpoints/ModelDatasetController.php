@@ -111,6 +111,9 @@ class ModelDatasetController extends ParentedRepositoryController
     {
         /** @var Model $model */
         $model = $this->repository->getParent();
+        if (!$body->hasKey('name')) {
+            throw new MissingRequiredKeyException('name');
+        }
         $ds = new ModelDataset($model, $body->getString('name'),false);
         $ds->setVarsToDataset($model->getDefaultDataset()->getVarsToDataset()->map(function (ModelVarToDataset $var){
             return (clone $var);
