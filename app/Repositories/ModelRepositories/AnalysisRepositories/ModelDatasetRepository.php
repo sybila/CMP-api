@@ -4,8 +4,11 @@ namespace App\Entity\Repositories;
 
 use App\Entity\IdentifiedObject;
 use App\Entity\Model;
+use App\Entity\ModelCompartment;
 use App\Entity\ModelDataset;
+use App\Entity\ModelVarToDataset;
 use App\Exceptions\WrongParentException;
+use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\ORMException;
 use Doctrine\ORM\QueryBuilder;
@@ -59,25 +62,63 @@ class ModelDatasetRepository implements IDependentEndpointRepository
 
     public function getNumResults(array $filter): int
     {
-        return $this->buildListQuery($filter)
-            ->select('COUNT(d)')
-            ->getQuery()
-            ->getSingleScalarResult();
+        return $this->repository
+            ->matching($this->createQueryCriteria($filter))
+            ->count();
     }
 
     public function getList(array $filter, array $sort, array $limit): array
     {
-        $query = $this->buildListQuery($filter)
-            ->select('d.id, d.name');
-        return $query->getQuery()->getArrayResult();
+        return $this->repository
+            ->matching($this->createQueryCriteria($filter, $limit, $sort))
+            ->map(function (ModelDataset $object) {
+                $vars = ['compartments'=> [], 'species' => [], 'parameters' => []];
+                $object->getVarsToDataset()->map(function (ModelVarToDataset $var) use (&$vars) {
+                    switch ($var->getVarType()) {
+                        case 'compartment':
+                            /** @var ModelCompartment $cpt */
+                            $cpt = $var->getCompartment();
+                            array_push($vars['compartments'], [
+                                'id' => $cpt->getId(),
+                                'alias' => $cpt->getAlias(),
+                                'initialValue' => $var->getValue()
+                            ]);
+                            break;
+                        case 'species':
+                            $spec = $var->getSpecies();
+                            array_push($vars['species'], [
+                                'id' => $spec->getId(),
+                                'alias' => $spec->getAlias(),
+                                'initialValue' => $var->getValue()
+                            ]);
+                            break;
+                        case 'parameter':
+                            $par = $var->getParameter();
+                            array_push($vars['parameters'], [
+                                'id' => $par->getId(),
+                                'alias' => $par->getAlias(),
+                                'initialValue' => $var->getValue()
+                            ]);
+                            break;
+                    }
+                });
+                return [
+                    "id" => $object->getId(),
+                    "name" => $object->getName(),
+                    "default" => $object->getIsDefault(),
+                    "initialValues" => $vars
+                ];
+            })->toArray();
     }
 
-    private function buildListQuery(array $filter): QueryBuilder
+    public function createQueryCriteria(array $filter, array $limit = null, array $sort = null): Criteria
     {
-        $query = $this->em->createQueryBuilder()
-            ->from(ModelDataset::class, 'd')
-            ->where('d.model = :model')
-            ->setParameter('model', $this->getParent());
-        return $query;
+        $criteria = Criteria::create()->where(Criteria::expr()->eq('model', $this->getParent()));
+        foreach ($filter['argFilter'] as $by => $expr){
+            $criteria = $criteria->andWhere(Criteria::expr()->contains($by, $expr));
+        }
+        return $criteria->setMaxResults($limit['limit'] ? $limit['limit'] : null)
+            ->setFirstResult($limit['offset'] ? $limit['offset'] : null)
+            ->orderBy($sort ? $sort : []);
     }
 }
