@@ -45,7 +45,7 @@ class ExperimentRepository implements IEndpointRepository
 	public function getList(array $filter, array $sort, array $limit): array
 	{
 		$query = $this->buildListQuery($filter)
-			->select('e.id, e.name, e.description, e.protocol, e.started, e.inserted, e.status,e.groupId');
+			->select('e.id, e.name, e.description, e.protocol, e.started, e.inserted, e.timeUnit, e.status, e.groupId');
         $query = $this->addPagingDql($query, $limit);
         $query = $this->addSortDql($query, $sort);
 		return $query->getQuery()->getArrayResult();

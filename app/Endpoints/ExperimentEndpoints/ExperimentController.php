@@ -73,6 +73,7 @@ final class ExperimentController extends WritableRepositoryController implements
                 'protocol' => $experiment->getProtocol(),
                 'inserted' => $experiment->getInserted(),
                 'started' => $experiment->getStarted(),
+                'timeUnit' => $experiment->getTimeUnit(),
                 'status' => (string)$experiment->getStatus(),
                 //FIXME
                 'organism' => $experiment->getOrganismId()!= null ? OrganismController::getData($experiment->getOrganismId()):null,
@@ -115,6 +116,7 @@ final class ExperimentController extends WritableRepositoryController implements
 		!$data->hasKey('organismId') ?: $experiment->setOrganismId($this->organismRepository->get($data->getInt('organismId')));
 		!$data->hasKey('protocol') ?: $experiment->setProtocol($data->getString('protocol'));
 		!$data->hasKey('status') ?: $experiment->setStatus($data->getString('status'));
+        !$data->hasKey('timeUnit') ?: $experiment->setStatus($data->getString('timeUnit'));
         !$data->hasKey('addRelatedExperimentId') ?: $experiment->addExperiment($this->experimentRepository->get($data->getInt('addRelatedExperimentId')));
         !$data->hasKey('removeRelatedExperimentId') ?: $experiment->removeExperiment($this->experimentRepository->get($data->getInt('removeRelatedExperimentId')));
         !$data->hasKey('addRelatedModelId') ?: $experiment->addModel($this->modelRepository->get($data->getInt('addRelatedModelId')));
