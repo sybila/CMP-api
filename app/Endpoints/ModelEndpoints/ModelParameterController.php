@@ -65,7 +65,7 @@ abstract class ModelParameterController extends ParentedRepositoryController
 			'reactionItems' => $parameter->getReactionsItems()->map(function (ModelReactionItem $reactionItem) {
 				return ['id' => $reactionItem->getId(), 'name' => $reactionItem->getName()];
 			})->toArray(),
-			'rule' => ['id' => $parameter->getRule()->getId(), 'expression' => is_null($parameter->getRule()->getExpression()) ?
+			'rule' => is_null($parameter->getRule()) ? [] : ['id' => $parameter->getRule()->getId(), 'expression' => is_null($parameter->getRule()->getExpression()) ?
                     ['latex' => '', 'cmml' => ''] :
                     ['latex' => $parameter->getRule()->getExpression()->getLatex(),
                     'cmml' => $parameter->getRule()->getExpression()->getContentMML()]]
