@@ -57,7 +57,7 @@ final class ModelCompartmentController extends ParentedRepositoryController impl
                 })->map(function (ModelRule $rule){
                     return ['id' => $rule->getId(),
                         'type' => $rule->getType(),
-                        'equation' => is_null($rule->getExpression()) ? ['latex' => '', 'cmml' => '', 'components' => ''] :
+                        'equation' => is_null($rule->getExpression()) ? ['latex' => '', 'cmml' => '', 'detail' => []] :
                             ['latex' => $rule->getExpression()->getLatex(),
                             'cmml' => $rule->getExpression()->getContentMML(),
                             'detail' => $rule->getExpression()->getModelComponents($this->repository->getParent())]];

@@ -39,7 +39,8 @@ final class ModelEventAssignmentController extends ParentedRepositoryController
 		return array_merge($sBaseData, [
 		    'variable' => $eventAssignment->getVariable()->getAlias(),
 			'formula' => ['latex' => $eventAssignment->getFormula()->getLatex(),
-                'cmml' => $eventAssignment->getFormula()->getContentMML()]
+                'cmml' => $eventAssignment->getFormula()->getContentMML(),
+                'detail' => $eventAssignment->getFormula()->getModelComponents($eventAssignment->getEvent()->getModel())]
 		]);
 	}
 
