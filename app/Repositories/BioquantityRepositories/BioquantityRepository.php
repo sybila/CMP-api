@@ -43,7 +43,7 @@ class BioquantityRepository implements IEndpointRepository
         $entities =  $this->repository
             ->matching($this->createQueryCriteria($filter, $limit, $sort));
         if (key_exists('organism', $sort)) {
-            $entities = $this->sortByOrganismName($entities->getIterator());
+            $entities = $this->sortByOrganismName($entities->getIterator(), $sort['organism']);
         }
         $entities = $entities->map(function (Bioquantity $bq) {
             return [
@@ -70,9 +70,13 @@ class BioquantityRepository implements IEndpointRepository
         return $entities[0]->slice($limit['offset'], $limit['limit'] ? $limit['limit'] : null );
 	}
 
-	public function sortByOrganismName (Traversable $iterator){
-        $iterator->uasort(function (Bioquantity $a, Bioquantity $b) {
-            return $a->getOrganism()->getName() <=> $b->getOrganism()->getName();
+	public function sortByOrganismName (Traversable $iterator, string $how){
+        $iterator->uasort(function (Bioquantity $a, Bioquantity $b) use ($how) {
+            if ($how === 'asc') {
+                return $a->getOrganism()->getName() <=> $b->getOrganism()->getName();
+            } else {
+                return $b->getOrganism()->getName() <=> $a->getOrganism()->getName();
+            }
         });
         return new ArrayCollection(iterator_to_array($iterator));
     }
@@ -91,6 +95,6 @@ class BioquantityRepository implements IEndpointRepository
      */
     public function createQueryCriteria(array $filter, array $limit = null, array $sort = null): Criteria
     {
-        return $criteria = Criteria::create();
+        return $criteria = Criteria::create()->orderBy($sort ? $sort : []);
     }
 }
