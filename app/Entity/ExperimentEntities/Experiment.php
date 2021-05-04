@@ -16,6 +16,9 @@ class Experiment implements IdentifiedObject
 {
     const STATUS_PUBLIC = 'public';
     const STATUS_PRIVATE = 'private';
+    const TIME_UNIT_SECONDS = 'seconds';
+    const TIME_UNIT_DAYS = 'days';
+
 
     use EBase;
 
@@ -66,7 +69,12 @@ class Experiment implements IdentifiedObject
      * @ORM\ManyToOne(targetEntity="...", inversedBy="...")
      * @ORM\JoinColumn(name="user_id", referencedColumnName="id")
      */
-    //private $userId;
+
+    /**
+     * @var string
+     * @ORM\Column(type="string", name="time_unit", columnDefinition="ENUM('seconds', 'days')")
+     */
+    private $timeUnit;
 
     /**
      * @var int
@@ -371,6 +379,32 @@ class Experiment implements IdentifiedObject
     public function setUserId($userId): Experiment
     {
         $this->userId = $userId;
+        return $this;
+    }
+
+    /**
+     * Get time unit
+     * @return string
+     */
+    public function getTimeUnit(): string
+    {
+        return $this->timeUnit;
+    }
+
+    /**
+     * Set time unit
+     * @param string? $timeUnit
+     * @return Experiment
+     */
+    public function setTimeUnit($timeUnit): Experiment
+    {
+        if($timeUnit == null){
+            $timeUnit = self::TIME_UNIT_SECONDS;
+        }
+        if (!in_array($timeUnit, array(self::TIME_UNIT_DAYS, self::TIME_UNIT_SECONDS))) {
+            throw new \InvalidArgumentException("Invalid time unit");
+        }
+        $this->timeUnit = $timeUnit;
         return $this;
     }
 
