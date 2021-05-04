@@ -108,7 +108,7 @@ class Model implements IdentifiedObject
 //	/**
 //	 * @var ArrayCollection
 //	 */
-//	private $unitDefinitions;
+//	private $units;
 
 //    /**
 //     * @var ArrayCollection
@@ -352,140 +352,6 @@ class Model implements IdentifiedObject
     }
 
 
-    public function getSBML()
-    {
-//        $domTree = new \DOMDocument('1.0', 'UTF-8');
-//        $sbmlRoot = $domTree->createElement('sbml');
-//        $sbmlRoot = $domTree->appendChild($sbmlRoot);
-//        $model = $domTree->appendChild($domTree->createElement('model'))
-//        dump($domTree->saveXML());exit();
-        $sbml = new \SimpleXMLElement("<sbml></sbml>");
-        $sbml->addAttribute('xmlns',"http://www.sbml.org/sbml/level2/version4");
-        $sbml->addAttribute('level', '2');
-        $sbml->addAttribute('version', "4");
-        $model = $sbml->addChild('model');
-        $model->addAttribute("id", $this->alias);
-        $model->addAttribute("name", $this->name);
-
-        $fnList = $sbml->addChild('listOfFunctionDefinitions');
-        $this->functionDefinitions->map(function (ModelFunctionDefinition $fnDef) use ($fnList) {
-            $fn = $fnList->addChild('functionDefinition');
-            $fn->addAttribute('id', $fnDef->getAlias());
-            $fn->addAttribute('name',$fnDef->getName());
-            $fnDom = dom_import_simplexml($fn);
-            $math = new SimpleXMLElement($fnDef->getExpression()->getContentMML());
-            $mathDom = dom_import_simplexml($math);
-            $mathDom = $fnDom->ownerDocument->importNode($mathDom, TRUE);
-            $fnDom->appendChild($mathDom);
-        });
-        $uUnitList = $sbml->addChild('listOfUnitDefinitions');
-        $compList = $sbml->addChild('listOfCompartments');
-        $specList = $sbml->addChild('listOfSpecies');
-        $this->compartments->map(function (ModelCompartment $cpt) use ($compList, $specList) {
-            $c = $compList->addChild('compartment');
-            $cAlias = $cpt->getAlias();
-            $c->addAttribute('id', $cpt->getAlias());
-            $c->addAttribute('name', $cpt->getName());
-            $c->addAttribute('spatialDimensions', $cpt->getSpatialDimensions());
-            $c->addAttribute('size', $cpt->getDefaultValue());
-            $c->addAttribute('constant', $cpt->getConstant() ? 'true' : 'false');
-            $cpt->getSpecies()->map(function (ModelSpecie $spec) use ($specList, $cAlias) {
-                $s = $specList->addChild('species');
-                $s->addAttribute('id', $spec->getAlias());
-                $s->addAttribute('name', $spec->getName());
-                $s->addAttribute('compartment', $cAlias);
-                $s->addAttribute('initialAmount', $spec->getDefaultValue());
-                $s->addAttribute('boundaryCondition', $spec->getBoundaryCondition() ? 'true' : 'false');
-                $s->addAttribute('constant', $spec->getConstant() ? 'true' : 'false');
-            });
-            //notes
-        });
-        $paraList = $sbml->addChild('listOfParameters');
-        $this->parameters->map(function (ModelParameter $param) use ($paraList) {
-            $p = $paraList->addChild('parameter');
-            $p->addAttribute('id', $param->getAlias());
-            $p->addAttribute('name', $param->getName());
-            $p->addAttribute('value', $param->getDefaultValue());
-            $p->addAttribute('units', '');
-            $p->addAttribute('constant', $param->getConstant() ? 'true' : 'false');
-        });
-        $initAssList = $sbml->addChild('listOfInitialAssignments');
-        $this->initialAssignments->map(function (ModelInitialAssignment $ass) use ($initAssList) {
-            $initAss = $initAssList->addChild('initialAssignment');
-            $initAss->addAttribute('symbol', $ass->getAlias());
-            $iADom = dom_import_simplexml($initAss);
-            $math = new SimpleXMLElement($ass->getExpression()->getContentMML());
-            $mathDom = dom_import_simplexml($math);
-            $mathDom = $iADom->ownerDocument->importNode($mathDom, TRUE);
-            $iADom->appendChild($mathDom);
-        });
-        $ruleList = $sbml->addChild('listOfRules');
-        $this->rules->map(function (ModelRule $rul) use ($ruleList) {
-            if ($rul->getType() === 'assignment') {
-                $mr = $ruleList->addChild('assignmentRule');
-                $mr->addAttribute('variable', $rul->getVariableAlias());
-                $ruleDom = dom_import_simplexml($mr);
-                $math = new SimpleXMLElement($rul->getExpression()->getContentMML());
-                $mathDom = dom_import_simplexml($math);
-                $mathDom = $ruleDom->ownerDocument->importNode($mathDom, TRUE);
-                $ruleDom->appendChild($mathDom);
-            }
-            if ($rul->getType() === 'rate') {
-                $mr = $ruleList->addChild('rateRule');
-                $mr->addAttribute('variable', $rul->getVariableAlias());
-                $ruleDom = dom_import_simplexml($mr);
-                $math = new SimpleXMLElement($rul->getExpression()->getContentMML());
-                $mathDom = dom_import_simplexml($math);
-                $mathDom = $ruleDom->ownerDocument->importNode($mathDom, TRUE);
-                $ruleDom->appendChild($mathDom);
-            }
-        });
-        $reactList = $sbml->addChild('listOfReactions');
-        $this->reactions->map(function (ModelReaction $reaction) use ($reactList) {
-            $rc = $reactList->addChild('reaction');
-            $rc->addAttribute('id', $reaction->getAlias());
-            $rc->addAttribute('name', $reaction->getName());
-            $rc->addAttribute('reversible', $reaction->getIsReversible() ? 'true' : 'false');
-            $reactants = $rc->addChild('listOfReactants');
-            $products = $rc->addChild('listOfProducts');
-            $reaction->getReactionItems()->map(function (ModelReactionItem $rItem) use ($reactants, $products){
-                if ($rItem->getType() === 'reactant') {
-                    $rRef = $reactants->addChild('speciesReference');
-                    $rRef->addAttribute('species', $rItem->getAlias());
-                    $rRef->addAttribute('stoichiometry', $rItem->getStoichiometry());
-                }
-                if ($rItem->getType() === 'product') {
-                    $pRef = $products->addChild('speciesReference');
-                    $pRef->addAttribute('species', $rItem->getAlias());
-                    $pRef->addAttribute('stoichiometry', $rItem->getStoichiometry());
-                }
-            });
-            $reactDom = dom_import_simplexml($rc);
-            $math = new SimpleXMLElement($reaction->getRate()->getContentMML());
-            $mathDom = dom_import_simplexml($math);
-            $mathDom = $reactDom->ownerDocument->importNode($mathDom, TRUE);
-            $reactDom->appendChild($mathDom);
-        });
-        $eventList = $sbml->addChild('listOfEvents');
-        $this->events->map(function (ModelEvent $event) use ($eventList) {
-            $sbmlExent = $eventList->addChild('event');
-            $sbmlExent->addAttribute('id', $event->getAlias());
-            $sbmlExent->addAttribute('name', $event->getName());
-            $trig = $sbmlExent->addChild('trigger');
-            $trigDom = dom_import_simplexml($trig);
-            $math = new SimpleXMLElement($event->getTrigger()->getContentMML());
-            $mathDom = dom_import_simplexml($math);
-            $mathDom = $trigDom->ownerDocument->importNode($mathDom, TRUE);
-            $trigDom->appendChild($mathDom);
-            $eAssList = $sbmlExent->addChild('listOfEventAssignments');
-            $event->getEventAssignments()->map(function (ModelEventAssignment $eass) use ($eAssList) {
-                $ass = $eAssList->addChild('eventAssignment');
-                $ass->addAttribute('variable', $eass->getAlias());
-            });
-        });
-        return $sbml->asXML();
-    }
-
     public function getDefaultDataset()
     {
         return $this->getDatasets()->filter(function (ModelDataset $ds) {
@@ -528,3 +394,4 @@ class Model implements IdentifiedObject
 //        $experiment->removeModel($this);
 //    }
 }
+

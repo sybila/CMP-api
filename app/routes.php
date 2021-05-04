@@ -270,6 +270,10 @@ return function(App $app) {
         ->setMask(RouteHelper::ADD)
         ->register();
 
+    $app->get('/models/{id:\\d+}/SBML', Ctl\ModelController::class . ':getSBML')
+        ->add(RouteHelper::$authMiddleware);
+
+
 
 	// experiments module
 	(new RouteHelper)

@@ -35,6 +35,8 @@ class ModelParameter implements IdentifiedObject
 	 */
 	protected $constant;
 
+	protected $units;
+
 	/**
 	 * @var Collection
 	 * @ORM\OneToMany(targetEntity="ModelReactionItem", mappedBy="parameterId")
@@ -177,6 +179,23 @@ class ModelParameter implements IdentifiedObject
     {
         return $this->eventAssignments;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getUnits()
+    {
+        return $this->units;
+    }
+
+    /**
+     * @param mixed $units
+     */
+    public function setUnits($units): void
+    {
+        $this->units = $units;
+    }
+
 
 
 }

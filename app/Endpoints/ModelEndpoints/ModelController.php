@@ -16,7 +16,8 @@ use App\Entity\{Authorization\User,
     ModelRule,
     ModelVarToDataset,
     Repositories\IEndpointRepository,
-    Repositories\ModelRepository};
+    Repositories\ModelRepository,
+    SBMLModel};
 use App\Exceptions\{DependentResourcesBoundException,
     InvalidRoleException,
     MissingRequiredKeyException};
@@ -199,5 +200,19 @@ final class ModelController extends WritableRepositoryController implements IGro
 			'status' => new Assert\Type(['type' => 'string']),
 		]));
 	}
+
+    public function getSBML(Request $request, Response $response, ArgumentParser $args): Response
+    {
+        $this->runEvents($this->beforeRequest, $request, $response, $args);
+        $this->permitUser([$this, 'validateDetail'], [$this, 'canDetail']);
+        $id = current($this->getReadIds($args));
+        $SBMLModel = new SBMLModel($this->getObject((int)$id));
+        $body = new ArgumentParser($request->getParsedBody());
+        if ($body->hasKey('dataset')) {
+            $ds = $body->get('dataset');
+            !key_exists('initialValues', $ds) ?: $SBMLModel->setWithDataset($ds['initialValues']);
+        }
+        return $SBMLModel->produceSBML($response);
+    }
 
 }
