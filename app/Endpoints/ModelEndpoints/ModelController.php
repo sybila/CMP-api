@@ -101,6 +101,7 @@ final class ModelController extends WritableRepositoryController implements IGro
                     'name' => $dataset->getName(),
                     'variables' => $vars];
             })->toArray(),
+            'graphsets' => []
 //			'unitDefinitions' => $model->getUnitDefinitions()->map(function (ModelUnitDefinition $unitDefinition) {
 //				return ['id' => $unitDefinition->getId(), 'name' => $unitDefinition->getName()];
 //			})->toArray()

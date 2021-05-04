@@ -94,7 +94,7 @@ class SBMLModel
             if (is_null($this->withDataset)) {
                 $c->addAttribute('size', $cpt->getDefaultValue());
             } else {
-                $subs = $this->getDatasetSubstitution('compartments', $cpt->getAlias());
+                $subs = $this->getDatasetSubstitution($cpt->getAlias());
                 is_null($subs)
                     ? $c->addAttribute('size', $cpt->getDefaultValue())
                     : $c->addAttribute('size', $subs['initialValue']);
@@ -108,7 +108,7 @@ class SBMLModel
                 if (is_null($this->withDataset)) {
                     $s->addAttribute('initialAmount', $spec->getDefaultValue());
                 } else {
-                    $subs = $this->getDatasetSubstitution('species', $spec->getAlias());
+                    $subs = $this->getDatasetSubstitution($spec->getAlias());
                     is_null($subs)
                         ? $s->addAttribute('initialAmount', $spec->getDefaultValue())
                         : $s->addAttribute('initialAmount', $subs['initialValue']);
@@ -127,11 +127,10 @@ class SBMLModel
             $p = $paraList->addChild('parameter');
             $p->addAttribute('id', $param->getAlias());
             $p->addAttribute('name', $param->getName());
-            $p->addAttribute('value', $param->getDefaultValue());
             if (is_null($this->withDataset)) {
                 $p->addAttribute('value', $param->getDefaultValue());
             } else {
-                $subs = $this->getDatasetSubstitution('parameters', $param->getAlias());
+                $subs = $this->getDatasetSubstitution($param->getAlias());
                 is_null($subs)
                     ? $p->addAttribute('value', $param->getDefaultValue())
                     : $p->addAttribute('value', $subs['initialValue']);
@@ -231,10 +230,13 @@ class SBMLModel
         $dom->appendChild($mathDom);
     }
 
-    private function getDatasetSubstitution(string $varType, string $varAlias)
+    private function getDatasetSubstitution(string $varAlias)
     {
-            foreach ($this->withDataset[$varType] as $var) {
+            foreach ($this->withDataset as $var) {
                 if ($var['alias'] === $varAlias) {
+//                    if ($varAlias === 'R0') {
+//                        dump($var);exit;
+//                    }
                     return $var;
                 }
             }
