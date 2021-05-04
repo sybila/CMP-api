@@ -48,7 +48,7 @@ class BioquantityController extends WritableRepositoryController
 			'name' => $bioquantity->getName(),
 			'isValid' => $bioquantity->getIsValid(),
 			'userId' => $bioquantity->getUserId(),
-            'organism' => $bioquantity->getOrganismId()!= null ? OrganismController::getData($bioquantity->getOrganismId()):null,
+            'organism' => $bioquantity->getOrganism()!= null ? OrganismController::getData($bioquantity->getOrganism()):null,
 			'value' => $bioquantity->getValue(),
 			'link' => $bioquantity->getLink(),
 			'timeFrom' => $bioquantity->getTimeFrom(),
@@ -95,7 +95,7 @@ class BioquantityController extends WritableRepositoryController
 	protected function setData(IdentifiedObject $bioquantity, ArgumentParser $data): void
 	{
 		/** @var Bioquantity $bioquantity */
-		!$data->hasKey('organismId') ?: $bioquantity->setOrganismId($data->getInt('organismId'));
+		!$data->hasKey('organismId') ?: $bioquantity->setOrganism($data->getInt('organismId'));
 		!$data->hasKey('userId') ?: $bioquantity->setUserId($data->getInt('userId'));
 		!$data->hasKey('name') ?: $bioquantity->setName($data->getString('name'));
 		!$data->hasKey('isValid') ?: $bioquantity->setIsValid($data->getInt('isValid'));
@@ -112,7 +112,7 @@ class BioquantityController extends WritableRepositoryController
 
 	protected static function getAllowedSort(): array
 	{
-		return ['id', 'name'];
+		return ['id', 'name', 'organism'];
 	}
 
 

@@ -20,10 +20,12 @@ class Bioquantity implements IdentifiedObject
 
     use Identifier;
 
-	/**
-	 * @var int
-	 */
-	protected $organismId;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Organism")
+     * @ORM\JoinColumn(name="organism_id", referencedColumnName="id")
+     */
+	protected $organism;
 
 	/**
 	 * @var int
@@ -116,16 +118,15 @@ class Bioquantity implements IdentifiedObject
 	protected $unitDefinitions;
 
 
-	public function getOrganismId(): ?int
+	public function getOrganism(): Organism
 	{
-		return $this->organismId;
+		return $this->organism;
 	}
 
 
-	public function setOrganismId(int $organismId): self
+	public function setOrganism($organism)
 	{
-		$this->organismId = $organismId;
-		return $this;
+		$this->organism = $organism;
 	}
 
 
