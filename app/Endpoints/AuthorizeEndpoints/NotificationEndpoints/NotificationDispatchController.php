@@ -12,7 +12,6 @@ use App\Entity\EBase;
 use App\Entity\Experiment;
 use App\Entity\IdentifiedObject;
 use App\Entity\Model;
-use App\Entity\ModelFunction;
 use App\Entity\SBase;
 use App\Exceptions\MissingRequiredKeyException;
 use Doctrine\Common\EventSubscriber;
@@ -124,7 +123,7 @@ class NotificationDispatchController implements EventSubscriber
     private function isModelEntity(string $className): bool
     {
         return in_array(SBase::class, class_uses($className)) ||
-            $className == ModelFunction::class;
+            $className == Model::class;
     }
 
     /**

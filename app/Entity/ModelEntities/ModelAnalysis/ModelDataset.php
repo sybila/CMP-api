@@ -32,6 +32,11 @@ class ModelDataset implements IdentifiedObject
      */
     private $name;
 
+//    /**
+//     * @ORM\Column(type="string")
+//     */
+//    private $taskSettings;
+
     /**
      * @ORM\Column(type="boolean", name="is_default")
      */

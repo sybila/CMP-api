@@ -212,6 +212,7 @@ class SBMLModel
             $event->getEventAssignments()->map(function (ModelEventAssignment $eass) use ($eAssList) {
                 $ass = $eAssList->addChild('eventAssignment');
                 $ass->addAttribute('variable', $eass->getVariable()->getAlias());
+                $this->appendMathDOM($eass->getFormula(), $ass);
             });
         });
     }
