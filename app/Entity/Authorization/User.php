@@ -78,12 +78,6 @@ class User implements UserEntityInterface, IdentifiedObject
 	private $email;
 
 	/**
-	 * @var string
-	 * @ORM\Column
-	 */
-	private $phone;
-
-	/**
      * @var ArrayCollection
 	 * @ORM\OneToMany(targetEntity="UserGroupToUser", mappedBy="userId")
 	 */
@@ -151,12 +145,6 @@ class User implements UserEntityInterface, IdentifiedObject
 	}
 
 
-	public function getPhone()
-	{
-
-		return $this->phone;
-	}
-
     /**
      * @return Collection|UserGroupToUser[]
      */
@@ -202,12 +190,6 @@ class User implements UserEntityInterface, IdentifiedObject
 		return $this;
 	}
 
-
-	public function setPhone(string $phone)
-	{
-		$this->phone = $phone;
-		return $this;
-	}
 
 
     public function getIsPublic()

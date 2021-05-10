@@ -273,6 +273,8 @@ return function(App $app) {
     $app->get('/models/{id:\\d+}/SBML', Ctl\ModelController::class . ':getSBML')
         ->add(RouteHelper::$authMiddleware);
 
+    $app->post('/models/{id:\\d+}/SBML', Ctl\ModelController::class . ':getSBML')
+        ->add(RouteHelper::$authMiddleware);
 
 
 	// experiments module
@@ -310,31 +312,6 @@ return function(App $app) {
     (new RouteHelper)
         ->setRoute(Ctl\DeviceController::class, '/devices')
         ->addAnnotationsRoutes()
-        ->register();
-
-    //analysis module
-    (new RouteHelper())
-        ->setRoute(Ctl\AnalysisTypeController::class, '/analysisTypes')
-        ->setMask(RouteHelper::LIST | RouteHelper::DETAIL)
-        ->register();
-    (new RouteHelper())
-        ->setRoute(Ctl\AnalysisToolController::class, '/analysisTools')
-        ->setMask(RouteHelper::LIST | RouteHelper::DETAIL)
-        ->register();
-    (new RouteHelper())
-        ->setRoute(Ctl\AnalysisMethodController::class, '/analysisMethods')
-        ->setMask(RouteHelper::LIST | RouteHelper::DETAIL)
-        ->register();
-    (new RouteHelper())
-        ->setRoute(Ctl\AnalysisSettingsController::class, '/analysisMethods/{meth-id:\\d+}/settings')
-        ->register();
-    (new RouteHelper())
-        ->setRoute(Ctl\AnalysisTaskController::class, '/{obj-type:experiment|model}s/{obj-id:\\d+}/tasks')
-        ->setAuthMask(true)
-        ->register();
-    (new RouteHelper())
-        ->setRoute(Ctl\AnalysisTaskController::class, '/analysisTasks')
-        ->setAuthMask(true)
         ->register();
 
     // authorize module
