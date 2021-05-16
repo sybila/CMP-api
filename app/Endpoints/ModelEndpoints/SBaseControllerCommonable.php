@@ -130,6 +130,16 @@ trait SBaseControllerCommonable
         return true;
     }
 
+    public function canList(?int $role, ?int $id): bool
+    {
+        return true;
+    }
+
+    public function canDetail(?int $role, ?int $id): bool
+    {
+        return true;
+    }
+
     public function deleteAnnotations($objId)
     {
         $entity = $this->getObject($objId);
