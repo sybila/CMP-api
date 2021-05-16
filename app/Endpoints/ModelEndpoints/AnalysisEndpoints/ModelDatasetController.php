@@ -13,12 +13,17 @@ use App\Exceptions\WrongParentException;
 use App\Helpers\ArgumentParser;
 use Symfony\Component\Validator\Constraints as Assert;
 
+/**
+ * Class ModelDatasetController
+ * @package App\Controllers
+ * @author Radoslav Doktor
+ */
 class ModelDatasetController extends ParentedRepositoryController
 {
 
     protected static function getAllowedSort(): array
     {
-        // TODO: Implement getAllowedSort() method.
+        return [];
     }
 
     protected function getParentObjectInfo(): ParentObjectInfo

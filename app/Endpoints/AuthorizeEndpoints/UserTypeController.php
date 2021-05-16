@@ -10,6 +10,11 @@ use App\Repositories\{
 	Authorization\UserTypeRepository
 };
 
+/**
+ * Class UserTypeController
+ * @package App\Controllers
+ * @author Radoslav Doktor
+ */
 final class UserTypeController extends RepositoryController
 {
 

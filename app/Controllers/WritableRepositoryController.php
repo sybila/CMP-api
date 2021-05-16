@@ -21,7 +21,7 @@ use App\Exceptions\MissingRequiredKeyException;
 /**
  * Class WritableRepositoryController
  * @package App\Controllers
- * @author Radoslav Doktor & jakub Hrabec
+ * @author Radoslav Doktor & Jakub Hrabec
  */
 abstract class WritableRepositoryController extends RepositoryController
     implements IGroupRoleAuthWritableController, IPlatformRoleAuthWritableController

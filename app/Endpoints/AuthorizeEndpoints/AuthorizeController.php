@@ -10,6 +10,11 @@ use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;
 
+/**
+ * Class AuthorizeController
+ * @package App\Controllers
+ * @author Radoslav Doktor
+ */
 class AuthorizeController extends AbstractController
 {
 	/** @var EntityManager */

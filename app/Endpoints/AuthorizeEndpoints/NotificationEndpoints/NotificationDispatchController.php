@@ -21,6 +21,11 @@ use Doctrine\ORM\Events;
 use Doctrine\ORM\ORMException;
 use SocketIO;
 
+/**
+ * @author Radoslav Doktor
+ * Class NotificationDispatchController
+ * @package App\Controllers
+ */
 class NotificationDispatchController implements EventSubscriber
 {
 

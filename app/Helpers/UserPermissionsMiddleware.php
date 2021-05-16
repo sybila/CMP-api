@@ -7,6 +7,7 @@ use Doctrine\ORM\EntityManager;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
+/** Can be used as middleware */
 class UserPermissionsControllerMiddleware
 {
 

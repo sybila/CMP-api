@@ -14,7 +14,7 @@ use Doctrine\ORM\QueryBuilder;
 use Traversable;
 
 /**
- * @author Alexandra Stanová stanovaalex@mail.muni.cz
+ * @author Alexandra Stanová stanovaalex@mail.muni.cz & Radoslav Doktor
  */
 class BioquantityRepository implements IEndpointRepository
 {

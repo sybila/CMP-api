@@ -14,6 +14,7 @@ use Psr\Http\Message\ServerRequestInterface;
 /**
  * Class NonstrictResourceServerMiddleware is just League\OAuth2\Server\Middleware\ResourceServerMiddleware
  * adjusted to our need.
+ * @author Radoslav Doktor
  * @package App\Helpers
  */
 class NonstrictResourceServerMiddleware

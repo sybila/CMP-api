@@ -10,6 +10,11 @@ use App\Repositories\{
 	Authorization\UserGroupRoleRepository
 };
 
+/**
+ * Class UserGroupRoleController
+ * @package App\Controllers
+ * @author Radoslav Doktor
+ */
 final class UserGroupRoleController extends RepositoryController
 {
 

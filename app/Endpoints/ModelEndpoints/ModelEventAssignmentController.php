@@ -16,7 +16,7 @@ use Slim\Http\{
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * @author Radoslav Doktor from 2018
+ * @author Radoslav Doktor & Marek Havlík
  * @property-read ModelEventAssignmentRepository $repository
  * @method ModelEventAssignment getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */

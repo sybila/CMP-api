@@ -22,6 +22,7 @@ use Slim\Http\{
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
+ * @author Radoslav Doktor & Marek Havlík
  * @property-read ModelSpecieRepository $repository
  * @method ModelSpecie getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */

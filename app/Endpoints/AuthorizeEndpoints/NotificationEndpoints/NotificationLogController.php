@@ -6,6 +6,11 @@ use App\Entity\Authorization\Notification\NotificationLog;
 use App\Entity\IdentifiedObject;
 use App\Repositories\Authorization\NotificationLogRepository;
 
+/**
+ * @author Radoslav Doktor
+ * Class NotificationLogController
+ * @package App\Controllers
+ */
 class NotificationLogController extends RepositoryController
 {
 

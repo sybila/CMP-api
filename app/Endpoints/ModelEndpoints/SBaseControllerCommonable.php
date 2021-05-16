@@ -18,6 +18,11 @@ use Slim\Http\Request;
 use Slim\Http\Response;
 use Symfony\Component\Validator\Constraints as Assert;
 
+/**
+ * @author Radoslav Doktor
+ * Trait SBaseControllerCommonable
+ * @package App\Controllers
+ */
 trait SBaseControllerCommonable
 {
     protected function getSBaseData(IdentifiedObject $object): array
