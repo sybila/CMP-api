@@ -260,26 +260,6 @@ $c[EntityRepo\DeviceRepository::class] = function (Container $c) {
 	return new EntityRepo\DeviceRepository($c[EntityManager::class]);
 };
 
-$c[EntityRepo\AnalysisTypeRepository::class] = function (Container $c) {
-	return new EntityRepo\AnalysisTypeRepository($c[EntityManager::class]);
-};
-
-$c[EntityRepo\AnalysisToolRepository::class] = function (Container $c) {
-	return new EntityRepo\AnalysisToolRepository($c[EntityManager::class]);
-};
-
-$c[EntityRepo\AnalysisMethodRepository::class] = function (Container $c) {
-	return new EntityRepo\AnalysisMethodRepository($c[EntityManager::class]);
-};
-
-$c[EntityRepo\AnalysisSettingsRepository::class] = function (Container $c) {
-	return new EntityRepo\AnalysisSettingsRepository($c[EntityManager::class]);
-};
-
-$c[EntityRepo\AnalysisTaskRepository::class] = function (Container $c) {
-	return new EntityRepo\AnalysisTaskRepository($c[EntityManager::class]);
-};
-
 $c[EntityRepo\ModelDatasetRepository::class] = function (Container $c) {
 	return new EntityRepo\ModelDatasetRepository($c[EntityManager::class]);
 };
