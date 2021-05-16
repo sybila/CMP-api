@@ -30,6 +30,11 @@ use Slim\Http\Request;
 use Slim\Http\Response;
 use Symfony\Component\Validator\Constraints as Assert;
 
+/**
+ * Class ImportModelController
+ * @package App\Controllers
+ * @author Radoslav Doktor
+ */
 class ImportModelController extends WritableRepositoryController
 {
 
@@ -497,19 +502,19 @@ class ImportModelController extends WritableRepositoryController
 
     private function importUnits($units)
     {
-        foreach ($units as $unit) {
-            $unitData = new ArgumentParser($unit);
-            /** @var Attribute $attrObj */
-            /** @var Unit $unitObj */
-            $attrObj = new Attribute;
-            !$unitData->hasKey('name') ?: $attrObj->setName($unitData->getString('name'));
-            $unitObj = new Unit;
-            $unitObj->set
-            !$unitData->hasKey('symbol') ?: $initAssObj->setAlias($unitData->getString('symbol'));
-            $this->orm->persist($initAssObj);
-            $this->orm->flush();
-            !$unitData->hasKey('annotations') ?: $this->importAnnotation(ModelInitialAssignment::class,$initAssObj, $unitData['annotations']);
-        }
+//        foreach ($units as $unit) {
+//            $unitData = new ArgumentParser($unit);
+//            /** @var Attribute $attrObj */
+//            /** @var Unit $unitObj */
+//            $attrObj = new Attribute;
+//            !$unitData->hasKey('name') ?: $attrObj->setName($unitData->getString('name'));
+//            $unitObj = new Unit;
+//            //$unitObj->set
+//            !$unitData->hasKey('symbol') ?: $unitObj->setAlias($unitData->getString('symbol'));
+//            $this->orm->persist($unitObj);
+//            $this->orm->flush();
+//            !$unitData->hasKey('annotations') ?: $this->importAnnotation(ModelInitialAssignment::class,$initAssObj, $unitData['annotations']);
+//        }
     }
 
 }
