@@ -12,6 +12,7 @@ use SimpleXMLElement;
  * @ORM\Entity
  * @ORM\Table(name="model")
  * @ORM\DiscriminatorColumn(name="hierarchy_type", type="string")
+ * @author Radoslav Doktor & Marek Havlik
  */
 class Model implements IdentifiedObject
 {

@@ -12,6 +12,11 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 use Exception;
 
+/**
+ * Class ModelReactionItemRepository
+ * @package App\Entity\Repositories
+ * @author Radoslav Doktor & Marek Havlik
+ */
 class ModelReactionItemRepository implements IDependentEndpointRepository
 {
     use QueryRepositoryHelper;

@@ -8,6 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Entity
  * @ORM\Table(name="model_initial_assignment")
  * @ORM\DiscriminatorColumn(name="hierarchy_type", type="string")
+ * @author Radoslav Doktor & Marek Havlik
  */
 class ModelInitialAssignment implements IdentifiedObject
 {

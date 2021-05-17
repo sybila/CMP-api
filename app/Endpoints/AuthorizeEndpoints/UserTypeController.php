@@ -13,7 +13,7 @@ use App\Repositories\{
 /**
  * Class UserTypeController
  * @package App\Controllers
- * @author Radoslav Doktor
+ * @author Radoslav Doktor & Jakub Hrabec & Marek Havlik
  */
 final class UserTypeController extends RepositoryController
 {

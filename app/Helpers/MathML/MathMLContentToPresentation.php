@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * Class MathMLContentToLatex
+ * @author Radoslav Doktor
+ */
 class MathMLContentToLatex
 {
     public static function convert(string $input){

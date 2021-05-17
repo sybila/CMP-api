@@ -10,6 +10,7 @@ use Doctrine\Common\Collections\Collection;
  * @ORM\Entity
  * @ORM\Table(name="model_parameter")
  * @ORM\DiscriminatorColumn(name="hierarchy_type", type="string")
+ * @author Radoslav Doktor & Marek Havlik
  */
 class ModelParameter implements IdentifiedObject
 {

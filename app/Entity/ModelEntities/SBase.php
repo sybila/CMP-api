@@ -10,6 +10,11 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Mapping as ORM;
 use EntityAnnotable;
 
+/**
+ * Trait SBase
+ * @package App\Entity
+ * @author Radoslav Doktor & Marek Havlik
+ */
 trait SBase
 {
 

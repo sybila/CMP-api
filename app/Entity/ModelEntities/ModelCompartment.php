@@ -9,6 +9,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * @ORM\Entity
  * @ORM\Table(name="model_compartment")
+ * @author Radoslav Doktor & Marek Havlik
  */
 class ModelCompartment implements IdentifiedObject
 {

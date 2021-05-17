@@ -11,6 +11,11 @@ use App\Entity\Model;
 use App\Exceptions\InvalidSortFieldException;
 use Doctrine\ORM\QueryBuilder;
 
+/**
+ * Trait QueryRepositoryHelper
+ * @package App\Helpers
+ * @author Radoslav Doktor & Marek Havlik
+ */
 trait QueryRepositoryHelper
 {
     public static function addPagingDql(QueryBuilder $query, array $limit) : QueryBuilder

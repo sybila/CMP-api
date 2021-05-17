@@ -7,6 +7,11 @@ namespace App\Helpers;
 use Doctrine\DBAL\Logging\SQLLogger;
 use PHPSQLParser\PHPSQLParser;
 
+/**
+ * Class CMPSQLLogger
+ * @package App\Helpers
+ * @author Radoslav Doktor & Marek Havlik
+ */
 class CMPSQLLogger implements SQLLogger
 {
     /**

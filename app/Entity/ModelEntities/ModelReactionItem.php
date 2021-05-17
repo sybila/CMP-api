@@ -8,6 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Entity
  * @ORM\Table(name="model_reaction_item")
  * @ORM\DiscriminatorColumn(name="hierarchy_type", type="string")
+ * @author Radoslav Doktor & Marek Havlik
  */
 class ModelReactionItem implements IdentifiedObject
 {

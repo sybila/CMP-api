@@ -9,6 +9,7 @@ use DOMDocument;
  * @ORM\Entity
  * @ORM\Table(name="model_function_definition")
  * @ORM\DiscriminatorColumn(name="hierarchy_type", type="string")
+ * @author Radoslav Doktor & Marek Havlik
  */
 class ModelFunctionDefinition implements IdentifiedObject
 {

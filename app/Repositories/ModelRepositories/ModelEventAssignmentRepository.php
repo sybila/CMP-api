@@ -11,6 +11,11 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 use Exception;
 
+/**
+ * Class ModelEventAssignmentRepository
+ * @package App\Entity\Repositories
+ * @author Radoslav Doktor & Marek Havlik
+ */
 class ModelEventAssignmentRepository implements IDependentEndpointRepository
 {
     use QueryRepositoryHelper;

@@ -7,6 +7,11 @@ namespace App\Entity;
 use Slim\Http\Response;
 use SimpleXMLElement;
 
+/**
+ * Class SBMLModel
+ * @package App\Entity
+ * @author Radoslav Doktor & Marek Havlik
+ */
 class SBMLModel
 {
     /** @var Model $model */

@@ -30,7 +30,7 @@ use Slim\Http\{
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * @author Radoslav Doktor
+ * @author Radoslav Doktor & Jakub Hrabec & Marek Havlik
  * @property-read UserRepository $repository
  * @method User getObject(int $id, IEndpointRepository $repository = null, string $objectName = null)
  */

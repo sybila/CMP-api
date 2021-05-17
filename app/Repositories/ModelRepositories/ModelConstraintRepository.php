@@ -10,6 +10,11 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 use Exception;
 
+/**
+ * Class ModelConstraintRepository
+ * @package App\Entity\Repositories
+ * @author Radoslav Doktor & Marek Havlik
+ */
 class ModelConstraintRepository implements IDependentEndpointRepository
 {
     use QueryRepositoryHelper;

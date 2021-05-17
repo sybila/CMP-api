@@ -14,6 +14,11 @@ use Doctrine\ORM\ORMException;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\UnexpectedResultException;
 
+/**
+ * Class ModelDatasetRepository
+ * @package App\Entity\Repositories
+ * @author Radoslav Doktor
+ */
 class ModelDatasetRepository implements IDependentEndpointRepository
 {
 

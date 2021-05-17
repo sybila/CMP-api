@@ -9,6 +9,7 @@ use Doctrine\ORM\Mapping as ORM;
  * //TODO initialValue (bool), persistent (bool)
  * @ORM\Entity
  * @ORM\Table(name="model_event")
+ * @author Radoslav Doktor & Marek Havlik
  */
 class ModelEvent implements IdentifiedObject
 {

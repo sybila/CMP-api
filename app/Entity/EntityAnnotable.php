@@ -5,6 +5,10 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\EntityManager;
 
+/**
+ * Trait EntityAnnotable
+ * @author Radoslav Doktor & Marek Havlik
+ */
 trait EntityAnnotable
 {
     /**

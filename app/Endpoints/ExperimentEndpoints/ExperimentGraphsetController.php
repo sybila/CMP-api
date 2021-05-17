@@ -16,6 +16,11 @@ use App\Helpers\ArgumentParser;
 use IGroupRoleAuthWritableController;
 use Symfony\Component\Validator\Constraints as Assert;
 
+/**
+ * Class ExperimentGraphsetController
+ * @package App\Controllers
+ * @author Radoslav Doktor
+ */
 class ExperimentGraphsetController extends ParentedRepositoryController
     implements IGroupRoleAuthWritableController
 {

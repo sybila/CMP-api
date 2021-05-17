@@ -8,6 +8,11 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 /** Can be used as middleware */
+
+/**
+ * Class UserPermissionsControllerMiddleware
+ * @author Radoslav Doktor & Marek Havlik
+ */
 class UserPermissionsControllerMiddleware
 {
 

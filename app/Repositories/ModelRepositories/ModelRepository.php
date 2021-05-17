@@ -7,6 +7,11 @@ use App\Helpers\QueryRepositoryHelper;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 
+/**
+ * Class ModelRepository
+ * @package App\Entity\Repositories
+ * @author Radoslav Doktor & Marek Havlik
+ */
 class ModelRepository implements IEndpointRepository
 {
     use QueryRepositoryHelper;

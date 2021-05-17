@@ -13,7 +13,7 @@ use Slim\Http\Response;
 /**
  * Class AuthorizeController
  * @package App\Controllers
- * @author Radoslav Doktor
+ * @author Radoslav Doktor & Jakub Hrabec & Marek Havlik
  */
 class AuthorizeController extends AbstractController
 {

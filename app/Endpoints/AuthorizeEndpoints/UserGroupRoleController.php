@@ -13,7 +13,7 @@ use App\Repositories\{
 /**
  * Class UserGroupRoleController
  * @package App\Controllers
- * @author Radoslav Doktor
+ * @author Radoslav Doktor & Jakub Hrabec & Marek Havlik
  */
 final class UserGroupRoleController extends RepositoryController
 {
