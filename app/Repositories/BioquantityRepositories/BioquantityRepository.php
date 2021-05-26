@@ -65,7 +65,7 @@ class BioquantityRepository implements IEndpointRepository
             foreach ($filter['argFilter'] as $by => $expr) {
                 $logicSum = $logicSum && (bool) stristr($bqObj[$by], $expr);
             }
-            return $logicSum;
+            return [$logicSum];
         });
         return $entities[0]->slice($limit['offset'], $limit['limit'] ? $limit['limit'] : null );
 	}
