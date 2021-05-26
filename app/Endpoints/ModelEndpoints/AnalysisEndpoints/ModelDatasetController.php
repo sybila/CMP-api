@@ -21,6 +21,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 class ModelDatasetController extends ParentedRepositoryController
 {
 
+    use SBaseControllerCommonable;
     protected static function getAllowedSort(): array
     {
         return [];
