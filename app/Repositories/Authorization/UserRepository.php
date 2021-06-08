@@ -73,8 +73,7 @@ class UserRepository implements UserRepositoryInterface, IEndpointRepository
                     'id' => $user->getType()->getId(),
                     'tier' => $user->getType()->getTier(),
                     'name' => $user->getType()->getName()],
-                'email' => $user->getEmail(),
-                'phone' => $user->getPhone()];
+                'email' => $user->getEmail()];
             })->toArray();
 	}
 
