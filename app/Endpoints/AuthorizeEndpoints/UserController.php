@@ -333,6 +333,17 @@ class UserController extends WritableRepositoryController
         return $this->canEdit($role, $id);
     }
 
+    public function canList(?int $role, ?int $id): bool
+    {
+        return true;
+    }
+
+    public function canDetail(?int $role, ?int $id): bool
+    {
+        return true;
+    }
+
+
     /**
      * ROUTE: Confirm user, basically change the type from 4 to 3. And create own group for the user.
      * @param Request $request
