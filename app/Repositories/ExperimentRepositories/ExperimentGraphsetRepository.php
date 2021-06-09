@@ -73,4 +73,14 @@ class ExperimentGraphsetRepository implements IDependentEndpointRepository
     {
         // TODO: Implement getList() method.
     }
+
+    public function canList(?int $role, ?int $id): bool
+    {
+        return true;
+    }
+
+    public function canDetail(?int $role, ?int $id): bool
+    {
+        return true;
+    }
 }
