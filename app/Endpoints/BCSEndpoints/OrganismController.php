@@ -76,4 +76,14 @@ final class OrganismController extends WritableRepositoryController
 			throw new MissingRequiredKeyException('code');
 	}
 
+    public function canList(?int $role, ?int $id): bool
+    {
+        return true;
+    }
+
+    public function canDetail(?int $role, ?int $id): bool
+    {
+        return true;
+    }
+
 }
