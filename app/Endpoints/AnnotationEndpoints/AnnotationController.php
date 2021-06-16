@@ -135,4 +135,14 @@ class AnnotationSourceController extends MultiParentedRepoController
         }
         return $this->getObjectViaORM($this->annotatedObjType, $id);
     }
+
+    public function canList(?int $role, ?int $id): bool
+    {
+        return true;
+    }
+
+    public function canDetail(?int $role, ?int $id): bool
+    {
+        return true;
+    }
 }
