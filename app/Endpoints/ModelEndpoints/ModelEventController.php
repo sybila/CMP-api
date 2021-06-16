@@ -46,14 +46,16 @@ final class ModelEventController extends ParentedRepositoryController implements
                 'latex' => is_null($event->getPriority()) ? '' : $event->getPriority()->getLatex(),
                 'cmml' => is_null($event->getPriority()) ? '' : $event->getPriority()->getContentMML()],
 			'evaluateOnTrigger' => $event->getEvaluateOnTrigger(),
-			'eventAssignments' => $event->getEventAssignments()->map(function (ModelEventAssignment $eventAssignment) {
-				return ['id' => $eventAssignment->getId(),
-                    'formula' => is_null($eventAssignment->getFormula()) ? ['latex' => '', 'cmml' => '', 'detail' => []]
-                        : ['latex' => $eventAssignment->getFormula()->getLatex(),
-                            'cmml' => $eventAssignment->getFormula()->getContentMML(),
-                            'detail' => $eventAssignment->getFormula()->getModelComponents($eventAssignment->getEvent()->getModel())]
-                ];
-			})->toArray(),
+			'eventAssignments' => $event->getEventAssignments()->map(function (ModelEventAssignment $ass) {
+                return [
+                    'id' => $ass->getId(),
+                    'variableType' => $ass->getVariableType(),
+                    'variableId' => $ass->getVariable()->getId(),
+                    'variable' => $ass->getVariable()->getAlias(),
+                    'formula' => [
+                        'latex' => is_null($ass->getFormula()) ? '' : $ass->getFormula()->getLatex(),
+                        'cmml' => is_null($ass->getFormula()) ? '' : $ass->getFormula()->getContentMML()]];
+            })->toArray()
 		]);
 	}
 
