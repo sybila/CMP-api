@@ -55,7 +55,7 @@ final class ModelEventController extends ParentedRepositoryController implements
                     'formula' => [
                         'latex' => is_null($ass->getFormula()) ? '' : $ass->getFormula()->getLatex(),
                         'cmml' => is_null($ass->getFormula()) ? '' : $ass->getFormula()->getContentMML(),
-                        'detail' => $ass->getFormula()->getModelComponents($event->getModel()->getId())]];
+                        'detail' => $ass->getFormula()->getModelComponents($event->getModel())]];
             })->toArray()
 		]);
 	}
