@@ -46,7 +46,7 @@ final class ModelEventController extends ParentedRepositoryController implements
                 'latex' => is_null($event->getPriority()) ? '' : $event->getPriority()->getLatex(),
                 'cmml' => is_null($event->getPriority()) ? '' : $event->getPriority()->getContentMML()],
 			'evaluateOnTrigger' => $event->getEvaluateOnTrigger(),
-			'eventAssignments' => $event->getEventAssignments()->map(function (ModelEventAssignment $ass) {
+			'eventAssignments' => $event->getEventAssignments()->map(function (ModelEventAssignment $ass) use ($event){
                 return [
                     'id' => $ass->getId(),
                     'variableType' => $ass->getVariableType(),
@@ -54,7 +54,8 @@ final class ModelEventController extends ParentedRepositoryController implements
                     'variable' => $ass->getVariable()->getAlias(),
                     'formula' => [
                         'latex' => is_null($ass->getFormula()) ? '' : $ass->getFormula()->getLatex(),
-                        'cmml' => is_null($ass->getFormula()) ? '' : $ass->getFormula()->getContentMML()]];
+                        'cmml' => is_null($ass->getFormula()) ? '' : $ass->getFormula()->getContentMML(),
+                        'detail' => $ass->getFormula()->getModelComponents($event->getModel()->getId())]];
             })->toArray()
 		]);
 	}
