@@ -31,6 +31,7 @@ class AnnotatedEntity
         11 => ModelParameter::class,
         12 => ModelRule::class,
         13 => Experiment::class,
+        14 => Bioquantity::class
     ];
 
     /**
@@ -51,6 +52,7 @@ class AnnotatedEntity
         'parameter' => ModelParameter::class,
         'rule' => ModelRule::class,
         'experiment' => Experiment::class,
+        'bioquantitie' => Bioquantity::class //TODO solve plural
     ];
 
     /**

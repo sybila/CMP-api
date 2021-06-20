@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Entity\AnnotationSource;
 use App\Entity\Bioquantity;
 use App\Entity\Attribute;
 use App\Entity\ExperimentValues;
-use App\Entity\ModelUnitDefinition;
+//use App\Entity\ModelUnitDefinition;
 use App\Entity\Repositories\BioquantityRepository;
 use App\Entity\IdentifiedObject;
+use App\Exceptions\MissingRequiredKeyException;
 use App\Helpers\ArgumentParser;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -68,7 +70,11 @@ class BioquantityController extends WritableRepositoryController
 			/* 'unitDefinitions' => $bioquantity->getUnitDefinitions()->map(function (UnitDefinition $unitDefinition) {
 			  return ['id' => $unitDefinition->getId(), 'name' => $unitDefinition->getName()];
 			  })->toArray(), */
-			'annotations' => $bioquantity->getAnnotations(),
+            'annotations' => $bioquantity->getAnnotations($this->orm)
+                ->map(function (AnnotationSource $ann) {
+                    return ['id' => $ann->getId(),
+                        'link' => $ann->getLink()];
+                })->toArray()
 		];
 	}
 
@@ -86,8 +92,7 @@ class BioquantityController extends WritableRepositoryController
 			'timeTo' => new Assert\Type(['type' => 'float']),
 			'valueFrom' => new Assert\Type(['type' => 'float']),
 			'valueTo' => new Assert\Type(['type' => 'float']),
-			'valueStep' => new Assert\Type(['type' => 'float']),
-			'annotations' => new Assert\Type(['type' => 'string']),
+			'valueStep' => new Assert\Type(['type' => 'float'])
 		]);
 	}
 
@@ -106,7 +111,6 @@ class BioquantityController extends WritableRepositoryController
 		!$data->hasKey('valueFrom') ?: $bioquantity->setValueFrom($data->getFloat('valueFrom'));
 		!$data->hasKey('valueTo') ?: $bioquantity->setValueTo($data->getFloat('valueTo'));
 		!$data->hasKey('valueStep') ?: $bioquantity->setValueStep($data->getFloat('valueStep'));
-		!$data->hasKey('annotations') ?: $bioquantity->setAnotations($data->getString('annotatnions'));
 	}
 
 

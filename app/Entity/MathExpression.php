@@ -12,7 +12,7 @@ use MathMLContentToLatex;
 /**
  * @ORM\Entity
  * @ORM\Table(name="math_expression")
- * @author Radoslav Doktor & Marek Havlik
+ * @author Radoslav Doktor
  */
 class MathExpression
 {

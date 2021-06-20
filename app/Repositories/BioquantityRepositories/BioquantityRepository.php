@@ -95,6 +95,8 @@ class BioquantityRepository implements IEndpointRepository
      */
     public function createQueryCriteria(array $filter, array $limit = null, array $sort = null): Criteria
     {
-        return $criteria = Criteria::create()->orderBy($sort ? $sort : []);
+        return $criteria = Criteria::create()
+            ->where(Criteria::expr()->eq('isValid', true))
+            ->orderBy($sort ? $sort : []);
     }
 }

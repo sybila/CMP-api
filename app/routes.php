@@ -339,8 +339,9 @@ return function(App $app) {
 
 	// Bioquantities module
 	(new RouteHelper)
-		->setRoute(Ctl\BioquantityController::class, '/bioquantities')
+		->setRoute(Ctl\BioquantityController::class, '/{obj:bioquantitie}s')
         ->setAuthMask(true)
+        ->addAnnotationsRoutes()
 		->register();
 
 	// Units module

@@ -6,6 +6,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use App\Helpers\DateTimeJson;
 use Doctrine\ORM\Mapping as ORM;
+use EntityAnnotable;
 
 /**
  * @ORM\Entity
@@ -21,6 +22,7 @@ class Experiment implements IdentifiedObject
 
 
     use EBase;
+    use EntityAnnotable;
 
     /**
      * @ORM\Id

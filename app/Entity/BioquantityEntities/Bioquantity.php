@@ -7,6 +7,7 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use App\Entity\IdentifiedObject;
 use Doctrine\Common\Collections\Collection;
+use EntityAnnotable;
 
 /**
  * @author Alexandra Stanová stanovaalex@mail.muni.cz
@@ -19,6 +20,7 @@ class Bioquantity implements IdentifiedObject
 	/* TODO: Many to many relations */
 
     use Identifier;
+    use EntityAnnotable;
 
 
     /**
@@ -86,12 +88,6 @@ class Bioquantity implements IdentifiedObject
 	 * @ORM\Column(name="value_step", type="float")
 	 */
 	protected $valueStep;
-
-	/**
-	 * @var string
-	 * @ORM\Column(name="annotations", type="string")
-	 */
-	protected $annotations;
 
 	/**
 	 * @var ArrayCollection
@@ -269,19 +265,6 @@ class Bioquantity implements IdentifiedObject
 	public function setValueStep(float $valueStep): self
 	{
 		$this->valueStep = $valueStep;
-		return $this;
-	}
-
-
-	public function getAnnotations(): ?string
-	{
-		return $this->annotations;
-	}
-
-
-	public function setAnotations(string $annotations): self
-	{
-		$this->annotations = $annotations;
 		return $this;
 	}
 

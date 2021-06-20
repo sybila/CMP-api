@@ -7,7 +7,7 @@ use Doctrine\ORM\EntityManager;
 
 /**
  * Trait EntityAnnotable
- * @author Radoslav Doktor & Marek Havlik
+ * @author Radoslav Doktor
  */
 trait EntityAnnotable
 {

@@ -2,7 +2,8 @@
 
 namespace App\Controllers;
 
-use App\Entity\{Experiment,
+use App\Entity\{AnnotationSource,
+    Experiment,
     ExperimentGraphset,
     ExpVarToGraphset,
     IdentifiedObject,
@@ -102,6 +103,11 @@ final class ExperimentController extends WritableRepositoryController implements
                     })->toArray();
                     return ['name' => $g->getName(), 'variables' => $vars];
                 })->toArray(),
+                'annotations' => $experiment->getAnnotations($this->orm)
+                    ->map(function (AnnotationSource $ann) {
+                        return ['id' => $ann->getId(),
+                            'link' => $ann->getLink()];
+                    })->toArray()
             ];
         }
 		else return [];
