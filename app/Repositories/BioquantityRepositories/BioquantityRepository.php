@@ -72,7 +72,7 @@ class BioquantityRepository implements IEndpointRepository
 
 	public function sortByOrganismName (Traversable $iterator, string $how){
         $iterator->uasort(function (Bioquantity $a, Bioquantity $b) use ($how) {
-            if ($how === 'asc') {
+            if ($how === 'ASC') {
                 return $a->getOrganism()->getName() <=> $b->getOrganism()->getName();
             } else {
                 return $b->getOrganism()->getName() <=> $a->getOrganism()->getName();

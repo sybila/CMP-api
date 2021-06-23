@@ -240,9 +240,6 @@ class SBMLModel
     {
             foreach ($this->withDataset as $var) {
                 if ($var['alias'] === $varAlias) {
-//                    if ($varAlias === 'R0') {
-//                        dump($var);exit;
-//                    }
                     return $var;
                 }
             }
