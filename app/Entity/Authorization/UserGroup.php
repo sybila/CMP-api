@@ -16,8 +16,13 @@ use League\OAuth2\Server\Entities\UserEntityInterface;
 class UserGroup implements IdentifiedObject
 {
 
-    const PUBLIC_SPACE = 1;
-    const ADMIN_SPACE = 2;
+    const USER_SPACE = 3;
+    const WORK_SPACE = 4;
+
+    const SPACES = [
+        'user space' => self::USER_SPACE,
+        'work space' => self::WORK_SPACE
+    ];
 
 	use Identifier;
 
@@ -28,7 +33,7 @@ class UserGroup implements IdentifiedObject
 	private $name;
 
 	/**
-	 * @ORM\OneToMany(targetEntity="UserGroupToUser", mappedBy="userGroupId")
+	 * @ORM\OneToMany(targetEntity="UserGroupToUser", mappedBy="userGroupId", cascade={"remove"})
 	 */
 	private $users;
 
@@ -42,13 +47,13 @@ class UserGroup implements IdentifiedObject
 	 * @var string
 	 * @ORM\Column
 	 */
-	private $type;
+	private $type = self::USER_SPACE;
 
     /**
-     * @var boolean
+     * @var bool
      * @ORM\Column(name="is_public")
      */
-	private $isPublic;
+	private $isPublic = false;
 
 	public function getIdentifier()
 	{
@@ -62,10 +67,18 @@ class UserGroup implements IdentifiedObject
 	}
 
 
-	public function getUsers()
+    //FIXME: refactor, this returns only links
+	public function getUsers(): Collection
 	{
 		return $this->users;
 	}
+
+    public function getAllUsers(): Collection
+    {
+        return $this->getUsers()->map(function (UserGroupToUser $userGroupToUser) {
+            return $userGroupToUser->getUserId();
+        });
+    }
 
 
 	public function getType()
@@ -89,21 +102,19 @@ class UserGroup implements IdentifiedObject
 	public function setName(string $name)
 	{
 		$this->name = $name;
-		return $name;
 	}
 
 
-	public function setType(int $type)
+	public function setType(string $type)
 	{
 		$this->type = $type;
-		return $type;
+
 	}
 
 
 	public function setDescription(string $description)
 	{
 		$this->description = $description;
-		return $description;
 	}
 
 

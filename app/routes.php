@@ -327,6 +327,9 @@ return function(App $app) {
 		->setRoute(Ctl\UserGroupController::class, '/userGroups')
         ->setAuthMask(true)
 		->register();
+    // Group management
+    $app->post('/userGroups/{id:\\d+}/addUsers', Ctl\UserGroupController::class . ':addUsers')
+        ->add(RouteHelper::$authMiddleware);
 	(new RouteHelper)
 		->setRoute(Ctl\UserGroupRoleController::class, '/userGroupRoles')
         ->setMask(RouteHelper::LIST | RouteHelper::DETAIL)

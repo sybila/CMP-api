@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use App\Repositories\Authorization\UserRepository;
 use App\Entity\{
 	Authorization\User,
 	Authorization\UserGroup,
@@ -54,7 +55,13 @@ final class UserGroupController extends WritableRepositoryController implements 
 	{
 		/** @var UserGroup $userGroup */
 		!$body->hasKey('name') ?: $userGroup->setName($body->getString('name'));
-		!$body->hasKey('type') ?: $userGroup->setType($body->getString('type'));
+        if ($body->hasKey('type')) {
+            $type = $body->getString('type');
+            if (array_key_exists($type, UserGroup::SPACES)) {
+                $type = UserGroup::SPACES[$type];
+            }
+            $userGroup->setType($type);
+        }
 		!$body->hasKey('description') ?: $userGroup->setDescription($body->getString('description'));
 	}
 
@@ -68,12 +75,13 @@ final class UserGroupController extends WritableRepositoryController implements 
 
 	protected function checkInsertObject(IdentifiedObject $userGroup): void
 	{
-		//TODO
+		$userGroup->setIsPublic(intval($userGroup->getIsPublic()));
 	}
 
 
 	public function delete(Request $request, Response $response, ArgumentParser $args): Response
 	{
+        // TODO: Should not forcefully delete
 		// TODO: verify user dependencies
 		return parent::delete($request, $response, $args);
 	}
@@ -84,7 +92,7 @@ final class UserGroupController extends WritableRepositoryController implements 
 		return new Assert\Collection([
 			'name' => new Assert\Type(['type' => 'string']),
 			'description' => new Assert\Type(['type' => 'string']),
-			'type' => new Assert\Type(['type' => 'integer']),
+			'type' => new Assert\Type(['type' => 'string']),
 		]);
 	}
 
@@ -139,9 +147,56 @@ final class UserGroupController extends WritableRepositoryController implements 
         foreach (array_flip($accObj) as $id => $trash) {
             $userGroups[$id] = $dql;
         }
-        $quasiFilter = array_map(function () use ($dql) { return $dql; }, $userGroups);
-        unset($quasiFilter[UserGroup::PUBLIC_SPACE]);
-        return $quasiFilter;
+        return array_map(function () use ($dql) { return $dql; }, $userGroups);
+    }
+
+    public function addUsers(Request $request, Response $response, ArgumentParser $args): Response
+    {
+        $this->isAuthorized($request->getAttribute('oauth_user_id'));
+        $body = new ArgumentParser($request->getParsedBody());
+        if ($body->hasKey('emails')) {
+            $this->validate($body, new Assert\Collection([
+                'emails' => new Assert\Type(['type' => 'array'])]));
+            $emails = $body->getArray('emails');
+            /** @var User[] $usersToAdd */
+            $usersToAdd = $this->orm->getRepository(User::class)->findBy(['email' => $emails]);
+            /** @var UserGroup $group */
+            $group = $this->getObject($this->getModifyId($args));
+            $usersToInviteCount = 0;
+            $usersAddedCount = 0;
+            foreach ($usersToAdd as $u) {
+                if (in_array($u->getEmail(), $emails))
+                {
+                    $usersToInviteCount++;
+                }
+                if (!$group->getAllUsers()->contains($u)) {
+                    $linkToMySpace = new UserGroupToUser();
+                    $linkToMySpace->setUserId($u);
+                    $linkToMySpace->setUserGroupId($group);
+                    $linkToMySpace->setRoleId(User::SPECTATOR);
+                    $this->orm->persist($linkToMySpace);
+                    $usersAddedCount++;
+                }
+            }
+            $this->orm->flush();
+            return self::formatOk($response, [
+                'users' => $emails,
+                'added' => $usersAddedCount,
+                'invited' => $usersToInviteCount]);
+        }
+
+    }
+
+    /**
+     * @param int|null $id
+     * @throws InvalidAuthenticationException
+     */
+    private function isAuthorized(?int $id)
+    {
+        if(is_null($id)) {
+            throw new InvalidAuthenticationException('User not authorized.',  'This endpoint is accessible' .
+                ' only with valid token.');
+        }
     }
 
     public function canAdd(int $role, int $id): bool

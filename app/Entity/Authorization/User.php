@@ -32,6 +32,7 @@ class User implements UserEntityInterface, IdentifiedObject
     const CAN_EDIT = [2,3,6,7,8];
     const CAN_DELETE = [1,3,5,7,8];
     const OWNER_ROLE = 8;
+    const SPECTATOR = 10;
 
 	const PASSWORD_ALGORITHM = PASSWORD_DEFAULT;
 
